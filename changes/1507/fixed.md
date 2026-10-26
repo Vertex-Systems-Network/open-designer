@@ -1,0 +1,1 @@
+- Preserve component property definitions, bindings, and instance assignments across node reads and Design JSX exports.
