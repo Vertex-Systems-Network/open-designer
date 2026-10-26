@@ -3,6 +3,7 @@ import { compact } from 'es-toolkit/array'
 import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
+import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 
 import {
   connectorExportScope,
@@ -115,6 +116,12 @@ function ownElement(
   return isGeneratedFrame(node) ? OWN_ELEMENTS[node.type](graph, node, scope) : undefined
 }
 
+/** An unresolved library instance cannot be recreated, so retain the existing frame fallback. */
+function exportTag(node: SceneNode, graph: SceneGraph): string | undefined {
+  if (node.type === 'INSTANCE' && !instanceMainComponent(graph, node)) return 'Frame'
+  return elementTag(node.type)
+}
+
 /** The layers an export writes, by the roots it starts from. */
 function nodeToJSX(
   node: SceneNode,
@@ -142,7 +149,7 @@ function nodeToJSX(
     layerIds?.push(node.id)
     return [jsx.element('Icon', withRef(icon).map(propAttribute), [], depth)]
   }
-  const tag = reka.tags.get(node.id) ?? elementTag(node.type)
+  const tag = reka.tags.get(node.id) ?? exportTag(node, graph)
   if (!tag) return []
   layerIds?.push(node.id)
   const own = ownElement(graph, node, scope)
@@ -186,7 +193,7 @@ export function sceneNodeAttributes(
   graph: SceneGraph
 ): JSXAttributeSource[] | null {
   const node = graph.getNode(nodeId)
-  if (!node || !elementTag(node.type)) return null
+  if (!node || !exportTag(node, graph)) return null
   const own = ownElement(graph, node)
   const props = own ? own.props : collectProps(node, graph)
   if (node.type === 'TEXT') props.push(['text', node.text])
@@ -223,7 +230,7 @@ function contentBetween(tag: string, children: SyntaxNode[], inline: boolean): s
 
 export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXElement | null {
   const node = graph.getNode(nodeId)
-  const tag = node && elementTag(node.type)
+  const tag = node && exportTag(node, graph)
   const printed = sceneNodeAttributes(nodeId, graph)
   if (!node || !tag || !printed) return null
   // A text layer's content, a connector's label, or a sticky note's body is written as its

@@ -54,6 +54,91 @@ test('size limits are limits, not a width', async () => {
 })
 
 describe('design JSX export round trip', () => {
+  test('component sets keep property definitions and layer bindings', async () => {
+    const graph = new SceneGraph()
+    const [source] = await renderJSX(
+      graph,
+      `<ComponentSet name="Button" properties={[
+  { id: "size", name: "Size", type: "VARIANT", defaultValue: "default", variantOptions: ["default", "sm"] },
+  { id: "label", name: "Label", type: "TEXT", defaultValue: "Hi" },
+  { id: "visible", name: "Visible", type: "BOOLEAN", defaultValue: "true" },
+  { id: "content", name: "Content", type: "SLOT", defaultValue: "", slotSettings: { allowPreferredValuesOnly: false, displayEmptyByDefault: false, stretchChildOnInsert: false } }
+]}>
+  <Component name="Size=default">
+    <Text name="Label" propertyRefs={[{ propertyId: "label", field: "TEXT" }]}>Hi</Text>
+    <Frame name="Visible" propertyRefs={[{ propertyId: "visible", field: "VISIBLE" }]} />
+    <Frame name="Content" propertyRefs={[{ propertyId: "content", field: "SLOT_CONTENT" }]} />
+  </Component>
+  <Component name="Size=sm">
+    <Text name="Label" propertyRefs={[{ propertyId: "label", field: "TEXT" }]}>Hi</Text>
+    <Frame name="Visible" propertyRefs={[{ propertyId: "visible", field: "VISIBLE" }]} />
+    <Frame name="Content" propertyRefs={[{ propertyId: "content", field: "SLOT_CONTENT" }]} />
+  </Component>
+</ComponentSet>`
+    )
+    const sourceSet = getNodeOrThrow(graph, expectDefined(source, 'component set').id)
+    const jsx = sceneNodeToJSX(sourceSet.id, graph)
+    expect(jsx).toContain('<ComponentSet name="Button"')
+    expect(jsx).toContain('properties={[')
+    expect(jsx).toContain('propertyRefs={[')
+
+    const target = graph.addPage('Rendered')
+    const [rendered] = await renderJSX(graph, jsx, { parentId: target.id })
+    const copy = getNodeOrThrow(graph, expectDefined(rendered, 'rendered component set').id)
+    expect(copy.type).toBe('COMPONENT_SET')
+    expect(copy.componentPropertyDefinitions).toEqual(sourceSet.componentPropertyDefinitions)
+
+    const variant = expectDefined(
+      graph.getChildren(copy.id).find((child) => child.type === 'COMPONENT'),
+      'rendered variant'
+    )
+    const text = expectDefined(
+      graph.getChildren(variant.id).find((child) => child.type === 'TEXT'),
+      'rendered label'
+    )
+    expect(text).toMatchObject({
+      text: 'Hi',
+      componentPropertyReferences: [{ propertyId: 'label', field: 'TEXT' }]
+    })
+    expect(
+      graph.getChildren(variant.id).find((child) => child.name === 'Visible')
+        ?.componentPropertyReferences
+    ).toEqual([{ propertyId: 'visible', field: 'VISIBLE' }])
+    expect(
+      graph.getChildren(variant.id).find((child) => child.name === 'Content')
+        ?.componentPropertyReferences
+    ).toEqual([{ propertyId: 'content', field: 'SLOT_CONTENT' }])
+    expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
+  })
+
+  test('instances retain their source component and property assignments', async () => {
+    const graph = new SceneGraph()
+    const [component] = await renderJSX(
+      graph,
+      `<Component name="Note" properties={[{ id: "label", name: "Label", type: "TEXT", defaultValue: "Hi" }]}>
+  <Text propertyRefs={[{ propertyId: "label", field: "TEXT" }]}>Hi</Text>
+</Component>`
+    )
+    const componentId = expectDefined(component, 'component').id
+    const [source] = await renderJSX(
+      graph,
+      `<Instance of=${JSON.stringify(componentId)} properties={{ label: "Updated" }} />`
+    )
+    const instance = getNodeOrThrow(graph, expectDefined(source, 'instance').id)
+    const jsx = sceneNodeToJSX(instance.id, graph)
+    expect(jsx).toContain('<Instance')
+    expect(jsx).toContain(`of="${componentId}"`)
+    expect(jsx).toContain('properties={{ label: "Updated" }}')
+
+    const target = graph.addPage('Rendered instance')
+    const [rendered] = await renderJSX(graph, jsx, { parentId: target.id })
+    const copy = getNodeOrThrow(graph, expectDefined(rendered, 'rendered instance').id)
+    expect(copy.type).toBe('INSTANCE')
+    expect(copy.componentPropertyAssignments).toEqual({ label: 'Updated' })
+    expect(graph.getChildren(copy.id)[0]?.text).toBe('Updated')
+    expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
+  })
+
   test.each(PROPERTY_CASES.map((testCase) => [testCase.name, testCase] as const))(
     '%s',
     async (_, testCase) => {

@@ -21,6 +21,90 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { DESIGN_JSX_SUPPORTED_PROPERTIES } from './definitions'
 import { parseScriptInput } from './schema'
 
+const definitionSchema = v.object({
+  id: v.string(),
+  name: v.string(),
+  type: v.picklist(['VARIANT', 'TEXT', 'BOOLEAN', 'INSTANCE_SWAP', 'SLOT']),
+  defaultValue: v.string(),
+  variantOptions: v.optional(v.array(v.string())),
+  preferredValues: v.optional(v.array(v.string())),
+  description: v.optional(v.string()),
+  slotSettings: v.optional(
+    v.object({
+      minChildren: v.optional(v.number()),
+      maxChildren: v.optional(v.number()),
+      allowPreferredValuesOnly: v.boolean(),
+      displayEmptyByDefault: v.boolean(),
+      stretchChildOnInsert: v.boolean()
+    })
+  )
+}) satisfies v.GenericSchema<ComponentPropertyDefinition>
+
+const referenceSchema = v.object({
+  propertyId: v.string(),
+  field: v.picklist(['VISIBLE', 'TEXT', 'INSTANCE_SWAP', 'SLOT_CONTENT'])
+}) satisfies v.GenericSchema<ComponentPropertyReference>
+
+function expectedReferenceField(type: ComponentPropertyDefinition['type']): string {
+  if (type === 'BOOLEAN') return 'VISIBLE'
+  if (type === 'SLOT') return 'SLOT_CONTENT'
+  return type
+}
+
+/** Accept the native graph contracts, without introducing a second property model. */
+export function componentMetadata(
+  props: Record<string, unknown>,
+  type: SceneNode['type'],
+  definitions?: readonly ComponentPropertyDefinition[]
+): Partial<SceneNode> {
+  const result: Partial<SceneNode> = {}
+  if (props.properties !== undefined && type !== 'INSTANCE') {
+    if (type !== 'COMPONENT' && type !== 'COMPONENT_SET')
+      throw new Error('Only components, component sets, and instances accept properties')
+    const componentDefinitions = parseScriptInput(
+      'Invalid properties',
+      v.array(definitionSchema),
+      props.properties
+    )
+    if (
+      new Set(componentDefinitions.map((definition) => definition.id)).size !==
+      componentDefinitions.length
+    )
+      throw new Error('Duplicate component property IDs')
+    const variantNames = componentDefinitions
+      .filter((item) => item.type === 'VARIANT')
+      .map((item) => item.name)
+    if (new Set(variantNames).size !== variantNames.length)
+      throw new Error('Duplicate variant property names')
+    result.componentPropertyDefinitions = componentDefinitions
+  }
+  if (props.propertyRefs !== undefined) {
+    const references = parseScriptInput(
+      'Invalid propertyRefs',
+      v.array(referenceSchema),
+      props.propertyRefs
+    )
+    for (const reference of references) {
+      if (reference.field === 'TEXT' && type !== 'TEXT')
+        throw new Error('TEXT properties require a text node')
+      if (reference.field === 'INSTANCE_SWAP' && type !== 'INSTANCE')
+        throw new Error('INSTANCE_SWAP properties require an instance')
+      if (reference.field === 'SLOT_CONTENT' && type !== 'FRAME')
+        throw new Error('SLOT_CONTENT properties require a frame node')
+      if (definitions) {
+        const definition = definitions.find((item) => item.id === reference.propertyId)
+        if (!definition)
+          throw new Error(`Unknown component property reference: ${reference.propertyId}`)
+        const expectedField = expectedReferenceField(definition.type)
+        if (reference.field !== expectedField)
+          throw new Error(`Component property ${definition.id} cannot bind ${reference.field}`)
+      }
+    }
+    result.componentPropertyReferences = references
+  }
+  return result
+}
+
 const PROPERTY_SYMBOL = Symbol.for('open-pencil.component-property')
 
 /**

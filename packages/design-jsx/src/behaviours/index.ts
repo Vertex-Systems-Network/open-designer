@@ -6,7 +6,7 @@ import {
   type BehaviourSpec
 } from '@open-pencil/scene-graph/behaviours'
 import { createComponentPropertyId } from '@open-pencil/scene-graph/components'
-import { createSlotProperty } from '@open-pencil/scene-graph/slots'
+import { createSlotProperty, slotPropertyId } from '@open-pencil/scene-graph/slots'
 
 import { node, type TreeNode } from '../tree'
 
@@ -155,6 +155,15 @@ export function createScope(kind: BehaviourKind, ownerId: string): RekaScope {
 
 /** Make a rendered part frame its part's slot, with the id the part has in this component. */
 export function bindPart(graph: SceneGraph, scope: RekaScope, frame: SceneNode, partId: string) {
+  const existingId = slotPropertyId(frame)
+  if (existingId) {
+    const id = scope.slots.get(partId)
+    if (id && id !== existingId)
+      throw new Error(`<${partId}> must use the same slot property across component variants`)
+    scope.slots.set(partId, existingId)
+    return
+  }
+
   const id = scope.slots.get(partId) ?? createComponentPropertyId()
   if (!createSlotProperty(graph, frame.id, id))
     throw new Error(`<${partId}> must be inside a main component`)
