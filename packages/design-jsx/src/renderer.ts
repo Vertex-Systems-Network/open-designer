@@ -1,6 +1,6 @@
 import { omitBy } from 'es-toolkit/object'
 
-import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-pencil/scene-graph'
+import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { parseColor } from '@open-pencil/scene-graph/color'
 import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
 
@@ -10,6 +10,7 @@ import {
   assignComponentProperties,
   assignNamedProperties,
   bindProperties,
+  componentMetadataForNode,
   componentPropNames as namesOnInstance,
   exposeInstance,
   inferComponentSetProperties
@@ -363,9 +364,10 @@ async function renderInstanceNode(
     const label = typeof ref === 'string' || typeof ref === 'number' ? String(ref) : ''
     throw new Error(`<Instance> component not found: ${label}`)
   }
-  const overrides: Partial<SceneNode> = {
+  const metadata = componentMetadataForNode(graph, props, 'INSTANCE', parentId, bound, modes)
+  const overrides = {
     ...propsToOverrides(props, false, parentLayout),
-    ...layerMetadata(modes, bound.references)
+    ...metadata
   }
   // Instances inherit their container layout, but explicitly authored dimensions
   // must also replace the inherited sizing mode on that axis.
@@ -457,21 +459,10 @@ async function renderArtworkNode<Artwork>(
     tree.type === 'icon'
       ? await renderIconNode(services, graph, artwork, parentId)
       : renderSVGNode(services, graph, artwork, parentId)
-  const metadata: Partial<SceneNode> = layerMetadata(undefined, bound.references)
+  const metadata = componentMetadataForNode(graph, bound.props, 'VECTOR', parentId, bound)
   if (typeof bound.props.visible === 'boolean') metadata.visible = bound.props.visible
   if (Object.keys(metadata).length > 0) graph.updateNode(node.id, metadata)
   return node
-}
-
-/** The modes a layer pins and the component properties its fields are bound to. */
-function layerMetadata(
-  modes: VariableModeMap | undefined,
-  references: SceneNode['componentPropertyReferences']
-): Partial<SceneNode> {
-  return {
-    ...(modes && { variableModes: modes }),
-    ...(references.length > 0 && { componentPropertyReferences: references })
-  }
 }
 
 /** The component a swap property's default names, by ID or name, as `<Instance of>` finds it. */
@@ -498,10 +489,11 @@ export function elementOverrides(
   const bound = bindProperties(graph, tree.props, nodeType, parentId, componentIdNamed(graph))
   const layer = { parentId, modes }
   const { props, bindings } = preparePropsForRender(graph, bound.props, isText, layer)
+  const metadata = componentMetadataForNode(graph, props, nodeType, parentId, bound, modes)
   const overrides = {
     ...propsToOverrides(props, isText, parentLayout),
     ...shapeOverrides(nodeType, props),
-    ...layerMetadata(modes, bound.references)
+    ...metadata
   }
 
   if (isText) {

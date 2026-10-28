@@ -51,11 +51,32 @@ function expectedReferenceField(type: ComponentPropertyDefinition['type']): stri
   return type
 }
 
+function validateComponentReference(
+  reference: ComponentPropertyReference,
+  type: SceneNode['type'],
+  definitions: readonly ComponentPropertyDefinition[] | undefined
+): void {
+  if (reference.field === 'TEXT' && type !== 'TEXT')
+    throw new Error('TEXT properties require a text node')
+  if (reference.field === 'INSTANCE_SWAP' && type !== 'INSTANCE')
+    throw new Error('INSTANCE_SWAP properties require an instance')
+  if (reference.field === 'SLOT_CONTENT' && type !== 'FRAME')
+    throw new Error('SLOT_CONTENT properties require a frame node')
+  if (!definitions) return
+
+  const definition = definitions.find((item) => item.id === reference.propertyId)
+  if (!definition) throw new Error(`Unknown component property reference: ${reference.propertyId}`)
+  const expectedField = expectedReferenceField(definition.type)
+  if (reference.field !== expectedField)
+    throw new Error(`Component property ${definition.id} cannot bind ${reference.field}`)
+}
+
 /** Accept the native graph contracts, without introducing a second property model. */
 export function componentMetadata(
   props: Record<string, unknown>,
   type: SceneNode['type'],
-  definitions?: readonly ComponentPropertyDefinition[]
+  definitions?: readonly ComponentPropertyDefinition[],
+  boundReferences: readonly ComponentPropertyReference[] = []
 ): Partial<SceneNode> {
   const result: Partial<SceneNode> = {}
   if (props.properties !== undefined && type !== 'INSTANCE') {
@@ -78,30 +99,13 @@ export function componentMetadata(
       throw new Error('Duplicate variant property names')
     result.componentPropertyDefinitions = componentDefinitions
   }
-  if (props.propertyRefs !== undefined) {
-    const references = parseScriptInput(
-      'Invalid propertyRefs',
-      v.array(referenceSchema),
-      props.propertyRefs
-    )
-    for (const reference of references) {
-      if (reference.field === 'TEXT' && type !== 'TEXT')
-        throw new Error('TEXT properties require a text node')
-      if (reference.field === 'INSTANCE_SWAP' && type !== 'INSTANCE')
-        throw new Error('INSTANCE_SWAP properties require an instance')
-      if (reference.field === 'SLOT_CONTENT' && type !== 'FRAME')
-        throw new Error('SLOT_CONTENT properties require a frame node')
-      if (definitions) {
-        const definition = definitions.find((item) => item.id === reference.propertyId)
-        if (!definition)
-          throw new Error(`Unknown component property reference: ${reference.propertyId}`)
-        const expectedField = expectedReferenceField(definition.type)
-        if (reference.field !== expectedField)
-          throw new Error(`Component property ${definition.id} cannot bind ${reference.field}`)
-      }
-    }
-    result.componentPropertyReferences = references
-  }
+  const references =
+    props.propertyRefs === undefined
+      ? []
+      : parseScriptInput('Invalid propertyRefs', v.array(referenceSchema), props.propertyRefs)
+  for (const reference of references) validateComponentReference(reference, type, definitions)
+  const allReferences = [...references, ...boundReferences]
+  if (allReferences.length > 0) result.componentPropertyReferences = allReferences
   return result
 }
 
@@ -207,8 +211,13 @@ export function bindProperties(
   parentId: string,
   componentId: ComponentLookup
 ): BoundProperties {
-  if (source.properties !== undefined && type !== 'INSTANCE')
-    throw new Error('Only instances accept properties; bind a field to property() instead')
+  if (
+    source.properties !== undefined &&
+    type !== 'INSTANCE' &&
+    type !== 'COMPONENT' &&
+    type !== 'COMPONENT_SET'
+  )
+    throw new Error('Only components, component sets, and instances accept properties')
   const props = { ...source }
   const references: ComponentPropertyReference[] = []
   for (const [key, value] of Object.entries(source)) {
@@ -255,6 +264,21 @@ export function componentPropertyScope(
     parent = parent.parentId ? graph.getNode(parent.parentId) : undefined
   }
   return undefined
+}
+
+/** Component metadata, property references, and variable mode for one rendered node. */
+export function componentMetadataForNode(
+  graph: SceneGraph,
+  props: Record<string, unknown>,
+  type: SceneNode['type'],
+  parentId: string,
+  bound: Pick<BoundProperties, 'references'>,
+  variableModes?: SceneNode['variableModes']
+): Partial<SceneNode> {
+  return {
+    ...componentMetadata(props, type, componentPropertyScope(graph, parentId), bound.references),
+    ...(variableModes && { variableModes })
+  }
 }
 
 /** The one property with this name; a name several properties share is an error. */
