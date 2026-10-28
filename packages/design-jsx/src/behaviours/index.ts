@@ -178,6 +178,25 @@ export function bindInput(
   valueId: string,
   propertyName: string
 ) {
+  const references = text.componentPropertyReferences.filter(
+    (reference) => reference.field === 'TEXT'
+  )
+  if (references.length > 1) throw new Error('A Reka input can bind only one text property')
+  if (references.length === 1) {
+    const reference = references[0]
+    const owner = graph.getNode(scope.ownerId)
+    const definition = owner?.componentPropertyDefinitions.find(
+      (item) => item.id === reference.propertyId
+    )
+    if (definition?.type !== 'TEXT')
+      throw new Error('A Reka input reference must name a text property on its component')
+    const existing = scope.texts.get(valueId)
+    if (existing && existing !== reference.propertyId)
+      throw new Error('A Reka input must use the same text property across component variants')
+    scope.texts.set(valueId, reference.propertyId)
+    return
+  }
+
   let id = scope.texts.get(valueId)
   if (!id) {
     id = createComponentPropertyId()

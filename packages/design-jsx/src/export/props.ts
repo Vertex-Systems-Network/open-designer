@@ -9,6 +9,7 @@ import { resolveNodeTextDirection } from '@open-pencil/scene-graph/text/directio
 
 import { BLEND_MODE, TEXT_ALIGN, TEXT_ALIGN_VERTICAL, TEXT_CASE, TEXT_DECORATION } from '../enums'
 import { textLengthJSX } from '../overrides/text'
+import { componentReference, type ComponentReferenceMap } from './component-references'
 import { collectDecorationProps } from './decoration'
 import { collectFontSettingProps, FONT_SETTING_FIELDS } from './font'
 import {
@@ -339,7 +340,8 @@ function collectShapeNodeProps(node: SceneNode, props: JSXProp[]): void {
 export function collectProps(
   node: SceneNode,
   graph: SceneGraph,
-  variables: VariableExport = variableReferences(graph)
+  variables: VariableExport = variableReferences(graph),
+  componentRefs: ComponentReferenceMap = new Map()
 ): JSXProp[] {
   const props: JSXProp[] = []
   const ctx = getNodeContext(node, graph)
@@ -366,7 +368,7 @@ export function collectProps(
   if (node.type === 'INSTANCE') {
     const component = instanceMainComponent(graph, node)
     if (component) {
-      props.push(['of', component.id])
+      props.push(['of', componentReference(component, componentRefs)])
       if (Object.keys(node.componentPropertyAssignments).length > 0)
         props.push(['properties', plainValue(node.componentPropertyAssignments)])
     }

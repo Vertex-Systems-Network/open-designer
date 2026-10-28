@@ -5,9 +5,10 @@ import { findByName, PROPERTY_CASES } from '#core-tests/helpers/property-cases'
 import { pick } from 'es-toolkit'
 
 import { renderJSX } from '@open-pencil/core/design-jsx'
-import { sceneNodeToJSX } from '@open-pencil/design-jsx'
+import { sceneNodeToJSX, selectionToJSX } from '@open-pencil/design-jsx'
 import { SceneGraph } from '@open-pencil/scene-graph'
 import { shaderOfPaint } from '@open-pencil/scene-graph/shaders'
+import { claimSlotContent, slotScope } from '@open-pencil/scene-graph/slots'
 
 describe('attribute string round-trip', () => {
   it.each([
@@ -136,6 +137,102 @@ describe('design JSX export round trip', () => {
     expect(copy.type).toBe('INSTANCE')
     expect(copy.componentPropertyAssignments).toEqual({ label: 'Updated' })
     expect(graph.getChildren(copy.id)[0]?.text).toBe('Updated')
+    expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
+  })
+
+  test('instances resolve an exported component in a fresh graph', async () => {
+    const source = new SceneGraph()
+    const [component] = await renderJSX(
+      source,
+      '<Component name="Note"><Text>Original</Text></Component>'
+    )
+    const [instance] = await renderJSX(source, `<Instance of=${JSON.stringify(component.id)} />`)
+    const jsx = `<>${selectionToJSX([component.id, instance.id], source)}</>`
+
+    const target = new SceneGraph()
+    await renderJSX(target, '<Component name="Other"><Text>Other</Text></Component>')
+    expect(target.getNode(component.id)).toBeUndefined()
+
+    const [copy, copyInstance] = await renderJSX(target, jsx)
+    expect(copy.type).toBe('COMPONENT')
+    expect(copyInstance.type).toBe('INSTANCE')
+    expect(copy.id).not.toBe(component.id)
+    expect(getNodeOrThrow(target, copyInstance.id).componentId).toBe(copy.id)
+    expect(target.getChildren(copyInstance.id)[0]?.text).toBe('Original')
+  })
+
+  test('instances restore owned and empty slot content without replacing default content', async () => {
+    const graph = new SceneGraph()
+    const slot = (id: string, name: string) => ({
+      id,
+      name,
+      type: 'SLOT',
+      defaultValue: '',
+      slotSettings: {
+        allowPreferredValuesOnly: false,
+        displayEmptyByDefault: false,
+        stretchChildOnInsert: false
+      }
+    })
+    const [component] = await renderJSX(
+      graph,
+      `<Component name="Card" properties={[
+  ${JSON.stringify(slot('content', 'Content'))},
+  ${JSON.stringify(slot('empty', 'Empty'))},
+  ${JSON.stringify(slot('default', 'Default'))}
+]}>
+  <Frame name="Content" propertyRefs={[{ propertyId: "content", field: "SLOT_CONTENT" }]}><Text>Original</Text></Frame>
+  <Frame name="Empty" propertyRefs={[{ propertyId: "empty", field: "SLOT_CONTENT" }]}><Text>Remove me</Text></Frame>
+  <Frame name="Default" propertyRefs={[{ propertyId: "default", field: "SLOT_CONTENT" }]}><Text>Keep me</Text></Frame>
+</Component>`
+    )
+    const [instance] = await renderJSX(graph, `<Instance of=${JSON.stringify(component.id)} />`)
+    const frame = (parentId: string, name: string) =>
+      expectDefined(
+        graph.getChildren(parentId).find((child) => child.name === name),
+        name
+      )
+    const content = frame(instance.id, 'Content')
+    const empty = frame(instance.id, 'Empty')
+
+    for (const slotFrame of [content, empty]) {
+      const scope = slotScope(graph, slotFrame.id)
+      if (scope.kind !== 'slot')
+        throw new Error(`Expected ${slotFrame.name} to be an instance slot`)
+      claimSlotContent(graph, scope)
+    }
+    const editedText = expectDefined(graph.getChildren(content.id)[0], 'content text')
+    graph.updateNode(editedText.id, { text: 'Edited content' })
+    for (const child of graph.getChildren(empty.id)) graph.deleteNode(child.id)
+
+    const jsx = sceneNodeToJSX(instance.id, graph)
+    const targetPage = graph.addPage('Rendered')
+    const [copy] = await renderJSX(graph, jsx, { parentId: targetPage.id })
+    const copyContent = frame(copy.id, 'Content')
+    const copyEmpty = frame(copy.id, 'Empty')
+    const copyDefault = frame(copy.id, 'Default')
+
+    expect(graph.getChildren(copyContent.id).map((child) => child.text)).toEqual(['Edited content'])
+    expect(graph.getChildren(copyEmpty.id)).toEqual([])
+    expect(graph.getChildren(copyDefault.id).map((child) => child.text)).toEqual(['Keep me'])
+  })
+
+  test('Reka inputs reuse their exported text-property reference', async () => {
+    const graph = new SceneGraph()
+    const [source] = await renderJSX(
+      graph,
+      '<TextField.Root name="Search"><TextField.Input name="Query" /></TextField.Root>'
+    )
+    const sourceNode = getNodeOrThrow(graph, source.id)
+    const [sourceInput] = graph.getChildren(sourceNode.id)
+    const jsx = sceneNodeToJSX(sourceNode.id, graph)
+    const targetPage = graph.addPage('Rendered')
+    const [copy] = await renderJSX(graph, jsx, { parentId: targetPage.id })
+    const copyNode = getNodeOrThrow(graph, copy.id)
+    const [copyInput] = graph.getChildren(copyNode.id)
+
+    expect(copyNode.componentPropertyDefinitions).toEqual(sourceNode.componentPropertyDefinitions)
+    expect(copyInput.componentPropertyReferences).toEqual(sourceInput.componentPropertyReferences)
     expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
   })
 

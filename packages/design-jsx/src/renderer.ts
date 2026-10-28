@@ -5,7 +5,7 @@ import { parseColor } from '@open-pencil/scene-graph/color'
 import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
 
 import type { RekaScope } from './behaviours'
-import { renderRekaNode } from './behaviours/render'
+import { renderRekaNode, type RenderChild } from './behaviours/render'
 import {
   assignComponentProperties,
   assignNamedProperties,
@@ -17,6 +17,7 @@ import {
 } from './component-properties'
 import { CONNECTOR_ELEMENT, resolveConnectorEnds } from './connectors'
 import { elementNodeType, elementOwnLayer, type OwnLayerRenderer } from './elements'
+import { restoreOwnedSlotContent } from './instance-slot-content'
 import { applySizeOverrides, propsToOverrides, shapeOverrides } from './props-overrides'
 import { LayerRefs } from './refs'
 import { prepareScalarBindings } from './scalar-bindings'
@@ -351,7 +352,8 @@ export function componentPropNames(graph: SceneGraph, props: Record<string, unkn
 async function renderInstanceNode(
   graph: SceneGraph,
   tree: TreeNode,
-  parentId: string
+  parentId: string,
+  renderChild: RenderChild
 ): Promise<SceneNode> {
   const parent = graph.getNode(parentId)
   const parentLayout = parent?.layoutMode ?? 'NONE'
@@ -398,6 +400,7 @@ async function renderInstanceNode(
     assignNamedProperties(graph, instance, props, componentIdNamed(graph))
     assignComponentProperties(graph, instance, props.properties, componentIdNamed(graph))
     if (props.exposed === true) exposeInstance(graph, instance)
+    await restoreOwnedSlotContent(graph, instance, tree, renderChild)
     return instance
   } catch (error) {
     graph.deleteNode(instance.id)
@@ -526,14 +529,15 @@ function renderOwnElement<Artwork>(
   services: DesignJSXServices<Artwork>,
   graph: SceneGraph,
   tree: TreeNode,
-  parentId: string
+  parentId: string,
+  renderChild: RenderChild
 ): Promise<SceneNode> | null {
   switch (tree.type) {
     case 'icon':
     case 'svg':
       return renderArtworkNode(services, graph, tree, parentId)
     case 'instance':
-      return renderInstanceNode(graph, tree, parentId)
+      return renderInstanceNode(graph, tree, parentId, renderChild)
     default: {
       const element = elementOwnLayer(tree.type)
       return element ? Promise.resolve(renderOwnLayerElement(graph, tree, parentId, element)) : null
@@ -549,18 +553,20 @@ async function renderNodeContent<Artwork>(
   onNode?: RenderOptions['onNode'],
   scope?: RekaScope
 ): Promise<SceneNode> {
-  const own = renderOwnElement(services, graph, tree, parentId)
+  const renderChild: RenderChild = (child, childParentId, childScope) =>
+    renderNode(services, graph, child, childParentId, onNode, childScope)
+  const own = renderOwnElement(services, graph, tree, parentId, renderChild)
   if (own) return own
   const reka = await renderRekaNode(graph, tree, parentId, scope, {
-    render: (child, childParentId, childScope) =>
-      renderNode(services, graph, child, childParentId, onNode, childScope),
+    render: renderChild,
     create: (nodeType, element, elementParentId) => {
       const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
       const created = graph.createNode(nodeType, elementParentId, overrides)
       applyBindings(graph, created.id, bindings)
       return created
     },
-    instance: (element, elementParentId) => renderInstanceNode(graph, element, elementParentId),
+    instance: (element, elementParentId) =>
+      renderInstanceNode(graph, element, elementParentId, renderChild),
     finishSet: (setId) => inferComponentSetProperties(graph, setId)
   })
   if (reka) return reka

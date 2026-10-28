@@ -16,6 +16,7 @@ import { elementTag } from '../elements'
 import { shapeWithTextLabelText, shapeWithTextProps } from '../shapes-with-text'
 import { stickyBody, stickyProps } from '../stickies'
 import { rekaExport, type RekaExport } from './behaviours'
+import { componentReferences } from './component-references'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
@@ -129,10 +130,11 @@ function nodeToJSX(
   depth: number,
   scope: ConnectorExportScope,
   variables: VariableExport,
+  componentRefs: ReturnType<typeof componentReferences>,
   layerIds?: Array<string | null>,
   outer: RekaExport = NO_REKA
 ): SyntaxNode[] {
-  const reka = mergeReka(outer, rekaExport(graph, node))
+  const reka = mergeReka(outer, rekaExport(graph, node, componentRefs))
   const ref = scope.refs.get(node.id)
   // A layer a connector joins by a ref is marked with it, after its own props.
   const withRef = (props: JSXProp[]): JSXProp[] =>
@@ -141,7 +143,9 @@ function nodeToJSX(
   const children = (childDepth: number) =>
     graph
       .getChildren(node.id)
-      .flatMap((child) => nodeToJSX(child, graph, childDepth, scope, variables, layerIds, reka))
+      .flatMap((child) =>
+        nodeToJSX(child, graph, childDepth, scope, variables, componentRefs, layerIds, reka)
+      )
   if (reka.flatten.has(node.id)) return children(depth)
   // An icon is written by name; its paths are the icon set's to draw again.
   const icon = iconProps(node, graph)
@@ -161,9 +165,10 @@ function nodeToJSX(
   // An item names its component; the instance's own layers are the component's to write.
   if (ownProps?.some(([name]) => name === 'of'))
     return [jsx.element(tag, withRef(ownProps).map(propAttribute), [], depth)]
-  const attributes = withRef([...collectProps(node, graph, variables), ...(ownProps ?? [])]).map(
-    propAttribute
-  )
+  const attributes = withRef([
+    ...collectProps(node, graph, variables, componentRefs),
+    ...(ownProps ?? [])
+  ]).map(propAttribute)
   if (node.type === 'TEXT') {
     const { children: content, inline } = textChildren(node, depth)
     for (let count = elementCount(content); count > 0; count--) layerIds?.push(null)
@@ -195,7 +200,9 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !exportTag(node, graph)) return null
   const own = ownElement(graph, node)
-  const props = own ? own.props : collectProps(node, graph)
+  const props = own
+    ? own.props
+    : collectProps(node, graph, undefined, componentReferences(graph, [nodeId]))
   if (node.type === 'TEXT') props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
@@ -285,10 +292,13 @@ export function selectionToJSXWithLayers(
   const declare = options.declarations ?? true
   const scope = connectorExportScope(graph, nodeIds, declare)
   const variables = variableExport(graph, nodeIds, declare)
+  const componentRefs = componentReferences(graph, nodeIds)
   const roots = compact(
     nodeIds.map((id) => {
       const node = graph.getNode(id)
-      const syntax = node ? nodeToJSX(node, graph, 0, scope, variables, layerIds).at(0) : undefined
+      const syntax = node
+        ? nodeToJSX(node, graph, 0, scope, variables, componentRefs, layerIds).at(0)
+        : undefined
       return syntax ? jsx.printJSX(syntax) : ''
     })
   )
