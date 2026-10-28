@@ -210,7 +210,7 @@ describe('Reka UI elements in JSX export', () => {
     expect(copiedRadio.type).toBe('COMPONENT_SET')
     expect(copiedGroup.type).toBe('COMPONENT')
     const copiedRadioVariant = target.getChildren(copiedRadio.id)[0]
-    expect(target.getAllNodes().find((node) => node.type === 'INSTANCE')?.componentId).toBe(
+    expect([...target.getAllNodes()].find((node) => node.type === 'INSTANCE')?.componentId).toBe(
       copiedRadioVariant.id
     )
 
