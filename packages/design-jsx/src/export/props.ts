@@ -6,6 +6,7 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { layoutSizing } from '@open-pencil/scene-graph/layout'
 import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
 import { resolveNodeTextDirection } from '@open-pencil/scene-graph/text/direction'
+import { vectorNetworkPaths } from '@open-pencil/scene-graph/vector-network'
 
 import { BLEND_MODE, TEXT_ALIGN, TEXT_ALIGN_VERTICAL, TEXT_CASE, TEXT_DECORATION } from '../enums'
 import { textLengthJSX } from '../overrides/text'
@@ -330,6 +331,11 @@ function collectShapeNodeProps(node: SceneNode, props: JSXProp[]): void {
   }
   if (node.type === 'POLYGON' && node.pointCount !== 3) {
     props.push(['points', node.pointCount])
+  }
+  if (node.type === 'VECTOR' && node.vectorNetwork) {
+    // Figma's own form of a vector's geometry, which <Vector> reads back as written.
+    const paths = vectorNetworkPaths(node.vectorNetwork)
+    if (paths.length > 0) props.push(['paths', paths.map((path) => ({ ...path }))])
   }
 }
 
