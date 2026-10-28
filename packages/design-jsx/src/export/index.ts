@@ -200,9 +200,7 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !exportTag(node, graph)) return null
   const own = ownElement(graph, node)
-  const props = own
-    ? own.props
-    : collectProps(node, graph, undefined, componentReferences(graph, [nodeId]))
+  const props = own ? own.props : collectProps(node, graph)
   if (node.type === 'TEXT') props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
