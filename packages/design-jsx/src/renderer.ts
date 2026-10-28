@@ -15,22 +15,19 @@ import {
   exposeInstance,
   inferComponentSetProperties
 } from './component-properties'
-import { CONNECTOR_ELEMENT, resolveConnectorEnds } from './connectors'
 import { elementNodeType, elementOwnLayer, type OwnLayerRenderer } from './elements'
 import { restoreOwnedSlotContent } from './instance-slot-content'
 import { placeVectorPaths } from './overrides/vector'
 import { applySizeOverrides, propsToOverrides, shapeOverrides } from './props-overrides'
-import { LayerRefs } from './refs'
 import { prepareScalarBindings } from './scalar-bindings'
 import { readElementProps } from './schema'
 import type { DesignJSXServices } from './services'
 import { isTextContent, TEXT_CONTENT_NAMES, textContentFields } from './text-content'
-import { FRAGMENT, isTreeNode } from './tree'
+import { isTreeNode } from './tree'
 import type { TreeNode } from './tree'
 import type { RenderOptions } from './types'
 import { isVariable } from './variables'
 import {
-  applyVariableDefinitions,
   bindVariableProp,
   requireVariableId,
   resolveForLayer,
@@ -38,70 +35,6 @@ import {
   type LayerContext
 } from './variables/graph'
 import { paintProps } from './variables/props'
-
-export interface RenderResult {
-  id: string
-  name: string
-  type: NodeType
-  childIds: string[]
-  warnings?: string[]
-}
-
-/** The nodes a tree renders as: a fragment's children, or the tree itself. */
-function treeRoots(tree: TreeNode): TreeNode[] {
-  return tree.type === FRAGMENT ? tree.children.filter(isTreeNode) : [tree]
-}
-
-/** Render every root of `tree` into the parent and lay out once. */
-export async function renderRoots<Artwork>(
-  services: DesignJSXServices<Artwork>,
-  graph: SceneGraph,
-  tree: TreeNode,
-  options: RenderOptions = {}
-): Promise<RenderResult[]> {
-  const roots = treeRoots(tree)
-  if (roots.length === 0) throw new Error('JSX must return a Figma element (Frame, Text, etc)')
-  const parentId = options.parentId ?? graph.getPages()[0].id
-  applyVariableDefinitions(graph, tree)
-
-  const nodes: SceneNode[] = []
-  const connectors: Array<{ node: SceneNode; tree: TreeNode }> = []
-  const refs = new LayerRefs()
-  const onNode = (element: TreeNode, node: SceneNode) => {
-    if (element.type === CONNECTOR_ELEMENT) connectors.push({ node, tree: element })
-    else refs.mark(element.props.ref, node)
-    options.onNode?.(element, node)
-  }
-  for (const root of roots) {
-    const node = await renderNode(services, graph, root, parentId, onNode)
-    if (options.x !== undefined) graph.updateNode(node.id, { x: options.x })
-    if (options.y !== undefined) graph.updateNode(node.id, { y: options.y })
-    nodes.push(node)
-  }
-
-  const rootIds = nodes.map((node) => node.id)
-  const warnings = [...refs.warnings, ...resolveConnectorEnds(graph, rootIds, connectors, refs)]
-  if (!options.deferLayout) services.layout(graph, rootIds)
-
-  return nodes.map((node) => ({
-    id: node.id,
-    name: node.name,
-    type: node.type,
-    childIds: node.childIds,
-    ...(warnings.length > 0 && { warnings })
-  }))
-}
-
-/** Render `tree` and return its first root; a fragment's other roots are rendered too. */
-export async function renderTree<Artwork>(
-  services: DesignJSXServices<Artwork>,
-  graph: SceneGraph,
-  tree: TreeNode,
-  options: RenderOptions = {}
-): Promise<RenderResult> {
-  const [first] = await renderRoots(services, graph, tree, options)
-  return first
-}
 
 interface PreparedProps {
   props: Record<string, unknown>
@@ -367,7 +300,15 @@ async function renderInstanceNode(
     const label = typeof ref === 'string' || typeof ref === 'number' ? String(ref) : ''
     throw new Error(`<Instance> component not found: ${label}`)
   }
-  const metadata = componentMetadataForNode(graph, props, 'INSTANCE', parentId, bound, modes)
+  const metadata = componentMetadataForNode(
+    graph,
+    props,
+    'INSTANCE',
+    parentId,
+    bound,
+    modes,
+    componentIdNamed(graph)
+  )
   const overrides = {
     ...propsToOverrides(props, false, parentLayout),
     ...metadata
@@ -463,7 +404,15 @@ async function renderArtworkNode<Artwork>(
     tree.type === 'icon'
       ? await renderIconNode(services, graph, artwork, parentId)
       : renderSVGNode(services, graph, artwork, parentId)
-  const metadata = componentMetadataForNode(graph, bound.props, 'VECTOR', parentId, bound)
+  const metadata = componentMetadataForNode(
+    graph,
+    bound.props,
+    'VECTOR',
+    parentId,
+    bound,
+    undefined,
+    componentIdNamed(graph)
+  )
   if (typeof bound.props.visible === 'boolean') metadata.visible = bound.props.visible
   if (Object.keys(metadata).length > 0) graph.updateNode(node.id, metadata)
   return node
@@ -493,7 +442,15 @@ export function elementOverrides(
   const bound = bindProperties(graph, tree.props, nodeType, parentId, componentIdNamed(graph))
   const layer = { parentId, modes }
   const { props, bindings } = preparePropsForRender(graph, bound.props, isText, layer)
-  const metadata = componentMetadataForNode(graph, props, nodeType, parentId, bound, modes)
+  const metadata = componentMetadataForNode(
+    graph,
+    props,
+    nodeType,
+    parentId,
+    bound,
+    modes,
+    componentIdNamed(graph)
+  )
   const overrides = {
     ...propsToOverrides(props, isText, parentLayout),
     ...shapeOverrides(nodeType, props),
@@ -509,7 +466,7 @@ export function elementOverrides(
   return { overrides, bindings }
 }
 
-async function renderNode<Artwork>(
+export async function renderNode<Artwork>(
   services: DesignJSXServices<Artwork>,
   graph: SceneGraph,
   tree: TreeNode,

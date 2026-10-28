@@ -112,7 +112,7 @@ describe('design JSX export round trip', () => {
     expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
   })
 
-  test('instances retain their source component and property assignments', async () => {
+  test('instances without their component export as self-contained frames', async () => {
     const graph = new SceneGraph()
     const [component] = await renderJSX(
       graph,
@@ -127,15 +127,15 @@ describe('design JSX export round trip', () => {
     )
     const instance = getNodeOrThrow(graph, expectDefined(source, 'instance').id)
     const jsx = sceneNodeToJSX(instance.id, graph)
-    expect(jsx).toContain('<Instance')
-    expect(jsx).toContain(`of="${componentId}"`)
-    expect(jsx).toContain('properties={{ label: "Updated" }}')
+    expect(jsx).toContain('<Frame')
+    expect(jsx).not.toContain('<Instance')
+    expect(jsx).not.toContain(componentId)
+    expect(jsx).toContain('Updated')
 
     const target = graph.addPage('Rendered instance')
     const [rendered] = await renderJSX(graph, jsx, { parentId: target.id })
-    const copy = getNodeOrThrow(graph, expectDefined(rendered, 'rendered instance').id)
-    expect(copy.type).toBe('INSTANCE')
-    expect(copy.componentPropertyAssignments).toEqual({ label: 'Updated' })
+    const copy = getNodeOrThrow(graph, expectDefined(rendered, 'rendered frame').id)
+    expect(copy.type).toBe('FRAME')
     expect(graph.getChildren(copy.id)[0]?.text).toBe('Updated')
     expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
   })
@@ -159,6 +159,80 @@ describe('design JSX export round trip', () => {
     expect(copy.id).not.toBe(component.id)
     expect(getNodeOrThrow(target, copyInstance.id).componentId).toBe(copy.id)
     expect(target.getChildren(copyInstance.id)[0]?.text).toBe('Original')
+  })
+
+  test('included instance swap values map to fresh components but other values stay literal', async () => {
+    const source = new SceneGraph()
+    const [defaultIcon] = await renderJSX(
+      source,
+      '<Component name="DefaultIcon"><Text>Default</Text></Component>'
+    )
+    const [assignedIcon] = await renderJSX(
+      source,
+      '<Component name="AssignedIcon"><Text>Assigned</Text></Component>'
+    )
+    const defaultIconId = expectDefined(defaultIcon, 'default icon').id
+    const assignedIconId = expectDefined(assignedIcon, 'assigned icon').id
+    const [button] = await renderJSX(
+      source,
+      `<Component name="Button" properties={[
+  { id: "icon", name: "Icon", type: "INSTANCE_SWAP", defaultValue: ${JSON.stringify(defaultIconId)}, preferredValues: [${JSON.stringify(defaultIconId)}, ${JSON.stringify(assignedIconId)}, "external-component"] },
+  { id: "label", name: "Label", type: "TEXT", defaultValue: ${JSON.stringify(defaultIconId)} }
+]}>
+  <Instance name="Icon" of=${JSON.stringify(defaultIconId)} propertyRefs={[{ propertyId: "icon", field: "INSTANCE_SWAP" }]} />
+</Component>`
+    )
+    const buttonId = expectDefined(button, 'button component').id
+    const [instance] = await renderJSX(
+      source,
+      `<Instance of=${JSON.stringify(buttonId)} properties={{ icon: ${JSON.stringify(assignedIconId)}, label: ${JSON.stringify(defaultIconId)} }} />`
+    )
+
+    const jsx = selectionToJSX(
+      [defaultIconId, assignedIconId, buttonId, expectDefined(instance, 'button instance').id],
+      source
+    )
+    const target = new SceneGraph()
+    const [copyDefaultIcon, copyAssignedIcon, copyButton, copyInstance] = await renderJSX(
+      target,
+      jsx
+    )
+    const defaultCopyId = expectDefined(copyDefaultIcon, 'copied default icon').id
+    const assignedCopyId = expectDefined(copyAssignedIcon, 'copied assigned icon').id
+    const buttonCopy = getNodeOrThrow(target, expectDefined(copyButton, 'copied button').id)
+    const instanceCopy = getNodeOrThrow(target, expectDefined(copyInstance, 'copied instance').id)
+
+    expect(buttonCopy.componentPropertyDefinitions).toMatchObject([
+      {
+        id: 'icon',
+        defaultValue: defaultCopyId,
+        preferredValues: [defaultCopyId, assignedCopyId, 'external-component']
+      },
+      { id: 'label', defaultValue: defaultIconId }
+    ])
+    expect(instanceCopy.componentPropertyAssignments).toEqual({
+      icon: assignedCopyId,
+      label: defaultIconId
+    })
+  })
+
+  test('an instance can precede its component while preserving root order', async () => {
+    const source = new SceneGraph()
+    const [component] = await renderJSX(
+      source,
+      '<Component name="Note"><Text>Original</Text></Component>'
+    )
+    const componentId = expectDefined(component, 'component').id
+    const [instance] = await renderJSX(source, `<Instance of=${JSON.stringify(componentId)} />`)
+    const instanceId = expectDefined(instance, 'instance').id
+    const jsx = selectionToJSX([instanceId, componentId], source)
+
+    const target = new SceneGraph()
+    const [copyInstance, copyComponent] = await renderJSX(target, jsx)
+    expect(copyInstance.type).toBe('INSTANCE')
+    expect(copyComponent.type).toBe('COMPONENT')
+    const pageId = expectDefined(target.getPages()[0], 'target page').id
+    expect(target.getChildren(pageId).map((node) => node.type)).toEqual(['INSTANCE', 'COMPONENT'])
   })
 
   test('instances restore owned and empty slot content without replacing default content', async () => {

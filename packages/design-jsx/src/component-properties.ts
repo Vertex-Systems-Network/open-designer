@@ -76,7 +76,8 @@ export function componentMetadata(
   props: Record<string, unknown>,
   type: SceneNode['type'],
   definitions?: readonly ComponentPropertyDefinition[],
-  boundReferences: readonly ComponentPropertyReference[] = []
+  boundReferences: readonly ComponentPropertyReference[] = [],
+  componentId?: ComponentLookup
 ): Partial<SceneNode> {
   const result: Partial<SceneNode> = {}
   if (props.properties !== undefined && type !== 'INSTANCE') {
@@ -97,7 +98,16 @@ export function componentMetadata(
       .map((item) => item.name)
     if (new Set(variantNames).size !== variantNames.length)
       throw new Error('Duplicate variant property names')
-    result.componentPropertyDefinitions = componentDefinitions
+    result.componentPropertyDefinitions = componentDefinitions.map((definition) => {
+      if (definition.type !== 'INSTANCE_SWAP' || !componentId) return definition
+      return {
+        ...definition,
+        defaultValue: componentId(definition.defaultValue) ?? definition.defaultValue,
+        ...(definition.preferredValues && {
+          preferredValues: definition.preferredValues.map((value) => componentId(value) ?? value)
+        })
+      }
+    })
   }
   const references =
     props.propertyRefs === undefined
@@ -273,10 +283,17 @@ export function componentMetadataForNode(
   type: SceneNode['type'],
   parentId: string,
   bound: Pick<BoundProperties, 'references'>,
-  variableModes?: SceneNode['variableModes']
+  variableModes?: SceneNode['variableModes'],
+  componentId?: ComponentLookup
 ): Partial<SceneNode> {
   return {
-    ...componentMetadata(props, type, componentPropertyScope(graph, parentId), bound.references),
+    ...componentMetadata(
+      props,
+      type,
+      componentPropertyScope(graph, parentId),
+      bound.references,
+      componentId
+    ),
     ...(variableModes && { variableModes })
   }
 }

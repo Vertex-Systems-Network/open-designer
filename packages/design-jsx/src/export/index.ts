@@ -117,9 +117,28 @@ function ownElement(
   return isGeneratedFrame(node) ? OWN_ELEMENTS[node.type](graph, node, scope) : undefined
 }
 
-/** An unresolved library instance cannot be recreated, so retain the existing frame fallback. */
-function exportTag(node: SceneNode, graph: SceneGraph): string | undefined {
-  if (node.type === 'INSTANCE' && !instanceMainComponent(graph, node)) return 'Frame'
+/** A component omitted from this export cannot be resolved on its own. */
+function instanceUsesFrameFallback(
+  node: SceneNode,
+  graph: SceneGraph,
+  componentRefs?: ReturnType<typeof componentReferences>
+): boolean {
+  if (node.type !== 'INSTANCE') return false
+  const component = instanceMainComponent(graph, node)
+  return !!component && !!componentRefs && !componentRefs.has(component.id)
+}
+
+/** An unresolved or omitted component cannot be recreated, so retain the frame fallback. */
+function exportTag(
+  node: SceneNode,
+  graph: SceneGraph,
+  componentRefs?: ReturnType<typeof componentReferences>
+): string | undefined {
+  if (
+    node.type === 'INSTANCE' &&
+    (!instanceMainComponent(graph, node) || instanceUsesFrameFallback(node, graph, componentRefs))
+  )
+    return 'Frame'
   return elementTag(node.type)
 }
 
@@ -153,7 +172,10 @@ function nodeToJSX(
     layerIds?.push(node.id)
     return [jsx.element('Icon', withRef(icon).map(propAttribute), [], depth)]
   }
-  const tag = reka.tags.get(node.id) ?? exportTag(node, graph)
+  const frameFallback = instanceUsesFrameFallback(node, graph, componentRefs)
+  const tag = frameFallback
+    ? 'Frame'
+    : (reka.tags.get(node.id) ?? exportTag(node, graph, componentRefs))
   if (!tag) return []
   layerIds?.push(node.id)
   const own = ownElement(graph, node, scope)
@@ -161,7 +183,7 @@ function nodeToJSX(
     const children = own.text ? [jsx.text(own.text)] : []
     return [jsx.element(tag, own.props.map(propAttribute), children, depth, true)]
   }
-  const ownProps = reka.props.get(node.id)
+  const ownProps = frameFallback ? undefined : reka.props.get(node.id)
   // An item names its component; the instance's own layers are the component's to write.
   if (ownProps?.some(([name]) => name === 'of'))
     return [jsx.element(tag, withRef(ownProps).map(propAttribute), [], depth)]

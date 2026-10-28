@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test'
 import { getNodeOrThrow } from '#core-tests/helpers/assert'
 
 import { renderJSX } from '@open-pencil/core/design-jsx'
-import { sceneNodeToJSX } from '@open-pencil/design-jsx'
+import { sceneNodeToJSX, selectionToJSX } from '@open-pencil/design-jsx'
 import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
 import { missingBindings, readBehaviour } from '@open-pencil/scene-graph/behaviours'
 
@@ -198,7 +198,21 @@ describe('Reka UI elements in JSX export', () => {
       graph,
       `<RadioGroup.Root name="Plan"><RadioGroup.Item of="${radio.id}" /></RadioGroup.Root>`
     )
-    expect(sceneNodeToJSX(group.id, graph)).toContain(`<RadioGroup.Item of="${radio.id}" />`)
+    const standalone = sceneNodeToJSX(group.id, graph)
+    expect(standalone).toContain('<Frame')
+    expect(standalone).not.toContain(`<RadioGroup.Item of="${radio.id}" />`)
+    expect(standalone).not.toContain(radio.id)
+
+    const withItemComponent = selectionToJSX([radio.id, group.id], graph)
+    expect(withItemComponent).toContain('<RadioGroup.Item of="Radio" />')
+    const target = new SceneGraph()
+    const [copiedRadio, copiedGroup] = await renderJSX(target, withItemComponent)
+    expect(copiedRadio.type).toBe('COMPONENT_SET')
+    expect(copiedGroup.type).toBe('COMPONENT')
+    const copiedRadioVariant = target.getChildren(copiedRadio.id)[0]
+    expect(target.getAllNodes().find((node) => node.type === 'INSTANCE')?.componentId).toBe(
+      copiedRadioVariant.id
+    )
 
     const [tabs] = await renderJSX(
       graph,

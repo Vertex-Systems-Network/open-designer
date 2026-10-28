@@ -1,6 +1,12 @@
 import { isEqual, omitBy, pick } from 'es-toolkit'
 
-import type { ArcData, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type {
+  ArcData,
+  ComponentPropertyDefinition,
+  SceneGraph,
+  SceneNode
+} from '@open-pencil/scene-graph'
+import { componentPropertyDefinitions } from '@open-pencil/scene-graph/components'
 import { DEFAULT_FONT_FAMILY } from '@open-pencil/scene-graph/constants'
 import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { layoutSizing } from '@open-pencil/scene-graph/layout'
@@ -347,7 +353,7 @@ export function collectProps(
   node: SceneNode,
   graph: SceneGraph,
   variables: VariableExport = variableReferences(graph),
-  componentRefs: ComponentReferenceMap = new Map()
+  componentRefs?: ComponentReferenceMap
 ): JSXProp[] {
   const props: JSXProp[] = []
   const ctx = getNodeContext(node, graph)
@@ -366,23 +372,101 @@ export function collectProps(
   }
   collectShapeNodeProps(node, props)
   collectStateProps(node, ctx, props, variables)
+  props.push(...collectComponentProps(node, graph, componentRefs))
 
+  return props
+}
+
+function collectComponentProps(
+  node: SceneNode,
+  graph: SceneGraph,
+  componentRefs?: ComponentReferenceMap
+): JSXProp[] {
+  const props: JSXProp[] = []
   if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') {
     if (node.componentPropertyDefinitions.length > 0)
-      props.push(['properties', plainValue(node.componentPropertyDefinitions)])
+      props.push([
+        'properties',
+        plainValue(
+          node.componentPropertyDefinitions.map((definition) =>
+            mapComponentPropertyDefinition(definition, graph, componentRefs)
+          )
+        )
+      ])
   }
   if (node.type === 'INSTANCE') {
     const component = instanceMainComponent(graph, node)
-    if (component) {
-      props.push(['of', componentReference(component, componentRefs)])
+    if (component && (!componentRefs || componentRefs.has(component.id))) {
+      props.push([
+        'of',
+        componentRefs ? componentReference(component, componentRefs) : component.id
+      ])
       if (Object.keys(node.componentPropertyAssignments).length > 0)
-        props.push(['properties', plainValue(node.componentPropertyAssignments)])
+        props.push([
+          'properties',
+          plainValue(mapComponentPropertyAssignments(graph, node, componentRefs))
+        ])
     }
   }
-  if (node.type !== 'INSTANCE' || instanceMainComponent(graph, node)) {
+  const component = node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
+  if (
+    node.type !== 'INSTANCE' ||
+    (component && (!componentRefs || componentRefs.has(component.id)))
+  ) {
     if (node.componentPropertyReferences.length > 0)
       props.push(['propertyRefs', plainValue(node.componentPropertyReferences)])
   }
 
   return props
+}
+
+function componentReferenceValue(
+  value: string,
+  graph: SceneGraph,
+  componentRefs?: ComponentReferenceMap
+): string {
+  if (!componentRefs) return value
+  const component = graph.getNode(value)
+  if (
+    !component ||
+    (component.type !== 'COMPONENT' && component.type !== 'COMPONENT_SET') ||
+    !componentRefs.has(component.id)
+  )
+    return value
+  return componentReference(component, componentRefs)
+}
+
+function mapComponentPropertyDefinition(
+  definition: ComponentPropertyDefinition,
+  graph: SceneGraph,
+  componentRefs?: ComponentReferenceMap
+): ComponentPropertyDefinition {
+  if (definition.type !== 'INSTANCE_SWAP') return definition
+  return {
+    ...definition,
+    defaultValue: componentReferenceValue(definition.defaultValue, graph, componentRefs),
+    ...(definition.preferredValues && {
+      preferredValues: definition.preferredValues.map((value) =>
+        componentReferenceValue(value, graph, componentRefs)
+      )
+    })
+  }
+}
+
+function mapComponentPropertyAssignments(
+  graph: SceneGraph,
+  instance: SceneNode,
+  componentRefs?: ComponentReferenceMap
+): Record<string, string> {
+  const swapProperties = new Set(
+    componentPropertyDefinitions(graph, instance)
+      .filter((definition) => definition.type === 'INSTANCE_SWAP')
+      .map((definition) => definition.id)
+  )
+  return Object.fromEntries(
+    Object.entries(instance.componentPropertyAssignments).map(([propertyId, value]) => [
+      propertyId,
+      swapProperties.has(propertyId) ? componentReferenceValue(value, graph, componentRefs) : value
+    ])
+  )
 }
