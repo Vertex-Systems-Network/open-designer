@@ -392,7 +392,7 @@ function applyInstanceOverrides(
     return child && prop in child ? [{ child, prop, value }] : []
   })
   for (const { child, prop, value } of targets) {
-    graph.updateNode(child.id, { [prop]: value } as Partial<SceneNode>)
+    graph.updateNode(child.id, { [prop]: value })
     setInstanceOverride(instance.instanceOverrides, instance.id, child.id, prop, value)
   }
   if (targets.length > 0) {
