@@ -82,3 +82,39 @@ describe('tile image cache', () => {
     cache.clear()
   })
 })
+
+describe('tile fallback lookup', () => {
+  function tileAt(level: number, x: number, y: number): RenderedTile {
+    const rendered = tile(x)
+    return { ...rendered, key: { pageId: 'page', level, x, y } }
+  }
+
+  test('covers a missing tile with the nearest level that spans its area', () => {
+    const cache = new TileImageCache()
+    // Level 1 tiles span 256 world units; level 2 tiles span 128.
+    cache.install(tileAt(1, 0, 0), 1)
+    cache.install(tileAt(0.5, 0, 0), 1)
+    const fallback = cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })
+    expect(fallback?.map((entry) => entry.key.level)).toEqual([1])
+
+    // Without the level-1 tile, the coarser level-0.5 tile still spans the area.
+    cache.invalidateBounds('page', { minX: 0, minY: 0, maxX: 256, maxY: 256 }, 2)
+    expect(cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })).toBeNull()
+    cache.install(tileAt(0.5, 0, 0), 2)
+    expect(
+      cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })?.map((entry) => entry.key.level)
+    ).toEqual([0.5])
+  })
+
+  test('needs every tile of a level before using it, and prefers the finer level on a tie', () => {
+    const cache = new TileImageCache()
+    cache.install(tileAt(2, 0, 0), 1)
+    expect(cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })).toBeNull()
+    cache.install(tileAt(2, 1, 0), 1)
+    cache.install(tileAt(2, 0, 1), 1)
+    cache.install(tileAt(2, 1, 1), 1)
+    cache.install(tileAt(0.5, 0, 0), 1)
+    const fallback = cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })
+    expect(fallback?.map((entry) => entry.key.level)).toEqual([2, 2, 2, 2])
+  })
+})

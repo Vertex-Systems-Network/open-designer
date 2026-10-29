@@ -122,7 +122,17 @@ export class TileScheduler {
     this.jobs.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
   }
 
-  runFrame(execute: (job: TileJob) => TileJobResult): TileSchedulerMetrics {
+  /** Drops queued jobs matching `predicate` and returns how many it dropped. */
+  discard(predicate: (job: TileJob) => boolean): number {
+    const previousCount = this.jobs.length
+    this.jobs = this.jobs.filter((job) => !predicate(job))
+    return previousCount - this.jobs.length
+  }
+
+  runFrame(
+    execute: (job: TileJob) => TileJobResult,
+    budgetMs: number = this.budgetMs
+  ): TileSchedulerMetrics {
     const frameStart = this.now()
     const metrics = emptyTileSchedulerMetrics()
 
@@ -132,20 +142,20 @@ export class TileScheduler {
       const job = this.jobs[0]
       const elapsed = this.now() - frameStart
       const mandatory = job.priority === 'mandatory' && !job.fallbackAvailable
-      if (jobsExecuted > 0 && elapsed >= this.budgetMs) break
+      if (jobsExecuted > 0 && elapsed >= budgetMs) break
       if (this.isStale(job)) {
         this.jobs.shift()
         metrics.staleJobsDiscarded++
         continue
       }
-      if (!mandatory && job.fallbackAvailable && elapsed + job.estimatedCost > this.budgetMs) {
+      if (!mandatory && job.fallbackAvailable && elapsed + job.estimatedCost > budgetMs) {
         if (jobsExecuted === 0) {
           const result = execute(job)
           this.jobs.shift()
           metrics.interruptibleCompleted++
           addJobMetrics(metrics, result)
-          if (result.overBudget || result.renderMs > this.budgetMs) metrics.overBudgetJobs++
-          const overrun = this.now() - frameStart - this.budgetMs
+          if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
+          const overrun = this.now() - frameStart - budgetMs
           if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
         } else {
           metrics.skippedWithFallback++
@@ -156,10 +166,10 @@ export class TileScheduler {
       const result = execute(job)
       jobsExecuted++
       addJobMetrics(metrics, result)
-      if (result.overBudget || result.renderMs > this.budgetMs) metrics.overBudgetJobs++
+      if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
       if (mandatory) metrics.mandatoryCompleted++
       else metrics.interruptibleCompleted++
-      const overrun = this.now() - frameStart - this.budgetMs
+      const overrun = this.now() - frameStart - budgetMs
       if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
     }
     metrics.remaining = this.jobs.length

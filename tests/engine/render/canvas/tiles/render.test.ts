@@ -244,7 +244,7 @@ describe('tile rendering', () => {
     }
   })
 
-  test('cancels obsolete refresh jobs and performs no exact work during navigation', () => {
+  test('cancels jobs of an earlier navigation generation and keeps working within the budget', () => {
     const graph = new SceneGraph()
     const page = expectDefined(graph.getPages()[0], 'page')
     for (let index = 0; index < 48; index++) {
@@ -258,7 +258,9 @@ describe('tile rendering', () => {
     }
     const surface = expectDefined(ck.MakeSurface(1280, 800), 'cancellation surface')
     const renderer = new SkiaRenderer(ck, surface)
-    const controller = new TiledSceneController()
+    // Every clock reading is 10 ms later, so each frame affords exactly one tile.
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 10) })
     renderer.pageId = page.id
     renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
     renderer.viewportWidth = 1280
@@ -269,13 +271,14 @@ describe('tile rendering', () => {
     try {
       const initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       expect(initial.pending).toBe(true)
+      expect(initial.metrics.interruptibleCompleted).toBe(1)
 
-      renderer.navigationPhase = 'zoom'
+      renderer.navigationPhase = 'pan'
       renderer.navigationGeneration = 1
       const navigating = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(navigating.metrics.cancelledJobs).toBeGreaterThan(0)
-      expect(navigating.metrics.mandatoryCompleted).toBe(0)
-      expect(navigating.metrics.interruptibleCompleted).toBe(0)
+      expect(navigating.metrics.interruptibleCompleted).toBe(1)
+      expect(navigating.pending).toBe(true)
     } finally {
       controller.destroy()
       renderer.destroy()
@@ -513,6 +516,65 @@ describe('tile scheduling', () => {
       expect(redraw.metrics.interruptibleCompleted).toBe(0)
       expect(redraw.metrics.mandatoryCompleted).toBe(0)
       expect(redraw.metrics.cancelledJobs).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('zooms over the previous level scaled and rasterizes the new level once idle', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    const uncovered: number[] = []
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+
+      // Zoom in: level 2 has no tiles, and each of its tiles lies inside one level-1 tile.
+      renderer.zoom = 2
+      renderer.navigationPhase = 'zoom'
+      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1, (areas) =>
+        uncovered.push(areas.length)
+      )
+      expect(zoomed.covered).toBe(false)
+      expect(zoomed.metrics.interruptibleCompleted).toBe(0)
+      expect(zoomed.metrics.skippedWithFallback).toBeGreaterThan(0)
+      expect(zoomed.fallbackTileCount).toBe(5 * 4)
+      expect(zoomed.uncoveredAreaCount).toBe(0)
+      expect(uncovered).toEqual([])
+      expect(zoomed.pending).toBe(true)
+
+      renderer.navigationPhase = 'idle'
+      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(settled.covered).toBe(true)
+      expect(settled.fallbackTileCount).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('hands areas no level covers to the scene fallback', () => {
+    const { graph, surface, renderer } = createGridScene()
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 10) })
+    const uncovered: number[] = []
+    try {
+      // The index is built while idle; the first navigating frame then renders one tile.
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0, (areas) =>
+        uncovered.push(areas.length)
+      )
+      renderer.navigationPhase = 'pan'
+      const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1, (areas) =>
+        uncovered.push(areas.length)
+      )
+      const visibleTiles = 5 * 4
+      expect(uncovered).toEqual([visibleTiles - 1, visibleTiles - 2])
+      expect(panning.fallbackTileCount).toBe(0)
+      expect(panning.uncoveredAreaCount).toBe(visibleTiles - 2)
     } finally {
       controller.destroy()
       renderer.destroy()

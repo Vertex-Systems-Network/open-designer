@@ -87,9 +87,9 @@ export function renderTile(
       canvas.drawPicture(picture)
     }
     const drawMs = rendererNow() - drawStartedAt
-    const flushStartedAt = rendererNow()
-    surface.flush()
-    const flushMs = rendererNow() - flushStartedAt
+    // The tile's draws stay queued on the shared GPU context: the frame's own flush submits them
+    // once for every tile, in order, before the snapshots are drawn.
+    const flushMs = 0
     const snapshotStartedAt = rendererNow()
     const image = surface.makeImageSnapshot()
     const snapshotMs = rendererNow() - snapshotStartedAt
