@@ -340,8 +340,9 @@ async function renderInstanceNode(
 /**
  * Apply child overrides to a freshly created instance. Keys are
  * `childName:prop` (e.g. 'label:text', 'icon:fills'); the child is resolved by
- * name among the instance's descendants, and the value is applied to both the
- * child node and the instance's overrides record so component sync keeps it.
+ * name among the instance's descendants, before any override renames one, and the
+ * value is applied to both the child node and the instance's overrides record so
+ * component sync keeps it.
  */
 function applyInstanceOverrides(
   graph: SceneGraph,
@@ -360,21 +361,22 @@ function applyInstanceOverrides(
     descendants.push(node)
     for (const cid of node.childIds) walk(cid)
   }
-  walk(instance.id)
+  for (const cid of instance.childIds) walk(cid)
 
-  let mutated = false
-  for (const [key, value] of entries) {
-    const sep = key.indexOf(':')
-    if (sep === -1) continue
+  // A layer's name may hold a colon; a field's never does.
+  const targets = entries.flatMap(([key, value]) => {
+    const sep = key.lastIndexOf(':')
+    if (sep === -1) return []
     const childName = key.slice(0, sep)
     const prop = key.slice(sep + 1)
     const child = descendants.find((n) => n.name === childName)
-    if (!child || !(prop in child)) continue
+    return child && prop in child ? [{ child, prop, value }] : []
+  })
+  for (const { child, prop, value } of targets) {
     graph.updateNode(child.id, { [prop]: value } as Partial<SceneNode>)
     setInstanceOverride(instance.instanceOverrides, instance.id, child.id, prop, value)
-    mutated = true
   }
-  if (mutated) {
+  if (targets.length > 0) {
     graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
   }
 }

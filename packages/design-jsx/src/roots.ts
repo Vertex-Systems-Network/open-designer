@@ -1,5 +1,7 @@
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
+import { namesComponent, rekaRole } from './behaviours'
+import { isComponentProperty } from './component-properties'
 import { CONNECTOR_ELEMENT, resolveConnectorEnds } from './connectors'
 import { elementNodeType } from './elements'
 import { LayerRefs } from './refs'
@@ -22,8 +24,25 @@ function treeRoots(tree: TreeNode): TreeNode[] {
   return tree.type === FRAGMENT ? tree.children.filter(isTreeNode) : [tree]
 }
 
-/** Render roots that define named components before roots that instantiate them. */
-function rootRenderOrder(roots: TreeNode[]): TreeNode[] {
+/** The component an element names: its `of`, or the default of the swap property bound there. */
+function componentReference(props: Record<string, unknown>): string | undefined {
+  const reference = props.of ?? props.componentId ?? props.component
+  const value = isComponentProperty(reference) ? reference.defaultValue : reference
+  return typeof value === 'string' ? value : undefined
+}
+
+/** Whether an element defines a component: a component, a set, or a Reka root naming none. */
+function definesComponent(node: TreeNode): boolean {
+  const nodeType = elementNodeType(node.type)
+  if (nodeType === 'COMPONENT' || nodeType === 'COMPONENT_SET') return true
+  return rekaRole(node.type)?.role === 'root' && !namesComponent(node.props)
+}
+
+/**
+ * The indices of `roots` in render order: roots that define named components before roots that
+ * instantiate them.
+ */
+function rootRenderOrder(roots: TreeNode[]): number[] {
   const componentOwners = new Map<string, Set<number>>()
   const references = roots.map(() => new Set<string>())
 
@@ -32,17 +51,16 @@ function rootRenderOrder(roots: TreeNode[]): TreeNode[] {
     while (pending.length > 0) {
       const node = pending.pop()
       if (!node) continue
-      const nodeType = elementNodeType(node.type)
-      if (node.type === 'instance') {
-        const reference = node.props.of ?? node.props.componentId ?? node.props.component
-        if (typeof reference === 'string') references[index]?.add(reference)
-      } else if (nodeType === 'COMPONENT' || nodeType === 'COMPONENT_SET') {
+      if (definesComponent(node)) {
         const name = node.props.name
         if (typeof name === 'string' && name) {
           const owners = componentOwners.get(name) ?? new Set<number>()
           owners.add(index)
           componentOwners.set(name, owners)
         }
+      } else {
+        const reference = componentReference(node.props)
+        if (reference) references[index]?.add(reference)
       }
       pending.push(...node.children.filter(isTreeNode))
     }
@@ -75,7 +93,7 @@ function rootRenderOrder(roots: TreeNode[]): TreeNode[] {
     order.push(index)
   }
 
-  return order.map((index) => roots[index])
+  return order
 }
 
 /** Render every root of `tree` into the parent and lay out once. */
@@ -91,37 +109,32 @@ export async function renderRoots<Artwork>(
   applyVariableDefinitions(graph, tree)
 
   const originalChildCount = graph.getChildren(parentId).length
-  const nodesByRoot = new Map<TreeNode, SceneNode>()
-  const eventsByRoot = new Map<TreeNode, Array<[TreeNode, SceneNode]>>()
-  const connectorsByRoot = new Map<TreeNode, Array<{ node: SceneNode; tree: TreeNode }>>()
+  // By each root's position in `roots`: a fragment may list one element twice.
+  const nodes: SceneNode[] = []
+  const eventsByRoot: Array<Array<[TreeNode, SceneNode]>> = []
+  const connectorsByRoot: Array<Array<{ node: SceneNode; tree: TreeNode }>> = []
   const refs = new LayerRefs()
-  for (const root of rootRenderOrder(roots)) {
+  for (const index of rootRenderOrder(roots)) {
     const events: Array<[TreeNode, SceneNode]> = []
     const connectors: Array<{ node: SceneNode; tree: TreeNode }> = []
-    eventsByRoot.set(root, events)
-    connectorsByRoot.set(root, connectors)
+    eventsByRoot[index] = events
+    connectorsByRoot[index] = connectors
     const onNode = (element: TreeNode, node: SceneNode) => {
       if (element.type === CONNECTOR_ELEMENT) connectors.push({ node, tree: element })
       else refs.mark(element.props.ref, node)
       events.push([element, node])
     }
-    const node = await renderNode(services, graph, root, parentId, onNode)
+    const node = await renderNode(services, graph, roots[index], parentId, onNode)
     if (options.x !== undefined) graph.updateNode(node.id, { x: options.x })
     if (options.y !== undefined) graph.updateNode(node.id, { y: options.y })
-    nodesByRoot.set(root, node)
+    nodes[index] = node
   }
 
-  const nodes: SceneNode[] = []
-  for (const root of roots) {
-    const node = nodesByRoot.get(root)
-    if (!node) throw new Error('Failed to render a JSX root')
-    nodes.push(node)
-  }
   nodes.forEach((node, index) => graph.insertChildAt(node.id, parentId, originalChildCount + index))
-  for (const root of roots) {
-    for (const [element, node] of eventsByRoot.get(root) ?? []) options.onNode?.(element, node)
+  for (const events of eventsByRoot) {
+    for (const [element, node] of events) options.onNode?.(element, node)
   }
-  const connectors = roots.flatMap((root) => connectorsByRoot.get(root) ?? [])
+  const connectors = connectorsByRoot.flat()
   const rootIds = nodes.map((node) => node.id)
   const warnings = [...refs.warnings, ...resolveConnectorEnds(graph, rootIds, connectors, refs)]
   if (!options.deferLayout) services.layout(graph, rootIds)

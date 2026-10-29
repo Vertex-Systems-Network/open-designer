@@ -199,12 +199,28 @@ function nodeToJSX(
   if (instance) return [jsx.element(tag, withRef(instance).map(propAttribute), [], depth)]
   const props = [...frameProps(node, graph, variables, reference), ...(ownProps ?? [])]
   const attributes = withRef(props).map(propAttribute)
-  if (node.type === 'TEXT' && !hasTextProp(props)) {
-    const { children: content, inline } = textChildren(node, depth)
-    for (let count = elementCount(content); count > 0; count--) layerIds?.push(null)
-    return [jsx.element(tag, attributes, content, depth, inline)]
-  }
-  return [jsx.element(tag, attributes, children(depth + 1), depth)]
+  const text =
+    node.type === 'TEXT' ? textElement(node, tag, props, attributes, depth, layerIds) : null
+  return [text ?? jsx.element(tag, attributes, children(depth + 1), depth)]
+}
+
+/**
+ * A text layer with its content between its tags. A bound text's characters are the binding's,
+ * so it keeps its content only for the styling: null for one with none.
+ */
+function textElement(
+  node: SceneNode,
+  tag: string,
+  props: JSXProp[],
+  attributes: SyntaxNode[],
+  depth: number,
+  layerIds?: Array<string | null>
+): SyntaxNode | null {
+  const { children: content, inline } = textChildren(node, depth)
+  const count = elementCount(content)
+  if (hasTextProp(props) && count === 0) return null
+  for (let index = 0; index < count; index++) layerIds?.push(null)
+  return jsx.element(tag, attributes, content, depth, inline)
 }
 
 /** A JSX attribute as the export prints it: its name and its source, such as `w={320}`. */
@@ -280,19 +296,25 @@ export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXEl
   if (!tag) return null
   // A text layer's content, a connector's label, or a sticky note's body is written as its
   // children, not as the `text` attribute; the layers they generate are not written at all.
-  // A text layer bound to a component property keeps it as the `text` attribute.
+  // A text layer bound to a component property keeps it as the `text` attribute, and its
+  // content only for the styling.
   const own = ownElement(graph, node)
   const boundText =
     node.type === 'TEXT' && hasTextProp(propertyBindingProps(node, graph, reference))
-  const hasContent = (node.type === 'TEXT' && !boundText) || own !== undefined
+  const content = node.type === 'TEXT' ? textChildren(node, 0) : undefined
+  const writesContent = content !== undefined && (!boundText || elementCount(content.children) > 0)
   const attributes = Object.fromEntries(
     printed
-      .filter(({ name }) => !hasContent || name !== 'text')
+      .filter(({ name }) => boundText || !(writesContent || own) || name !== 'text')
       .map(({ name, source }) => [name, source])
   )
-  if (node.type === 'TEXT' && !boundText) {
-    const { children, inline } = textChildren(node, 0)
-    return { tag, attributes, text: contentBetween(tag, children, inline), childIds: [] }
+  if (content && writesContent) {
+    return {
+      tag,
+      attributes,
+      text: contentBetween(tag, content.children, content.inline),
+      childIds: []
+    }
   }
   if (node.type === 'TEXT' || isInstance) return { tag, attributes, text: null, childIds: [] }
   if (own) {

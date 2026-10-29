@@ -111,6 +111,49 @@ describe('component export', () => {
     expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
   })
 
+  test('writes an override equal to the component value, so the layer keeps it', async () => {
+    const { graph } = await library()
+    const [created] = await renderJSX(graph, '<Instance of="Button" />')
+    const instance = getNodeOrThrow(graph, created.id)
+    const dot = graph.getChildren(instance.id).find((child) => child.name === 'Dot')
+    if (!dot) throw new Error('No dot')
+    setInstanceOverride(instance.instanceOverrides, instance.id, dot.id, 'opacity')
+
+    const jsx = sceneNodeToJSX(instance.id, graph)
+    expect(jsx).toContain('overrides={{ "Dot:opacity": 1 }}')
+    const [copy] = await renderJSX(graph, jsx)
+    const copiedDot = graph.getChildren(copy.id).find((child) => child.name === 'Dot')
+    const claimed = getNodeOrThrow(graph, copy.id).instanceOverrides.descendants.get(copiedDot?.id ?? '')
+    expect(claimed?.has('opacity')).toBe(true)
+  })
+
+  test('keeps the styling of text bound to a property', async () => {
+    const graph = new SceneGraph()
+    const [tag] = await renderJSX(
+      graph,
+      `<Component name="Tag"><Text name="Label" text={property('Label', 'Bold rest')}><Span weight={700}>Bold</Span> rest</Text></Component>`
+    )
+    const jsx = sceneNodeToJSX(tag.id, graph)
+    expect(jsx).toContain('text={property("Label", "Bold rest")}')
+    expect(jsx).toContain('<Span weight="bold">Bold</Span>')
+    const [copy] = await renderJSX(graph, jsx)
+    const label = (id: string) => graph.getChildren(id)[0]
+    expect(label(copy.id)?.styleRuns).toEqual(label(tag.id)?.styleRuns)
+    expect(sceneNodeToJSX(copy.id, graph)).toBe(jsx)
+  })
+
+  test('writes an instance as the frame it draws when it sets a property whose name is shared', async () => {
+    const { graph } = await library()
+    const set = named(graph, 'Button')
+    const [created] = await renderJSX(graph, '<Instance of="Button" Label="Save" />')
+    graph.updateNode(set.id, {
+      componentPropertyDefinitions: set.componentPropertyDefinitions.map((definition) =>
+        definition.type === 'BOOLEAN' ? { ...definition, name: 'Label' } : definition
+      )
+    })
+    expect(sceneNodeToJSX(created.id, graph).startsWith('<Frame')).toBe(true)
+  })
+
   test('writes an instance as the frame it draws when its changes cannot be written', async () => {
     const { graph } = await library()
     const [created] = await renderJSX(graph, '<Instance of="Button" />')
@@ -159,6 +202,24 @@ describe('component export', () => {
     expect(copiedLibrary.type).toBe('FRAME')
     const page = target.getPages()[0]
     expect(target.getChildren(page.id).map((node) => node.type)).toEqual(['INSTANCE', 'FRAME'])
+  })
+
+  test('renders components before the roots that use them, however they name them', async () => {
+    const graph = new SceneGraph()
+    const [radio, swap, star] = await renderJSX(
+      graph,
+      `<>
+        <Instance of="Radio" />
+        <Component name="Swap"><Instance name="Icon" of={property('Icon', 'Star')} /></Component>
+        <Component name="Star" w={4} h={4} />
+        <RadioGroup.Item name="Radio" modelValue="Checked">
+          <Component name="Checked=Off" w={20} h={20} />
+          <Component name="Checked=On" w={20} h={20} />
+        </RadioGroup.Item>
+      </>`
+    )
+    expect(radio.type).toBe('INSTANCE')
+    expect(graph.getChildren(swap.id)[0]?.componentId).toBe(star.id)
   })
 
   test('keeps a Reka text field binding its own text property', async () => {

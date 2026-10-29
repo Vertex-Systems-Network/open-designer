@@ -46,8 +46,9 @@ function descendants(graph: SceneGraph, node: SceneNode): SceneNode[] {
 
 /**
  * What the instance's layers override, as `overrides` sets it: `{ 'Label:fills': [...] }`,
- * keyed by the name each layer has in a new instance. A renamed layer is renamed last, so the
- * keys before it still find it. Null when an override cannot be written that way: one on a
+ * keyed by the name each layer has in a new instance. An override equal to the component's value
+ * is written too, so the layer keeps it when the component changes. A renamed layer is renamed
+ * last, so the keys before it still find it. Null when an override cannot be written that way: one on a
  * nested instance, a binding, or a layer whose name another layer of the instance shares.
  */
 function layerOverrides(graph: SceneGraph, instance: SceneNode): Record<string, JSXValue> | null {
@@ -66,9 +67,8 @@ function layerOverrides(graph: SceneGraph, instance: SceneNode): Record<string, 
     for (const field of overridden.keys()) {
       if (assigned.has(field)) continue
       if (layer.type === 'INSTANCE' || !source || !WRITTEN_OVERRIDE_FIELDS.has(field)) return null
-      const value: unknown = layer[field as keyof SceneNode]
-      if (isEqual(value, source[field as keyof SceneNode])) continue
       if (names[source.name] !== 1) return null
+      const value: unknown = layer[field as keyof SceneNode]
       const entry: [string, JSXValue] = [`${source.name}:${field}`, plainValue(value)]
       if (field === 'name') renames.push(entry)
       else fields.push(entry)
@@ -91,8 +91,9 @@ function assignedValue(
 
 /**
  * The values an instance gives its component's properties, by name, as `<Instance>` takes them:
- * as props where the name can be one, else in `properties`, by ID where two properties share
- * the name. Defaults are left out. Null when one is a slot's content, which JSX cannot write.
+ * as props where the name can be one, else in `properties`. Defaults are left out. Null when one
+ * is a slot's content, which JSX cannot write, or names a property whose name another shares:
+ * a render gives properties new IDs, so only the name finds one.
  */
 function assignmentProps(
   graph: SceneGraph,
@@ -106,10 +107,9 @@ function assignmentProps(
   for (const [id, value] of Object.entries(instance.componentPropertyAssignments)) {
     const definition = definitions.find((item) => item.id === id)
     if (!definition || definition.type === 'VARIANT' || value === definition.defaultValue) continue
-    if (definition.type === 'SLOT') return null
+    if (definition.type === 'SLOT' || names[definition.name] !== 1) return null
     const written = assignedValue(graph, definition, value, reference)
-    if (names[definition.name] !== 1) properties[id] = written
-    else if (isPropName(definition.name)) props.push([definition.name, written])
+    if (isPropName(definition.name)) props.push([definition.name, written])
     else properties[definition.name] = written
   }
   return Object.keys(properties).length > 0 ? [...props, ['properties', properties]] : props
