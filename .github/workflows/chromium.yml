@@ -1,0 +1,109 @@
+name: Chromium build
+
+# OpenPencil Chromium: the desktop app on Tauri v3 with the CEF runtime,
+# built by hand from a branch that carries it (desktop/tauri.chromium.conf.json).
+# Each run replaces the `chromium` prerelease, whose latest.json is that
+# flavor's update feed; stable releases and their feed are untouched.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Branch or commit with the Chromium flavor.
+        required: true
+        default: build/tauri-v3
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chromium-build
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release-id: ${{ steps.release.outputs.id }}
+      source: ${{ steps.version.outputs.source }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+      - id: version
+        name: Version the build after the run number
+        run: |
+          base=$(jq -r .version desktop/tauri.conf.json)
+          echo "version=$base-chromium.$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - id: release
+        name: Replace the chromium prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          SOURCE: ${{ steps.version.outputs.source }}
+        run: |
+          gh release delete chromium --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes || true
+          gh release create chromium --repo "$GITHUB_REPOSITORY" --target "$SOURCE" \
+            --prerelease --latest=false --title "OpenPencil Chromium $VERSION" \
+            --notes "OpenPencil on Tauri v3 with the Chromium (CEF) runtime, from $SOURCE. It installs beside OpenPencil and updates only from this release."
+          echo "id=$(gh release view chromium --repo "$GITHUB_REPOSITORY" --json databaseId -q .databaseId)" >> "$GITHUB_OUTPUT"
+
+  native:
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    runs-on: macos-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.source }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26.x
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop -> target
+          key: chromium-${{ matrix.target }}
+      - uses: ./.github/actions/setup-bun
+        with:
+          cache-scope: desktop
+          cache-save: 'false'
+      - name: Stamp the build version
+        env:
+          VERSION: ${{ needs.release.outputs.version }}
+        run: |
+          jq -n --arg version "$VERSION" '{version: $version}' > chromium-version.json
+      - name: Build, sign, and upload to the chromium prerelease
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || '' }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          tauriScript: node node_modules/@tauri-apps/cli/tauri.js
+          releaseId: ${{ needs.release.outputs.release-id }}
+          args: >-
+            --target ${{ matrix.target }} --features cef
+            --config desktop/tauri.chromium.conf.json
+            --config chromium-version.json
+          retryAttempts: 0
