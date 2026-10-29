@@ -44,8 +44,7 @@ import {
 import {
   alignGeometryWindingRules,
   resolveGeometryPaths,
-  resolveVectorNetwork,
-  resolveVectorStyleOverrideFills
+  resolveVectorNetwork
 } from './vector/geometry'
 import { decodeVectorNetworkBlob, textPathStartSegment, type StyleOverride } from './vector/network'
 
@@ -676,7 +675,7 @@ function convertVectorAndStrokeProps(nc: NodeChange, blobs: Uint8Array[]) {
   const strokeCap = getVectorStrokeCap(nc)
   const strokeJoin = getVectorStrokeJoin(nc, vectorNetwork)
   const fillGeometry = alignGeometryWindingRules(
-    resolveGeometryPaths(nc.fillGeometry, blobs, resolveVectorStyleOverrideFills(nc)),
+    resolveGeometryPaths(nc.fillGeometry, blobs),
     vectorNetwork
   )
   return {
