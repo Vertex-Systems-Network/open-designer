@@ -106,14 +106,25 @@ describe('tile fallback lookup', () => {
     ).toEqual([0.5])
   })
 
-  test('needs every tile of a level before using it, and prefers the finer level on a tie', () => {
+  test('prefers a level covering the whole area, then the nearest partial one', () => {
     const cache = new TileImageCache()
     cache.install(tileAt(2, 0, 0), 1)
-    expect(cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })).toBeNull()
-    cache.install(tileAt(2, 1, 0), 1)
-    cache.install(tileAt(2, 0, 1), 1)
-    cache.install(tileAt(2, 1, 1), 1)
-    cache.install(tileAt(0.5, 0, 0), 1)
+    // One of four finer tiles still stands in for its quarter; the rest stays page colour.
+    expect(
+      cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })?.map((entry) => entry.key.x)
+    ).toEqual([0])
+    // A coarser level covering everything wins over a partial finer one.
+    cache.install(tileAt(0.25, 0, 0), 1)
+    expect(
+      cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })?.map((entry) => entry.key.level)
+    ).toEqual([0.25])
+    cache.invalidateBounds('page', { minX: 0, minY: 0, maxX: 1024, maxY: 1024 }, 2)
+    cache.install(tileAt(2, 0, 0), 2)
+    cache.install(tileAt(2, 1, 0), 2)
+    cache.install(tileAt(2, 0, 1), 2)
+    cache.install(tileAt(2, 1, 1), 2)
+    cache.install(tileAt(0.5, 0, 0), 2)
+    // Both levels cover everything and sit one step away; the finer one wins the tie.
     const fallback = cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })
     expect(fallback?.map((entry) => entry.key.level)).toEqual([2, 2, 2, 2])
   })

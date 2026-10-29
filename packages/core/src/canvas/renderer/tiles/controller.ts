@@ -36,6 +36,9 @@ const NAVIGATION_TILE_BUDGET_MS = 2
 const NAVIGATION_FIRST_TILE_LIMIT_MS = 8
 const MAXIMUM_TILE_JOBS_PER_FRAME = 128
 const TILE_OVERSCAN = 1
+/** The backdrop is this many times coarser than the visible level, and reaches this far out. */
+const BACKDROP_LEVEL_RATIO = 4
+const BACKDROP_OVERSCAN = 1
 const TILE_COST_SMOOTHING = 0.3
 
 function smoothCost(previous: number | undefined, costMs: number): number {
@@ -150,7 +153,10 @@ export class TiledSceneController {
 
     const level = tileLevel(renderer.zoom * renderer.dpr)
     // Jobs planned at another level draw nothing the viewport shows now.
-    this.cancelledJobs += this.scheduler.discard((job) => job.key.level !== level)
+    const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
+    this.cancelledJobs += this.scheduler.discard(
+      (job) => job.key.level !== level && job.key.level !== backdropLevel
+    )
     const plan = planTiles(this.tileCache, {
       pageId: renderer.pageId,
       level,
@@ -159,7 +165,8 @@ export class TiledSceneController {
       navigationGeneration,
       contentGeneration,
       estimateCost: (key) => this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0,
-      globalFallbackAvailable: true
+      globalFallbackAvailable: true,
+      backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
     })
     // A zoom changes level every few frames, and rasterizing each level as it passes costs more
     // GPU time than the gesture leaves; the previous level's tiles stand in until the zoom ends.

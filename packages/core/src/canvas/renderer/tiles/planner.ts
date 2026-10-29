@@ -17,6 +17,11 @@ export interface TilePlanOptions {
   contentGeneration: number
   estimateCost: (key: TileKey) => number
   globalFallbackAvailable?: boolean
+  /**
+   * A coarser level rendered around the viewport once the visible level and its overscan are
+   * complete, so zooming out has scaled tiles to show where the visible level has none.
+   */
+  backdrop?: { level: number; overscanTiles: number }
 }
 
 export interface TilePlan {
@@ -79,6 +84,24 @@ export function planTiles(
       contentGeneration: options.contentGeneration,
       priority: 'overscan',
       fallbackAvailable: tile !== null,
+      estimatedCost: options.estimateCost(key)
+    })
+  }
+  if (jobs.length > 0 || !options.backdrop) return { jobs, visible }
+  const backdropKeys = tileKeysForWorldBounds(
+    options.pageId,
+    options.backdrop.level,
+    expand(options.viewport, tileWorldSize(options.backdrop.level) * options.backdrop.overscanTiles)
+  )
+  for (const key of backdropKeys) {
+    const tile = cache.get(key)
+    if (tile?.contentGeneration === options.contentGeneration) continue
+    jobs.push({
+      key,
+      navigationGeneration: options.navigationGeneration,
+      contentGeneration: options.contentGeneration,
+      priority: 'overscan',
+      fallbackAvailable: true,
       estimatedCost: options.estimateCost(key)
     })
   }

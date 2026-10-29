@@ -68,9 +68,12 @@ describe('tile scheduling', () => {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
       expect(result.covered).toBe(true)
-      // Overscan is planned once the visible tiles exist; a free clock finishes it in one frame.
-      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      // Overscan and then the backdrop are planned once the visible tiles exist; a free clock
+      // finishes each stage in one frame, so a frame with no work means everything is rendered.
+      let settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 5 && settled.metrics.interruptibleCompleted > 0; frame++) {
+        settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
       expect(settled.metrics.interruptibleCompleted).toBe(0)
 
       // requestRender() bumps the content generation without any node changing.
@@ -128,6 +131,31 @@ describe('tile scheduling', () => {
       const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(panning.metrics.interruptibleCompleted).toBe(1)
       expect(panning.metrics.skippedWithFallback).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('zooms out over the coarse backdrop rendered around the settled viewport', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      // A free clock settles visible, overscan, and backdrop tiles within a few frames.
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 10; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      expect(result.pending).toBe(false)
+
+      // Zoom out to half: the visible level has nothing beyond the old viewport, the backdrop has.
+      renderer.zoom = 0.5
+      renderer.navigationPhase = 'zoom'
+      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(zoomed.covered).toBe(false)
+      expect(zoomed.uncoveredAreaCount).toBe(0)
+      expect(zoomed.fallbackTileCount).toBeGreaterThan(0)
     } finally {
       controller.destroy()
       renderer.destroy()

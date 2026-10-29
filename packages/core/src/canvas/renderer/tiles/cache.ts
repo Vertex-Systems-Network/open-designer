@@ -55,8 +55,9 @@ export class TileImageCache {
   }
 
   /**
-   * Cached tiles of the level nearest to `key`'s that together cover its area, or null when no
-   * other level covers all of it. They stand in for the missing tile, scaled, until it is rendered.
+   * Cached tiles of other levels that stand in for `key`'s missing tile, scaled: the nearest
+   * level whose tiles cover all of its area, else the nearest level that has any tile over it,
+   * which leaves the rest at the page colour. Null when no level has a tile there.
    */
   findFallback(key: TileKey): CachedTile[] | null {
     const levels = [...(this.levelCounts.get(key.pageId)?.keys() ?? [])]
@@ -70,19 +71,20 @@ export class TileImageCache {
       maxX: bounds.maxX - 1e-6,
       maxY: bounds.maxY - 1e-6
     }
+    let partial: CachedTile[] | null = null
     for (const level of levels) {
       const tiles: CachedTile[] = []
+      let complete = true
       for (const candidate of tileKeysForWorldBounds(key.pageId, level, inset)) {
         const tile = this.get(candidate)
-        if (!tile) {
-          tiles.length = 0
-          break
-        }
-        tiles.push(tile)
+        if (tile) tiles.push(tile)
+        else complete = false
       }
-      if (tiles.length > 0) return tiles
+      if (tiles.length === 0) continue
+      if (complete) return tiles
+      partial ??= tiles
     }
-    return null
+    return partial
   }
 
   get(key: TileKey): CachedTile | null {

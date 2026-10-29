@@ -97,4 +97,24 @@ describe('tile planner', () => {
       estimatedCost: 12
     })
   })
+
+  test('plans the coarse backdrop only once the visible level and its overscan are complete', () => {
+    const cache = new TileImageCache()
+    cache.install(rendered(0), 2)
+    const backdrop = { level: 0.25, overscanTiles: 1 }
+    const pending = planTiles(cache, baseOptions({ overscanTiles: 1, backdrop }))
+    expect(pending.jobs.every((job) => job.key.level === 1)).toBe(true)
+
+    cache.install(rendered(1), 2)
+    for (const x of [-1, 2]) cache.install(renderedTile({ pageId: 'page', level: 1, x, y: 0 }), 2)
+    for (const x of [-1, 0, 1, 2]) {
+      for (const y of [-1, 1]) cache.install(renderedTile({ pageId: 'page', level: 1, x, y }), 2)
+    }
+    const settled = planTiles(cache, baseOptions({ overscanTiles: 1, backdrop }))
+    expect(settled.jobs.length).toBeGreaterThan(0)
+    expect(settled.jobs.every((job) => job.key.level === 0.25)).toBe(true)
+    expect(settled.jobs.every((job) => job.priority === 'overscan')).toBe(true)
+    expect(settled.jobs.every((job) => job.fallbackAvailable)).toBe(true)
+    cache.clear()
+  })
 })
