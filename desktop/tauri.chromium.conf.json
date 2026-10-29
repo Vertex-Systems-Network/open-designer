@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "OpenPencil Chromium",
+  "identifier": "net.dannote.open-pencil.chromium",
+  "app": {
+    "windows": [
+      {
+        "title": "OpenPencil Chromium",
+        "width": 1280,
+        "height": 800,
+        "dragDropEnabled": false
+      }
+    ]
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/open-pencil/open-pencil/releases/download/chromium/latest.json"
+      ]
+    }
+  }
+}

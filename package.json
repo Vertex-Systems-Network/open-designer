@@ -63,6 +63,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "tauri": "tauri",
+    "dev:chromium": "tauri dev --features cef --config desktop/tauri.chromium.conf.json",
+    "build:chromium": "bun run build:packages && tauri build --features cef --config desktop/tauri.chromium.conf.json",
     "build:native-test": "bun run generate:icons --target desktop && bun run build:packages && bun tauri build --debug --no-bundle --features native-test --config desktop/tauri.native-test.conf.json",
     "benchmark:navigation": "bun tools/dev/navigation-benchmark/src/cli.ts run",
     "test:native": "bun run build:native-test && wdio run wdio.conf.ts",
