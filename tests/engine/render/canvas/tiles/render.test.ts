@@ -451,3 +451,71 @@ describe('tile rendering', () => {
     }
   })
 })
+
+describe('tile scheduling', () => {
+  function createGridScene() {
+    const graph = new SceneGraph()
+    const page = expectDefined(graph.getPages()[0], 'page')
+    for (let index = 0; index < 48; index++) {
+      graph.createNode('RECTANGLE', page.id, {
+        x: (index % 12) * 100,
+        y: Math.floor(index / 12) * 100,
+        width: 80,
+        height: 80,
+        fills: color(0.2, 0.4, 0.8)
+      })
+    }
+    const surface = expectDefined(ck.MakeSurface(1280, 800), 'scheduling surface')
+    const renderer = new SkiaRenderer(ck, surface)
+    renderer.pageId = page.id
+    renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
+    renderer.viewportWidth = 1280
+    renderer.viewportHeight = 800
+    renderer.dpr = 1
+    renderer.zoom = 1
+    renderer.navigationPhase = 'idle'
+    return { graph, surface, renderer }
+  }
+
+  test('fills the frame budget with tiles whose cost is not measured yet', () => {
+    const { graph, surface, renderer } = createGridScene()
+    // A clock that never advances: every tile is free, so only the cost model can stop the frame.
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      const first = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(first.covered).toBe(true)
+      expect(first.metrics.interruptibleCompleted).toBeGreaterThan(1)
+      expect(first.metrics.skippedWithFallback).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('keeps rendered tiles when the content generation advances without node changes', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      // Overscan is planned once the visible tiles exist; a free clock finishes it in one frame.
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(settled.metrics.interruptibleCompleted).toBe(0)
+
+      // requestRender() bumps the content generation without any node changing.
+      const redraw = controller.renderFrame(renderer, surface.getCanvas(), graph, 2, 0)
+      expect(redraw.covered).toBe(true)
+      expect(redraw.pending).toBe(false)
+      expect(redraw.metrics.interruptibleCompleted).toBe(0)
+      expect(redraw.metrics.mandatoryCompleted).toBe(0)
+      expect(redraw.metrics.cancelledJobs).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+})

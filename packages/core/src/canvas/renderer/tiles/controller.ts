@@ -8,11 +8,12 @@ import {
   RenderChunkIndex,
   RenderChunkPictureCache
 } from '#core/canvas/renderer/chunks'
+import { rendererNow } from '#core/canvas/renderer/clock'
 
 import { TileImageCache } from './cache'
 import { TILE_DEVICE_SIZE, tileLevel, tileWorldBounds, type TileWorldBounds } from './geometry'
 import { planTiles } from './planner'
-import { deleteRenderedTile, renderTile, tileChunks } from './render'
+import { deleteRenderedTile, renderTile } from './render'
 import {
   emptyTileSchedulerMetrics,
   TileScheduler,
@@ -25,6 +26,12 @@ import { emitTileCoverageComplete, emitTileFrameTrace } from './telemetry'
 const TILE_FRAME_BUDGET_MS = 5
 const MAXIMUM_TILE_JOBS_PER_FRAME = 32
 const TILE_OVERSCAN = 1
+const TILE_COST_SMOOTHING = 0.3
+
+function smoothCost(previous: number | undefined, costMs: number): number {
+  if (previous === undefined) return costMs
+  return previous * (1 - TILE_COST_SMOOTHING) + costMs * TILE_COST_SMOOTHING
+}
 
 export interface TiledSceneFrameResult {
   covered: boolean
@@ -32,7 +39,13 @@ export interface TiledSceneFrameResult {
   metrics: TileSchedulerMetrics
 }
 
+export interface TiledSceneControllerOptions {
+  /** The clock the scheduler's deadline and the tile cost model share. */
+  now?: () => number
+}
+
 export class TiledSceneController {
+  private readonly now: () => number
   private index: RenderChunkIndex | null = null
   private pageId: string | null = null
   private contentGeneration = -1
@@ -47,11 +60,23 @@ export class TiledSceneController {
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
   private readonly surfacePool = new TileSurfacePool()
-  private readonly scheduler = new TileScheduler({
-    budgetMs: TILE_FRAME_BUDGET_MS,
-    maximumJobsPerFrame: MAXIMUM_TILE_JOBS_PER_FRAME
-  })
+  private readonly scheduler: TileScheduler
+  /** Smoothed render time of each tile already rendered, in ms. */
   private readonly measuredCosts = new Map<string, number>()
+  /**
+   * Smoothed render time of any tile, in ms: the estimate for a tile not rendered yet. The
+   * scheduler compares estimates with its frame budget, so they must be times, not node counts.
+   */
+  private typicalCostMs: number | undefined
+
+  constructor(options: TiledSceneControllerOptions = {}) {
+    this.now = options.now ?? rendererNow
+    this.scheduler = new TileScheduler({
+      now: this.now,
+      budgetMs: TILE_FRAME_BUDGET_MS,
+      maximumJobsPerFrame: MAXIMUM_TILE_JOBS_PER_FRAME
+    })
+  }
 
   invalidateNode(nodeId: string, graph?: SceneGraph): void {
     const chunks = this.index?.getChunksDependingOnNode(nodeId) ?? []
@@ -104,9 +129,7 @@ export class TiledSceneController {
         overscanTiles: TILE_OVERSCAN,
         navigationGeneration,
         contentGeneration,
-        estimateCost: (key) =>
-          this.measuredCosts.get(this.costKey(key)) ??
-          tileChunks(index, key).reduce((total, chunk) => total + chunk.estimatedCost, 0),
+        estimateCost: (key) => this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0,
         globalFallbackAvailable: true
       },
       this.navigationActive
@@ -202,20 +225,17 @@ export class TiledSceneController {
     navigationGeneration: number
   ): void {
     this.cancelledJobs += this.scheduler.setGeneration(navigationGeneration, contentGeneration)
+    // Node changes arrive through invalidateNode() and structural ones through
+    // invalidateStructure(), so a new content generation on its own is a redraw request (every
+    // requestRender() bumps it) and the rendered tiles stay valid.
     if (
       this.index &&
       this.pageId === renderer.pageId &&
-      this.contentGeneration !== contentGeneration &&
-      this.pendingInvalidations.length > 0
+      this.contentGeneration !== contentGeneration
     ) {
       this.applyPendingInvalidations(graph, contentGeneration)
     }
-    if (
-      this.index &&
-      (this.pageId !== renderer.pageId || this.contentGeneration !== contentGeneration)
-    ) {
-      this.invalidate()
-    }
+    if (this.index && this.pageId !== renderer.pageId) this.invalidate()
     if (!this.navigationActive && this.index === null && renderer.pageId) {
       this.ensureIndex(graph, renderer.pageId, contentGeneration)
     }
@@ -246,6 +266,8 @@ export class TiledSceneController {
     this.tileCache.markStale(contentGeneration)
     this.pageId = pageId
     this.contentGeneration = contentGeneration
+    // A fresh index already reflects every change recorded before it was built.
+    this.pendingInvalidations = []
     this.index = pageId ? RenderChunkIndex.build(graph, pageId).index : null
   }
 
@@ -270,10 +292,10 @@ export class TiledSceneController {
     index: RenderChunkIndex,
     job: TileJob
   ) {
+    const startedAt = this.now()
     const tile = renderTile(renderer, graph, index, job.key, this.pictureCache, this.surfacePool)
     if (!tile) return { renderMs: 0, overBudget: true }
-    const previousCost = this.measuredCosts.get(this.costKey(job.key)) ?? tile.renderMs
-    this.measuredCosts.set(this.costKey(job.key), previousCost * 0.7 + tile.renderMs * 0.3)
+    this.recordCost(job.key, this.now() - startedAt)
     if (
       job.navigationGeneration !== this.navigationGeneration ||
       job.contentGeneration !== this.contentGeneration
@@ -295,6 +317,12 @@ export class TiledSceneController {
       snapshotMs: tile.snapshotMs,
       chunkCount: tile.chunkCount
     }
+  }
+
+  private recordCost(key: TileJob['key'], costMs: number): void {
+    const id = this.costKey(key)
+    this.measuredCosts.set(id, smoothCost(this.measuredCosts.get(id), costMs))
+    this.typicalCostMs = smoothCost(this.typicalCostMs, costMs)
   }
 
   private costKey(key: TileJob['key']): string {
