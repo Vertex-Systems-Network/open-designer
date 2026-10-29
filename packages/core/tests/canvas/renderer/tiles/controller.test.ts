@@ -1,0 +1,160 @@
+import { beforeAll, describe, expect, test } from 'bun:test'
+
+import { expectDefined } from '#core-tests/helpers/assert'
+
+import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
+import { SceneGraph } from '@open-pencil/scene-graph'
+
+import { SkiaRenderer } from '#core/canvas'
+import { TiledSceneController } from '#core/canvas/renderer/tiles'
+
+let ck: Awaited<ReturnType<typeof initCanvasKit>>
+
+beforeAll(async () => {
+  ck = await initCanvasKit()
+})
+
+function color(r: number, g: number, b: number) {
+  return [{ type: 'SOLID' as const, color: { r, g, b, a: 1 }, opacity: 1, visible: true }]
+}
+
+describe('tile scheduling', () => {
+  function createGridScene() {
+    const graph = new SceneGraph()
+    const page = expectDefined(graph.getPages()[0], 'page')
+    for (let index = 0; index < 48; index++) {
+      graph.createNode('RECTANGLE', page.id, {
+        x: (index % 12) * 100,
+        y: Math.floor(index / 12) * 100,
+        width: 80,
+        height: 80,
+        fills: color(0.2, 0.4, 0.8)
+      })
+    }
+    const surface = expectDefined(ck.MakeSurface(1280, 800), 'scheduling surface')
+    const renderer = new SkiaRenderer(ck, surface)
+    renderer.pageId = page.id
+    renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
+    renderer.viewportWidth = 1280
+    renderer.viewportHeight = 800
+    renderer.dpr = 1
+    renderer.zoom = 1
+    renderer.navigationPhase = 'idle'
+    return { graph, surface, renderer }
+  }
+
+  test('fills the frame budget with tiles whose cost is not measured yet', () => {
+    const { graph, surface, renderer } = createGridScene()
+    // A clock that never advances: every tile is free, so only the cost model can stop the frame.
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      const first = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(first.covered).toBe(true)
+      expect(first.metrics.interruptibleCompleted).toBeGreaterThan(1)
+      expect(first.metrics.skippedWithFallback).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('keeps rendered tiles when the content generation advances without node changes', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      // Overscan is planned once the visible tiles exist; a free clock finishes it in one frame.
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(settled.metrics.interruptibleCompleted).toBe(0)
+
+      // requestRender() bumps the content generation without any node changing.
+      const redraw = controller.renderFrame(renderer, surface.getCanvas(), graph, 2, 0)
+      expect(redraw.covered).toBe(true)
+      expect(redraw.pending).toBe(false)
+      expect(redraw.metrics.interruptibleCompleted).toBe(0)
+      expect(redraw.metrics.mandatoryCompleted).toBe(0)
+      expect(redraw.metrics.cancelledJobs).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('zooms over the previous level scaled and rasterizes the new level once idle', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+
+      // Zoom in: level 2 has no tiles, and each of its tiles lies inside one level-1 tile.
+      renderer.zoom = 2
+      renderer.navigationPhase = 'zoom'
+      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(zoomed.covered).toBe(false)
+      expect(zoomed.metrics.interruptibleCompleted).toBe(0)
+      expect(zoomed.metrics.skippedWithFallback).toBeGreaterThan(0)
+      expect(zoomed.fallbackTileCount).toBe(5 * 4)
+      expect(zoomed.uncoveredAreaCount).toBe(0)
+      expect(zoomed.pending).toBe(true)
+
+      renderer.navigationPhase = 'idle'
+      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(settled.covered).toBe(true)
+      expect(settled.fallbackTileCount).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('renders one affordable tile per moving frame', () => {
+    const { graph, surface, renderer } = createGridScene()
+    // Every clock reading is 3 ms later: a tile costs 3 ms, over the moving budget but affordable.
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 3) })
+    try {
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      renderer.navigationPhase = 'pan'
+      const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(panning.metrics.interruptibleCompleted).toBe(1)
+      expect(panning.metrics.skippedWithFallback).toBe(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('counts areas no level covers and keeps a moving frame within its budget', () => {
+    const { graph, surface, renderer } = createGridScene()
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 10) })
+    try {
+      // Idle, the first job may overrun the budget so the frame makes progress.
+      const idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      const visibleTiles = 5 * 4
+      expect(idle.metrics.interruptibleCompleted).toBe(1)
+      expect(idle.uncoveredAreaCount).toBe(visibleTiles - 1)
+
+      // Panning, a job estimated over the budget is skipped and the holes stay page colour.
+      renderer.navigationPhase = 'pan'
+      const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(panning.metrics.interruptibleCompleted).toBe(0)
+      expect(panning.metrics.skippedWithFallback).toBe(1)
+      expect(panning.fallbackTileCount).toBe(0)
+      expect(panning.uncoveredAreaCount).toBe(visibleTiles - 1)
+      expect(panning.pending).toBe(true)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+})

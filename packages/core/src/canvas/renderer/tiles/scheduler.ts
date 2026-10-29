@@ -157,30 +157,35 @@ export class TileScheduler {
       }
       if (!mandatory && job.fallbackAvailable && elapsed + job.estimatedCost > budgetMs) {
         if (jobsExecuted === 0 && elapsed + job.estimatedCost <= firstJobLimitMs) {
-          const result = execute(job)
-          this.jobs.shift()
-          metrics.interruptibleCompleted++
-          addJobMetrics(metrics, result)
-          if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
-          const overrun = this.now() - frameStart - budgetMs
-          if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
+          this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
         } else {
           metrics.skippedWithFallback++
         }
         break
       }
-      this.jobs.shift()
-      const result = execute(job)
+      this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
       jobsExecuted++
-      addJobMetrics(metrics, result)
-      if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
-      if (mandatory) metrics.mandatoryCompleted++
-      else metrics.interruptibleCompleted++
-      const overrun = this.now() - frameStart - budgetMs
-      if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
     }
     metrics.remaining = this.jobs.length
     return metrics
+  }
+
+  private runJob(
+    job: TileJob,
+    execute: (job: TileJob) => TileJobResult,
+    metrics: TileSchedulerMetrics,
+    frameStart: number,
+    budgetMs: number,
+    mandatory: boolean
+  ): void {
+    this.jobs.shift()
+    const result = execute(job)
+    addJobMetrics(metrics, result)
+    if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
+    if (mandatory) metrics.mandatoryCompleted++
+    else metrics.interruptibleCompleted++
+    const overrun = this.now() - frameStart - budgetMs
+    if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
   }
 
   clear(): number {

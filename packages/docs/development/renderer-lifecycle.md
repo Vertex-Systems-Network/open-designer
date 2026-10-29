@@ -6,7 +6,7 @@ The CanvasKit renderer keeps hot drawing loops direct, but its retained and tile
 
 The default renderer presents a committed retained backing while navigation is active. It must not rebuild that backing during pan, zoom, momentum, or settling, because reconstruction can collide with direction reversals and block input delivery. Once navigation becomes idle, it builds exact content incrementally and atomically replaces the committed backing.
 
-The tiled renderer is opt-in and does not use the retained backing. It presents cached tiles whether or not navigation is active, covers a missing tile with the cached tiles of the nearest level scaled into place, and draws the scene picture only over areas no level covers. Tile rasterization continues during navigation under a smaller frame budget, and queued jobs for another level or an earlier navigation generation are discarded. Visible exact coverage while idle is the settlement boundary; overscan remains background work.
+The tiled renderer is opt-in and does not use the retained backing. It presents cached tiles whether or not navigation is active, covers a missing tile with the cached tiles of the nearest level scaled into place, and leaves areas no level covers at the page colour until their tiles render; it never draws the whole-scene picture, which a large document cannot afford. Panning keeps rasterizing under a smaller frame budget and runs at most one tile estimated past it; zooming rasterizes nothing until it ends; queued jobs for another level or an earlier navigation generation are discarded. Visible exact coverage while idle is the settlement boundary; overscan remains background work.
 
 Generation rules:
 
