@@ -185,7 +185,7 @@
     "@open-pencil/kiwi": "workspace:*",
     "@open-pencil/pen": "workspace:*",
     "@open-pencil/scene-graph": "workspace:*",
-    "@tauri-apps/api": "^2.12.1",
+    "@tauri-apps/api": "^3.0.0-alpha.3",
     "@valibot/to-json-schema": "^1.8.0",
     "@xmldom/xmldom": "^0.9.12",
     "acorn": "^8.18.0",

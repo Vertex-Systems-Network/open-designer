@@ -110,7 +110,7 @@ describe('Tauri file actions', () => {
       () => 0,
       () => calls.push('reload')
     )
-    watcher.onEvent?.({ type: { modify: { kind: 'data' } } })
+    watcher.onEvent?.({ type: 'modify', kind: 'data', mode: 'content' })
     expect(calls).toEqual(['reload'])
 
     await clearTauriMocks()
@@ -130,7 +130,7 @@ describe('Tauri file actions', () => {
       () => Date.now(),
       () => calls.push('reload')
     )
-    watcher.onEvent?.({ type: { modify: { kind: 'data' } } })
+    watcher.onEvent?.({ type: 'modify', kind: 'data', mode: 'content' })
     expect(calls).toEqual([])
 
     unwatch()

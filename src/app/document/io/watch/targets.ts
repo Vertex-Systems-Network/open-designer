@@ -10,16 +10,16 @@ export async function watchTauriFile(
   reloadFromDisk: () => void
 ) {
   const { watch: tauriWatch } = await import('@tauri-apps/plugin-fs')
-  const unwatch = await tauriWatch(
+  const watcher = await tauriWatch(
     filePath,
     (event) => {
-      if (typeof event.type !== 'object' || !('modify' in event.type)) return
+      if (event.type !== 'modify') return
       if (Date.now() - getLastWriteTime() < RECENT_WRITE_MS) return
       reloadFromDisk()
     },
     { delayMs: TAURI_WATCH_DELAY_MS }
   )
-  return () => unwatch()
+  return () => void watcher.close()
 }
 
 export async function watchBrowserFile(

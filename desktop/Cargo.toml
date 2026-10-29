@@ -6,8 +6,10 @@ authors = ["Danila Poyarkov"]
 edition = "2021"
 
 [features]
-default = []
-native-test = ["dep:tauri-plugin-wdio-webdriver"]
+default = ["wry"]
+wry = ["dep:tauri-runtime-wry"]
+cef = ["dep:tauri-runtime-cef"]
+native-test = ["dep:tauri-plugin-automation"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -20,33 +22,35 @@ name = "open_pencil_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "3.0.0-alpha.4", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["devtools"] }
-tauri-plugin-opener = "2"
+tauri = { version = "3.0.0-alpha.5", features = ["devtools"] }
+tauri-runtime-wry = { version = "3.0.0-alpha.5", features = ["devtools"], optional = true }
+tauri-runtime-cef = { version = "3.0.0-alpha.6", optional = true }
+tauri-plugin-opener = "3.0.0-alpha"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 tokio = { version = "1", features = ["sync"] }
-tauri-plugin-dialog = "2.6.0"
-tauri-plugin-fs = { version = "2.4.5", features = ["watch"] }
-tauri-plugin-shell = "2"
+tauri-plugin-dialog = "3.0.0-alpha"
+tauri-plugin-fs = { version = "3.0.0-alpha", features = ["watch"] }
+tauri-plugin-shell = "3.0.0-alpha"
 zstd = "0.13"
 zip = { version = "2", default-features = false }
 which = "7.0.3"
 semver = "1"
 fontique = "0.11"
 fix-path-env = { git = "https://github.com/tauri-apps/fix-path-env-rs", branch = "dev" }
-tauri-plugin-updater = "2"
-tauri-plugin-process = "2"
-tauri-plugin-os = "2"
-tauri-plugin-clipboard-manager = "2"
-tauri-plugin-deep-link = "2"
+tauri-plugin-updater = "3.0.0-alpha"
+tauri-plugin-process = "3.0.0-alpha"
+tauri-plugin-os = "3.0.0-alpha"
+tauri-plugin-clipboard-manager = "3.0.0-alpha"
+tauri-plugin-deep-link = "3.0.0-alpha"
 keyring = "4.1.5"
 url = "2"
 httparse = "1"
-tauri-plugin-wdio-webdriver = { version = "1.3.0", optional = true }
+tauri-plugin-automation = { version = "3.0.0-alpha.2", optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 security-framework = "3"
@@ -54,5 +58,5 @@ objc2-core-foundation = { version = "0.3.2", default-features = false, features 
 objc2-core-text = { version = "0.3.2", default-features = false, features = ["std", "CTFontDescriptor"] }
 
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
-tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+tauri-plugin-single-instance = { version = "3.0.0-alpha", features = ["deep-link"] }
 

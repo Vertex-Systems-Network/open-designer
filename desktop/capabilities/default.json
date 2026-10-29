@@ -56,7 +56,14 @@
     },
     {
       "identifier": "fs:allow-read-file",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        { "path": "**" },
+        { "path": "$HOME/.pi/agent/settings.json" },
+        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
+        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
+        { "path": "$RUNTIME/openpencil/mcp.json" },
+        { "path": "$HOME/.openpencil/mcp.json" }
+      ]
     },
     {
       "identifier": "fs:allow-stat",
@@ -79,16 +86,6 @@
     "fs:allow-fstat",
     "fs:allow-seek",
     "fs:allow-read",
-    {
-      "identifier": "fs:allow-read-text-file",
-      "allow": [
-        { "path": "$HOME/.pi/agent/settings.json" },
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
-      ]
-    },
     {
       "identifier": "fs:allow-write-file",
       "allow": [{ "path": "**" }],
@@ -127,7 +124,6 @@
       "identifier": "fs:allow-watch",
       "allow": [{ "path": "**" }]
     },
-    "fs:allow-unwatch",
     {
       "identifier": "shell:allow-spawn",
       "allow": [

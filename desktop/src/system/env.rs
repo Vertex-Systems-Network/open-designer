@@ -5,8 +5,8 @@
 /// WebKit bundle version on macOS, the WebKitGTK version on Linux, and the
 /// WebView2 runtime version on Windows; `None` when the runtime cannot report it.
 #[tauri::command]
-pub fn webview_version() -> Option<String> {
-    tauri::webview_version().ok()
+pub fn webview_version(app: tauri::AppHandle) -> Option<String> {
+    app.webview_version().ok()
 }
 
 /// Whether the environment turns off pings and usage stats: `OPENPENCIL_TELEMETRY` set to

@@ -246,7 +246,7 @@ describe('Tauri MCP spawning', () => {
       if (cmd === 'plugin:fs|exists') {
         return pathArg === DISCOVERY_PATH
       }
-      if (cmd === 'plugin:fs|read_text_file') {
+      if (cmd === 'plugin:fs|read_file') {
         // Only return discovery data when reading the expected discovery path
         if (pathArg === DISCOVERY_PATH) return new TextEncoder().encode(DISCOVERY_JSON)
         return null
@@ -269,7 +269,7 @@ describe('Tauri MCP spawning', () => {
     expect(
       calls.some(
         (c) =>
-          c.cmd === 'plugin:fs|read_text_file' &&
+          c.cmd === 'plugin:fs|read_file' &&
           (c.args as { path?: string })?.path === DISCOVERY_PATH
       )
     ).toBe(true)
@@ -307,7 +307,7 @@ describe('Tauri MCP spawning', () => {
       if (cmd === 'plugin:shell|spawn') return 77
       const pathArg = (args as { path?: string })?.path
       if (cmd === 'plugin:fs|exists') return pathArg === DISCOVERY_PATH
-      if (cmd === 'plugin:fs|read_text_file')
+      if (cmd === 'plugin:fs|read_file')
         return pathArg === DISCOVERY_PATH ? new TextEncoder().encode(DISCOVERY_JSON) : null
       if (cmd === 'plugin:path|resolve_directory') return '/mock/home'
       return null

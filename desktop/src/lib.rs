@@ -25,17 +25,21 @@ use system::window::show_main_window;
 use tauri::{Emitter, Manager};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
+#[cfg_attr(feature = "cef", tauri_runtime_cef::cef_entry_point)]
 pub fn run() {
     let _ = fix_path_env::fix();
     agents::path::augment_process_path();
 
-    let mut builder = tauri::Builder::default();
+    #[cfg(feature = "cef")]
+    let mut builder = tauri::Builder::default().runtime(tauri_runtime_cef::Cef::default());
+    #[cfg(not(feature = "cef"))]
+    let mut builder = tauri::Builder::default().runtime(tauri_runtime_wry::Wry::default());
 
     #[cfg(feature = "native-test")]
     {
         builder = builder
             .manage(system::opener::OpenedExternalUrls::default())
-            .plugin(tauri_plugin_wdio_webdriver::init());
+            .plugin(tauri_plugin_automation::init());
     }
 
     #[cfg(all(
