@@ -5,7 +5,6 @@ import { computeDescendantVisualBounds } from '@open-pencil/scene-graph/geometry
 
 import { needsImagePreviews } from '#core/canvas/images/previews'
 import type { RenderOverlays, SkiaRenderer } from '#core/canvas/renderer'
-import type { TileWorldBounds } from '#core/canvas/renderer/tiles'
 import { playIslandRoots } from '#core/editor/play/islands'
 import type { EditorState } from '#core/editor/types'
 import { emitNavigationTrace } from '#core/profiler'
@@ -282,32 +281,8 @@ export function render(
     p.beginPhase('render:scene')
     let renderedScene = false
     if (layer === 'scene' && !requiresUncachedSceneRender && r.tiledSceneEnabled) {
-      // Tiles stand in for the retained backing, idle or moving; the scene picture only fills
-      // the areas no cached tile covers.
-      const tiled = r.tiledScene.renderFrame(
-        r,
-        canvas,
-        graph,
-        sceneVersion,
-        r.navigationGeneration,
-        (areas) => {
-          canvas.save()
-          canvas.translate(r.panX, r.panY)
-          canvas.scale(r.zoom, r.zoom)
-          clipToWorldAreas(r, canvas, areas)
-          renderSceneContent(
-            r,
-            canvas,
-            graph,
-            overlays,
-            sceneVersion,
-            canUsePicture,
-            cacheMissReason,
-            requiresUncachedSceneRender
-          )
-          canvas.restore()
-        }
-      )
+      // Tiles stand in for the retained backing, idle or moving.
+      const tiled = r.tiledScene.renderFrame(r, canvas, graph, sceneVersion, r.navigationGeneration)
       r.tiledScenePending = tiled.pending
       r.tiledSceneCovered = tiled.covered
       r.sceneBackingNeedsCrispRender = false
@@ -360,16 +335,6 @@ export function render(
     culledNodes: r._culledCount,
     backingCrisp: !r.sceneBackingNeedsCrispRender
   })
-}
-
-function clipToWorldAreas(r: SkiaRenderer, canvas: Canvas, areas: TileWorldBounds[]): void {
-  const builder = new r.ck.PathBuilder()
-  for (const area of areas) {
-    builder.addRect(r.ck.LTRBRect(area.minX, area.minY, area.maxX, area.maxY))
-  }
-  const path = builder.detachAndDelete()
-  canvas.clipPath(path, r.ck.ClipOp.Intersect, false)
-  path.delete()
 }
 
 function renderSceneContent(

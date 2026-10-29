@@ -32,6 +32,8 @@ import { emitTileCoverageComplete, emitTileFrameTrace } from './telemetry'
 const TILE_FRAME_BUDGET_MS = 5
 /** Tile work per frame while the viewport moves, leaving the rest to input and presentation. */
 const NAVIGATION_TILE_BUDGET_MS = 2
+/** The one tile a moving frame may still afford past its budget; dearer tiles wait for idle. */
+const NAVIGATION_FIRST_TILE_LIMIT_MS = 8
 const MAXIMUM_TILE_JOBS_PER_FRAME = 128
 const TILE_OVERSCAN = 1
 const TILE_COST_SMOOTHING = 0.3
@@ -48,7 +50,7 @@ export interface TiledSceneFrameResult {
   metrics: TileSchedulerMetrics
   /** Tiles of other levels drawn, scaled, where the current level has none yet. */
   fallbackTileCount: number
-  /** Visible tile areas no level covers, handed to `drawUncovered`. */
+  /** Visible tile areas no level covers; they show the page colour until their tiles render. */
   uncoveredAreaCount: number
 }
 
@@ -57,13 +59,10 @@ export interface TiledSceneControllerOptions {
   now?: () => number
 }
 
-/** Draws the scene over the given world areas, which no cached tile covers. */
-export type DrawUncoveredAreas = (areas: TileWorldBounds[]) => void
-
 interface VisiblePresentation {
   exact: Array<{ key: TileKey; tile: CachedTile }>
   fallback: Array<{ key: TileKey; tiles: CachedTile[] }>
-  uncovered: TileWorldBounds[]
+  uncovered: number
 }
 
 export class TiledSceneController {
@@ -124,17 +123,18 @@ export class TiledSceneController {
 
   /**
    * Renders due tiles within the frame's budget and presents the viewport from the cache: exact
-   * tiles where they exist, the nearest level's tiles scaled where they do not, and
-   * `drawUncovered` for the areas no level covers. Navigation keeps presenting, shortens the
-   * budget while panning, and rasterizes nothing while zooming; the retained backing plays no part.
+   * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
+   * colour where no level has one, until its tile renders. Nothing is drawn straight from the
+   * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting,
+   * shortens the budget while panning, and rasterizes nothing while zooming; the retained
+   * backing plays no part.
    */
   renderFrame(
     renderer: SkiaRenderer,
     canvas: Canvas,
     graph: SceneGraph,
     contentGeneration: number,
-    navigationGeneration: number,
-    drawUncovered?: DrawUncoveredAreas
+    navigationGeneration: number
   ): TiledSceneFrameResult {
     this.navigationGeneration = navigationGeneration
     this.navigationActive = this.isNavigationActive(renderer)
@@ -146,10 +146,7 @@ export class TiledSceneController {
       maxY: (-renderer.panY + renderer.viewportHeight) / renderer.zoom
     }
     const index = this.index
-    if (!index || !renderer.pageId) {
-      drawUncovered?.([viewport])
-      return this.emptyResult()
-    }
+    if (!index || !renderer.pageId) return this.emptyResult()
 
     const level = tileLevel(renderer.zoom * renderer.dpr)
     // Jobs planned at another level draw nothing the viewport shows now.
@@ -176,7 +173,8 @@ export class TiledSceneController {
       this.scheduler.enqueue(plan.jobs)
       metrics = this.scheduler.runFrame(
         (job) => this.executeJob(renderer, graph, index, job),
-        this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS
+        this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
+        this.navigationActive ? NAVIGATION_FIRST_TILE_LIMIT_MS : Number.POSITIVE_INFINITY
       )
     }
     metrics.cancelledJobs += this.cancelledJobs
@@ -196,7 +194,6 @@ export class TiledSceneController {
       true
     ).visible
     const presentation = this.resolveVisible(visible)
-    if (presentation.uncovered.length > 0) drawUncovered?.(presentation.uncovered)
     canvas.save()
     canvas.translate(renderer.panX, renderer.panY)
     canvas.scale(renderer.zoom, renderer.zoom)
@@ -212,7 +209,7 @@ export class TiledSceneController {
       visibleTileCount: visible.length,
       presentedTileCount: presentation.exact.length,
       fallbackTileCount: presentation.fallback.length,
-      uncoveredAreaCount: presentation.uncovered.length,
+      uncoveredAreaCount: presentation.uncovered,
       covered
     })
     const settledGenerationKey = `${navigationGeneration}:${contentGeneration}`
@@ -231,7 +228,7 @@ export class TiledSceneController {
       pending: this.scheduler.pending() > 0 || !covered,
       metrics,
       fallbackTileCount: presentation.fallback.length,
-      uncoveredAreaCount: presentation.uncovered.length
+      uncoveredAreaCount: presentation.uncovered
     }
   }
 
@@ -365,7 +362,7 @@ export class TiledSceneController {
   private resolveVisible(
     visible: Array<{ key: TileKey; tile: CachedTile | null }>
   ): VisiblePresentation {
-    const presentation: VisiblePresentation = { exact: [], fallback: [], uncovered: [] }
+    const presentation: VisiblePresentation = { exact: [], fallback: [], uncovered: 0 }
     for (const { key, tile } of visible) {
       if (tile) {
         presentation.exact.push({ key, tile })
@@ -373,7 +370,7 @@ export class TiledSceneController {
       }
       const tiles = this.tileCache.findFallback(key)
       if (tiles) presentation.fallback.push({ key, tiles })
-      else presentation.uncovered.push(tileWorldBounds(key))
+      else presentation.uncovered++
     }
     return presentation
   }

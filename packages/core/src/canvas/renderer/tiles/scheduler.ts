@@ -129,9 +129,16 @@ export class TileScheduler {
     return previousCount - this.jobs.length
   }
 
+  /**
+   * Runs queued jobs until `budgetMs` is spent. A job estimated to overrun it is skipped when a
+   * fallback exists, except that the frame's first job may overrun up to `firstJobLimitMs`: an
+   * idle renderer sets no limit so it always makes progress, and a moving one sets a small one
+   * so an affordable tile still fills in while an expensive one waits for idle.
+   */
   runFrame(
     execute: (job: TileJob) => TileJobResult,
-    budgetMs: number = this.budgetMs
+    budgetMs: number = this.budgetMs,
+    firstJobLimitMs = Number.POSITIVE_INFINITY
   ): TileSchedulerMetrics {
     const frameStart = this.now()
     const metrics = emptyTileSchedulerMetrics()
@@ -149,7 +156,7 @@ export class TileScheduler {
         continue
       }
       if (!mandatory && job.fallbackAvailable && elapsed + job.estimatedCost > budgetMs) {
-        if (jobsExecuted === 0) {
+        if (jobsExecuted === 0 && elapsed + job.estimatedCost <= firstJobLimitMs) {
           const result = execute(job)
           this.jobs.shift()
           metrics.interruptibleCompleted++
