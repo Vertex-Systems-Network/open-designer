@@ -133,7 +133,7 @@ export class TileScheduler {
    * Runs queued jobs until `budgetMs` is spent. A job estimated to overrun it is skipped when a
    * fallback exists, except that the frame's first job may overrun up to `firstJobLimitMs`: an
    * idle renderer sets no limit so it always makes progress, and a moving one sets a small one
-   * so an affordable tile still fills in while an expensive one waits for idle.
+   * so an affordable tile still fills in while the expensive ones ahead of it wait for idle.
    */
   runFrame(
     execute: (job: TileJob) => TileJobResult,
@@ -144,6 +144,7 @@ export class TileScheduler {
     const metrics = emptyTileSchedulerMetrics()
 
     let jobsExecuted = 0
+    const deferred: TileJob[] = []
     while (this.jobs.length > 0) {
       if (jobsExecuted >= this.maximumJobsPerFrame) break
       const job = this.jobs[0]
@@ -156,15 +157,26 @@ export class TileScheduler {
         continue
       }
       if (!mandatory && job.fallbackAvailable && elapsed + job.estimatedCost > budgetMs) {
-        if (jobsExecuted === 0 && elapsed + job.estimatedCost <= firstJobLimitMs) {
-          this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
-        } else {
+        if (jobsExecuted > 0) {
           metrics.skippedWithFallback++
+          break
         }
-        break
+        if (elapsed + job.estimatedCost <= firstJobLimitMs) {
+          this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
+          break
+        }
+        // Too dear for this frame: leave it queued and look for an affordable one behind it.
+        this.jobs.shift()
+        deferred.push(job)
+        metrics.skippedWithFallback++
+        continue
       }
       this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
       jobsExecuted++
+    }
+    if (deferred.length > 0) {
+      this.jobs.unshift(...deferred)
+      this.jobs.sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
     }
     metrics.remaining = this.jobs.length
     return metrics

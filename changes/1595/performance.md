@@ -1,1 +1,1 @@
-- Progressive rendering settles a changed canvas in tens of milliseconds instead of over a second, keeps exact tiles on screen while panning, and shows the previous zoom level's tiles while zooming instead of blank fallback pixels.
+- Progressive rendering settles a changed canvas in tens of milliseconds instead of over a second, keeps exact tiles on screen while panning, scales the nearest rendered zoom level into place while zooming, and stays on for documents that draw image previews.

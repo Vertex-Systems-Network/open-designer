@@ -131,3 +131,31 @@ describe('tile scheduler', () => {
     expect(scheduler.pending()).toBe(0)
   })
 })
+
+test('a moving frame skips dear jobs ahead of an affordable one and keeps them queued', () => {
+  const executed: string[] = []
+  let time = 0
+  const scheduler = new TileScheduler({ now: () => time, budgetMs: 2 })
+  const job = (x: number, estimatedCost: number) => ({
+    key: { pageId: 'page', level: 1, x, y: 0 },
+    navigationGeneration: 0,
+    contentGeneration: 0,
+    priority: 'visible' as const,
+    fallbackAvailable: true,
+    estimatedCost
+  })
+  scheduler.enqueue([job(0, 20), job(1, 20), job(2, 3)])
+  const metrics = scheduler.runFrame(
+    (candidate) => {
+      executed.push(`${candidate.key.x}`)
+      time += candidate.estimatedCost
+      return { renderMs: candidate.estimatedCost, overBudget: candidate.estimatedCost > 2 }
+    },
+    2,
+    8
+  )
+  expect(executed).toEqual(['2'])
+  expect(metrics.interruptibleCompleted).toBe(1)
+  expect(metrics.skippedWithFallback).toBe(2)
+  expect(scheduler.pending()).toBe(2)
+})

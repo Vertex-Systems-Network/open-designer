@@ -280,7 +280,7 @@ describe('tile rendering', () => {
       const navigating = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(navigating.metrics.cancelledJobs).toBeGreaterThan(0)
       expect(navigating.metrics.interruptibleCompleted).toBe(0)
-      expect(navigating.metrics.skippedWithFallback).toBe(1)
+      expect(navigating.metrics.skippedWithFallback).toBeGreaterThan(0)
       expect(navigating.pending).toBe(true)
 
       renderer.navigationPhase = 'idle'

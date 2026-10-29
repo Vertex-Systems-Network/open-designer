@@ -282,7 +282,9 @@ export class TiledSceneController {
       this.applyPendingInvalidations(graph, contentGeneration)
     }
     if (this.index && this.pageId !== renderer.pageId) this.invalidate()
-    if (!this.navigationActive && this.index === null && renderer.pageId) {
+    // Without an index nothing can be shown, so a page that arrives mid-gesture builds its index
+    // at once; its tiles then fill in under the moving budget rather than after the gesture.
+    if (this.index === null && renderer.pageId) {
       this.ensureIndex(graph, renderer.pageId, contentGeneration)
     }
   }

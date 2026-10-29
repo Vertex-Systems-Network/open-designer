@@ -149,7 +149,8 @@ describe('tile scheduling', () => {
       renderer.navigationPhase = 'pan'
       const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(panning.metrics.interruptibleCompleted).toBe(0)
-      expect(panning.metrics.skippedWithFallback).toBe(1)
+      // Every queued tile is too dear, and each is tried before the frame gives up.
+      expect(panning.metrics.skippedWithFallback).toBe(visibleTiles - 1)
       expect(panning.fallbackTileCount).toBe(0)
       expect(panning.uncoveredAreaCount).toBe(visibleTiles - 1)
       expect(panning.pending).toBe(true)
