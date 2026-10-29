@@ -9,7 +9,7 @@ import {
 
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import type { TextEditorState } from '#core/text/editor'
-import { hasGlyphOutlines } from '#core/text/opentype'
+import { hasGlyphOutlines } from '#core/text/font/glyphs'
 
 import { applyBoundTextEdit } from './components/authoring/text-edit'
 import { fitEmptyLabelToPlaceholder } from './connectors/label-edit'
@@ -255,7 +255,16 @@ export function createTextActions(ctx: EditorContext) {
     recordTextEdit(textState)
     change()
     const node = ctx.graph.getNode(textState.nodeId)
-    if (!node) return
+    if (!node) {
+      // The change took the text away, such as an undo past the step that made it: the edit
+      // ends with it, recording nothing of a node that is gone.
+      te.stop()
+      ctx.state.editingTextId = null
+      activeSession = null
+      restoreEmptyLabel = null
+      ctx.requestRender()
+      return
+    }
     activeSession = createTextEditSession(node)
     te.syncToNode(node)
     ctx.requestRender()

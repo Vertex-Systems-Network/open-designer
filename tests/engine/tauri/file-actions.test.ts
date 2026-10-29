@@ -20,7 +20,7 @@ describe('Tauri file actions', () => {
           filters: [
             {
               name: 'Design file',
-              extensions: ['fig', 'pen', 'drawio', 'dio', 'html', 'htm', 'xhtml']
+              extensions: ['fig', 'pen', 'drawio', 'dio', 'mmd', 'mermaid', 'html', 'htm', 'xhtml']
             }
           ],
           multiple: true
@@ -49,6 +49,14 @@ describe('Tauri file actions', () => {
 
     expect(file.name).toBe('design.pen')
     await expect(file.text()).resolves.toBe('{"a":1}')
+  })
+
+  test('names a file read from a Windows path by its last segment', async () => {
+    await mockTauriIPC(() => [123, 125])
+
+    const file = await readTauriDesignFile('C:\\Users\\me\\Design File.pen')
+
+    expect(file.name).toBe('Design File.pen')
   })
 
   test('saves exports through Tauri dialog and fs APIs', async () => {

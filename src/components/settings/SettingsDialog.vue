@@ -17,6 +17,7 @@ import { provideSettingsNavigation } from '@/app/settings/navigation/use'
 import { CloudSettingsSection } from '@/components/cloud/integration'
 import ChatSettingsSection from '@/components/settings/chat/ChatSettingsSection.vue'
 import DiagnosticsSettingsPanel from '@/components/settings/diagnostics/DiagnosticsSettingsPanel.vue'
+import FontSettingsPanel from '@/components/settings/fonts/FontSettingsPanel.vue'
 import GeneralSettingsPanel from '@/components/settings/general/GeneralSettingsPanel.vue'
 import SettingsBreadcrumb from '@/components/settings/layout/SettingsBreadcrumb.vue'
 import SettingsPage from '@/components/settings/layout/SettingsPage.vue'
@@ -36,10 +37,7 @@ import {
   AppDialogRoot
 } from '@/components/ui/dialog'
 import AppSelect from '@/components/ui/select/AppSelect.vue'
-import AppTabsContent from '@/components/ui/tabs/AppTabsContent.vue'
-import AppTabsList from '@/components/ui/tabs/AppTabsList.vue'
-import AppTabsRoot from '@/components/ui/tabs/AppTabsRoot.vue'
-import AppTabsTrigger from '@/components/ui/tabs/AppTabsTrigger.vue'
+import { AppTabsContent, AppTabsList, AppTabsRoot, AppTabsTrigger } from '@/components/ui/tabs'
 
 const { isMobile } = useViewportKind()
 const { settings, common } = useI18n()
@@ -57,6 +55,7 @@ const sections = computed(
       { value: 'privacy', label: settings.value.privacy },
       { value: 'mcp', label: settings.value.mcp },
       { value: 'tools', label: settings.value.toolAccess },
+      { value: 'fonts', label: settings.value.fonts },
       { value: 'media', label: settings.value.media },
       { value: 'storage', label: settings.value.storage },
       ...(CLOUD_INCLUDED ? [{ value: 'cloud' as const, label: settings.value.cloud }] : [])
@@ -154,6 +153,10 @@ function onOpenChange(open: boolean): void {
           <template #leading><icon-lucide-sliders-horizontal class="size-3.5" /></template>
           {{ settings.toolAccess }}
         </AppTabsTrigger>
+        <AppTabsTrigger value="fonts" data-test-id="settings-section-fonts">
+          <template #leading><icon-lucide-type class="size-3.5" /></template>
+          {{ settings.fonts }}
+        </AppTabsTrigger>
         <AppTabsTrigger value="media" data-test-id="settings-section-media">
           <template #leading><icon-lucide-image class="size-3.5" /></template>
           {{ settings.media }}
@@ -195,6 +198,9 @@ function onOpenChange(open: boolean): void {
       </AppTabsContent>
       <AppTabsContent value="tools" as-child>
         <ToolAccessSettingsPanel />
+      </AppTabsContent>
+      <AppTabsContent value="fonts" as-child>
+        <FontSettingsPanel />
       </AppTabsContent>
       <AppTabsContent value="media" as-child>
         <MediaSettingsPanel />

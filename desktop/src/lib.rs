@@ -2,6 +2,7 @@ mod agents;
 mod credentials;
 mod files;
 mod fonts;
+mod icons;
 mod launch;
 mod menu;
 mod network;
@@ -88,6 +89,8 @@ pub fn run() {
             launch::paths::path_matches_suffix,
             list_system_fonts,
             load_system_font,
+            icons::sf_symbols_catalogue,
+            icons::sf_symbols_render,
             proxy_http_request,
             cancel_http_request,
             files::recent::set_recent_files,

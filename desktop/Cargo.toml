@@ -24,6 +24,9 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "3.0.0-alpha.4", features = [] }
 
+[target.'cfg(target_os = "macos")'.build-dependencies]
+swift-rs = { version = "=1.0.9", features = ["build"] }
+
 [dependencies]
 tauri = { version = "3.0.0-alpha.5", features = ["devtools"] }
 tauri-runtime-wry = { version = "3.0.0-alpha.5", features = ["devtools"], optional = true }
@@ -54,6 +57,7 @@ tauri-plugin-automation = { version = "3.0.0-alpha.2", optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 security-framework = "3"
+swift-rs = "=1.0.9"
 objc2-core-foundation = { version = "0.3.2", default-features = false, features = ["std", "CFArray", "CFBase", "CFDictionary", "CFSet", "CFString", "CFURL"] }
 objc2-core-text = { version = "0.3.2", default-features = false, features = ["std", "CTFontDescriptor"] }
 

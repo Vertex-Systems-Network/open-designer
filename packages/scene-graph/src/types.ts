@@ -354,6 +354,15 @@ export type TextBindableField = (typeof TEXT_BINDABLE_FIELDS)[number]
 /** Variable IDs bound to text fields, by field. */
 export type TextBoundVariables = Partial<Record<TextBindableField, string>>
 
+/**
+ * A line height or letter spacing as Figma keeps it: pixels, or a percent of the font size that
+ * follows the size when it changes.
+ */
+export interface TextLength {
+  value: number
+  unit: 'PIXELS' | 'PERCENT'
+}
+
 export interface CharacterStyleOverride {
   fontWeight?: number
   italic?: boolean
@@ -365,10 +374,13 @@ export interface CharacterStyleOverride {
   textUnderlineOffset?: number | null
   fontSize?: number
   fontFamily?: string
-  letterSpacing?: number
-  lineHeight?: number | null
+  letterSpacing?: TextLength
+  /** `null` is automatic, from the font. */
+  lineHeight?: TextLength | null
   fills?: Fill[]
   fontVariations?: FontVariation[]
+  /** Whether the characters' optical size follows their font size, in place of the text's own. */
+  opticalSizeFromFontSize?: boolean
   fontFeatures?: FontFeature[]
   textLanguage?: string | null
   textCase?: TextCase
@@ -650,8 +662,9 @@ export interface SceneNode {
   textDecorationSkipInk: boolean
   textUnderlineOffset: number | null
   leadingTrim: LeadingTrim
-  lineHeight: number | null
-  letterSpacing: number
+  /** `null` is automatic, from the font. */
+  lineHeight: TextLength | null
+  letterSpacing: TextLength
   maxLines: number | null
   /**
    * One entry per paragraph of `text`, in order. Missing entries are plain paragraphs, so text
@@ -669,6 +682,11 @@ export interface SceneNode {
 
   styleRuns: StyleRun[]
   fontVariations: FontVariation[]
+  /**
+   * Whether a variable font's optical size follows the font size, as Figma's "Set optical size
+   * automatically" does by default; when it does not, the `opsz` in `fontVariations` applies.
+   */
+  opticalSizeFromFontSize: boolean
   fontFeatures: FontFeature[]
 
   horizontalConstraint: ConstraintType

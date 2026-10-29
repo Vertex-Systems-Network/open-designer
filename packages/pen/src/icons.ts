@@ -5,6 +5,7 @@ import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { BLACK } from '@open-pencil/scene-graph/constants'
 import { readIconTint } from '@open-pencil/scene-graph/icons'
 import {
+  getInstances,
   INSTANCE_SYNC_PROPS,
   instanceMainComponent,
   populateInstanceChildren,
@@ -13,45 +14,18 @@ import {
 } from '@open-pencil/scene-graph/instances'
 import type { Color } from '@open-pencil/scene-graph/primitives'
 
-import { iconFontFamily, iconName } from './assets'
+import { iconName, iconOptions } from './assets'
 import type { Build } from './nodes'
 import type { PenNode } from './schema'
-import { resolveNumber, resolveString } from './variables'
-
-/** The weight pen.dev draws Material Symbols at when an icon sets none. */
-const MATERIAL_SYMBOLS_WEIGHT = 200
+import { resolveOptionalNumber, resolveString } from './variables'
 
 /** Space between the icon components on their page. */
 const ICON_COMPONENT_GAP = 16
 
-/** A font icon's glyph: its name set in the icon font, which turns it into the glyph. */
-function drawFontGlyph(
-  build: Build,
-  frameId: string,
-  family: string,
-  icon: string,
-  weight: number,
-  size: number,
-  color: Color
-): void {
-  build.graph.createNode('TEXT', frameId, {
-    name: icon,
-    text: icon,
-    fontFamily: family,
-    fontWeight: weight,
-    fontVariations: [{ axis: 'wght', value: weight }],
-    fontSize: size,
-    lineHeight: size,
-    width: size,
-    height: size,
-    textAutoResize: 'NONE',
-    fills: [{ type: 'SOLID', color, opacity: 1, visible: true }]
-  })
-}
-
 /**
  * An icon draws its glyph in its fill colour, scaled to fit its box and centred, as pen.dev does;
- * an icon the host could not load is an empty frame. Its library and name may be variables.
+ * an icon the host could not load is an empty frame. Its library, name, and weight may be
+ * variables.
  */
 export function drawIcon(node: SceneNode, pen: PenNode, build: Build): void {
   const { graph, ctx } = build
@@ -61,13 +35,10 @@ export function drawIcon(node: SceneNode, pen: PenNode, build: Build): void {
   const library = resolveString(pen.library, ctx)
   const icon = resolveString(pen.icon, ctx)
   const size = Math.min(node.width, node.height)
-  if (!library || !icon || size <= 0) return
-  const family = iconFontFamily(library)
-  const name = iconName(library, icon)
-  if (family) {
-    const weight = resolveNumber(pen.weight, ctx, MATERIAL_SYMBOLS_WEIGHT)
-    drawFontGlyph(build, node.id, family, icon, weight, size, color)
-  } else if (!name || !build.icons?.draw(graph, node.id, name, size, color)) return
+  const name = library && icon ? iconName(library, icon) : null
+  if (!library || !name || size <= 0) return
+  const options = iconOptions(library, resolveOptionalNumber(pen.weight, ctx))
+  if (!build.icons?.draw(graph, node.id, name, size, color, options)) return
   const dx = (node.width - size) / 2
   const dy = (node.height - size) / 2
   for (const glyph of graph.getChildren(node.id)) {
@@ -96,10 +67,8 @@ function iconComponent(build: Build, pen: PenNode, width: number, height: number
   const { graph, ctx } = build
   const library = resolveString(pen.library, ctx) ?? ''
   const icon = resolveString(pen.icon, ctx) ?? ''
-  const weight = iconFontFamily(library)
-    ? `/${resolveNumber(pen.weight, ctx, MATERIAL_SYMBOLS_WEIGHT)}`
-    : ''
-  const key = `${library}/${icon}/${width}x${height}${weight}`
+  const options = iconOptions(library, resolveOptionalNumber(pen.weight, ctx))
+  const key = `${library}/${icon}/${width}x${height}${options ? `/${JSON.stringify(options)}` : ''}`
   const existing = build.iconComponents.get(key)
   if (existing) return existing
   build.iconPageId ??= graph.addPage('Icons').id
@@ -121,11 +90,9 @@ function iconComponent(build: Build, pen: PenNode, width: number, height: number
 function recolorGlyph(graph: SceneGraph, instanceId: string, color: Color): void {
   for (const glyph of graph.getChildren(instanceId)) {
     const tint = readIconTint(glyph)
-    // A font icon's glyph is text in the icon's colour.
-    const fills =
-      glyph.type === 'TEXT' || tint.includes('fill')
-        ? glyph.fills.map((fill) => ({ ...fill, color }))
-        : glyph.fills
+    const fills = tint.includes('fill')
+      ? glyph.fills.map((fill) => ({ ...fill, color }))
+      : glyph.fills
     const strokes = tint.includes('stroke')
       ? glyph.strokes.map((stroke) => ({ ...stroke, color }))
       : glyph.strokes
@@ -158,6 +125,17 @@ function keepOwnFields(
 }
 
 /**
+ * Whether a copy of an icon still shows the glyph its source showed when it was copied: drawing
+ * the source again at its laid-out size gives it a new glyph, which the copy does not follow.
+ */
+function showsReplacedGlyph(graph: SceneGraph, copy: SceneNode, sourceId: string): boolean {
+  const sourceChildIds = graph.getNode(sourceId)?.childIds ?? []
+  return graph
+    .getChildren(copy.id)
+    .some((glyph) => !glyph.componentId || !sourceChildIds.includes(glyph.componentId))
+}
+
+/**
  * Makes the icon instance `node` show its icon: the icon component for its glyph and size,
  * swapped in when an override changed either, with the glyph in the icon's fill colour.
  */
@@ -172,7 +150,24 @@ export function useIconComponent(node: SceneNode, pen: PenNode, build: Build): v
     populateInstanceChildren(graph, node.id, componentId)
   } else if (instanceMainComponent(graph, node)?.id !== componentId) {
     swapInstanceComponent(graph, node.id, componentId, { keepName: true })
+    // The layer keeps its own name rather than the icon's, which a saved file keeps as an override.
+    recordInstanceOverride(graph, node.id, ['name'])
+  } else if (showsReplacedGlyph(graph, node, node.componentId)) {
+    for (const childId of node.childIds) graph.deleteNode(childId)
+    populateInstanceChildren(graph, node.id, node.componentId)
   }
   keepOwnFields(graph, node.id, own, componentId)
   recolorGlyph(graph, node.id, color)
+}
+
+/**
+ * Removes the icon components no icon shows any more: those for the sizes reading guessed before
+ * laying out gave the icons theirs.
+ */
+export function removeUnusedIconComponents(build: Build): void {
+  for (const [key, id] of build.iconComponents) {
+    if (getInstances(build.graph, id).length > 0) continue
+    build.graph.deleteNode(id)
+    build.iconComponents.delete(key)
+  }
 }

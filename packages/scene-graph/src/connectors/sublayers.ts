@@ -2,6 +2,7 @@ import { BLACK } from '../constants'
 import type { GeneratedFrameKind } from '../generated/kind'
 import type { SceneGraph } from '../graph'
 import type { Color, Vector } from '../primitives'
+import { pixelLength } from '../text/lengths'
 import type { ConnectorEndpoint, Fill, SceneNode, Stroke, VectorNetwork } from '../types'
 
 /**
@@ -13,6 +14,8 @@ export const CONNECTOR_STROKE_WEIGHT = 4
 /** FigJam's line menu draws a connector Thin, at its default weight, or Thick, at twice it. */
 export const CONNECTOR_THICK_STROKE_WEIGHT = 8
 export const CONNECTOR_CORNER_RADIUS = 24
+/** The face a connector's label starts in, as FigJam's: Inter Medium. */
+export const CONNECTOR_LABEL_FONT = { family: 'Inter', weight: 500 } as const
 
 /** The dash FigJam's line menu draws a connector with, longer for a thick line. Measured in FigJam. */
 export function connectorDash(weight: number): number[] {
@@ -137,10 +140,10 @@ export function buildConnectorSublayers(
   const label = graph.createNode('TEXT', connector.id, {
     name: 'Label',
     text: '',
-    fontFamily: 'Inter',
-    fontWeight: 500,
+    fontFamily: CONNECTOR_LABEL_FONT.family,
+    fontWeight: CONNECTOR_LABEL_FONT.weight,
     fontSize: 16,
-    lineHeight: 24,
+    lineHeight: pixelLength(24),
     textAlignHorizontal: 'CENTER',
     textAutoResize: 'WIDTH_AND_HEIGHT',
     fills: [solid(BLACK)],

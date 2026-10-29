@@ -14,7 +14,7 @@ import { booleanOperationPaints, createBooleanOperation } from '#core/editor/str
 import { wrapNodes } from '#core/editor/structure/container-wrap'
 import { ungroupNode } from '#core/editor/structure/group/ungroup'
 import { setDefaultPageBackground } from '#core/figma-api/page-backgrounds'
-import { iconify, type IconProvider } from '#core/icons'
+import { defaultIcons, type IconProvider } from '#core/icons'
 import type { RasterCodec } from '#core/io/formats/raster'
 import { createSVGNodes } from '#core/io/formats/svg'
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
@@ -22,6 +22,7 @@ import { fontManager } from '#core/text/fonts'
 
 import { componentFromNode } from './components'
 import { flattenSceneNodes } from './flatten'
+import { loadFigmaFont, variationAxisTags, type FigmaFontNameInput } from './fonts'
 import * as images from './images'
 import type {
   FigmaBooleanOperationNode,
@@ -41,14 +42,7 @@ import type {
   FigmaVectorNode
 } from './node-types'
 import { startPendingLayout } from './pending-layout'
-import {
-  FigmaNodeProxy,
-  INTERNAL_ID,
-  MIXED,
-  type FigmaFont,
-  type FigmaFontName,
-  type NodeProxyHost
-} from './proxy'
+import { FigmaNodeProxy, INTERNAL_ID, MIXED, type FigmaFont, type NodeProxyHost } from './proxy'
 import { newShapeWithText } from './shape-with-text'
 import type { ExportImageOptions } from './types'
 import { figmaUtil } from './util'
@@ -97,6 +91,7 @@ export type {
   FigmaVectorNode
 } from './node-types'
 export type { FigmaFont, FigmaFontName } from './proxy'
+export type { FigmaFontNameInput, FigmaVariationSettings } from './fonts'
 
 // TODO(figma-api): Implement the full official PluginAPI interface once our compatibility
 // layer covers all required node-specific return types and unsupported APIs are modeled explicitly.
@@ -536,12 +531,24 @@ export class FigmaAPI implements NodeProxyHost {
 
   // --- Stubs ---
 
+  /** Loads the font so text measures and draws with it from then on; rejects as Figma does. */
+  async loadFontAsync(fontName: FigmaFontNameInput): Promise<void> {
+    await loadFigmaFont(fontName)
+  }
+
   /**
-   * Loads the font so text measures and draws with it from then on. Hosts with their own font
-   * sources replace this; a font that cannot load is skipped, where Figma would reject.
+   * The axis tags a variable family takes in `variationSettings`, or `null` for a static family.
+   * Figma answers for any family it lists; OpenPencil reads the axes from a file the family has
+   * loaded, so a family has to be loaded first.
    */
-  async loadFontAsync(fontName: FigmaFontName): Promise<void> {
-    await fontManager.loadFont(fontName.family, fontName.style).catch(() => null)
+  getFontFamilyVariationAxes(family: string): string[] | null {
+    const variation = fontManager.familyVariation(family)
+    if (variation === undefined) {
+      throw new Error(
+        `in getFontFamilyVariationAxes: Font family "${family}" is not available. Load it with figma.loadFontAsync({ family: "${family}" }) first.`
+      )
+    }
+    return variation ? variationAxisTags(variation.axes) : null
   }
 
   async listAvailableFontsAsync(): Promise<FigmaFont[]> {
@@ -587,7 +594,7 @@ export class FigmaAPI implements NodeProxyHost {
 
   exportImage?: (nodeIds: string[], options: ExportImageOptions) => Promise<Uint8Array | null>
   /** Where icon tools search and fetch icons; hosts may pass a self-hosted or bundled set. */
-  icons: IconProvider = iconify
+  icons: IconProvider = defaultIcons
   rasterCodec?: RasterCodec
   /** The document as it was before the current AI run first edited `pageId`, or null if unedited. */
   changeBaseline?: (pageId: string) => SceneGraph | null
