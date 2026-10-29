@@ -358,9 +358,11 @@ export function selectionToJSXWithLayers(
 ): DesignJSXWithLayers {
   const layerIds: Array<string | null> = []
   const declare = options.declarations ?? true
-  const connectors = connectorExportScope(graph, nodeIds, declare)
   const variables = variableExport(graph, nodeIds, declare)
-  const refs = exportRefs(graph, nodeIds, connectors.refs, declare)
+  // Refs are named apart from the variables declared before them.
+  const taken = new Set(variables.names)
+  const connectors = connectorExportScope(graph, nodeIds, declare, taken)
+  const refs = exportRefs(graph, nodeIds, connectors.refs, declare, taken)
   const scope = { connectors, refs, variables, reference: componentReferences(graph, refs) }
   const roots = compact(
     nodeIds.map((id) => {

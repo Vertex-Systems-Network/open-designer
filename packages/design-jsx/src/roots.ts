@@ -26,7 +26,7 @@ function treeRoots(tree: TreeNode): TreeNode[] {
 
 /** The component an element names: its `of`, or the default of the swap property bound there. */
 function componentReference(props: Record<string, unknown>): string | LayerRef | undefined {
-  const reference = props.of ?? props.componentId ?? props.component
+  const reference = props.component ?? props.componentId ?? props.of
   const value = isComponentProperty(reference) ? reference.defaultValue : reference
   return typeof value === 'string' || isLayerRef(value) ? value : undefined
 }

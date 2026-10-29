@@ -48,22 +48,20 @@ export function componentReferences(
 /**
  * The refs an export declares: `connectorRefs`, and one for each component under `rootIds`
  * that an instance there is of and whose name another component shares, so a render into a
- * fresh graph finds it. A layer both need takes one ref.
+ * fresh graph finds it, named apart from the names in `taken`. A layer both need takes one ref.
  */
 export function exportRefs(
   graph: SceneGraph,
   rootIds: readonly string[],
   connectorRefs: ReadonlyMap<string, string | null>,
-  declare: boolean
+  declare: boolean,
+  taken: Set<string>
 ): ReadonlyMap<string, string | null> {
   if (!declare) return connectorRefs
   const layers = layersUnder(graph, rootIds)
   const reference = componentReferences(graph)
   const under = new Set(layers.map((layer) => layer.id))
   const refs = new Map(connectorRefs)
-  const taken = new Set(
-    [...connectorRefs.values()].filter((value): value is string => typeof value === 'string')
-  )
   for (const layer of layers) {
     if (layer.type !== 'INSTANCE') continue
     const component = layer.componentId ? graph.getNode(layer.componentId) : undefined

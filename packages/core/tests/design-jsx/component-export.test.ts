@@ -214,6 +214,28 @@ describe('component export', () => {
     expect(selectionToJSX([copiedInstance.id, copiedLibrary.id], target)).toBe(jsx)
   })
 
+  test('names a component ref apart from the variables the export declares', async () => {
+    const graph = new SceneGraph()
+    const [library] = await renderJSX(
+      graph,
+      `const tokens = defineVars('Card 1', { Accent: '#FF0000' })
+      return <Frame name="Library" bg={tokens.Accent}>
+        <Component name="Card" w={10} h={10} />
+        <Component name="Card" w={20} h={20} />
+      </Frame>`
+    )
+    const [first] = graph.getChildren(library.id)
+    const [instance] = await renderJSX(graph, `<Instance of="${first?.id}" />`)
+    const jsx = selectionToJSX([library.id, instance.id], graph)
+    expect(jsx).toContain('const card1 = defineVars("Card 1"')
+    expect(jsx).toContain('const card2 = ref()')
+
+    const target = new SceneGraph()
+    const [copiedLibrary, copiedInstance] = await renderJSX(target, jsx)
+    const [copiedFirst] = target.getChildren(copiedLibrary.id)
+    expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(copiedFirst?.id)
+  })
+
   test('renders an instance written before its component', async () => {
     const { graph, library: libraryId } = await library()
     const [instance] = await renderJSX(graph, '<Instance of="Button" />')

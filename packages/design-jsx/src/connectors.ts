@@ -194,12 +194,14 @@ export interface ConnectorExportScope {
 
 /**
  * Plans how the connectors under `rootIds` write their ends. With `declare`, a joined layer
- * whose name is not unique gets a `ref()` the export declares before its JSX.
+ * whose name is not unique gets a `ref()` the export declares before its JSX, named apart from
+ * the names in `taken`, which it adds to.
  */
 export function connectorExportScope(
   graph: SceneGraph,
   rootIds: readonly string[],
-  declare: boolean
+  declare: boolean,
+  taken = new Set<string>()
 ): ConnectorExportScope {
   const layers = layersUnder(graph, rootIds)
   const connectors = layers.filter((layer) => layer.type === 'CONNECTOR')
@@ -215,7 +217,6 @@ export function connectorExportScope(
     layers.filter((layer) => layer.type !== 'CONNECTOR'),
     (layer) => layer.name
   )
-  const taken = new Set<string>()
   for (const layer of layers) {
     if (!joined.has(layer.id) || (named[layer.name] ?? 0) < 2) continue
     refs.set(layer.id, declare ? refName(layer.name, taken) : null)
