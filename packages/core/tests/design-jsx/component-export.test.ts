@@ -190,6 +190,30 @@ describe('component export', () => {
     expect(sceneNodeToJSX(instance.id, graph)).toContain(`of="${first.id}"`)
   })
 
+  test('names a component in the export by a ref where its name is shared', async () => {
+    const graph = new SceneGraph()
+    const [library] = await renderJSX(
+      graph,
+      `<Frame name="Library">
+        <Component name="Card" w={10} h={10} />
+        <Component name="Card" w={20} h={20} />
+      </Frame>`
+    )
+    const [first] = graph.getChildren(library.id)
+    const [instance] = await renderJSX(graph, `<Instance of="${first?.id}" />`)
+    const jsx = selectionToJSX([instance.id, library.id], graph)
+    expect(jsx).toContain('const card1 = ref()')
+    expect(jsx).toContain('<Instance name="Card" of={card1} />')
+    expect(jsx).toContain('<Component name="Card" w={10} h={10} ref={card1} />')
+
+    const target = new SceneGraph()
+    const [copiedInstance, copiedLibrary] = await renderJSX(target, jsx)
+    expect(copiedInstance.warnings).toBeUndefined()
+    const [copiedFirst] = target.getChildren(copiedLibrary.id)
+    expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(copiedFirst?.id)
+    expect(selectionToJSX([copiedInstance.id, copiedLibrary.id], target)).toBe(jsx)
+  })
+
   test('renders an instance written before its component', async () => {
     const { graph, library: libraryId } = await library()
     const [instance] = await renderJSX(graph, '<Instance of="Button" />')

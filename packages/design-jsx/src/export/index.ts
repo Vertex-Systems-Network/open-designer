@@ -8,14 +8,14 @@ import {
   connectorExportScope,
   connectorLabel,
   connectorProps,
-  connectorRefDeclarations,
+  refDeclarations,
   type ConnectorExportScope
 } from '../connectors'
 import { elementTag } from '../elements'
 import { shapeWithTextLabelText, shapeWithTextProps } from '../shapes-with-text'
 import { stickyBody, stickyProps } from '../stickies'
 import { rekaExport, type RekaExport } from './behaviours'
-import { componentReferences, type ComponentReference } from './component-references'
+import { componentReferences, exportRefs, type ComponentReference } from './component-references'
 import { iconProps } from './icons'
 import { instanceProps } from './instances'
 import { propertyBindingProps } from './properties'
@@ -145,9 +145,13 @@ function frameProps(
   return node.type === 'INSTANCE' ? props.filter(([name]) => name !== 'of') : props
 }
 
-/** What an export writes layers with: connector ends, variables, and how it names components. */
+/**
+ * What an export writes layers with: connector ends, the refs it declares, variables, and how
+ * it names components.
+ */
 interface ExportScope {
   connectors: ConnectorExportScope
+  refs: ReadonlyMap<string, string | null>
   variables: VariableExport
   reference: ComponentReference
 }
@@ -163,8 +167,8 @@ function nodeToJSX(
 ): SyntaxNode[] {
   const { variables, reference } = scope
   const reka = mergeReka(outer, rekaExport(graph, node, reference))
-  const ref = scope.connectors.refs.get(node.id)
-  // A layer a connector joins by a ref is marked with it, after its own props.
+  const ref = scope.refs.get(node.id)
+  // A layer a connector or `of` names by a ref is marked with it, after its own props.
   const withRef = (props: JSXProp[]): JSXProp[] =>
     ref ? [...props, ['ref', new Reference(ref)]] : props
   // Hidden children export with `visible={false}` rather than disappearing.
@@ -356,7 +360,8 @@ export function selectionToJSXWithLayers(
   const declare = options.declarations ?? true
   const connectors = connectorExportScope(graph, nodeIds, declare)
   const variables = variableExport(graph, nodeIds, declare)
-  const scope = { connectors, variables, reference: componentReferences(graph) }
+  const refs = exportRefs(graph, nodeIds, connectors.refs, declare)
+  const scope = { connectors, refs, variables, reference: componentReferences(graph, refs) }
   const roots = compact(
     nodeIds.map((id) => {
       const node = graph.getNode(id)
@@ -366,10 +371,7 @@ export function selectionToJSXWithLayers(
   )
   const elements = roots.join('\n\n')
   // Variables first: a ref names a layer, and nothing in a variable's definition refers to one.
-  const declarations = compact([
-    variables.declarations(),
-    connectorRefDeclarations(connectors)
-  ]).join('\n\n')
+  const declarations = compact([variables.declarations(), refDeclarations(refs)]).join('\n\n')
   if (!declarations || !elements) return { code: elements, layerIds }
   // Statements end with `return` and the JSX; several roots return as siblings in a fragment.
   const returned = roots.length > 1 ? `<>\n${elements}\n</>` : elements

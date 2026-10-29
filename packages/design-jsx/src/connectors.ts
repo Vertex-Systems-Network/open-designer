@@ -171,7 +171,7 @@ export function resolveConnectorEnds(
 }
 
 /** `card1` for a layer named "Card": a name a declaration can take, numbered to stay unique. */
-function refName(layerName: string, taken: Set<string>): string {
+export function refName(layerName: string, taken: Set<string>): string {
   const camel = camelCase(layerName)
   const base = es.isIdentifierName(camel) ? camel : 'layer'
   let count = 1
@@ -223,9 +223,9 @@ export function connectorExportScope(
   return { roots: new Set(rootIds), refs }
 }
 
-/** `const card1 = ref()` for each ref the scope declares, one per line. */
-export function connectorRefDeclarations(scope: ConnectorExportScope): string {
-  return compact([...scope.refs.values()])
+/** `const card1 = ref()` for each ref an export declares, one per line. */
+export function refDeclarations(refs: ReadonlyMap<string, string | null>): string {
+  return compact([...refs.values()])
     .map((name) => `const ${name} = ref()`)
     .join('\n')
 }

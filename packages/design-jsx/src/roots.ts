@@ -4,7 +4,7 @@ import { namesComponent, rekaRole } from './behaviours'
 import { isComponentProperty } from './component-properties'
 import { CONNECTOR_ELEMENT, resolveConnectorEnds } from './connectors'
 import { elementNodeType } from './elements'
-import { LayerRefs } from './refs'
+import { isLayerRef, LayerRefs, type LayerRef } from './refs'
 import { renderNode } from './renderer'
 import type { DesignJSXServices } from './services'
 import { FRAGMENT, isTreeNode, type TreeNode } from './tree'
@@ -25,10 +25,10 @@ function treeRoots(tree: TreeNode): TreeNode[] {
 }
 
 /** The component an element names: its `of`, or the default of the swap property bound there. */
-function componentReference(props: Record<string, unknown>): string | undefined {
+function componentReference(props: Record<string, unknown>): string | LayerRef | undefined {
   const reference = props.of ?? props.componentId ?? props.component
   const value = isComponentProperty(reference) ? reference.defaultValue : reference
-  return typeof value === 'string' ? value : undefined
+  return typeof value === 'string' || isLayerRef(value) ? value : undefined
 }
 
 /** Whether an element defines a component: a component, a set, or a Reka root naming none. */
@@ -43,8 +43,9 @@ function definesComponent(node: TreeNode): boolean {
  * instantiate them.
  */
 function rootRenderOrder(roots: TreeNode[]): number[] {
-  const componentOwners = new Map<string, Set<number>>()
-  const references = roots.map(() => new Set<string>())
+  // By name, and by the ref() that marks the component.
+  const componentOwners = new Map<string | LayerRef, Set<number>>()
+  const references = roots.map(() => new Set<string | LayerRef>())
 
   roots.forEach((root, index) => {
     const pending = [root]
@@ -52,11 +53,12 @@ function rootRenderOrder(roots: TreeNode[]): number[] {
       const node = pending.pop()
       if (!node) continue
       if (definesComponent(node)) {
-        const name = node.props.name
-        if (typeof name === 'string' && name) {
-          const owners = componentOwners.get(name) ?? new Set<number>()
+        const { name, ref } = node.props
+        for (const key of [typeof name === 'string' && name, isLayerRef(ref) && ref]) {
+          if (!key) continue
+          const owners = componentOwners.get(key) ?? new Set<number>()
           owners.add(index)
-          componentOwners.set(name, owners)
+          componentOwners.set(key, owners)
         }
       } else {
         const reference = componentReference(node.props)
@@ -124,7 +126,7 @@ export async function renderRoots<Artwork>(
       else refs.mark(element.props.ref, node)
       events.push([element, node])
     }
-    const node = await renderNode(services, graph, roots[index], parentId, onNode)
+    const node = await renderNode(services, graph, roots[index], parentId, onNode, undefined, refs)
     if (options.x !== undefined) graph.updateNode(node.id, { x: options.x })
     if (options.y !== undefined) graph.updateNode(node.id, { y: options.y })
     nodes[index] = node

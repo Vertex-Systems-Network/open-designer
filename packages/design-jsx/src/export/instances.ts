@@ -86,7 +86,7 @@ function assignedValue(
   if (definition.type === 'BOOLEAN') return value === 'true'
   if (definition.type !== 'INSTANCE_SWAP') return value
   const component = graph.getNode(value)
-  return component ? reference(component) : value
+  return component ? reference.name(component) : value
 }
 
 /**
@@ -127,8 +127,8 @@ function componentProps(
   const set = component.parentId ? graph.getNode(component.parentId) : undefined
   const values = Object.entries(component.componentPropertyValues)
   if (set?.type !== 'COMPONENT_SET' || !values.every(([name]) => isPropName(name)))
-    return [['of', reference(component)]]
-  return [['of', reference(set)], ...values]
+    return [['of', reference.of(component)]]
+  return [['of', reference.of(set)], ...values]
 }
 
 /**

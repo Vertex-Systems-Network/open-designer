@@ -96,7 +96,9 @@ function exportPart(
     // A group's items are written as the group's Item, naming their component.
     const set = item.parentId ? graph.getNode(item.parentId) : undefined
     result.tags.set(child.id, `${namespace}.Item`)
-    result.props.set(child.id, [['of', componentRef(set?.type === 'COMPONENT_SET' ? set : item)]])
+    result.props.set(child.id, [
+      ['of', componentRef.of(set?.type === 'COMPONENT_SET' ? set : item)]
+    ])
   }
 }
 
