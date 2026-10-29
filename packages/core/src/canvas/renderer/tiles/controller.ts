@@ -272,11 +272,12 @@ export class TiledSceneController {
     this.cancelledJobs += this.scheduler.setGeneration(navigationGeneration, contentGeneration)
     // Node changes arrive through invalidateNode() and structural ones through
     // invalidateStructure(), so a new content generation on its own is a redraw request (every
-    // requestRender() bumps it) and the rendered tiles stay valid.
+    // requestRender() bumps it) and the rendered tiles stay valid. Invalidations also arrive
+    // without a new generation, as when an image preview decodes.
     if (
       this.index &&
       this.pageId === renderer.pageId &&
-      this.contentGeneration !== contentGeneration
+      (this.contentGeneration !== contentGeneration || this.pendingInvalidations.length > 0)
     ) {
       this.applyPendingInvalidations(graph, contentGeneration)
     }

@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from 'bun:test'
+import { beforeAll, describe, expect, mock, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
@@ -6,6 +6,7 @@ import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
 import { SceneGraph } from '@open-pencil/scene-graph'
 
 import { SkiaRenderer } from '#core/canvas'
+import type { ImagePreview, ImagePreviewDecoder } from '#core/canvas/images/previews'
 import { TiledSceneController } from '#core/canvas/renderer/tiles'
 
 let ck: Awaited<ReturnType<typeof initCanvasKit>>
@@ -154,6 +155,124 @@ describe('tile scheduling', () => {
       expect(panning.pending).toBe(true)
     } finally {
       controller.destroy()
+      renderer.destroy()
+    }
+  })
+})
+
+describe('tiles with image previews', () => {
+  function encodedSquare(r: number, g: number, b: number): Uint8Array {
+    const surface = expectDefined(ck.MakeSurface(8, 8), 'image surface')
+    surface.getCanvas().clear(ck.Color4f(r, g, b, 1))
+    surface.flush()
+    const image = surface.makeImageSnapshot()
+    const bytes = expectDefined(image.encodeToBytes(ck.ImageFormat.PNG, 100), 'image PNG')
+    image.delete()
+    surface.delete()
+    return bytes
+  }
+
+  function centerPixel(renderer: SkiaRenderer): number[] {
+    const surface = renderer.surface
+    surface.flush()
+    const image = surface.makeImageSnapshot()
+    const pixels = expectDefined(
+      image.readPixels(160, 120, {
+        width: 1,
+        height: 1,
+        colorType: ck.ColorType.RGBA_8888,
+        alphaType: ck.AlphaType.Unpremul,
+        colorSpace: ck.ColorSpace.SRGB
+      }),
+      'pixel'
+    )
+    image.delete()
+    return Array.from(pixels as Uint8Array)
+  }
+
+  test('redraws only the tiles of an image once its preview decodes', async () => {
+    const graph = new SceneGraph()
+    const page = expectDefined(graph.getPages()[0], 'page')
+    const hash = 'red-square'
+    graph.images.set(hash, encodedSquare(1, 0, 0))
+    const node = graph.createNode('RECTANGLE', page.id, {
+      x: 60,
+      y: 40,
+      width: 200,
+      height: 160,
+      fills: [
+        {
+          type: 'IMAGE',
+          imageHash: hash,
+          color: { r: 0, g: 0, b: 0, a: 1 },
+          visible: true,
+          opacity: 1
+        }
+      ]
+    })
+    graph.createNode('RECTANGLE', page.id, {
+      x: 1000,
+      y: 1000,
+      width: 40,
+      height: 40,
+      fills: color(0, 0, 1)
+    })
+    const surface = expectDefined(ck.MakeSurface(320, 240), 'preview surface')
+    const renderer = new SkiaRenderer(ck, surface)
+    const controller = renderer.tiledScene
+    renderer.tiledSceneEnabled = true
+    renderer.pageId = page.id
+    renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
+    renderer.viewportWidth = 320
+    renderer.viewportHeight = 240
+    renderer.dpr = 1
+    renderer.zoom = 1
+    renderer.navigationPhase = 'idle'
+    renderer.viewportImageRendering = true
+    renderer.imageMemoryGraph = graph
+    let release: (() => void) | undefined
+    const decoded = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const decoder: ImagePreviewDecoder = {
+      decode: async (source, edge): Promise<ImagePreview> => {
+        await decoded
+        return { bytes: new Uint8Array(source), originalWidth: edge, originalHeight: edge }
+      },
+      destroy: mock()
+    }
+    renderer.imagePreviews.setDecoder(decoder)
+    const ready: string[] = []
+    renderer.onImagePreviewReady = (readyHash) => ready.push(readyHash)
+    try {
+      const canvas = surface.getCanvas()
+      canvas.clear(ck.WHITE)
+      let result = controller.renderFrame(renderer, canvas, graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, canvas, graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      // The preview is still decoding, so the image draws nothing yet.
+      expect(centerPixel(renderer)).toEqual([255, 255, 255, 255])
+      expect(renderer.imageFillUsers.get(hash)).toEqual(new Set([node.id]))
+
+      expectDefined(release, 'release')()
+      await decoded
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0)
+      })
+      expect(ready).toEqual([hash])
+
+      // The next frame invalidates only that node's tiles and renders them again.
+      renderer.flushDecodedPreviews(graph)
+      canvas.clear(ck.WHITE)
+      result = controller.renderFrame(renderer, canvas, graph, 1, 0)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, canvas, graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      expect(centerPixel(renderer)).toEqual([255, 0, 0, 255])
+    } finally {
       renderer.destroy()
     }
   })
