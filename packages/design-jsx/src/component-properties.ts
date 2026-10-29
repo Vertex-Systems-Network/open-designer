@@ -21,104 +21,6 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { DESIGN_JSX_SUPPORTED_PROPERTIES } from './definitions'
 import { parseScriptInput } from './schema'
 
-const definitionSchema = v.object({
-  id: v.string(),
-  name: v.string(),
-  type: v.picklist(['VARIANT', 'TEXT', 'BOOLEAN', 'INSTANCE_SWAP', 'SLOT']),
-  defaultValue: v.string(),
-  variantOptions: v.optional(v.array(v.string())),
-  preferredValues: v.optional(v.array(v.string())),
-  description: v.optional(v.string()),
-  slotSettings: v.optional(
-    v.object({
-      minChildren: v.optional(v.number()),
-      maxChildren: v.optional(v.number()),
-      allowPreferredValuesOnly: v.boolean(),
-      displayEmptyByDefault: v.boolean(),
-      stretchChildOnInsert: v.boolean()
-    })
-  )
-}) satisfies v.GenericSchema<ComponentPropertyDefinition>
-
-const referenceSchema = v.object({
-  propertyId: v.string(),
-  field: v.picklist(['VISIBLE', 'TEXT', 'INSTANCE_SWAP', 'SLOT_CONTENT'])
-}) satisfies v.GenericSchema<ComponentPropertyReference>
-
-function expectedReferenceField(type: ComponentPropertyDefinition['type']): string {
-  if (type === 'BOOLEAN') return 'VISIBLE'
-  if (type === 'SLOT') return 'SLOT_CONTENT'
-  return type
-}
-
-function validateComponentReference(
-  reference: ComponentPropertyReference,
-  type: SceneNode['type'],
-  definitions: readonly ComponentPropertyDefinition[] | undefined
-): void {
-  if (reference.field === 'TEXT' && type !== 'TEXT')
-    throw new Error('TEXT properties require a text node')
-  if (reference.field === 'INSTANCE_SWAP' && type !== 'INSTANCE')
-    throw new Error('INSTANCE_SWAP properties require an instance')
-  if (reference.field === 'SLOT_CONTENT' && type !== 'FRAME')
-    throw new Error('SLOT_CONTENT properties require a frame node')
-  if (!definitions) return
-
-  const definition = definitions.find((item) => item.id === reference.propertyId)
-  if (!definition) throw new Error(`Unknown component property reference: ${reference.propertyId}`)
-  const expectedField = expectedReferenceField(definition.type)
-  if (reference.field !== expectedField)
-    throw new Error(`Component property ${definition.id} cannot bind ${reference.field}`)
-}
-
-/** Accept the native graph contracts, without introducing a second property model. */
-export function componentMetadata(
-  props: Record<string, unknown>,
-  type: SceneNode['type'],
-  definitions?: readonly ComponentPropertyDefinition[],
-  boundReferences: readonly ComponentPropertyReference[] = [],
-  componentId?: ComponentLookup
-): Partial<SceneNode> {
-  const result: Partial<SceneNode> = {}
-  if (props.properties !== undefined && type !== 'INSTANCE') {
-    if (type !== 'COMPONENT' && type !== 'COMPONENT_SET')
-      throw new Error('Only components, component sets, and instances accept properties')
-    const componentDefinitions = parseScriptInput(
-      'Invalid properties',
-      v.array(definitionSchema),
-      props.properties
-    )
-    if (
-      new Set(componentDefinitions.map((definition) => definition.id)).size !==
-      componentDefinitions.length
-    )
-      throw new Error('Duplicate component property IDs')
-    const variantNames = componentDefinitions
-      .filter((item) => item.type === 'VARIANT')
-      .map((item) => item.name)
-    if (new Set(variantNames).size !== variantNames.length)
-      throw new Error('Duplicate variant property names')
-    result.componentPropertyDefinitions = componentDefinitions.map((definition) => {
-      if (definition.type !== 'INSTANCE_SWAP' || !componentId) return definition
-      return {
-        ...definition,
-        defaultValue: componentId(definition.defaultValue) ?? definition.defaultValue,
-        ...(definition.preferredValues && {
-          preferredValues: definition.preferredValues.map((value) => componentId(value) ?? value)
-        })
-      }
-    })
-  }
-  const references =
-    props.propertyRefs === undefined
-      ? []
-      : parseScriptInput('Invalid propertyRefs', v.array(referenceSchema), props.propertyRefs)
-  for (const reference of references) validateComponentReference(reference, type, definitions)
-  const allReferences = [...references, ...boundReferences]
-  if (allReferences.length > 0) result.componentPropertyReferences = allReferences
-  return result
-}
-
 const PROPERTY_SYMBOL = Symbol.for('open-pencil.component-property')
 
 /**
@@ -221,13 +123,8 @@ export function bindProperties(
   parentId: string,
   componentId: ComponentLookup
 ): BoundProperties {
-  if (
-    source.properties !== undefined &&
-    type !== 'INSTANCE' &&
-    type !== 'COMPONENT' &&
-    type !== 'COMPONENT_SET'
-  )
-    throw new Error('Only components, component sets, and instances accept properties')
+  if (source.properties !== undefined && type !== 'INSTANCE')
+    throw new Error('Only instances accept properties; bind a field to property() instead')
   const props = { ...source }
   const references: ComponentPropertyReference[] = []
   for (const [key, value] of Object.entries(source)) {
@@ -274,28 +171,6 @@ export function componentPropertyScope(
     parent = parent.parentId ? graph.getNode(parent.parentId) : undefined
   }
   return undefined
-}
-
-/** Component metadata, property references, and variable mode for one rendered node. */
-export function componentMetadataForNode(
-  graph: SceneGraph,
-  props: Record<string, unknown>,
-  type: SceneNode['type'],
-  parentId: string,
-  bound: Pick<BoundProperties, 'references'>,
-  variableModes?: SceneNode['variableModes'],
-  componentId?: ComponentLookup
-): Partial<SceneNode> {
-  return {
-    ...componentMetadata(
-      props,
-      type,
-      componentPropertyScope(graph, parentId),
-      bound.references,
-      componentId
-    ),
-    ...(variableModes && { variableModes })
-  }
 }
 
 /** The one property with this name; a name several properties share is an error. */

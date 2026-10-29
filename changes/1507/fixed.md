@@ -1,1 +1,1 @@
-- Preserve component property definitions, bindings, and instance assignments across node reads and Design JSX exports.
+- Node reads and `get_components` include component property definitions, and Design JSX export writes components, component sets, and instances with their `property()` bindings, property values, and layer overrides, so they render back as linked components instead of detached frames.

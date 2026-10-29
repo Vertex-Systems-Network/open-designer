@@ -1,41 +1,23 @@
+import { countBy } from 'es-toolkit/array'
+
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-export type ComponentReferenceMap = ReadonlyMap<string, string>
+/** How an export names a component: by its name where no other component has it, as `of` finds it. */
+export type ComponentReference = (component: SceneNode) => string
 
-/** Names resolve across graphs only when the exported component is included and unambiguous. */
-export function componentReferences(
-  graph: SceneGraph,
-  roots: readonly string[]
-): ComponentReferenceMap {
-  const included = new Map<string, SceneNode>()
-  const visited = new Set<string>()
-  const visit = (id: string) => {
-    if (visited.has(id)) return
-    visited.add(id)
-    const node = graph.getNode(id)
-    if (!node || node.type === 'INSTANCE') return
-    if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') included.set(node.id, node)
-    for (const child of graph.getChildren(id)) visit(child.id)
-  }
-  roots.forEach(visit)
-
-  const names = new Map<string, number>()
-  for (const node of graph.getAllNodes()) {
-    if (node.type !== 'COMPONENT' && node.type !== 'COMPONENT_SET') continue
-    names.set(node.name, (names.get(node.name) ?? 0) + 1)
-  }
-
-  return new Map(
-    [...included.values()].map((node) => [
-      node.id,
-      node.name && names.get(node.name) === 1 ? node.name : node.id
-    ])
-  )
+function isComponent(node: SceneNode): boolean {
+  return node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
 }
 
-export function componentReference(
-  component: SceneNode,
-  references: ComponentReferenceMap
-): string {
-  return references.get(component.id) ?? component.id
+/**
+ * Names `<Instance of>` resolves in this graph and in another that has the same components,
+ * such as a fresh graph the same export renders into. A name two components share is written
+ * as the component's ID. The graph is read once, on the first reference.
+ */
+export function componentReferences(graph: SceneGraph): ComponentReference {
+  let names: Record<string, number> | undefined
+  return (component) => {
+    names ??= countBy([...graph.getAllNodes()].filter(isComponent), (node) => node.name)
+    return component.name && names[component.name] === 1 ? component.name : component.id
+  }
 }

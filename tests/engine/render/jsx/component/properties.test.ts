@@ -210,11 +210,11 @@ test('property() binds text, visible, and of, on the layers that have them', asy
   }
 })
 
-test('layers that do not hold component properties reject definitions before rendering', async () => {
+test('elements other than instances reject properties before rendering', async () => {
   const graph = makeSceneGraph()
-  for (const type of ['frame', 'text', 'rectangle']) {
+  for (const type of ['frame', 'text', 'rectangle', 'component', 'component-set']) {
     await expect(renderTree(graph, node(type, { properties: [] }))).rejects.toThrow(
-      'Only components, component sets, and instances accept properties'
+      'Only instances accept properties'
     )
   }
 })

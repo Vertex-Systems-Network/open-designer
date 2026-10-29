@@ -9,7 +9,7 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { slotPropertyId } from '@open-pencil/scene-graph/slots'
 
 import { REKA_ELEMENTS, rekaRole } from '../behaviours'
-import { componentReference, type ComponentReferenceMap } from './component-references'
+import type { ComponentReference } from './component-references'
 import type { JSXProp, JSXValue } from './value'
 
 /** The Reka namespace and element a kind's component is written as. */
@@ -80,7 +80,7 @@ function exportPart(
   layer: SceneNode,
   partId: string,
   result: RekaExport,
-  componentRefs: ComponentReferenceMap
+  componentRef: ComponentReference
 ): void {
   const tag = elementFor(namespace, (role) => role?.role === 'part' && role.part === partId)
   const repeated = elementFor(
@@ -95,9 +95,8 @@ function exportPart(
     if (partId !== 'items' || !item) continue
     // A group's items are written as the group's Item, naming their component.
     const set = item.parentId ? graph.getNode(item.parentId) : undefined
-    const component = set?.type === 'COMPONENT_SET' ? set : item
     result.tags.set(child.id, `${namespace}.Item`)
-    result.props.set(child.id, [['of', componentReference(component, componentRefs)]])
+    result.props.set(child.id, [['of', componentRef(set?.type === 'COMPONENT_SET' ? set : item)]])
   }
 }
 
@@ -114,7 +113,7 @@ function descendants(graph: SceneGraph, node: SceneNode): SceneNode[] {
 export function rekaExport(
   graph: SceneGraph,
   owner: SceneNode,
-  componentRefs: ComponentReferenceMap = new Map()
+  componentRef: ComponentReference
 ): RekaExport | null {
   const behaviour = readBehaviour(owner)
   if (!behaviour || (owner.type !== 'COMPONENT' && owner.type !== 'COMPONENT_SET')) return null
@@ -133,7 +132,7 @@ export function rekaExport(
       ([, id]) => id === slotPropertyId(layer)
     )?.[0]
     if (partId) {
-      exportPart(graph, namespace, layer, partId, result, componentRefs)
+      exportPart(graph, namespace, layer, partId, result, componentRef)
       continue
     }
     const reference = layer.componentPropertyReferences.find((item) => item.field === 'TEXT')

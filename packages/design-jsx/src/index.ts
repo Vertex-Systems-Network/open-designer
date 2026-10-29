@@ -55,7 +55,7 @@ export {
   resolveToTree
 } from './tree'
 
-export type { RenderResult } from './render/roots'
+export type { RenderResult } from './roots'
 
 export {
   backgroundBlur,

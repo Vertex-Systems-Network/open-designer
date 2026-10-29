@@ -3,7 +3,6 @@ import { compact } from 'es-toolkit/array'
 import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 
 import {
   connectorExportScope,
@@ -16,12 +15,14 @@ import { elementTag } from '../elements'
 import { shapeWithTextLabelText, shapeWithTextProps } from '../shapes-with-text'
 import { stickyBody, stickyProps } from '../stickies'
 import { rekaExport, type RekaExport } from './behaviours'
-import { componentReferences } from './component-references'
+import { componentReferences, type ComponentReference } from './component-references'
 import { iconProps } from './icons'
+import { instanceProps } from './instances'
+import { propertyBindingProps } from './properties'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
 import { plainValue, propAttribute, Reference, type JSXProp } from './value'
-import { variableExport, type VariableExport } from './variables'
+import { variableExport, variableReferences, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
 export interface DesignJSXWithLayers {
@@ -117,29 +118,38 @@ function ownElement(
   return isGeneratedFrame(node) ? OWN_ELEMENTS[node.type](graph, node, scope) : undefined
 }
 
-/** A component omitted from this export cannot be resolved on its own. */
-function instanceUsesFrameFallback(
-  node: SceneNode,
-  graph: SceneGraph,
-  componentRefs?: ReturnType<typeof componentReferences>
-): boolean {
-  if (node.type !== 'INSTANCE') return false
-  const component = instanceMainComponent(graph, node)
-  return !!component && !!componentRefs && !componentRefs.has(component.id)
+/**
+ * The element a layer is written as. An instance whose props cannot be written is written as
+ * the frame it draws.
+ */
+function layerTag(node: SceneNode, instance: JSXProp[] | null): string | undefined {
+  return node.type === 'INSTANCE' && !instance ? 'Frame' : elementTag(node.type)
 }
 
-/** An unresolved or omitted component cannot be recreated, so retain the frame fallback. */
-function exportTag(
+/** Whether a text layer's text is a component property, written as a prop rather than as children. */
+function hasTextProp(props: JSXProp[]): boolean {
+  return props.some(([name]) => name === 'text')
+}
+
+/**
+ * A layer's props. An instance written as a frame leaves out the swap property it is bound to,
+ * which only an instance takes.
+ */
+function frameProps(
   node: SceneNode,
   graph: SceneGraph,
-  componentRefs?: ReturnType<typeof componentReferences>
-): string | undefined {
-  if (
-    node.type === 'INSTANCE' &&
-    (!instanceMainComponent(graph, node) || instanceUsesFrameFallback(node, graph, componentRefs))
-  )
-    return 'Frame'
-  return elementTag(node.type)
+  variables: VariableExport,
+  reference: ComponentReference
+): JSXProp[] {
+  const props = collectProps(node, graph, variables, reference)
+  return node.type === 'INSTANCE' ? props.filter(([name]) => name !== 'of') : props
+}
+
+/** What an export writes layers with: connector ends, variables, and how it names components. */
+interface ExportScope {
+  connectors: ConnectorExportScope
+  variables: VariableExport
+  reference: ComponentReference
 }
 
 /** The layers an export writes, by the roots it starts from. */
@@ -147,14 +157,13 @@ function nodeToJSX(
   node: SceneNode,
   graph: SceneGraph,
   depth: number,
-  scope: ConnectorExportScope,
-  variables: VariableExport,
-  componentRefs: ReturnType<typeof componentReferences>,
+  scope: ExportScope,
   layerIds?: Array<string | null>,
   outer: RekaExport = NO_REKA
 ): SyntaxNode[] {
-  const reka = mergeReka(outer, rekaExport(graph, node, componentRefs))
-  const ref = scope.refs.get(node.id)
+  const { variables, reference } = scope
+  const reka = mergeReka(outer, rekaExport(graph, node, reference))
+  const ref = scope.connectors.refs.get(node.id)
   // A layer a connector joins by a ref is marked with it, after its own props.
   const withRef = (props: JSXProp[]): JSXProp[] =>
     ref ? [...props, ['ref', new Reference(ref)]] : props
@@ -162,9 +171,7 @@ function nodeToJSX(
   const children = (childDepth: number) =>
     graph
       .getChildren(node.id)
-      .flatMap((child) =>
-        nodeToJSX(child, graph, childDepth, scope, variables, componentRefs, layerIds, reka)
-      )
+      .flatMap((child) => nodeToJSX(child, graph, childDepth, scope, layerIds, reka))
   if (reka.flatten.has(node.id)) return children(depth)
   // An icon is written by name; its paths are the icon set's to draw again.
   const icon = iconProps(node, graph)
@@ -172,26 +179,27 @@ function nodeToJSX(
     layerIds?.push(node.id)
     return [jsx.element('Icon', withRef(icon).map(propAttribute), [], depth)]
   }
-  const frameFallback = instanceUsesFrameFallback(node, graph, componentRefs)
-  const tag = frameFallback
-    ? 'Frame'
-    : (reka.tags.get(node.id) ?? exportTag(node, graph, componentRefs))
+  const instance =
+    node.type === 'INSTANCE' && !reka.tags.has(node.id)
+      ? instanceProps(node, graph, variables, reference)
+      : null
+  const tag = reka.tags.get(node.id) ?? layerTag(node, instance)
   if (!tag) return []
   layerIds?.push(node.id)
-  const own = ownElement(graph, node, scope)
+  const own = ownElement(graph, node, scope.connectors)
   if (own) {
     const children = own.text ? [jsx.text(own.text)] : []
     return [jsx.element(tag, own.props.map(propAttribute), children, depth, true)]
   }
-  const ownProps = frameFallback ? undefined : reka.props.get(node.id)
+  const ownProps = reka.props.get(node.id)
   // An item names its component; the instance's own layers are the component's to write.
   if (ownProps?.some(([name]) => name === 'of'))
     return [jsx.element(tag, withRef(ownProps).map(propAttribute), [], depth)]
-  const attributes = withRef([
-    ...collectProps(node, graph, variables, componentRefs),
-    ...(ownProps ?? [])
-  ]).map(propAttribute)
-  if (node.type === 'TEXT') {
+  // An instance's layers are its component's to draw; what it changes in them is in its props.
+  if (instance) return [jsx.element(tag, withRef(instance).map(propAttribute), [], depth)]
+  const props = [...frameProps(node, graph, variables, reference), ...(ownProps ?? [])]
+  const attributes = withRef(props).map(propAttribute)
+  if (node.type === 'TEXT' && !hasTextProp(props)) {
     const { children: content, inline } = textChildren(node, depth)
     for (let count = elementCount(content); count > 0; count--) layerIds?.push(null)
     return [jsx.element(tag, attributes, content, depth, inline)]
@@ -220,10 +228,15 @@ export function sceneNodeAttributes(
   graph: SceneGraph
 ): JSXAttributeSource[] | null {
   const node = graph.getNode(nodeId)
-  if (!node || !exportTag(node, graph)) return null
+  if (!node) return null
+  const reference = componentReferences(graph)
+  const variables = variableReferences(graph)
+  const instance =
+    node.type === 'INSTANCE' ? instanceProps(node, graph, variables, reference) : null
+  if (!layerTag(node, instance)) return null
   const own = ownElement(graph, node)
-  const props = own ? own.props : collectProps(node, graph)
-  if (node.type === 'TEXT') props.push(['text', node.text])
+  const props = instance ?? (own ? own.props : frameProps(node, graph, variables, reference))
+  if (node.type === 'TEXT' && !hasTextProp(props)) props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
     name: prop[0],
@@ -257,22 +270,31 @@ function contentBetween(tag: string, children: SyntaxNode[], inline: boolean): s
 
 export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXElement | null {
   const node = graph.getNode(nodeId)
-  const tag = node && exportTag(node, graph)
   const printed = sceneNodeAttributes(nodeId, graph)
-  if (!node || !tag || !printed) return null
+  if (!node || !printed) return null
+  const reference = componentReferences(graph)
+  const isInstance =
+    node.type === 'INSTANCE' &&
+    instanceProps(node, graph, variableReferences(graph), reference) !== null
+  const tag = node.type === 'INSTANCE' && !isInstance ? 'Frame' : elementTag(node.type)
+  if (!tag) return null
   // A text layer's content, a connector's label, or a sticky note's body is written as its
   // children, not as the `text` attribute; the layers they generate are not written at all.
+  // A text layer bound to a component property keeps it as the `text` attribute.
   const own = ownElement(graph, node)
-  const hasContent = node.type === 'TEXT' || own !== undefined
+  const boundText =
+    node.type === 'TEXT' && hasTextProp(propertyBindingProps(node, graph, reference))
+  const hasContent = (node.type === 'TEXT' && !boundText) || own !== undefined
   const attributes = Object.fromEntries(
     printed
       .filter(({ name }) => !hasContent || name !== 'text')
       .map(({ name, source }) => [name, source])
   )
-  if (node.type === 'TEXT') {
+  if (node.type === 'TEXT' && !boundText) {
     const { children, inline } = textChildren(node, 0)
     return { tag, attributes, text: contentBetween(tag, children, inline), childIds: [] }
   }
+  if (node.type === 'TEXT' || isInstance) return { tag, attributes, text: null, childIds: [] }
   if (own) {
     const children = own.text ? [jsx.text(own.text)] : []
     return { tag, attributes, text: contentBetween(tag, children, true), childIds: [] }
@@ -310,23 +332,22 @@ export function selectionToJSXWithLayers(
 ): DesignJSXWithLayers {
   const layerIds: Array<string | null> = []
   const declare = options.declarations ?? true
-  const scope = connectorExportScope(graph, nodeIds, declare)
+  const connectors = connectorExportScope(graph, nodeIds, declare)
   const variables = variableExport(graph, nodeIds, declare)
-  const componentRefs = componentReferences(graph, nodeIds)
+  const scope = { connectors, variables, reference: componentReferences(graph) }
   const roots = compact(
     nodeIds.map((id) => {
       const node = graph.getNode(id)
-      const syntax = node
-        ? nodeToJSX(node, graph, 0, scope, variables, componentRefs, layerIds).at(0)
-        : undefined
+      const syntax = node ? nodeToJSX(node, graph, 0, scope, layerIds).at(0) : undefined
       return syntax ? jsx.printJSX(syntax) : ''
     })
   )
   const elements = roots.join('\n\n')
   // Variables first: a ref names a layer, and nothing in a variable's definition refers to one.
-  const declarations = compact([variables.declarations(), connectorRefDeclarations(scope)]).join(
-    '\n\n'
-  )
+  const declarations = compact([
+    variables.declarations(),
+    connectorRefDeclarations(connectors)
+  ]).join('\n\n')
   if (!declarations || !elements) return { code: elements, layerIds }
   // Statements end with `return` and the JSX; several roots return as siblings in a fragment.
   const returned = roots.length > 1 ? `<>\n${elements}\n</>` : elements

@@ -1,14 +1,7 @@
 import { isEqual, omitBy, pick } from 'es-toolkit'
 
-import type {
-  ArcData,
-  ComponentPropertyDefinition,
-  SceneGraph,
-  SceneNode
-} from '@open-pencil/scene-graph'
-import { componentPropertyDefinitions } from '@open-pencil/scene-graph/components'
+import type { ArcData, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { DEFAULT_FONT_FAMILY } from '@open-pencil/scene-graph/constants'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { layoutSizing } from '@open-pencil/scene-graph/layout'
 import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
 import { resolveNodeTextDirection } from '@open-pencil/scene-graph/text/direction'
@@ -16,7 +9,7 @@ import { vectorNetworkPaths } from '@open-pencil/scene-graph/vector-network'
 
 import { BLEND_MODE, TEXT_ALIGN, TEXT_ALIGN_VERTICAL, TEXT_CASE, TEXT_DECORATION } from '../enums'
 import { textLengthJSX } from '../overrides/text'
-import { componentReference, type ComponentReferenceMap } from './component-references'
+import { componentReferences, type ComponentReference } from './component-references'
 import { collectDecorationProps } from './decoration'
 import { collectFontSettingProps, FONT_SETTING_FIELDS } from './font'
 import {
@@ -27,8 +20,9 @@ import {
   getNodeContext
 } from './helpers'
 import { collectEffectProps, collectFillProps, collectStrokeProps } from './paint'
+import { propertyBindingProps } from './properties'
 import { collectStateProps } from './state'
-import { plainValue, type JSXProp } from './value'
+import type { JSXProp } from './value'
 import { variableReferences, type VariableExport } from './variables'
 
 export type { JSXProp } from './value'
@@ -347,13 +341,14 @@ function collectShapeNodeProps(node: SceneNode, props: JSXProp[]): void {
 
 /**
  * The props of `node`, in the order they are printed, with the variables it binds written as
- * `variables` writes them: by default, by reference to the document's.
+ * `variables` writes them: by default, by reference to the document's. Components are named as
+ * `reference` names them.
  */
 export function collectProps(
   node: SceneNode,
   graph: SceneGraph,
   variables: VariableExport = variableReferences(graph),
-  componentRefs?: ComponentReferenceMap
+  reference: ComponentReference = componentReferences(graph)
 ): JSXProp[] {
   const props: JSXProp[] = []
   const ctx = getNodeContext(node, graph)
@@ -372,101 +367,8 @@ export function collectProps(
   }
   collectShapeNodeProps(node, props)
   collectStateProps(node, ctx, props, variables)
-  props.push(...collectComponentProps(node, graph, componentRefs))
 
-  return props
-}
-
-function collectComponentProps(
-  node: SceneNode,
-  graph: SceneGraph,
-  componentRefs?: ComponentReferenceMap
-): JSXProp[] {
-  const props: JSXProp[] = []
-  if (node.type === 'COMPONENT' || node.type === 'COMPONENT_SET') {
-    if (node.componentPropertyDefinitions.length > 0)
-      props.push([
-        'properties',
-        plainValue(
-          node.componentPropertyDefinitions.map((definition) =>
-            mapComponentPropertyDefinition(definition, graph, componentRefs)
-          )
-        )
-      ])
-  }
-  if (node.type === 'INSTANCE') {
-    const component = instanceMainComponent(graph, node)
-    if (component && (!componentRefs || componentRefs.has(component.id))) {
-      props.push([
-        'of',
-        componentRefs ? componentReference(component, componentRefs) : component.id
-      ])
-      if (Object.keys(node.componentPropertyAssignments).length > 0)
-        props.push([
-          'properties',
-          plainValue(mapComponentPropertyAssignments(graph, node, componentRefs))
-        ])
-    }
-  }
-  const component = node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
-  if (
-    node.type !== 'INSTANCE' ||
-    (component && (!componentRefs || componentRefs.has(component.id)))
-  ) {
-    if (node.componentPropertyReferences.length > 0)
-      props.push(['propertyRefs', plainValue(node.componentPropertyReferences)])
-  }
-
-  return props
-}
-
-function componentReferenceValue(
-  value: string,
-  graph: SceneGraph,
-  componentRefs?: ComponentReferenceMap
-): string {
-  if (!componentRefs) return value
-  const component = graph.getNode(value)
-  if (
-    !component ||
-    (component.type !== 'COMPONENT' && component.type !== 'COMPONENT_SET') ||
-    !componentRefs.has(component.id)
-  )
-    return value
-  return componentReference(component, componentRefs)
-}
-
-function mapComponentPropertyDefinition(
-  definition: ComponentPropertyDefinition,
-  graph: SceneGraph,
-  componentRefs?: ComponentReferenceMap
-): ComponentPropertyDefinition {
-  if (definition.type !== 'INSTANCE_SWAP') return definition
-  return {
-    ...definition,
-    defaultValue: componentReferenceValue(definition.defaultValue, graph, componentRefs),
-    ...(definition.preferredValues && {
-      preferredValues: definition.preferredValues.map((value) =>
-        componentReferenceValue(value, graph, componentRefs)
-      )
-    })
-  }
-}
-
-function mapComponentPropertyAssignments(
-  graph: SceneGraph,
-  instance: SceneNode,
-  componentRefs?: ComponentReferenceMap
-): Record<string, string> {
-  const swapProperties = new Set(
-    componentPropertyDefinitions(graph, instance)
-      .filter((definition) => definition.type === 'INSTANCE_SWAP')
-      .map((definition) => definition.id)
-  )
-  return Object.fromEntries(
-    Object.entries(instance.componentPropertyAssignments).map(([propertyId, value]) => [
-      propertyId,
-      swapProperties.has(propertyId) ? componentReferenceValue(value, graph, componentRefs) : value
-    ])
-  )
+  // A field bound to a component property is written as the binding, in place of its value.
+  const bound = propertyBindingProps(node, graph, reference)
+  return [...props.filter(([name]) => !bound.some(([key]) => key === name)), ...bound]
 }

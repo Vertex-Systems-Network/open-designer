@@ -6,7 +6,7 @@ import {
   type BehaviourSpec
 } from '@open-pencil/scene-graph/behaviours'
 import { createComponentPropertyId } from '@open-pencil/scene-graph/components'
-import { createSlotProperty, slotPropertyId } from '@open-pencil/scene-graph/slots'
+import { createSlotProperty } from '@open-pencil/scene-graph/slots'
 
 import { node, type TreeNode } from '../tree'
 
@@ -155,15 +155,6 @@ export function createScope(kind: BehaviourKind, ownerId: string): RekaScope {
 
 /** Make a rendered part frame its part's slot, with the id the part has in this component. */
 export function bindPart(graph: SceneGraph, scope: RekaScope, frame: SceneNode, partId: string) {
-  const existingId = slotPropertyId(frame)
-  if (existingId) {
-    const id = scope.slots.get(partId)
-    if (id && id !== existingId)
-      throw new Error(`<${partId}> must use the same slot property across component variants`)
-    scope.slots.set(partId, existingId)
-    return
-  }
-
   const id = scope.slots.get(partId) ?? createComponentPropertyId()
   if (!createSlotProperty(graph, frame.id, id))
     throw new Error(`<${partId}> must be inside a main component`)
@@ -178,25 +169,6 @@ export function bindInput(
   valueId: string,
   propertyName: string
 ) {
-  const references = text.componentPropertyReferences.filter(
-    (reference) => reference.field === 'TEXT'
-  )
-  if (references.length > 1) throw new Error('A Reka input can bind only one text property')
-  if (references.length === 1) {
-    const reference = references[0]
-    const owner = graph.getNode(scope.ownerId)
-    const definition = owner?.componentPropertyDefinitions.find(
-      (item) => item.id === reference.propertyId
-    )
-    if (definition?.type !== 'TEXT')
-      throw new Error('A Reka input reference must name a text property on its component')
-    const existing = scope.texts.get(valueId)
-    if (existing && existing !== reference.propertyId)
-      throw new Error('A Reka input must use the same text property across component variants')
-    scope.texts.set(valueId, reference.propertyId)
-    return
-  }
-
   let id = scope.texts.get(valueId)
   if (!id) {
     id = createComponentPropertyId()

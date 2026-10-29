@@ -1,22 +1,20 @@
 import { omitBy } from 'es-toolkit/object'
 
-import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-pencil/scene-graph'
 import { parseColor } from '@open-pencil/scene-graph/color'
 import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
 
 import type { RekaScope } from './behaviours'
-import { renderRekaNode, type RenderChild } from './behaviours/render'
+import { renderRekaNode } from './behaviours/render'
 import {
   assignComponentProperties,
   assignNamedProperties,
   bindProperties,
-  componentMetadataForNode,
   componentPropNames as namesOnInstance,
   exposeInstance,
   inferComponentSetProperties
 } from './component-properties'
 import { elementNodeType, elementOwnLayer, type OwnLayerRenderer } from './elements'
-import { restoreOwnedSlotContent } from './instance-slot-content'
 import { placeVectorPaths } from './overrides/vector'
 import { applySizeOverrides, propsToOverrides, shapeOverrides } from './props-overrides'
 import { prepareScalarBindings } from './scalar-bindings'
@@ -286,8 +284,7 @@ export function componentPropNames(graph: SceneGraph, props: Record<string, unkn
 async function renderInstanceNode(
   graph: SceneGraph,
   tree: TreeNode,
-  parentId: string,
-  renderChild: RenderChild
+  parentId: string
 ): Promise<SceneNode> {
   const parent = graph.getNode(parentId)
   const parentLayout = parent?.layoutMode ?? 'NONE'
@@ -300,18 +297,9 @@ async function renderInstanceNode(
     const label = typeof ref === 'string' || typeof ref === 'number' ? String(ref) : ''
     throw new Error(`<Instance> component not found: ${label}`)
   }
-  const metadata = componentMetadataForNode(
-    graph,
-    props,
-    'INSTANCE',
-    parentId,
-    bound,
-    modes,
-    componentIdNamed(graph)
-  )
-  const overrides = {
+  const overrides: Partial<SceneNode> = {
     ...propsToOverrides(props, false, parentLayout),
-    ...metadata
+    ...layerMetadata(modes, bound.references)
   }
   // Instances inherit their container layout, but explicitly authored dimensions
   // must also replace the inherited sizing mode on that axis.
@@ -342,7 +330,6 @@ async function renderInstanceNode(
     assignNamedProperties(graph, instance, props, componentIdNamed(graph))
     assignComponentProperties(graph, instance, props.properties, componentIdNamed(graph))
     if (props.exposed === true) exposeInstance(graph, instance)
-    await restoreOwnedSlotContent(graph, instance, tree, renderChild)
     return instance
   } catch (error) {
     graph.deleteNode(instance.id)
@@ -404,18 +391,21 @@ async function renderArtworkNode<Artwork>(
     tree.type === 'icon'
       ? await renderIconNode(services, graph, artwork, parentId)
       : renderSVGNode(services, graph, artwork, parentId)
-  const metadata = componentMetadataForNode(
-    graph,
-    bound.props,
-    'VECTOR',
-    parentId,
-    bound,
-    undefined,
-    componentIdNamed(graph)
-  )
+  const metadata: Partial<SceneNode> = layerMetadata(undefined, bound.references)
   if (typeof bound.props.visible === 'boolean') metadata.visible = bound.props.visible
   if (Object.keys(metadata).length > 0) graph.updateNode(node.id, metadata)
   return node
+}
+
+/** The modes a layer pins and the component properties its fields are bound to. */
+function layerMetadata(
+  modes: VariableModeMap | undefined,
+  references: SceneNode['componentPropertyReferences']
+): Partial<SceneNode> {
+  return {
+    ...(modes && { variableModes: modes }),
+    ...(references.length > 0 && { componentPropertyReferences: references })
+  }
 }
 
 /** The component a swap property's default names, by ID or name, as `<Instance of>` finds it. */
@@ -442,19 +432,10 @@ export function elementOverrides(
   const bound = bindProperties(graph, tree.props, nodeType, parentId, componentIdNamed(graph))
   const layer = { parentId, modes }
   const { props, bindings } = preparePropsForRender(graph, bound.props, isText, layer)
-  const metadata = componentMetadataForNode(
-    graph,
-    props,
-    nodeType,
-    parentId,
-    bound,
-    modes,
-    componentIdNamed(graph)
-  )
   const overrides = {
     ...propsToOverrides(props, isText, parentLayout),
     ...shapeOverrides(nodeType, props),
-    ...metadata
+    ...layerMetadata(modes, bound.references)
   }
 
   if (isText) {
@@ -487,15 +468,14 @@ function renderOwnElement<Artwork>(
   services: DesignJSXServices<Artwork>,
   graph: SceneGraph,
   tree: TreeNode,
-  parentId: string,
-  renderChild: RenderChild
+  parentId: string
 ): Promise<SceneNode> | null {
   switch (tree.type) {
     case 'icon':
     case 'svg':
       return renderArtworkNode(services, graph, tree, parentId)
     case 'instance':
-      return renderInstanceNode(graph, tree, parentId, renderChild)
+      return renderInstanceNode(graph, tree, parentId)
     default: {
       const element = elementOwnLayer(tree.type)
       return element ? Promise.resolve(renderOwnLayerElement(graph, tree, parentId, element)) : null
@@ -511,12 +491,11 @@ async function renderNodeContent<Artwork>(
   onNode?: RenderOptions['onNode'],
   scope?: RekaScope
 ): Promise<SceneNode> {
-  const renderChild: RenderChild = (child, childParentId, childScope) =>
-    renderNode(services, graph, child, childParentId, onNode, childScope)
-  const own = renderOwnElement(services, graph, tree, parentId, renderChild)
+  const own = renderOwnElement(services, graph, tree, parentId)
   if (own) return own
   const reka = await renderRekaNode(graph, tree, parentId, scope, {
-    render: renderChild,
+    render: (child, childParentId, childScope) =>
+      renderNode(services, graph, child, childParentId, onNode, childScope),
     create: (nodeType, element, elementParentId) => {
       const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
       const created = graph.createNode(nodeType, elementParentId, overrides)
@@ -524,8 +503,7 @@ async function renderNodeContent<Artwork>(
       placeVectorPaths(graph, created, element.props, (network) => services.vectorBounds(network))
       return created
     },
-    instance: (element, elementParentId) =>
-      renderInstanceNode(graph, element, elementParentId, renderChild),
+    instance: (element, elementParentId) => renderInstanceNode(graph, element, elementParentId),
     finishSet: (setId) => inferComponentSetProperties(graph, setId)
   })
   if (reka) return reka
