@@ -89,42 +89,37 @@ describe('tile scheduling', () => {
     }
   })
 
-  test('zooms over the previous level scaled while rendering the quantized gesture level', () => {
+  test('zooms over the previous level scaled and renders the exact level once the zoom pauses', () => {
     const { graph, surface, renderer, pageId } = createGridScene()
-    // A millisecond a reading: a tile's draw stays affordable while moving, and recording its
-    // chunk pictures spreads over frames.
-    let time = 0
-    const controller = new TiledSceneController({ now: () => (time += 1) })
+    const controller = new TiledSceneController({ now: () => 0 })
     try {
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 200 && !result.covered; frame++) {
+      for (let frame = 0; frame < 30 && (result.pending || result.backgroundPending); frame++) {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
       expect(result.covered).toBe(true)
 
-      // Zoom to 1.3: the gesture level is the quantized step above it, 2^0.5, and one of its
-      // tiles renders per moving frame while the level-1 tiles stand in for the rest.
+      // The level moves: nothing renders, the level-1 tiles stand in scaled.
       renderer.zoom = 1.3
       renderer.navigationPhase = 'zoom'
-      let zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(zoomed.covered).toBe(false)
-      expect(zoomed.fallbackTileCount).toBeGreaterThan(0)
-      expect(zoomed.uncoveredAreaCount).toBe(0)
-      for (let frame = 0; frame < 20 && zoomed.metrics.interruptibleCompleted === 0; frame++) {
-        zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      }
-      expect(zoomed.metrics.interruptibleCompleted).toBe(1)
-      expect(controller.isRendered({ pageId, level: 2 ** 0.5, x: 2, y: 1 })).toBe(true)
+      const moving = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(moving.covered).toBe(false)
+      expect(moving.metrics.interruptibleCompleted).toBe(0)
+      expect(moving.fallbackTileCount).toBeGreaterThan(0)
+      expect(moving.uncoveredAreaCount).toBe(0)
 
-      // Once the zoom ends the exact level renders, over the gesture tiles until it covers.
+      // The zoom pauses at that level: the exact level renders under the moving budget.
+      const paused = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(paused.metrics.interruptibleCompleted).toBeGreaterThan(0)
+
       renderer.navigationPhase = 'idle'
       let settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(settled.fallbackTileCount).toBeGreaterThan(0)
-      for (let frame = 0; frame < 200 && !settled.covered; frame++) {
+      for (let frame = 0; frame < 40 && !settled.covered; frame++) {
         settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       }
       expect(settled.covered).toBe(true)
       expect(settled.fallbackTileCount).toBe(0)
+      void pageId
     } finally {
       controller.destroy()
       renderer.destroy()

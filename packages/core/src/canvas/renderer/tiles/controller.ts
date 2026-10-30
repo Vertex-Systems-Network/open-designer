@@ -113,6 +113,7 @@ export class TiledSceneController {
     previousBounds: TileWorldBounds[]
   }> = []
   private lastCoveredGeneration = ''
+  private lastLevel: number | null = null
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
   private readonly surfacePool = new TileSurfacePool()
@@ -168,9 +169,9 @@ export class TiledSceneController {
    * Renders due tiles within the frame's budget and presents the viewport from the cache: exact
    * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
    * colour where no level has one, until its tile renders. Nothing is drawn straight from the
-   * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting
-   * and rendering under a shorter budget, a zoom at a quantized level; the retained backing plays
-   * no part. Idle time builds a pyramid of downsampled copies and a
+   * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting,
+   * renders under a shorter budget while panning or paused, and renders nothing while the zoom
+   * level moves; the retained backing plays no part. Idle time builds a pyramid of downsampled copies and a
    * scene-rendered backdrop around the viewport, so a zoom out finds scaled stand-ins.
    */
   renderFrame(
@@ -192,11 +193,13 @@ export class TiledSceneController {
     const index = this.index
     if (!index || !renderer.pageId) return this.emptyResult()
 
-    // A zoom passes through levels too fast to render each exactly, so while it lasts tiles are
-    // rendered at the quantized level just above the scale, which holds for a band of zooms and
-    // scales down by at most a step; once it ends the exact level renders over them.
-    const scale = renderer.zoom * renderer.dpr
-    const level = renderer.navigationPhase === 'zoom' ? tileLevel(scale) : exactTileLevel(scale)
+    // A zoom in motion changes level every frame, and a tile rendered mid-gesture is obsolete
+    // within a few frames, so while the level moves nothing renders and the pyramid, the page
+    // copy, and the earlier levels stand in, scaled; a zoom that pauses, and a pan, render at
+    // the exact level under the moving budget.
+    const level = exactTileLevel(renderer.zoom * renderer.dpr)
+    const zooming = renderer.navigationPhase === 'zoom' && level !== this.lastLevel
+    this.lastLevel = level
     // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
     // and feeds the fallback at any level, so it stays.
     const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
@@ -208,7 +211,6 @@ export class TiledSceneController {
         job.key.level !== backdropLevel &&
         job.key.level !== pageBackdrop?.level
     )
-    const zooming = renderer.navigationPhase === 'zoom'
     const planOptions: TilePlanOptions = {
       pageId: renderer.pageId,
       level,
@@ -216,7 +218,7 @@ export class TiledSceneController {
       overscanTiles: TILE_OVERSCAN,
       navigationGeneration,
       contentGeneration,
-      estimateCost: (key) => this.estimateCost(renderer, index, key, zooming),
+      estimateCost: (key) => this.estimateCost(renderer, index, key, this.navigationActive),
       globalFallbackAvailable: true,
       // Background stages wait for idle: a moving frame has only its budget to give.
       ...(this.navigationActive
@@ -228,16 +230,22 @@ export class TiledSceneController {
           })
     }
     const plan = planTiles(this.tileCache, planOptions)
-    this.scheduler.enqueue(plan.jobs)
     const visibleOutstanding = plan.visible.some(
       ({ tile }) => tile?.contentGeneration !== contentGeneration
     )
-    const firstJobLimitMs = this.firstJobLimit(visibleOutstanding)
-    const metrics = this.scheduler.runFrame(
-      (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
-      this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
-      firstJobLimitMs
-    )
+    let metrics: TileSchedulerMetrics
+    if (zooming) {
+      metrics = emptyTileSchedulerMetrics()
+      metrics.remaining = plan.jobs.length
+      metrics.skippedWithFallback = plan.jobs.filter((job) => job.fallbackAvailable).length
+    } else {
+      this.scheduler.enqueue(plan.jobs)
+      metrics = this.scheduler.runFrame(
+        (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
+        this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
+        this.firstJobLimit(visibleOutstanding)
+      )
+    }
     metrics.cancelledJobs += this.cancelledJobs
     this.cancelledJobs = 0
     // A stage is planned only once the previous one is done, so the plan is taken again after
@@ -315,6 +323,7 @@ export class TiledSceneController {
     this.pageId = null
     this.contentGeneration = -1
     this.lastCoveredGeneration = ''
+    this.lastLevel = null
     this.pendingInvalidations = []
     this.measuredCosts.clear()
     this.pictureCache.clear()
@@ -403,20 +412,20 @@ export class TiledSceneController {
   }
 
   /**
-   * A tile over nothing is free; while zooming, a tile with a chunk picture still to record is
-   * beyond any frame, since recording cannot be bounded below one chunk; otherwise the tile's
+   * A tile over nothing is free; while moving, a tile with a chunk picture still to record is
+   * beyond the frame, since recording cannot be bounded below one chunk; otherwise the tile's
    * own smoothed cost, or that of any tile until it has been measured.
    */
   private estimateCost(
     renderer: SkiaRenderer,
     index: RenderChunkIndex,
     key: TileKey,
-    zooming: boolean
+    moving: boolean
   ): number {
     const chunks = tileChunks(index, key)
     if (chunks.length === 0) return 0
     if (
-      zooming &&
+      moving &&
       chunks.some(
         (chunk) =>
           (chunk.kind !== 'subtree' || chunk.interruptible) &&
