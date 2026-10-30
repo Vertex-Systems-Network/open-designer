@@ -3,6 +3,7 @@ import type { Image as CKImage } from 'canvaskit-wasm'
 import { ResourceCache } from '#core/cache/resource'
 
 import {
+  TILE_DEVICE_SIZE,
   tileKeysForWorldBounds,
   tileKeyString,
   tileWorldBounds,
@@ -22,6 +23,31 @@ export interface CachedTile {
 }
 
 const DEFAULT_MAX_TILE_BYTES = 128 * 1024 * 1024
+const MAXIMUM_TILE_CACHE_BYTES = 768 * 1024 * 1024
+const TILE_BYTES = TILE_DEVICE_SIZE * TILE_DEVICE_SIZE * 4
+/**
+ * The budget holds this many viewports' worth of tiles: the visible level with its overscan
+ * ring, the level a zoom just left, the pyramid, the backdrop ring, and the page copy, so idle
+ * work never evicts what the next frame draws.
+ */
+const TILE_CACHE_VIEWPORTS = 5
+
+/** The bytes of the tiles a viewport of this many device pixels can touch. */
+export function viewportTileBytes(widthPx: number, heightPx: number): number {
+  return (
+    (Math.ceil(widthPx / TILE_DEVICE_SIZE) + 1) *
+    (Math.ceil(heightPx / TILE_DEVICE_SIZE) + 1) *
+    TILE_BYTES
+  )
+}
+
+/** The cache's byte budget for a viewport whose tiles weigh `viewportBytes`. */
+export function viewportTileCacheBudget(viewportBytes: number): number {
+  return Math.min(
+    MAXIMUM_TILE_CACHE_BYTES,
+    Math.max(DEFAULT_MAX_TILE_BYTES, viewportBytes * TILE_CACHE_VIEWPORTS)
+  )
+}
 
 /** Levels are compared by zoom distance; a finer level wins a tie, as it stays sharp scaled down. */
 function compareLevelDistance(target: number) {
@@ -35,25 +61,50 @@ function compareLevelDistance(target: number) {
  * A coarser level always covers a tile with at most four.
  */
 const MAX_FINER_FALLBACK_RATIO = 8
-/** How many levels a hole may draw from: the nearest complete one and the partials over it. */
-const MAX_FALLBACK_LAYERS = 2
+/** How many partial levels a hole may layer over the nearest level that covers all of it. */
+const MAX_PARTIAL_FALLBACK_LAYERS = 2
 
 export class TileImageCache {
   private readonly entries: ResourceCache<string, CachedTile>
   /** The tiles of each page by level, so fallback lookups and the pyramid walk only what exists. */
   private readonly entriesByLevel = new Map<string, Map<number, Map<string, CachedTile>>>()
   private clock = 0
+  /** Levels whose evictions the controller counts: those its current plan still needs. */
+  private watchedLevels: ReadonlySet<number> = new Set()
+  private watchedEvictions = 0
 
   constructor(maxBytes = DEFAULT_MAX_TILE_BYTES) {
     this.entries = new ResourceCache({
       maxWeight: maxBytes,
       // An empty tile weighs one byte: the cache refuses weightless entries.
       weight: (entry) => Math.max(1, entry.bytes),
-      dispose: (entry) => {
+      dispose: (entry, _id, reason) => {
+        if (reason === 'evict' && this.watchedLevels.has(entry.key.level)) this.watchedEvictions++
         this.forgetLevelEntry(entry)
         entry.image?.delete()
       }
     })
+  }
+
+  /** The byte budget; tiles past it are evicted least recently used first. */
+  budget(): number {
+    return this.entries.capacity
+  }
+
+  setBudget(bytes: number): void {
+    if (bytes !== this.entries.capacity) this.entries.resize(bytes)
+  }
+
+  /** Counts evictions of tiles at `levels` from now on. */
+  watchLevels(levels: ReadonlySet<number>): void {
+    this.watchedLevels = levels
+  }
+
+  /** Evictions of watched levels since the last call. */
+  takeWatchedEvictions(): number {
+    const count = this.watchedEvictions
+    this.watchedEvictions = 0
+    return count
   }
 
   private rememberLevelEntry(id: string, entry: CachedTile): void {
@@ -89,10 +140,11 @@ export class TileImageCache {
 
   /**
    * Cached tiles of other levels that stand in for `key`'s missing tile, scaled, in drawing
-   * order: levels from the one nearest `key`'s outward, each contributing the tiles it has over
-   * the area, until one covers all of it; drawn farthest first, so the nearest level ends on
-   * top and a coarser complete level fills whatever the nearer ones miss. Null when no level
-   * has a tile there.
+   * order: the nearest level that covers all of the area first, then the nearer partial levels
+   * over it, nearest last, so the sharpest content ends on top and the complete level fills
+   * whatever the partial ones miss. The search passes over partial levels beyond the layered
+   * ones until it finds a complete one, so a hole shows the page copy rather than the page
+   * colour. Null when no level has a tile there.
    */
   findFallback(key: TileKey, levels: number[]): CachedTile[] | null {
     const bounds = tileWorldBounds(key)
@@ -103,7 +155,8 @@ export class TileImageCache {
       maxX: bounds.maxX - 1e-6,
       maxY: bounds.maxY - 1e-6
     }
-    const layers: CachedTile[][] = []
+    const partial: CachedTile[][] = []
+    let base: CachedTile[] | null = null
     for (const level of levels) {
       const tiles: CachedTile[] = []
       let complete = true
@@ -112,11 +165,15 @@ export class TileImageCache {
         if (tile) tiles.push(tile)
         else complete = false
       }
-      if (tiles.length > 0) layers.push(tiles)
-      if ((complete && tiles.length > 0) || layers.length >= MAX_FALLBACK_LAYERS) break
+      if (tiles.length === 0) continue
+      if (complete) {
+        base = tiles
+        break
+      }
+      if (partial.length < MAX_PARTIAL_FALLBACK_LAYERS) partial.push(tiles)
     }
-    if (layers.length === 0) return null
-    return layers.reverse().flat()
+    if (!base && partial.length === 0) return null
+    return [...(base ?? []), ...partial.reverse().flat()]
   }
 
   get(key: TileKey): CachedTile | null {

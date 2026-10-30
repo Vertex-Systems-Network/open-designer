@@ -143,6 +143,37 @@ describe('tile fallback lookup', () => {
     expect(fallback?.map((entry) => entry.key.level)).toEqual([2, 2, 2, 2])
   })
 
+  test('passes over partial levels to the nearest one that covers the whole area', () => {
+    const cache = new TileImageCache()
+    // Two nearer levels each hold one tile over the area; only the coarsest covers it all.
+    cache.install(tileAt(2, 0, 0), 1)
+    cache.install(tileAt(4, 0, 0), 1)
+    cache.install(tileAt(0.5, 1, 1), 1)
+    cache.install(tileAt(0.125, 0, 0), 1)
+    const fallback = cache.findFallback(
+      { pageId: 'page', level: 1, x: 0, y: 0 },
+      cache.fallbackLevels('page', 1)
+    )
+    // The complete level draws first; the two nearest partial levels layer over it, nearest last.
+    expect(fallback?.map((entry) => entry.key.level)).toEqual([0.125, 4, 2])
+  })
+
+  test('counts evictions of the levels it is asked to watch', () => {
+    const cache = new TileImageCache(3 * 256 * 256 * 4)
+    cache.watchLevels(new Set([1]))
+    cache.install(tileAt(1, 0, 0), 1)
+    cache.install(tileAt(2, 0, 0), 1)
+    cache.install(tileAt(2, 1, 0), 1)
+    cache.install(tileAt(2, 2, 0), 1)
+    expect(cache.takeWatchedEvictions()).toBe(1)
+    expect(cache.takeWatchedEvictions()).toBe(0)
+    cache.install(tileAt(2, 3, 0), 1)
+    expect(cache.takeWatchedEvictions()).toBe(0)
+    cache.setBudget(256 * 256 * 4)
+    expect(cache.size()).toBe(1)
+    expect(cache.budget()).toBe(256 * 256 * 4)
+  })
+
   test('ignores levels more than eight times finer, which would need dozens of tiles per hole', () => {
     const cache = new TileImageCache()
     cache.install(tileAt(16, 0, 0), 1)

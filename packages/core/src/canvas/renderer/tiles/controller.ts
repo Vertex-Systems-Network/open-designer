@@ -1,4 +1,4 @@
-import type { Canvas, FilterMode } from 'canvaskit-wasm'
+import type { Canvas } from 'canvaskit-wasm'
 
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
@@ -10,17 +10,22 @@ import {
 } from '#core/canvas/renderer/chunks'
 import { rendererNow } from '#core/canvas/renderer/clock'
 
-import { type CachedTile, TileImageCache } from './cache'
+import {
+  type CachedTile,
+  TileImageCache,
+  viewportTileBytes,
+  viewportTileCacheBudget
+} from './cache'
 import {
   MAX_TILE_LEVEL,
   MIN_TILE_LEVEL,
   TILE_DEVICE_SIZE,
   type TileKey,
   tileLevel,
-  tileWorldBounds,
   type TileWorldBounds
 } from './geometry'
 import { planTiles, type TilePlanOptions } from './planner'
+import { drawPresentation, resolveVisible } from './presentation'
 import { childTileKeys, deleteRenderedTile, downsampleTile, renderTile, tileChunks } from './render'
 import {
   emptyTileSchedulerMetrics,
@@ -86,13 +91,8 @@ export interface TiledSceneFrameResult {
 export interface TiledSceneControllerOptions {
   /** The clock the scheduler's deadline and the tile cost model share. */
   now?: () => number
-}
-
-interface VisiblePresentation {
-  exact: Array<{ key: TileKey; tile: CachedTile }>
-  fallback: Array<{ key: TileKey; tiles: CachedTile[] }>
-  uncovered: number
-  uncoveredContent: number
+  /** The tile cache's byte budget for a viewport whose tiles weigh `viewportBytes`. */
+  tileCacheBudget?: (viewportBytes: number) => number
 }
 
 export class TiledSceneController {
@@ -109,6 +109,12 @@ export class TiledSceneController {
   }> = []
   private lastCoveredGeneration = ''
   private lastLevel: number | null = null
+  /**
+   * Set when a frame of background work evicted a tile its own plan needs: the cache cannot hold
+   * the plan, so the stages stop rather than render each other out until the view changes.
+   */
+  private backgroundSaturated = false
+  private readonly tileCacheBudget: (viewportBytes: number) => number
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
   private readonly surfacePool = new TileSurfacePool()
@@ -123,6 +129,7 @@ export class TiledSceneController {
 
   constructor(options: TiledSceneControllerOptions = {}) {
     this.now = options.now ?? rendererNow
+    this.tileCacheBudget = options.tileCacheBudget ?? viewportTileCacheBudget
     this.scheduler = new TileScheduler({
       now: this.now,
       budgetMs: TILE_FRAME_BUDGET_MS,
@@ -161,6 +168,11 @@ export class TiledSceneController {
     return this.pendingInvalidations.length > 0
   }
 
+  /** The tile cache's current byte budget. */
+  tileCacheBytes(): number {
+    return this.tileCache.budget()
+  }
+
   /**
    * Renders due tiles within the frame's budget and presents the viewport from the cache: exact
    * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
@@ -195,34 +207,25 @@ export class TiledSceneController {
     // the exact level under the moving budget.
     const level = exactTileLevel(renderer.zoom * renderer.dpr)
     const zooming = renderer.navigationPhase === 'zoom' && level !== this.lastLevel
+    if (level !== this.lastLevel || this.navigationActive) this.backgroundSaturated = false
     this.lastLevel = level
-    // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
-    // and feeds the fallback at any level, so it stays.
-    const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
-    const pageBackdrop = this.pageBackdrop(index, level)
-    this.cancelledJobs += this.scheduler.discard(
-      (job) =>
-        job.kind !== 'downsample' &&
-        job.key.level !== level &&
-        job.key.level !== backdropLevel &&
-        job.key.level !== pageBackdrop?.level
+    this.tileCache.setBudget(
+      this.tileCacheBudget(
+        viewportTileBytes(
+          renderer.viewportWidth * renderer.dpr,
+          renderer.viewportHeight * renderer.dpr
+        )
+      )
     )
-    const planOptions: TilePlanOptions = {
-      pageId: renderer.pageId,
+    const { planOptions, background } = this.planFrame(
+      renderer,
+      renderer.pageId,
+      index,
       level,
       viewport,
-      overscanTiles: TILE_OVERSCAN,
-      navigationGeneration,
       contentGeneration,
-      estimateCost: (key) => this.estimateCost(renderer, index, key, this.navigationActive),
-      globalFallbackAvailable: true
-    }
-    // Background stages wait for idle: a moving frame has only its budget to give.
-    if (!this.navigationActive) {
-      planOptions.backdrop = { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
-      planOptions.pageBackdrop = pageBackdrop
-      planOptions.pyramid = { levels: PYRAMID_LEVELS }
-    }
+      navigationGeneration
+    )
     const plan = planTiles(this.tileCache, planOptions)
     let metrics: TileSchedulerMetrics
     if (zooming) {
@@ -239,6 +242,14 @@ export class TiledSceneController {
     }
     metrics.cancelledJobs += this.cancelledJobs
     this.cancelledJobs = 0
+    // A background tile that evicted one of the plan's own levels would render in circles.
+    if (background && this.backgroundSaturated) {
+      this.cancelledJobs += this.scheduler.discard((job) => job.priority === 'overscan')
+      planOptions.overscanTiles = 0
+      delete planOptions.backdrop
+      delete planOptions.pageBackdrop
+      delete planOptions.pyramid
+    }
     // A stage is planned only once the previous one is done, so the plan is taken again after
     // the frame's work to learn whether anything remains for the next frame, and to queue it.
     // While moving, only the visible tiles are planned, and the frame does not re-plan.
@@ -258,7 +269,13 @@ export class TiledSceneController {
       },
       true
     ).visible
-    const presentation = this.resolveVisible(visible, renderer.pageId, level, index.bounds())
+    const presentation = resolveVisible(
+      this.tileCache,
+      visible,
+      renderer.pageId,
+      level,
+      index.bounds()
+    )
     canvas.save()
     // Snapped to device pixels, an exact tile lands texel on pixel and copies rather than samples.
     canvas.translate(
@@ -266,7 +283,7 @@ export class TiledSceneController {
       Math.round(renderer.panY * renderer.dpr) / renderer.dpr
     )
     canvas.scale(renderer.zoom, renderer.zoom)
-    this.drawPresentation(renderer, canvas, presentation)
+    drawPresentation(renderer, canvas, presentation)
     canvas.restore()
 
     const covered = presentation.exact.length === visible.length
@@ -454,6 +471,55 @@ export class TiledSceneController {
     return true
   }
 
+  /**
+   * The frame's plan options: the visible tiles and, while idle and the cache can hold them, the
+   * background stages; queued jobs for other levels are discarded, and the cache counts the
+   * evictions of the levels the plan needs.
+   */
+  private planFrame(
+    renderer: SkiaRenderer,
+    pageId: string,
+    index: RenderChunkIndex,
+    level: number,
+    viewport: TileWorldBounds,
+    contentGeneration: number,
+    navigationGeneration: number
+  ): { planOptions: TilePlanOptions; background: boolean } {
+    // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
+    // and feeds the fallback at any level, so it stays.
+    const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
+    const pageBackdrop = this.pageBackdrop(index, level)
+    this.cancelledJobs += this.scheduler.discard(
+      (job) =>
+        job.kind !== 'downsample' &&
+        job.key.level !== level &&
+        job.key.level !== backdropLevel &&
+        job.key.level !== pageBackdrop?.level
+    )
+    const planOptions: TilePlanOptions = {
+      pageId,
+      level,
+      viewport,
+      overscanTiles: this.backgroundSaturated ? 0 : TILE_OVERSCAN,
+      navigationGeneration,
+      contentGeneration,
+      estimateCost: (key) => this.estimateCost(renderer, index, key, this.navigationActive),
+      globalFallbackAvailable: true
+    }
+    // Background stages wait for idle: a moving frame has only its budget to give.
+    const background = !this.navigationActive && !this.backgroundSaturated
+    if (background) {
+      planOptions.backdrop = { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
+      planOptions.pageBackdrop = pageBackdrop
+      planOptions.pyramid = { levels: PYRAMID_LEVELS }
+    }
+    const watched = new Set([level, backdropLevel])
+    if (pageBackdrop) watched.add(pageBackdrop.level)
+    for (let depth = 1; depth <= PYRAMID_LEVELS; depth++) watched.add(level / 2 ** depth)
+    this.tileCache.watchLevels(watched)
+    return { planOptions, background }
+  }
+
   private executeJob(
     renderer: SkiaRenderer,
     graph: SceneGraph,
@@ -481,7 +547,11 @@ export class TiledSceneController {
       deleteRenderedTile(tile)
       return this.jobResult(tile)
     }
+    this.tileCache.takeWatchedEvictions()
     this.tileCache.install(tile, job.contentGeneration)
+    if (job.priority === 'overscan' && this.tileCache.takeWatchedEvictions() > 0) {
+      this.backgroundSaturated = true
+    }
     return this.jobResult(tile)
   }
 
@@ -541,87 +611,6 @@ export class TiledSceneController {
 
   private costKey(key: TileKey): string {
     return `${key.level}:${key.x}:${key.y}`
-  }
-
-  private resolveVisible(
-    visible: Array<{ key: TileKey; tile: CachedTile | null }>,
-    pageId: string,
-    level: number,
-    content: TileWorldBounds | null
-  ): VisiblePresentation {
-    const presentation: VisiblePresentation = {
-      exact: [],
-      fallback: [],
-      uncovered: 0,
-      uncoveredContent: 0
-    }
-    let levels: number[] | undefined
-    for (const { key, tile } of visible) {
-      if (tile) {
-        presentation.exact.push({ key, tile })
-        continue
-      }
-      levels ??= this.tileCache.fallbackLevels(pageId, level)
-      const tiles = this.tileCache.findFallback(key, levels)
-      if (tiles) {
-        presentation.fallback.push({ key, tiles })
-        continue
-      }
-      presentation.uncovered++
-      const bounds = tileWorldBounds(key)
-      if (
-        content &&
-        bounds.minX < content.maxX &&
-        bounds.maxX > content.minX &&
-        bounds.minY < content.maxY &&
-        bounds.maxY > content.minY
-      ) {
-        presentation.uncoveredContent++
-      }
-    }
-    return presentation
-  }
-
-  /** Draws tiles in world space; the canvas already carries the viewport transform. */
-  private drawPresentation(
-    renderer: SkiaRenderer,
-    canvas: Canvas,
-    presentation: VisiblePresentation
-  ): void {
-    const paint = renderer.opacityPaint
-    paint.setAlphaf(1)
-    paint.setBlendMode(renderer.ck.BlendMode.Src)
-    const source = renderer.ck.LTRBRect(0, 0, TILE_DEVICE_SIZE, TILE_DEVICE_SIZE)
-    const drawTile = (tile: CachedTile, filter: FilterMode) => {
-      if (!tile.image) return
-      const bounds = tileWorldBounds(tile.key)
-      canvas.drawImageRectOptions(
-        tile.image,
-        source,
-        renderer.ck.LTRBRect(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY),
-        filter,
-        renderer.ck.MipmapMode.None,
-        paint
-      )
-    }
-    try {
-      for (const { tiles, key } of presentation.fallback) {
-        const bounds = tileWorldBounds(key)
-        canvas.save()
-        canvas.clipRect(
-          renderer.ck.LTRBRect(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY),
-          renderer.ck.ClipOp.Intersect,
-          false
-        )
-        for (const tile of tiles) drawTile(tile, renderer.ck.FilterMode.Linear)
-        canvas.restore()
-      }
-      // An exact tile sits texel on pixel; nearest sampling copies it, so float noise in the
-      // viewport can never shift a value at a seam.
-      for (const { tile } of presentation.exact) drawTile(tile, renderer.ck.FilterMode.Nearest)
-    } finally {
-      paint.setBlendMode(renderer.ck.BlendMode.SrcOver)
-    }
   }
 
   private emptyResult(): TiledSceneFrameResult {
