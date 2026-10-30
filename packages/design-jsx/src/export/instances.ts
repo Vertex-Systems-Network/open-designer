@@ -86,7 +86,7 @@ function assignedValue(
   if (definition.type === 'BOOLEAN') return value === 'true'
   if (definition.type !== 'INSTANCE_SWAP') return value
   const component = graph.getNode(value)
-  return component ? reference.name(component) : value
+  return component ? reference.of(component) : value
 }
 
 /**

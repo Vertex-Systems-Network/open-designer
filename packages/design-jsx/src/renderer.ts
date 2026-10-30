@@ -12,7 +12,8 @@ import {
   bindProperties,
   componentPropNames as namesOnInstance,
   exposeInstance,
-  inferComponentSetProperties
+  inferComponentSetProperties,
+  type ComponentLookup
 } from './component-properties'
 import { elementNodeType, elementOwnLayer, type OwnLayerRenderer } from './elements'
 import type { RenderOrder } from './order'
@@ -316,7 +317,8 @@ async function renderInstanceNode(
   const parent = graph.getNode(parentId)
   const parentLayout = parent?.layoutMode ?? 'NONE'
   const modes = variableModes(graph, tree.props.mode)
-  const bound = bindProperties(graph, tree.props, 'INSTANCE', parentId, componentIdNamed(graph))
+  const lookup = componentIdNamed(graph, context?.refs)
+  const bound = bindProperties(graph, tree.props, 'INSTANCE', parentId, lookup)
   const { props, bindings } = preparePropsForRender(graph, bound.props, false, { parentId, modes })
   const component = resolveComponent(graph, props, context?.refs)
   if (!component) throw componentNotFound(props)
@@ -350,8 +352,8 @@ async function renderInstanceNode(
     graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
     applyBindings(graph, instance.id, bindings)
     applyInstanceOverrides(graph, instance, tree.props.overrides)
-    assignNamedProperties(graph, instance, props, componentIdNamed(graph))
-    assignComponentProperties(graph, instance, props.properties, componentIdNamed(graph))
+    assignNamedProperties(graph, instance, props, lookup)
+    assignComponentProperties(graph, instance, props.properties, lookup)
     if (props.exposed === true) exposeInstance(graph, instance)
     return instance
   } catch (error) {
@@ -360,8 +362,11 @@ async function renderInstanceNode(
   }
 }
 
-/** Fields that place a layer in the tree, which only the graph's own moves may change. */
-const STRUCTURAL_FIELDS = new Set(['id', 'parentId', 'childIds'])
+/**
+ * Fields that place a layer in the tree or link it to its component, which only the graph's own
+ * moves and swaps may change.
+ */
+const STRUCTURAL_FIELDS = new Set(['id', 'parentId', 'childIds', 'componentId'])
 
 /**
  * Apply child overrides to a freshly created instance. Keys are
@@ -443,8 +448,8 @@ function layerMetadata(
 }
 
 /** The component a swap property's default names, by ID or name, as `<Instance of>` finds it. */
-function componentIdNamed(graph: SceneGraph) {
-  return (name: string) => resolveComponent(graph, { of: name })?.id
+function componentIdNamed(graph: SceneGraph, refs?: LayerRefs): ComponentLookup {
+  return (reference) => resolveComponent(graph, { of: reference }, refs)?.id
 }
 
 export interface ElementOverrides {

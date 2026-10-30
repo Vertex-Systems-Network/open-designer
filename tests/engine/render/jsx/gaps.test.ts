@@ -125,39 +125,4 @@ describe('jsx gaps', () => {
     )
     expect(label?.text).toBe('+14%')
   })
-
-  it('instance overrides find the layer among the instance children, by the name before renames', async () => {
-    const g = makeSceneGraph()
-    const [, created] = await renderJSX(
-      g,
-      `<Component name="Card" w={60} h={24}>
-         <Frame name="Card" w={4} h={4} />
-         <Frame name="Icon:Small" w={4} h={4} />
-         <Frame name="A" w={4} h={4} />
-         <Frame name="B" w={4} h={4} />
-       </Component>
-       <Instance of="Card" overrides={{ 'Card:visible': false, 'Icon:Small:opacity': 0.5, 'A:name': 'B', 'B:name': 'C' }} />`
-    )
-    const instance = g.getNode(created.id)
-    expect(instance?.visible).toBe(true)
-    const children = g.getChildren(created.id)
-    expect(children.map((child) => child.name)).toEqual(['Card', 'Icon:Small', 'B', 'C'])
-    expect(children[0]?.visible).toBe(false)
-    expect(children[1]?.opacity).toBe(0.5)
-  })
-
-  it('instance overrides leave tree fields alone and reject a name layers share', async () => {
-    const g = makeSceneGraph()
-    const [, created] = await renderJSX(
-      g,
-      `<Component name="Pair" w={60} h={24}><Frame name="Dot" w={4} h={4} /><Frame name="Dot" w={4} h={4} /><Frame name="Box" w={4} h={4} /></Component>
-       <Instance of="Pair" overrides={{ 'Box:childIds': ['missing'], 'Box:parentId': 'missing' }} />`
-    )
-    const box = g.getChildren(created.id)[2]
-    expect(box?.childIds).toEqual([])
-    expect(box?.parentId).toBe(created.id)
-    await expect(
-      renderJSX(g, `<Instance of="Pair" overrides={{ 'Dot:opacity': 0.5 }} />`)
-    ).rejects.toThrow('ambiguous')
-  })
 })

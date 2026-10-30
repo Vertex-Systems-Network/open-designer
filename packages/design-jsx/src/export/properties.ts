@@ -7,7 +7,7 @@ import type {
 import { readBehaviour } from '@open-pencil/scene-graph/behaviours'
 
 import type { ComponentReference } from './component-references'
-import { helperCall, type JSXProp } from './value'
+import { helperCall, type JSXProp, type JSXValue } from './value'
 
 /**
  * The component whose properties a layer's fields bind, as `property()` finds it: the set, for
@@ -39,11 +39,11 @@ function defaultValue(
   graph: SceneGraph,
   definition: ComponentPropertyDefinition,
   reference: ComponentReference
-): string | boolean {
+): JSXValue {
   if (definition.type === 'BOOLEAN') return definition.defaultValue === 'true'
   if (definition.type !== 'INSTANCE_SWAP') return definition.defaultValue
   const component = graph.getNode(definition.defaultValue)
-  return component ? reference.name(component) : definition.defaultValue
+  return component ? reference.of(component) : definition.defaultValue
 }
 
 /**

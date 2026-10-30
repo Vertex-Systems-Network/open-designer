@@ -172,15 +172,16 @@ describe('component export', () => {
     // With its component, by a ref: the target may have a Button of its own.
     const jsx = selectionToJSX([libraryId, instance.id], graph)
     expect(jsx).toContain('of={button1}')
-    expect(jsx).not.toContain('ref={star1}')
+    expect(jsx).toContain('of={property("Icon", star1)}')
+    expect(jsx).not.toContain('ref={heart1}')
 
+    // The target has a Button of its own, which the copy must not link to.
     const target = new SceneGraph()
-    const [copiedLibrary, copiedInstance] = await renderJSX(
-      target,
-      selectionToJSX([libraryId, instance.id], graph)
-    )
-    const variant = named(target, 'State=On')
-    expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(variant.id)
+    await renderJSX(target, '<ComponentSet name="Button"><Component name="State=On" w={1} h={1} /></ComponentSet>')
+    const [copiedLibrary, copiedInstance] = await renderJSX(target, jsx)
+    const copiedSet = target.getChildren(copiedLibrary.id).find((child) => child.name === 'Button')
+    const variant = target.getChildren(copiedSet?.id ?? '').find((child) => child.name === 'State=On')
+    expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(variant?.id ?? "missing")
     expect(target.getChildren(copiedLibrary.id).length).toBe(3)
     const label = target.getChildren(copiedInstance.id).find((child) => child.name === 'Label')
     expect(label?.text).toBe('Go')
@@ -216,6 +217,28 @@ describe('component export', () => {
     const [copiedFirst] = target.getChildren(copiedLibrary.id)
     expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(copiedFirst?.id)
     expect(selectionToJSX([copiedInstance.id, copiedLibrary.id], target)).toBe(jsx)
+  })
+
+  test('names swap defaults and values by refs, so they find the exported copies', async () => {
+    const { graph, library: libraryId } = await library()
+    const [instance] = await renderJSX(graph, '<Instance of="Button" Icon="Heart" />')
+    const jsx = selectionToJSX([libraryId, instance.id], graph)
+    expect(jsx).toContain('of={property("Icon", star1)}')
+    expect(jsx).toContain('Icon={heart1}')
+
+    const target = new SceneGraph()
+    await renderJSX(target, '<><Component name="Star" w={1} h={1} /><Component name="Heart" w={1} h={1} /></>')
+    const [copiedLibrary, copiedInstance] = await renderJSX(target, jsx)
+    const copied = (name: string) =>
+      [...target.getAllNodes()].find(
+        (node) => node.name === name && node.parentId === copiedLibrary.id
+      )
+    const set = copied('Button')
+    const swap = set?.componentPropertyDefinitions.find((item) => item.type === 'INSTANCE_SWAP')
+    expect(swap?.defaultValue).toBe(copied('Star')?.id)
+    const icon = target.getChildren(copiedInstance.id).find((child) => child.type === 'INSTANCE')
+    expect(icon?.componentId).toBe(copied('Heart')?.id)
+    expect(selectionToJSX([copiedLibrary.id, copiedInstance.id], target)).toBe(jsx)
   })
 
   test('names a component ref apart from the variables the export declares', async () => {

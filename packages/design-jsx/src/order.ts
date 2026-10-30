@@ -1,3 +1,5 @@
+import { isPlainObject } from 'es-toolkit/predicate'
+
 import { namesComponent, rekaRole } from './behaviours'
 import { isComponentProperty } from './component-properties'
 import { elementNodeType } from './elements'
@@ -15,11 +17,20 @@ interface ComponentUse {
 
 const NO_USE: ComponentUse = { defines: new Set(), names: new Set() }
 
-/** The component an element names: its `of`, or the default of the swap property bound there. */
-function componentReference(props: Record<string, unknown>): ComponentKey | undefined {
+/**
+ * The components an element names: its `of`, or the default of the swap property bound there,
+ * and the `ref()`s its props and `properties` give swap properties.
+ */
+function componentReferences(props: Record<string, unknown>): ComponentKey[] {
   const reference = props.component ?? props.componentId ?? props.of
   const value = isComponentProperty(reference) ? reference.defaultValue : reference
-  return typeof value === 'string' || isLayerRef(value) ? value : undefined
+  const assigned = [
+    ...Object.entries(props)
+      .filter(([key]) => key !== 'ref' && key !== 'of')
+      .map(([, prop]) => prop),
+    ...(isPlainObject(props.properties) ? Object.values(props.properties) : [])
+  ].filter(isLayerRef)
+  return [...(typeof value === 'string' || isLayerRef(value) ? [value] : []), ...assigned]
 }
 
 /** Whether an element defines a component: a component, a set, or a Reka root naming none. */
@@ -38,21 +49,18 @@ export class RenderOrder {
     if (known) return known
     const children = node.children.filter(isTreeNode).map((child) => this.use(child))
     const own: ComponentKey[] = []
-    const reference = definesComponent(node) ? undefined : componentReference(node.props)
+    const references = definesComponent(node) ? [] : componentReferences(node.props)
     if (definesComponent(node)) {
       const { name, ref } = node.props
       if (typeof name === 'string' && name) own.push(name)
       if (isLayerRef(ref)) own.push(ref)
     }
     const use =
-      own.length === 0 && reference === undefined && children.every((child) => child === NO_USE)
+      own.length === 0 && references.length === 0 && children.every((child) => child === NO_USE)
         ? NO_USE
         : {
             defines: new Set([...own, ...children.flatMap((child) => [...child.defines])]),
-            names: new Set([
-              ...(reference === undefined ? [] : [reference]),
-              ...children.flatMap((child) => [...child.names])
-            ])
+            names: new Set([...references, ...children.flatMap((child) => [...child.names])])
           }
     this.uses.set(node, use)
     return use
