@@ -22,6 +22,7 @@ import type { EditorState } from '#core/editor/types'
 import { RenderProfiler } from '#core/profiler'
 import type { FontResolutionSnapshot } from '#core/text/resolver'
 
+import { createImageFilterCache, createMaskFilterCache } from './effects'
 import { createImageCache } from './images/cache'
 import { ImagePreviewCache } from './images/previews'
 import { LabelCache } from './labels/cache'
@@ -58,8 +59,6 @@ import type {
   FontMgr,
   TypefaceFontProvider,
   SkPicture,
-  ImageFilter,
-  MaskFilter,
   RuntimeEffect,
   Image,
   TextureSource
@@ -80,6 +79,7 @@ export interface PendingFontNode {
 
 import type { PlacedIssueMarker } from './issues/types'
 import type { PlacedStatusLabel } from './labels/status'
+import type { NodeEditPaints } from './node-edit-overlay'
 import { EffectRasterCache } from './renderer/effect-raster-cache'
 import { TiledSceneController } from './renderer/tiles'
 import type { TransientCanvasPreview } from './renderer/transient-previews'
@@ -110,8 +110,8 @@ export class SkiaRenderer {
   declare auxStroke: Paint
   declare opacityPaint: Paint
   declare effectLayerPaint: Paint
-  imageFilterCache = new Map<string, ImageFilter | null>()
-  maskFilterCache = new Map<number, MaskFilter | null>()
+  imageFilterCache = createImageFilterCache()
+  maskFilterCache = createMaskFilterCache()
   _tmpColor = new Float32Array(4)
   _tmpRect = new Float32Array(4)
   textFont: Font | null = null
@@ -219,6 +219,7 @@ export class SkiaRenderer {
   declare penHandlePaint: Paint
   declare penVertexFill: Paint
   declare penVertexStroke: Paint
+  declare nodeEditPaints: NodeEditPaints
 
   panX = 0
   panY = 0
@@ -244,7 +245,6 @@ export class SkiaRenderer {
   _nodeCount = 0
   _culledCount = 0
   _flashes: Array<{ nodeId: string; startTime: number }> = []
-  _flashPaint: Paint | null = null
   _aiActiveNodes: Set<string> = new Set()
   _aiDoneFlashes: Array<{ nodeId: string; startTime: number }> = []
 
@@ -545,6 +545,13 @@ export class SkiaRenderer {
       if (key === hash || key.startsWith(`${hash}:`)) this.imageCache.delete(key)
     }
     this.invalidateAllPictures()
+  }
+
+  /** Forgets a layer that left the document: its drawing and the fonts it was waiting for. */
+  forgetNode(nodeId: string): void {
+    this.pendingFontNodes.delete(nodeId)
+    this.textPictureGenerations.delete(nodeId)
+    this.invalidateNodePicture(nodeId)
   }
 
   /** Drops `nodeId`'s cached drawing; `changedKeys`, when known, lets text keep its glyph coverage. */

@@ -1,3 +1,4 @@
+import { createNodeEditPaints } from '#core/canvas/node-edit-overlay'
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import {
   DEFAULT_FONT_SIZE,
@@ -110,6 +111,8 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
   r.penVertexStroke.setStyle(ck.PaintStyle.Stroke)
   r.penVertexStroke.setStrokeWidth(1)
   r.penVertexStroke.setAntiAlias(true)
+
+  r.nodeEditPaints = createNodeEditPaints(ck)
 
   initializeSelectionPaintColors(r)
 }

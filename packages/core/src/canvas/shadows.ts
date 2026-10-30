@@ -128,7 +128,7 @@ function drawSilhouetteDropShadow(
     canvas.restore()
     paint.delete()
     if (morphology) {
-      filter.delete()
+      filter?.delete()
       morphology.delete()
     }
   }

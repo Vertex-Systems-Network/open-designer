@@ -6,6 +6,12 @@ import type { GroupFitOptions } from '@open-pencil/scene-graph/group-bounds'
 import { getTextOutlineSupport } from '#core/text/outlines'
 
 import type { SkiaRenderer } from './renderer'
+import {
+  configureStrokePaint,
+  forVisibleStrokes,
+  normalizeDashPattern,
+  withStrokeDash
+} from './strokes'
 import { makeLineStrokeOutline } from './strokes/line'
 import { textNodeToOutlinePath } from './text/outlines'
 
@@ -310,14 +316,13 @@ export function paintBooleanOperation(
     }
     between?.()
 
-    for (const stroke of node.strokes) {
-      if (!stroke.visible) continue
-      const color = r.resolveStrokeColor(stroke, 0, node, graph)
-      r.strokePaint.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
-      r.strokePaint.setStrokeWidth(stroke.weight)
-      r.strokePaint.setAlphaf(stroke.opacity)
-      canvas.drawPath(path, r.strokePaint)
-    }
+    // Each stroke resolves its own binding and shader, with its cap, join, and dash, as a shape's.
+    forVisibleStrokes(r, node, graph, (stroke, color) => {
+      configureStrokePaint(r, node, stroke, color)
+      withStrokeDash(r, normalizeDashPattern(stroke.dashPattern), 0, () =>
+        canvas.drawPath(path, r.strokePaint)
+      )
+    })
   } finally {
     path.delete()
   }

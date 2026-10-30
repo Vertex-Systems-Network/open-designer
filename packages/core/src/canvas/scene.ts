@@ -40,12 +40,13 @@ import { isLayerContainer } from './shadows/silhouette'
 import {
   configureStrokePaint,
   drawArrowHeads,
-  applyStrokeShader,
   drawDashedRRectWithSolidCorners,
   drawStyledRRectStroke,
+  forVisibleStrokes,
   getStrokeCapEntity,
   getStrokeJoinEntity,
-  normalizeDashPattern
+  normalizeDashPattern,
+  withStrokeDash
 } from './strokes'
 import { drawLineStroke } from './strokes/line'
 import { drawOutlinedDashes } from './strokes/outlined-dashes'
@@ -415,29 +416,6 @@ function makeNodeRRect(r: SkiaRenderer, node: SceneNode, radius: number): Float3
   return r.ck.RRectXY(rect, radius, radius)
 }
 
-/**
- * Every stroke a node draws passes through here, so a gradient or image stroke gets its shader
- * here rather than in each draw helper, and the shader is cleared before the next stroke.
- */
-function forVisibleStrokes(
-  r: SkiaRenderer,
-  node: SceneNode,
-  graph: SceneGraph,
-  draw: (stroke: SceneNode['strokes'][number], color: Color) => void
-): void {
-  for (let index = 0; index < node.strokes.length; index++) {
-    const stroke = node.strokes[index]
-    if (!stroke.visible) continue
-    const draws = applyStrokeShader(r, stroke, index, node, graph)
-    try {
-      if (draws) draw(stroke, r.resolveStrokeColor(stroke, index, node, graph))
-    } finally {
-      r.strokePaint.setShader(null)
-      r.fillPaint.setShader(null)
-    }
-  }
-}
-
 /** Fill a section's or set's rounded bounds and return them, for its strokes to follow. */
 function fillRoundedBounds(
   r: SkiaRenderer,
@@ -748,14 +726,13 @@ function drawRegularStroke(
   sc: Color
 ): void {
   configureStrokePaint(r, node, stroke, sc)
-  const dash = normalizeDashPattern(stroke.dashPattern)
-  r.strokePaint.setPathEffect(dash.length > 0 ? r.ck.PathEffect.MakeDash(dash, 0) : null)
-
-  if (node.independentStrokeWeights && r.isRectangularType(node.type)) {
-    r.drawIndividualSideStrokes(canvas, node, stroke)
-  } else if (!r.isRectangularType(node.type) || !drawFigmaDashes(r, canvas, node, stroke)) {
-    r.drawStrokeWithAlign(canvas, node, stroke.align)
-  }
+  withStrokeDash(r, normalizeDashPattern(stroke.dashPattern), 0, () => {
+    if (node.independentStrokeWeights && r.isRectangularType(node.type)) {
+      r.drawIndividualSideStrokes(canvas, node, stroke)
+    } else if (!r.isRectangularType(node.type) || !drawFigmaDashes(r, canvas, node, stroke)) {
+      r.drawStrokeWithAlign(canvas, node, stroke.align)
+    }
+  })
 }
 
 function drawNodeStroke(

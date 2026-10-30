@@ -9,7 +9,7 @@ type EmittedGraphEventName = keyof SceneGraphEvents
 /** The renderer surface graph events invalidate; tests provide a double of just this. */
 export type GraphEventRenderer = Pick<
   SkiaRenderer,
-  'invalidateVectorPath' | 'invalidateNodePicture'
+  'invalidateVectorPath' | 'invalidateNodePicture' | 'forgetNode'
 > & {
   tiledScene: Pick<SkiaRenderer['tiledScene'], 'invalidateNode' | 'invalidateStructure'>
 }
@@ -154,6 +154,7 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
       // the parent it had finds that component when the sync runs.
       deleted: (id, parentId) => {
         options.emitEditorEvent('node:deleted', id, parentId)
+        for (const renderer of options.getRenderers()) renderer.forgetNode(id)
         onNodeStructureChanged(id)
         flowChanged(parentId)
         if (parentId) options.scheduleComponentSync(parentId)

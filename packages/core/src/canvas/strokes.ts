@@ -109,12 +109,12 @@ export function drawDashedRRectWithSolidCorners(
     r.strokePaint
   )
 
-  r.strokePaint.setPathEffect(dash.length > 0 ? r.ck.PathEffect.MakeDash(dash, dashPhase) : null)
-  canvas.drawLine(left + radius, top, right - radius, top, r.strokePaint)
-  canvas.drawLine(right, top + radius, right, bottom - radius, r.strokePaint)
-  canvas.drawLine(right - radius, bottom, left + radius, bottom, r.strokePaint)
-  canvas.drawLine(left, bottom - radius, left, top + radius, r.strokePaint)
-  r.strokePaint.setPathEffect(null)
+  withStrokeDash(r, dash, dashPhase, () => {
+    canvas.drawLine(left + radius, top, right - radius, top, r.strokePaint)
+    canvas.drawLine(right, top + radius, right, bottom - radius, r.strokePaint)
+    canvas.drawLine(right - radius, bottom, left + radius, bottom, r.strokePaint)
+    canvas.drawLine(left, bottom - radius, left, top + radius, r.strokePaint)
+  })
 }
 
 /** The outline a polygonal head fills: a triangle, an equilateral arrow, or a diamond. */
@@ -287,6 +287,56 @@ export function applyStrokeShader(
   return true
 }
 
+/**
+ * Every stroke a node draws passes through here, so a gradient or image stroke gets its shader
+ * here rather than in each draw helper, and the shader and any dash are cleared before the next
+ * stroke: the paints are shared, and a node must not inherit what the previous one set.
+ */
+export function forVisibleStrokes(
+  r: SkiaRenderer,
+  node: SceneNode,
+  graph: SceneGraph,
+  draw: (stroke: Stroke, color: Color) => void
+): void {
+  for (let index = 0; index < node.strokes.length; index++) {
+    const stroke = node.strokes[index]
+    if (!stroke.visible) continue
+    const draws = applyStrokeShader(r, stroke, index, node, graph)
+    try {
+      if (draws) draw(stroke, r.resolveStrokeColor(stroke, index, node, graph))
+    } finally {
+      r.strokePaint.setShader(null)
+      r.fillPaint.setShader(null)
+      r.strokePaint.setPathEffect(null)
+    }
+  }
+}
+
+/**
+ * Draws with `dash` set on the stroke paint, then clears it and frees the effect: the paint keeps
+ * its own reference, and the handle is native memory the garbage collector never reclaims.
+ */
+export function withStrokeDash(
+  r: SkiaRenderer,
+  dash: readonly number[],
+  phase: number,
+  draw: () => void
+): void {
+  if (dash.length === 0) {
+    r.strokePaint.setPathEffect(null)
+    draw()
+    return
+  }
+  const effect = r.ck.PathEffect.MakeDash([...dash], phase)
+  r.strokePaint.setPathEffect(effect)
+  try {
+    draw()
+  } finally {
+    r.strokePaint.setPathEffect(null)
+    effect.delete()
+  }
+}
+
 /** Leaves any shader in place: a shaded stroke's color is unused, but its alpha still applies. */
 export function configureStrokePaint(
   r: SkiaRenderer,
@@ -313,9 +363,7 @@ export function drawStyledRRectStroke(
 ): void {
   const dash = normalizeDashPattern(stroke.dashPattern)
   configureStrokePaint(r, node, stroke, color)
-  r.strokePaint.setPathEffect(dash.length > 0 ? r.ck.PathEffect.MakeDash(dash, dashPhase) : null)
-  r.drawRRectStrokeWithAlign(canvas, rrect, node, stroke)
-  r.strokePaint.setPathEffect(null)
+  withStrokeDash(r, dash, dashPhase, () => r.drawRRectStrokeWithAlign(canvas, rrect, node, stroke))
 }
 
 /** Strokes a layer's outline, or a vector's own paths, open ones included. */

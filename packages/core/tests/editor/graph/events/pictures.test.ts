@@ -8,6 +8,7 @@ function createRenderer() {
   const invalidated: string[] = []
   const renderer: GraphEventRenderer & { invalidated: string[] } = {
     invalidateVectorPath: () => undefined,
+    forgetNode: () => undefined,
     invalidateNodePicture: (nodeId: string) => {
       invalidated.push(nodeId)
     },

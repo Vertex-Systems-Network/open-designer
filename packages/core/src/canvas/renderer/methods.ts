@@ -336,19 +336,24 @@ const rendererMethods = {
     return Shapes.getStrokeGeometry(this, node)
   },
 
-  getCachedDropShadow(dx: number, dy: number, sigma: number, color: Float32Array): ImageFilter {
+  getCachedDropShadow(
+    dx: number,
+    dy: number,
+    sigma: number,
+    color: Float32Array
+  ): ImageFilter | null {
     return Effects.getCachedDropShadow(this, dx, dy, sigma, color)
   },
 
-  getCachedBlur(sigma: number): ImageFilter {
+  getCachedBlur(sigma: number): ImageFilter | null {
     return Effects.getCachedBlur(this, sigma)
   },
 
-  getCachedDecalBlur(sigma: number): ImageFilter {
+  getCachedDecalBlur(sigma: number): ImageFilter | null {
     return Effects.getCachedDecalBlur(this, sigma)
   },
 
-  getCachedMaskBlur(sigma: number): MaskFilter {
+  getCachedMaskBlur(sigma: number): MaskFilter | null {
     return Effects.getCachedMaskBlur(this, sigma)
   },
 
