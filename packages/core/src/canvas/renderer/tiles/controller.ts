@@ -31,7 +31,7 @@ import {
 import { TileSurfacePool } from './surface-pool'
 import { emitTileCoverageComplete, emitTileFrameTrace } from './telemetry'
 
-const TILE_FRAME_BUDGET_MS = 5
+const TILE_FRAME_BUDGET_MS = 8
 /** Tile work per frame while the viewport moves, leaving the rest to input and presentation. */
 const NAVIGATION_TILE_BUDGET_MS = 2
 /** The one tile a moving frame may still afford past its budget; dearer tiles wait for idle. */
@@ -97,7 +97,6 @@ export class TiledSceneController {
     previousBounds: TileWorldBounds[]
   }> = []
   private lastCoveredGeneration = ''
-  private lastLevel: number | null = null
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
   private readonly surfacePool = new TileSurfacePool()
@@ -153,9 +152,9 @@ export class TiledSceneController {
    * Renders due tiles within the frame's budget and presents the viewport from the cache: exact
    * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
    * colour where no level has one, until its tile renders. Nothing is drawn straight from the
-   * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting,
-   * shortens the budget while panning, and rasterizes nothing while the zoom changes; the
-   * retained backing plays no part. Idle time builds a pyramid of downsampled copies and a
+   * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting
+   * and rendering under a shorter budget, a zoom at a quantized level; the retained backing plays
+   * no part. Idle time builds a pyramid of downsampled copies and a
    * scene-rendered backdrop around the viewport, so a zoom out finds scaled stand-ins.
    */
   renderFrame(
@@ -177,9 +176,11 @@ export class TiledSceneController {
     const index = this.index
     if (!index || !renderer.pageId) return this.emptyResult()
 
-    const level = exactTileLevel(renderer.zoom * renderer.dpr)
-    const zooming = renderer.navigationPhase === 'zoom' && level !== this.lastLevel
-    this.lastLevel = level
+    // A zoom passes through levels too fast to render each exactly, so while it lasts tiles are
+    // rendered at the quantized level just above the scale, which holds for a band of zooms and
+    // scales down by at most a step; once it ends the exact level renders over them.
+    const scale = renderer.zoom * renderer.dpr
+    const level = renderer.navigationPhase === 'zoom' ? tileLevel(scale) : exactTileLevel(scale)
     // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
     // and feeds the fallback at any level, so it stays.
     const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
@@ -203,23 +204,12 @@ export class TiledSceneController {
       backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
       pyramid: { levels: PYRAMID_LEVELS }
     })
-    // A zoom changes level every few frames, and rasterizing each level as it passes costs more
-    // GPU time than the gesture leaves; the previous level's tiles stand in until the zoom ends
-    // or pauses. A pan keeps its level, so its newly exposed tiles fill in under the navigation
-    // budget, as do a paused zoom's.
-    let metrics: TileSchedulerMetrics
-    if (zooming) {
-      metrics = emptyTileSchedulerMetrics()
-      metrics.remaining = plan.jobs.length
-      metrics.skippedWithFallback = plan.jobs.filter((job) => job.fallbackAvailable).length
-    } else {
-      this.scheduler.enqueue(plan.jobs)
-      metrics = this.scheduler.runFrame(
-        (job) => this.executeJob(renderer, graph, index, job),
-        this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
-        this.navigationActive ? NAVIGATION_FIRST_TILE_LIMIT_MS : Number.POSITIVE_INFINITY
-      )
-    }
+    this.scheduler.enqueue(plan.jobs)
+    const metrics = this.scheduler.runFrame(
+      (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
+      this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
+      this.navigationActive ? NAVIGATION_FIRST_TILE_LIMIT_MS : Number.POSITIVE_INFINITY
+    )
     metrics.cancelledJobs += this.cancelledJobs
     this.cancelledJobs = 0
 
@@ -286,7 +276,6 @@ export class TiledSceneController {
     this.pageId = null
     this.contentGeneration = -1
     this.lastCoveredGeneration = ''
-    this.lastLevel = null
     this.pendingInvalidations = []
     this.measuredCosts.clear()
     this.pictureCache.clear()
@@ -367,13 +356,44 @@ export class TiledSceneController {
     this.index = pageId ? RenderChunkIndex.build(graph, pageId).index : null
   }
 
+  /**
+   * Recording a chunk's picture is the dear part of a tile, so a tile whose chunks are not all
+   * recorded yet records them until the frame's budget is spent and defers the rest; the tile
+   * itself renders, from recorded pictures, on the frame that finds them all present.
+   */
+  private recordChunkPictures(
+    renderer: SkiaRenderer,
+    graph: SceneGraph,
+    index: RenderChunkIndex,
+    key: TileKey,
+    remainingMs: number
+  ): boolean {
+    const deadline = this.now() + remainingMs
+    let recorded = 0
+    for (const chunk of tileChunks(index, key)) {
+      if (chunk.kind === 'subtree' && !chunk.interruptible) continue
+      if (this.pictureCache.has(renderer, chunk)) continue
+      if (recorded > 0 && this.now() >= deadline) return false
+      this.pictureCache.get(renderer, graph, chunk)
+      recorded++
+    }
+    return true
+  }
+
   private executeJob(
     renderer: SkiaRenderer,
     graph: SceneGraph,
     index: RenderChunkIndex,
-    job: TileJob
+    job: TileJob,
+    remainingMs: number
   ) {
     const startedAt = this.now()
+    if (
+      job.kind !== 'downsample' &&
+      !this.recordChunkPictures(renderer, graph, index, job.key, remainingMs)
+    ) {
+      return { renderMs: this.now() - startedAt, overBudget: false, deferred: true }
+    }
     const tile =
       job.kind === 'downsample'
         ? this.downsample(renderer, job)

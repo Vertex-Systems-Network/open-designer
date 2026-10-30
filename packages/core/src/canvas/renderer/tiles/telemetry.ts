@@ -28,6 +28,7 @@ export function emitTileFrameTrace(frame: TileFrameTrace): void {
     maximumJobRenderMs: metrics.maximumJobRenderMs,
     staleJobsDiscarded: metrics.staleJobsDiscarded,
     cancelledJobs: metrics.cancelledJobs,
+    deferredJobs: metrics.deferredJobs,
     tileAllocationMs: metrics.totalAllocationMs,
     tileDrawMs: metrics.totalDrawMs,
     tileFlushMs: metrics.totalFlushMs,

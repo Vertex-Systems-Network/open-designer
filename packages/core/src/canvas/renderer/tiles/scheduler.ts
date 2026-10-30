@@ -20,6 +20,8 @@ export interface TileJob {
 export interface TileJobResult {
   renderMs: number
   overBudget: boolean
+  /** The job made progress but is not done; it stays first in the queue for the next frame. */
+  deferred?: boolean
   allocationMs?: number
   drawMs?: number
   flushMs?: number
@@ -37,6 +39,8 @@ export interface TileSchedulerMetrics {
   maximumJobRenderMs: number
   staleJobsDiscarded: number
   cancelledJobs: number
+  /** Frames ended on a job that recorded part of its work and will continue next frame. */
+  deferredJobs: number
   totalAllocationMs: number
   totalDrawMs: number
   totalFlushMs: number
@@ -61,6 +65,7 @@ export function emptyTileSchedulerMetrics(): TileSchedulerMetrics {
     maximumJobRenderMs: 0,
     staleJobsDiscarded: 0,
     cancelledJobs: 0,
+    deferredJobs: 0,
     totalAllocationMs: 0,
     totalDrawMs: 0,
     totalFlushMs: 0,
@@ -140,7 +145,7 @@ export class TileScheduler {
    * so an affordable tile still fills in while the expensive ones ahead of it wait for idle.
    */
   runFrame(
-    execute: (job: TileJob) => TileJobResult,
+    execute: (job: TileJob, remainingMs: number) => TileJobResult,
     budgetMs: number = this.budgetMs,
     firstJobLimitMs = Number.POSITIVE_INFINITY
   ): TileSchedulerMetrics {
@@ -175,7 +180,7 @@ export class TileScheduler {
         metrics.skippedWithFallback++
         continue
       }
-      this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)
+      if (!this.runJob(job, execute, metrics, frameStart, budgetMs, mandatory)) break
       jobsExecuted++
     }
     if (deferred.length > 0) {
@@ -186,22 +191,29 @@ export class TileScheduler {
     return metrics
   }
 
+  /** Runs the first job; false when it deferred, which ends the frame with it still first. */
   private runJob(
     job: TileJob,
-    execute: (job: TileJob) => TileJobResult,
+    execute: (job: TileJob, remainingMs: number) => TileJobResult,
     metrics: TileSchedulerMetrics,
     frameStart: number,
     budgetMs: number,
     mandatory: boolean
-  ): void {
+  ): boolean {
     this.jobs.shift()
-    const result = execute(job)
+    const result = execute(job, Math.max(0, budgetMs - (this.now() - frameStart)))
     addJobMetrics(metrics, result)
+    const overrun = this.now() - frameStart - budgetMs
+    if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
+    if (result.deferred) {
+      this.jobs.unshift(job)
+      metrics.deferredJobs++
+      return false
+    }
     if (result.overBudget || result.renderMs > budgetMs) metrics.overBudgetJobs++
     if (mandatory) metrics.mandatoryCompleted++
     else metrics.interruptibleCompleted++
-    const overrun = this.now() - frameStart - budgetMs
-    if (overrun > metrics.deadlineOverrunMs) metrics.deadlineOverrunMs = overrun
+    return true
   }
 
   clear(): number {

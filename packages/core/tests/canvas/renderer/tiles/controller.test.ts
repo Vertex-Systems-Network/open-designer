@@ -89,29 +89,40 @@ describe('tile scheduling', () => {
     }
   })
 
-  test('zooms over the previous level scaled and rasterizes the new level once idle', () => {
-    const { graph, surface, renderer } = createGridScene()
-    const controller = new TiledSceneController({ now: () => 0 })
+  test('zooms over the previous level scaled while rendering the quantized gesture level', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    // A millisecond a reading: a tile's draw stays affordable while moving, and recording its
+    // chunk pictures spreads over frames.
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 1) })
     try {
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 10 && result.pending; frame++) {
+      for (let frame = 0; frame < 200 && !result.covered; frame++) {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
       expect(result.covered).toBe(true)
 
-      // Zoom in: level 2 has no tiles, and each of its tiles lies inside one level-1 tile.
-      renderer.zoom = 2
+      // Zoom to 1.3: the gesture level is the quantized step above it, 2^0.5, and one of its
+      // tiles renders per moving frame while the level-1 tiles stand in for the rest.
+      renderer.zoom = 1.3
       renderer.navigationPhase = 'zoom'
-      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      let zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(zoomed.covered).toBe(false)
-      expect(zoomed.metrics.interruptibleCompleted).toBe(0)
-      expect(zoomed.metrics.skippedWithFallback).toBeGreaterThan(0)
-      expect(zoomed.fallbackTileCount).toBe(5 * 4)
+      expect(zoomed.fallbackTileCount).toBeGreaterThan(0)
       expect(zoomed.uncoveredAreaCount).toBe(0)
-      expect(zoomed.pending).toBe(true)
+      for (let frame = 0; frame < 20 && zoomed.metrics.interruptibleCompleted === 0; frame++) {
+        zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      }
+      expect(zoomed.metrics.interruptibleCompleted).toBe(1)
+      expect(controller.isRendered({ pageId, level: 2 ** 0.5, x: 2, y: 1 })).toBe(true)
 
+      // Once the zoom ends the exact level renders, over the gesture tiles until it covers.
       renderer.navigationPhase = 'idle'
-      const settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      let settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(settled.fallbackTileCount).toBeGreaterThan(0)
+      for (let frame = 0; frame < 200 && !settled.covered; frame++) {
+        settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      }
       expect(settled.covered).toBe(true)
       expect(settled.fallbackTileCount).toBe(0)
     } finally {
@@ -120,26 +131,12 @@ describe('tile scheduling', () => {
     }
   })
 
-  test('renders one affordable tile per moving frame', () => {
-    const { graph, surface, renderer } = createGridScene()
-    // Every clock reading is 3 ms later: a tile costs 3 ms, over the moving budget but affordable.
-    let time = 0
-    const controller = new TiledSceneController({ now: () => (time += 3) })
-    try {
-      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      renderer.navigationPhase = 'pan'
-      const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(panning.metrics.interruptibleCompleted).toBe(1)
-      expect(panning.metrics.skippedWithFallback).toBe(0)
-    } finally {
-      controller.destroy()
-      renderer.destroy()
-    }
-  })
-
   test('zooms out over the coarse backdrop rendered around the settled viewport', () => {
     const { graph, surface, renderer } = createGridScene()
-    const controller = new TiledSceneController({ now: () => 0 })
+    // Free while settling; once the zoom starts, 10 ms a reading, so one tile renders a frame.
+    let step = 0
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += step) })
     try {
       // A free clock settles visible, overscan, and backdrop tiles within a few frames.
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
@@ -150,6 +147,7 @@ describe('tile scheduling', () => {
       expect(result.pending).toBe(false)
 
       // Zoom out to half: the visible level has nothing beyond the old viewport, the backdrop has.
+      step = 10
       renderer.zoom = 0.5
       renderer.navigationPhase = 'zoom'
       const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
@@ -167,8 +165,12 @@ describe('tile scheduling', () => {
     let time = 0
     const controller = new TiledSceneController({ now: () => (time += 10) })
     try {
-      // Idle, the first job may overrun the budget so the frame makes progress.
-      const idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      // Idle, the first job may overrun the budget so the frame makes progress, once its
+      // chunk pictures are recorded.
+      let idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 8 && idle.metrics.interruptibleCompleted === 0; frame++) {
+        idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
       const visibleTiles = 5 * 4
       expect(idle.metrics.interruptibleCompleted).toBe(1)
       expect(idle.uncoveredAreaCount).toBe(visibleTiles - 1)
@@ -308,7 +310,9 @@ describe('tiles with image previews', () => {
 
   test('builds a pyramid of downsampled levels once the visible level settles', () => {
     const { graph, surface, renderer, pageId } = createGridScene()
-    const controller = new TiledSceneController({ now: () => 0 })
+    let step = 0
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += step) })
     try {
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       for (let frame = 0; frame < 12; frame++) {
@@ -322,6 +326,7 @@ describe('tiles with image previews', () => {
       expect(controller.isRendered({ pageId, level: 0.125, x: 0, y: 0 })).toBe(true)
 
       // Far out, the pyramid still stands in for everything that was rendered.
+      step = 10
       renderer.zoom = 1 / 16
       renderer.navigationPhase = 'zoom'
       const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
@@ -332,17 +337,26 @@ describe('tiles with image previews', () => {
     }
   })
 
-  test('keeps rendering when a zoom gesture pauses at one level', () => {
-    const { graph, surface, renderer } = createGridScene()
-    const controller = new TiledSceneController({ now: () => 0 })
+  test("records a tile's chunk pictures across frames when they exceed the budget", () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    // Every reading is 10 ms later, so a frame affords one chunk recording before deferring.
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 10) })
     try {
-      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      renderer.zoom = 2
-      renderer.navigationPhase = 'zoom'
-      const changing = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(changing.metrics.interruptibleCompleted).toBe(0)
-      const paused = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(paused.metrics.interruptibleCompleted).toBeGreaterThan(0)
+      const first = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(first.metrics.deferredJobs).toBe(1)
+      expect(first.metrics.interruptibleCompleted).toBe(0)
+      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(false)
+      let result = first
+      for (
+        let frame = 0;
+        frame < 8 && !controller.isRendered({ pageId, level: 1, x: 2, y: 1 });
+        frame++
+      ) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(true)
+      expect(result.metrics.interruptibleCompleted).toBe(1)
     } finally {
       controller.destroy()
       renderer.destroy()
@@ -354,8 +368,12 @@ describe('tiles with image previews', () => {
     let time = 0
     const controller = new TiledSceneController({ now: () => (time += 10) })
     try {
-      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 8 && result.metrics.interruptibleCompleted === 0; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
       // The viewport spans world 0..1280 × 0..800: its centre lies in tile (2, 1).
+      expect(result.metrics.interruptibleCompleted).toBe(1)
       expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(true)
       expect(controller.isRendered({ pageId, level: 1, x: 0, y: 0 })).toBe(false)
     } finally {

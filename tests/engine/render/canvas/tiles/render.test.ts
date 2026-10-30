@@ -271,7 +271,11 @@ describe('tile rendering', () => {
     renderer.zoom = 1
     renderer.navigationPhase = 'idle'
     try {
-      const initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      // A tile first records its chunk pictures, one per 10 ms frame, then renders.
+      let initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 8 && initial.metrics.interruptibleCompleted === 0; frame++) {
+        initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
       expect(initial.pending).toBe(true)
       expect(initial.metrics.interruptibleCompleted).toBe(1)
 
@@ -286,7 +290,10 @@ describe('tile rendering', () => {
       expect(navigating.pending).toBe(true)
 
       renderer.navigationPhase = 'idle'
-      const idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      let idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      for (let frame = 0; frame < 8 && idle.metrics.interruptibleCompleted === 0; frame++) {
+        idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      }
       expect(idle.metrics.interruptibleCompleted).toBe(1)
     } finally {
       controller.destroy()
