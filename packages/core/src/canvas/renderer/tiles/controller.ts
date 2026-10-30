@@ -21,7 +21,7 @@ import {
   type TileWorldBounds
 } from './geometry'
 import { planTiles } from './planner'
-import { childTileKeys, deleteRenderedTile, downsampleTile, renderTile } from './render'
+import { childTileKeys, deleteRenderedTile, downsampleTile, renderTile, tileChunks } from './render'
 import {
   emptyTileSchedulerMetrics,
   TileScheduler,
@@ -194,7 +194,11 @@ export class TiledSceneController {
       overscanTiles: TILE_OVERSCAN,
       navigationGeneration,
       contentGeneration,
-      estimateCost: (key) => this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0,
+      // A tile over nothing is free, whatever the tiles with content have cost.
+      estimateCost: (key) =>
+        tileChunks(index, key).length === 0
+          ? 0
+          : (this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0),
       globalFallbackAvailable: true,
       backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
       pyramid: { levels: PYRAMID_LEVELS }
