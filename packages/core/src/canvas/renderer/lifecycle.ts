@@ -43,7 +43,6 @@ export function destroyRenderer(r: SkiaRenderer): void {
   r.pixelGridEffect = null
   r.strokePaint.delete()
   r.selectionPaint.delete()
-  r.parentOutlinePaint.delete()
   r.snapPaint.delete()
   r.auxFill.delete()
   r.auxStroke.delete()
@@ -78,6 +77,9 @@ export function destroyRenderer(r: SkiaRenderer): void {
   r.effectLayerPaint.delete()
   r.imageFilterCache.clear()
   r.maskFilterCache.clear()
+  r.dashEffects.clear()
+  r.pixelGridShader?.shader.delete()
+  r.pixelGridShader = null
   disposeNodeEditPaints(r.nodeEditPaints)
   for (const pic of r.nodePictureCache.values()) pic?.delete()
   r.nodePictureCache.clear()

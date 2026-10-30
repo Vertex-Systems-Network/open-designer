@@ -2,7 +2,7 @@ import type { ImageFilter, MaskFilter, Canvas, Paint, Path } from 'canvaskit-was
 
 import type { Fill, SceneGraph, SceneNode, Stroke } from '@open-pencil/scene-graph'
 import type { Mat3 } from '@open-pencil/scene-graph/matrix'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+import type { Rect } from '@open-pencil/scene-graph/primitives'
 import type { SnapGuide } from '@open-pencil/scene-graph/snap'
 
 import * as Effects from '#core/canvas/effects'
@@ -11,7 +11,6 @@ import * as Labels from '#core/canvas/labels/draw'
 import * as NodeEditOverlay from '#core/canvas/node-edit-overlay'
 import type { NodeEditOverlayState } from '#core/canvas/node-edit-overlay'
 import * as Overlays from '#core/canvas/overlays'
-import * as AIOverlays from '#core/canvas/overlays/ai'
 import * as PenOverlay from '#core/canvas/pen-overlay'
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import type { PresenceCursor, RenderOverlays } from '#core/canvas/renderer/types'
@@ -107,10 +106,6 @@ const rendererMethods = {
     Overlays.drawGroupBounds(this, canvas, nodes, graph, preview)
   },
 
-  getRotatedCorners(n: SceneNode, abs: Vector): Vector[] {
-    return Overlays.getRotatedCorners(this, n, abs)
-  },
-
   drawHandle(canvas: Canvas, x: number, y: number): void {
     Overlays.drawHandle(this, canvas, x, y)
   },
@@ -129,7 +124,6 @@ const rendererMethods = {
 
   drawFlashes(canvas: Canvas, graph: SceneGraph): void {
     Overlays.drawFlashes(this, canvas, graph)
-    AIOverlays.drawAIOverlays(this, canvas, graph)
   },
 
   drawLayoutInsertIndicator(

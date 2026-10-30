@@ -3,7 +3,6 @@ import type { SkiaRenderer } from '#core/canvas/renderer'
 import {
   DEFAULT_FONT_SIZE,
   PARENT_OUTLINE_ALPHA,
-  PARENT_OUTLINE_DASH,
   PEN_PATH_STROKE_WIDTH,
   RULER_BG_COLOR,
   RULER_TEXT_COLOR,
@@ -26,14 +25,6 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
   r.selectionPaint.setStyle(ck.PaintStyle.Stroke)
   r.selectionPaint.setStrokeWidth(1)
   r.selectionPaint.setAntiAlias(true)
-
-  r.parentOutlinePaint = new ck.Paint()
-  r.parentOutlinePaint.setStyle(ck.PaintStyle.Stroke)
-  r.parentOutlinePaint.setStrokeWidth(1)
-  r.parentOutlinePaint.setAntiAlias(true)
-  r.parentOutlinePaint.setPathEffect(
-    ck.PathEffect.MakeDash([PARENT_OUTLINE_DASH, PARENT_OUTLINE_DASH], 0)
-  )
 
   r.snapPaint = new ck.Paint()
   r.snapPaint.setStyle(ck.PaintStyle.Stroke)
@@ -120,7 +111,17 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
 /** Colors the long-lived paints drawn in the selection color; rerun when that color changes. */
 export function initializeSelectionPaintColors(r: SkiaRenderer): void {
   r.selectionPaint.setColor(r.selColor())
-  r.parentOutlinePaint.setColor(r.selColor(PARENT_OUTLINE_ALPHA))
   r.penHandlePaint.setColor(r.selColor(PARENT_OUTLINE_ALPHA))
   r.penVertexStroke.setColor(r.selColor())
+}
+
+/** Colours the ruler paints from the ruler theme, or the defaults without one. */
+export function initializeRulerPaintColors(r: SkiaRenderer): void {
+  const theme = r.rulerTheme
+  const background = theme?.background ?? { ...RULER_BG_COLOR, a: 1 }
+  const tick = theme?.tick ?? { ...RULER_TICK_COLOR, a: 1 }
+  const text = theme?.text ?? { ...RULER_TEXT_COLOR, a: 1 }
+  r.rulerBgPaint.setColorComponents(background.r, background.g, background.b, background.a)
+  r.rulerTickPaint.setColorComponents(tick.r, tick.g, tick.b, tick.a)
+  r.rulerTextPaint.setColorComponents(text.r, text.g, text.b, text.a)
 }

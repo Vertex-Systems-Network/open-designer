@@ -29,12 +29,17 @@ import { LabelCache } from './labels/cache'
 import * as LabelHitTest from './labels/hit-test'
 import { LabelParagraphCache } from './labels/paragraph-cache'
 import { labelHitOptions } from './labels/style'
+import { createDashEffectCache } from './overlays/outline'
 import { NodePathCaches } from './paths/cache'
 import * as RenderColors from './renderer/colors'
 import * as RendererFonts from './renderer/fonts'
 import { destroyRenderer, releaseLiveImages } from './renderer/lifecycle'
 import { installRendererDomainMethods, type RendererDomainMethods } from './renderer/methods'
-import { initializeRendererPaints, initializeSelectionPaintColors } from './renderer/paints'
+import {
+  initializeRendererPaints,
+  initializeRulerPaintColors,
+  initializeSelectionPaintColors
+} from './renderer/paints'
 import * as RenderPipeline from './renderer/pipeline'
 import type { SceneBacking, SceneBackingBuild } from './renderer/retained-backing/types'
 import * as RendererState from './renderer/state'
@@ -60,9 +65,12 @@ import type {
   TypefaceFontProvider,
   SkPicture,
   RuntimeEffect,
+  Shader,
   Image,
   TextureSource
 } from 'canvaskit-wasm'
+
+import { createSceneGeometry, type RotationPreview, type SceneGeometry } from '#core/geometry'
 
 export interface SubtreePictureCacheEntry {
   picture: SkPicture
@@ -104,7 +112,6 @@ export class SkiaRenderer {
   pixelGridEffect: RuntimeEffect | null = null
   declare strokePaint: Paint
   declare selectionPaint: Paint
-  declare parentOutlinePaint: Paint
   declare snapPaint: Paint
   declare auxFill: Paint
   declare auxStroke: Paint
@@ -113,6 +120,19 @@ export class SkiaRenderer {
   /** Whether the shared fill and stroke paints carry a shader, so clearing one is a call only when needed. */
   fillPaintShaded = false
   strokePaintShaded = false
+  /** Dashes the overlay pass draws with, kept between frames. */
+  readonly dashEffects = createDashEffectCache()
+  /** Label widths by font and text, so chrome measures a label once. */
+  readonly glyphWidths = new WeakMap<Font, Map<string, number>>()
+  /** The pixel grid's shader, kept while its uniforms hold. */
+  pixelGridShader: { key: string; shader: Shader } | null = null
+  /** Scene geometry shared by everything drawn in one frame; `pipeline` starts each frame afresh. */
+  frameGeometry: {
+    graph: SceneGraph
+    preview: RotationPreview | null
+    geometry: SceneGeometry
+  } | null = null
+  private readonly colors = new Map<string, Float32Array>()
   imageFilterCache = createImageFilterCache()
   maskFilterCache = createMaskFilterCache()
   _tmpColor = new Float32Array(4)
@@ -265,7 +285,6 @@ export class SkiaRenderer {
   declare drawParentFrameOutlines: RendererDomainMethods['drawParentFrameOutlines']
   declare drawNodeOutline: RendererDomainMethods['drawNodeOutline']
   declare drawGroupBounds: RendererDomainMethods['drawGroupBounds']
-  declare getRotatedCorners: RendererDomainMethods['getRotatedCorners']
   declare drawHandle: RendererDomainMethods['drawHandle']
   declare drawSnapGuides: RendererDomainMethods['drawSnapGuides']
   declare drawSnapMarks: RendererDomainMethods['drawSnapMarks']
@@ -331,29 +350,63 @@ export class SkiaRenderer {
     return rc
   }
 
+  /** A colour the chrome draws with every frame, allocated once per theme; callers do not write to it. */
+  private cachedColor(key: string, r: number, g: number, b: number, a: number): Float32Array {
+    const cached = this.colors.get(key)
+    if (cached) return cached
+    const color = this.ck.Color4f(r, g, b, a)
+    this.colors.set(key, color)
+    return color
+  }
+
   selColor(alpha = 1) {
     const { r, g, b } = this.selectionTheme.color
-    return this.ck.Color4f(r, g, b, alpha)
+    return this.cachedColor(`sel:${alpha}`, r, g, b, alpha)
   }
 
   selForegroundColor() {
     const { r, g, b } = this.selectionTheme.foreground
-    return this.ck.Color4f(r, g, b, 1)
+    return this.cachedColor('selfg', r, g, b, 1)
   }
 
   /** Switches selection chrome to `theme`, repainting the paints that keep it between frames. */
   setSelectionTheme(theme: SelectionTheme = DEFAULT_SELECTION_THEME): void {
     if (isEqual(theme, this.selectionTheme)) return
     this.selectionTheme = { color: { ...theme.color }, foreground: { ...theme.foreground } }
+    this.colors.clear()
     initializeSelectionPaintColors(this)
   }
 
+  /** Recolours the ruler paints when the theme changes, rather than on every frame. */
+  setRulerTheme(theme: RulerTheme | null): void {
+    if (isEqual(theme, this.rulerTheme)) return
+    this.rulerTheme = theme
+    initializeRulerPaintColors(this)
+  }
+
+  /** The geometry of this frame, shared by every overlay that draws from the graph. */
+  sceneGeometry(graph: SceneGraph, preview?: RotationPreview | null): SceneGeometry {
+    const current = this.frameGeometry
+    if (current && current.graph === graph && current.preview === (preview ?? null)) {
+      return current.geometry
+    }
+    const geometry = createSceneGeometry(graph, preview)
+    this.frameGeometry = { graph, preview: preview ?? null, geometry }
+    return geometry
+  }
+
   compColor(alpha = 1) {
-    return this.ck.Color4f(COMPONENT_COLOR.r, COMPONENT_COLOR.g, COMPONENT_COLOR.b, alpha)
+    return this.cachedColor(
+      `comp:${alpha}`,
+      COMPONENT_COLOR.r,
+      COMPONENT_COLOR.g,
+      COMPONENT_COLOR.b,
+      alpha
+    )
   }
 
   slotColor(alpha = 1) {
-    return this.ck.Color4f(SLOT_COLOR.r, SLOT_COLOR.g, SLOT_COLOR.b, alpha)
+    return this.cachedColor(`slot:${alpha}`, SLOT_COLOR.r, SLOT_COLOR.g, SLOT_COLOR.b, alpha)
   }
 
   /**

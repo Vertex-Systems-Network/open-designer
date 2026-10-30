@@ -6,6 +6,7 @@ import { createImageFilterCache, createMaskFilterCache } from '#core/canvas/effe
 import { createImageCache } from '#core/canvas/images/cache'
 import { ImagePreviewCache } from '#core/canvas/images/previews'
 import type { NodeEditPaints } from '#core/canvas/node-edit-overlay'
+import { createDashEffectCache } from '#core/canvas/overlays/outline'
 import { NodePathCaches } from '#core/canvas/paths/cache'
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { EffectRasterCache } from '#core/canvas/renderer/effect-raster-cache'
@@ -36,7 +37,6 @@ function createRenderer() {
     fillPaint: deletable<Paint>(),
     strokePaint: deletable<Paint>(),
     selectionPaint: deletable<Paint>(),
-    parentOutlinePaint: deletable<Paint>(),
     snapPaint: deletable<Paint>(),
     auxFill: deletable<Paint>(),
     auxStroke: deletable<Paint>(),
@@ -63,6 +63,8 @@ function createRenderer() {
     penVertexFill: deletable<Paint>(),
     penVertexStroke: deletable<Paint>(),
     imageFilterCache: createImageFilterCache(),
+    dashEffects: createDashEffectCache(),
+    pixelGridShader: null,
     maskFilterCache: createMaskFilterCache(),
     nodeEditPaints: {
       techStrokePaint: deletable<Paint>()
@@ -99,14 +101,12 @@ test('destroyRenderer releases tiled resources before deleting the main surface'
 
 test('destroyRenderer deletes all renderer-owned paints and label fonts', () => {
   const renderer = createRenderer()
-  const parentOutlinePaint = renderer.parentOutlinePaint
   const sectionTitleFont = renderer.sectionTitleFont
   const componentLabelFont = renderer.componentLabelFont
   const pencilStrokePaint = renderer.pencilStrokePaint
 
   destroyRenderer(renderer)
 
-  expect(parentOutlinePaint.delete).toHaveBeenCalled()
   expect(pencilStrokePaint.delete).toHaveBeenCalled()
   expect(sectionTitleFont?.delete).toHaveBeenCalled()
   expect(componentLabelFont?.delete).toHaveBeenCalled()

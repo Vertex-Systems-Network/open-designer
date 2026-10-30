@@ -41,7 +41,6 @@ test('long-lived selection paints and text follow a new selection theme', () => 
     const expected = rgb(ck.Color4f(r, g, b, 1))
     for (const paint of [
       renderer.selectionPaint,
-      renderer.parentOutlinePaint,
       renderer.penHandlePaint,
       renderer.penVertexStroke
     ]) {
