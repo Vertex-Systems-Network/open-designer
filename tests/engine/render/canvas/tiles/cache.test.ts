@@ -113,7 +113,7 @@ describe('tile fallback lookup', () => {
     ).toEqual([0.5])
   })
 
-  test('prefers a level covering the whole area, then the nearest partial one', () => {
+  test('layers nearer partial levels over the nearest level that covers the whole area', () => {
     const cache = new TileImageCache()
     cache.install(tileAt(2, 0, 0), 1)
     // One of four finer tiles still stands in for its quarter; the rest stays page colour.
@@ -122,13 +122,13 @@ describe('tile fallback lookup', () => {
         .findFallback({ pageId: 'page', level: 1, x: 0, y: 0 }, cache.fallbackLevels('page', 1))
         ?.map((entry) => entry.key.x)
     ).toEqual([0])
-    // A coarser level covering everything wins over a partial finer one.
+    // A coarser level covering everything is drawn first, the partial finer one over it.
     cache.install(tileAt(0.25, 0, 0), 1)
     expect(
       cache
         .findFallback({ pageId: 'page', level: 1, x: 0, y: 0 }, cache.fallbackLevels('page', 1))
         ?.map((entry) => entry.key.level)
-    ).toEqual([0.25])
+    ).toEqual([0.25, 2])
     cache.invalidateBounds('page', { minX: 0, minY: 0, maxX: 1024, maxY: 1024 }, 2)
     cache.install(tileAt(2, 0, 0), 2)
     cache.install(tileAt(2, 1, 0), 2)

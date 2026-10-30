@@ -20,7 +20,7 @@ import {
   tileWorldBounds,
   type TileWorldBounds
 } from './geometry'
-import { planTiles } from './planner'
+import { planTiles, type TilePlanOptions } from './planner'
 import { childTileKeys, deleteRenderedTile, downsampleTile, renderTile, tileChunks } from './render'
 import {
   emptyTileSchedulerMetrics,
@@ -43,6 +43,8 @@ const BACKDROP_LEVEL_RATIO = 4
 const BACKDROP_OVERSCAN = 1
 /** How many halvings of the visible level the pyramid keeps: 2⁶ covers a 64× zoom out. */
 const PYRAMID_LEVELS = 6
+/** The whole page is kept at a level where its longer side spans this many tiles. */
+const PAGE_BACKDROP_TILES = 4
 const TILE_COST_SMOOTHING = 0.3
 /** Exact levels are keyed to this many bits of the scale's logarithm: stable across float noise. */
 const EXACT_LEVEL_BITS = 20
@@ -65,12 +67,20 @@ function smoothCost(previous: number | undefined, costMs: number): number {
 export interface TiledSceneFrameResult {
   /** Every visible tile exists at the current level. */
   covered: boolean
+  /** Visible tiles are still outstanding: settlement waits for this. */
   pending: boolean
+  /**
+   * Work beyond the visible tiles remains, the overscan ring, the page copy, the pyramid, or
+   * the backdrop ring, which only proceeds in frames, so the caller should keep scheduling them.
+   */
+  backgroundPending: boolean
   metrics: TileSchedulerMetrics
   /** Tiles of other levels drawn, scaled, where the current level has none yet. */
   fallbackTileCount: number
   /** Visible tile areas no level covers; they show the page colour until their tiles render. */
   uncoveredAreaCount: number
+  /** Those of the uncovered areas that lie over the page's content rather than empty canvas. */
+  uncoveredContentAreaCount: number
 }
 
 export interface TiledSceneControllerOptions {
@@ -82,6 +92,7 @@ interface VisiblePresentation {
   exact: Array<{ key: TileKey; tile: CachedTile }>
   fallback: Array<{ key: TileKey; tiles: CachedTile[] }>
   uncovered: number
+  uncoveredContent: number
 }
 
 export class TiledSceneController {
@@ -184,11 +195,15 @@ export class TiledSceneController {
     // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
     // and feeds the fallback at any level, so it stays.
     const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
+    const pageBackdrop = this.pageBackdrop(index, level)
     this.cancelledJobs += this.scheduler.discard(
       (job) =>
-        job.kind !== 'downsample' && job.key.level !== level && job.key.level !== backdropLevel
+        job.kind !== 'downsample' &&
+        job.key.level !== level &&
+        job.key.level !== backdropLevel &&
+        job.key.level !== pageBackdrop?.level
     )
-    const plan = planTiles(this.tileCache, {
+    const planOptions: TilePlanOptions = {
       pageId: renderer.pageId,
       level,
       viewport,
@@ -202,8 +217,10 @@ export class TiledSceneController {
           : (this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0),
       globalFallbackAvailable: true,
       backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
+      pageBackdrop,
       pyramid: { levels: PYRAMID_LEVELS }
-    })
+    }
+    const plan = planTiles(this.tileCache, planOptions)
     this.scheduler.enqueue(plan.jobs)
     const metrics = this.scheduler.runFrame(
       (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
@@ -212,6 +229,10 @@ export class TiledSceneController {
     )
     metrics.cancelledJobs += this.cancelledJobs
     this.cancelledJobs = 0
+    // A stage is planned only once the previous one is done, so the plan is taken again after
+    // the frame's work to learn whether anything remains for the next frame, and to queue it.
+    const next = planTiles(this.tileCache, planOptions)
+    this.scheduler.enqueue(next.jobs)
 
     const visible = planTiles(
       this.tileCache,
@@ -226,7 +247,7 @@ export class TiledSceneController {
       },
       true
     ).visible
-    const presentation = this.resolveVisible(visible, renderer.pageId, level)
+    const presentation = this.resolveVisible(visible, renderer.pageId, level, index.bounds())
     canvas.save()
     // Snapped to device pixels, an exact tile lands texel on pixel and copies rather than samples.
     canvas.translate(
@@ -247,6 +268,7 @@ export class TiledSceneController {
       presentedTileCount: presentation.exact.length,
       fallbackTileCount: presentation.fallback.length,
       uncoveredAreaCount: presentation.uncovered,
+      uncoveredContentAreaCount: presentation.uncoveredContent,
       covered
     })
     const settledGenerationKey = `${navigationGeneration}:${contentGeneration}`
@@ -260,12 +282,17 @@ export class TiledSceneController {
         this.tileCache.byteSize()
       )
     }
+    const visiblePending = next.visible.some(
+      ({ tile }) => tile?.contentGeneration !== contentGeneration
+    )
     return {
       covered,
-      pending: this.scheduler.pending() > 0 || !covered,
+      pending: visiblePending || !covered,
+      backgroundPending: this.scheduler.pending() > 0,
       metrics,
       fallbackTileCount: presentation.fallback.length,
-      uncoveredAreaCount: presentation.uncovered
+      uncoveredAreaCount: presentation.uncovered,
+      uncoveredContentAreaCount: presentation.uncoveredContent
     }
   }
 
@@ -422,6 +449,26 @@ export class TiledSceneController {
     return downsampleTile(renderer, job.key, children, this.surfacePool)
   }
 
+  /**
+   * The whole page at a level coarse enough to fit PAGE_BACKDROP_TILES along its longer side,
+   * or undefined when the visible level is already that coarse. The level depends only on the
+   * page, so its tiles stay valid across zooms.
+   */
+  private pageBackdrop(
+    index: RenderChunkIndex,
+    level: number
+  ): { level: number; bounds: TileWorldBounds } | undefined {
+    const bounds = index.bounds()
+    if (!bounds) return undefined
+    const span = Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY, 1)
+    const pageLevel = Math.max(
+      MIN_TILE_LEVEL,
+      tileLevel((PAGE_BACKDROP_TILES * TILE_DEVICE_SIZE) / span)
+    )
+    if (pageLevel >= level) return undefined
+    return { level: pageLevel, bounds }
+  }
+
   /** Whether the cache holds a fresh tile for `key`. */
   isRendered(key: TileKey): boolean {
     return this.tileCache.getIfPresent(key)?.contentGeneration === this.contentGeneration
@@ -452,9 +499,15 @@ export class TiledSceneController {
   private resolveVisible(
     visible: Array<{ key: TileKey; tile: CachedTile | null }>,
     pageId: string,
-    level: number
+    level: number,
+    content: TileWorldBounds | null
   ): VisiblePresentation {
-    const presentation: VisiblePresentation = { exact: [], fallback: [], uncovered: 0 }
+    const presentation: VisiblePresentation = {
+      exact: [],
+      fallback: [],
+      uncovered: 0,
+      uncoveredContent: 0
+    }
     let levels: number[] | undefined
     for (const { key, tile } of visible) {
       if (tile) {
@@ -463,8 +516,21 @@ export class TiledSceneController {
       }
       levels ??= this.tileCache.fallbackLevels(pageId, level)
       const tiles = this.tileCache.findFallback(key, levels)
-      if (tiles) presentation.fallback.push({ key, tiles })
-      else presentation.uncovered++
+      if (tiles) {
+        presentation.fallback.push({ key, tiles })
+        continue
+      }
+      presentation.uncovered++
+      const bounds = tileWorldBounds(key)
+      if (
+        content &&
+        bounds.minX < content.maxX &&
+        bounds.maxX > content.minX &&
+        bounds.minY < content.maxY &&
+        bounds.maxY > content.minY
+      ) {
+        presentation.uncoveredContent++
+      }
     }
     return presentation
   }
@@ -515,9 +581,11 @@ export class TiledSceneController {
     return {
       covered: false,
       pending: false,
+      backgroundPending: false,
       metrics: emptyTileSchedulerMetrics(),
       fallbackTileCount: 0,
-      uncoveredAreaCount: 1
+      uncoveredAreaCount: 1,
+      uncoveredContentAreaCount: 1
     }
   }
 }

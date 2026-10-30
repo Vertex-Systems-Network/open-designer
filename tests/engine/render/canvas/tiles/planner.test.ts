@@ -148,4 +148,19 @@ describe('tile planner', () => {
     expect(plan.jobs.map((job) => job.key.x)).toEqual([2, 1, 3, 0, 4])
     cache.clear()
   })
+
+  test('plans the whole page at its coarse level once the visible tiles are fresh', () => {
+    const cache = new TileImageCache()
+    const pageBackdrop = { level: 0.25, bounds: { minX: 0, minY: 0, maxX: 3000, maxY: 1500 } }
+    const pending = planTiles(cache, baseOptions({ overscanTiles: 1, pageBackdrop }))
+    expect(pending.jobs.every((job) => job.key.level === 1)).toBe(true)
+    cache.install(rendered(0), 2)
+    cache.install(rendered(1), 2)
+    const page = planTiles(cache, baseOptions({ overscanTiles: 1, pageBackdrop }))
+    expect(page.jobs.length).toBe(3 * 2)
+    expect(page.jobs.every((job) => job.key.level === 0.25 && job.priority === 'overscan')).toBe(
+      true
+    )
+    cache.clear()
+  })
 })

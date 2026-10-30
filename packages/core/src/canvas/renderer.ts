@@ -186,6 +186,8 @@ export class SkiaRenderer {
   /** Colour space this renderer's surface presents; colours convert into it when painting. */
   presentationColorSpace: RenderColorSpace = 'srgb'
   tiledScenePending = false
+  /** Tile work beyond the visible tiles remains; the frame loop keeps idle frames coming. */
+  tiledSceneBackgroundPending = false
   tiledSceneCovered = false
   lastSceneViewport: { panX: number; panY: number; zoom: number } | null = null
   nodePictureCache = new Map<string, SkPicture | null>()

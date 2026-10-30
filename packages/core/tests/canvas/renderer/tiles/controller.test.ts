@@ -131,6 +131,40 @@ describe('tile scheduling', () => {
     }
   })
 
+  test('zooms out over a coarse copy of the whole page beyond the settled viewport', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    // Content far outside the settled viewport: only the whole-page level can stand in for it.
+    graph.createNode('RECTANGLE', pageId, {
+      x: 3000,
+      y: 3000,
+      width: 40,
+      height: 40,
+      fills: color(1, 0, 0)
+    })
+    let step = 0
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += step) })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 12; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.pending).toBe(false)
+
+      // At a quarter the viewport spans 5120 × 3200 world units: twenty tiles, nine of them
+      // inside the page's bounds, which the page level covers; the rest is empty canvas.
+      step = 10
+      renderer.zoom = 0.25
+      renderer.navigationPhase = 'zoom'
+      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(zoomed.fallbackTileCount + (zoomed.covered ? 20 : 0)).toBeGreaterThanOrEqual(9)
+      expect(zoomed.uncoveredAreaCount).toBeLessThanOrEqual(11)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
   test('zooms out over the coarse backdrop rendered around the settled viewport', () => {
     const { graph, surface, renderer } = createGridScene()
     // Free while settling; once the zoom starts, 10 ms a reading, so one tile renders a frame.
@@ -308,6 +342,27 @@ describe('tiles with image previews', () => {
     }
   })
 
+  test('reports background work until the ring, page copy, pyramid, and backdrop are built', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(result.covered).toBe(true)
+      expect(result.pending).toBe(false)
+      expect(result.backgroundPending).toBe(true)
+      let frames = 0
+      while (result.backgroundPending && frames < 20) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+        frames++
+      }
+      expect(result.backgroundPending).toBe(false)
+      expect(frames).toBeGreaterThan(1)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
   test('builds a pyramid of downsampled levels once the visible level settles', () => {
     const { graph, surface, renderer, pageId } = createGridScene()
     let step = 0
@@ -389,10 +444,11 @@ describe('tiles with image previews', () => {
     renderer.tiledSceneEnabled = true
     try {
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 12 && result.pending; frame++) {
+      for (let frame = 0; frame < 30 && (result.pending || result.backgroundPending); frame++) {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
       expect(result.covered).toBe(true)
+      expect(result.backgroundPending).toBe(false)
       renderer.invalidateNodesForFonts(graph, [pageId])
       expect(controller.hasPendingWork()).toBe(true)
       const redraw = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)

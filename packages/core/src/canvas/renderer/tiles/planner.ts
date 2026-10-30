@@ -26,6 +26,11 @@ export interface TilePlanOptions {
    */
   backdrop?: { level: number; overscanTiles: number }
   /**
+   * The whole page at a level coarse enough to fit a handful of tiles, rendered right after the
+   * visible tiles, so any hole inside the page has a stand-in however far a zoom out reaches.
+   */
+  pageBackdrop?: { level: number; bounds: TileWorldBounds }
+  /**
    * Coarser copies of the visible level, each tile downsampled from the four cached tiles twice
    * as fine, built once the visible level and its overscan are complete and up to `levels` deep,
    * so a zoom out always finds a scaled stand-in for what was rendered.
@@ -128,6 +133,28 @@ function planVisibleJobs(options: TilePlanOptions, visible: TilePlan['visible'])
   return jobs.sort((a, b) => distance(a.key) - distance(b.key))
 }
 
+function planAreaJobs(
+  cache: TileImageCache,
+  options: TilePlanOptions,
+  level: number,
+  bounds: TileWorldBounds
+): TileJob[] {
+  const jobs: TileJob[] = []
+  for (const key of tileKeysForWorldBounds(options.pageId, level, bounds)) {
+    const tile = cache.get(key)
+    if (tile?.contentGeneration === options.contentGeneration) continue
+    jobs.push({
+      key,
+      navigationGeneration: options.navigationGeneration,
+      contentGeneration: options.contentGeneration,
+      priority: 'overscan',
+      fallbackAvailable: true,
+      estimatedCost: options.estimateCost(key)
+    })
+  }
+  return jobs
+}
+
 function planRingJobs(
   cache: TileImageCache,
   options: TilePlanOptions,
@@ -159,9 +186,9 @@ function planRingJobs(
 }
 
 /**
- * The frame's tile jobs, one stage at a time: stale or missing visible tiles, then the overscan
- * ring, then the pyramid, then the coarse backdrop; a later stage is planned only once the
- * earlier ones have nothing left.
+ * The frame's tile jobs, one stage at a time: stale or missing visible tiles, then the whole
+ * page at a coarse level, then the overscan ring, then the pyramid, then the coarse backdrop
+ * ring; a later stage is planned only once the earlier ones have nothing left.
  */
 export function planTiles(
   cache: TileImageCache,
@@ -172,6 +199,9 @@ export function planTiles(
   const visibleKeys = tileKeysForWorldBounds(options.pageId, options.level, options.viewport)
   const visible = visibleKeys.map((key) => ({ key, tile: cache.get(key) }))
   let jobs = planVisibleJobs(options, visible)
+  if (jobs.length === 0 && options.pageBackdrop) {
+    jobs = planAreaJobs(cache, options, options.pageBackdrop.level, options.pageBackdrop.bounds)
+  }
   if (jobs.length === 0) {
     const visibleIds = new Set(visibleKeys.map(tileKeyString))
     jobs = planRingJobs(

@@ -293,6 +293,7 @@ export function render(
       // Tiles stand in for the retained backing, idle or moving.
       const tiled = r.tiledScene.renderFrame(r, canvas, graph, sceneVersion, r.navigationGeneration)
       r.tiledScenePending = tiled.pending
+      r.tiledSceneBackgroundPending = tiled.backgroundPending
       r.tiledSceneCovered = tiled.covered
       r.sceneBackingNeedsCrispRender = false
       renderedScene = true

@@ -77,11 +77,6 @@ export class TileImageCache {
     return this.entriesByLevel.get(pageId)?.get(level)?.values() ?? []
   }
 
-  /**
-   * Cached tiles of other levels that stand in for `key`'s missing tile, scaled: the nearest
-   * level whose tiles cover all of its area, else the nearest level that has any tile over it,
-   * which leaves the rest at the page colour. Null when no level has a tile there.
-   */
   /** The levels `findFallback` may draw from for a page shown at `level`, nearest first. */
   fallbackLevels(pageId: string, level: number): number[] {
     return [...(this.entriesByLevel.get(pageId)?.keys() ?? [])]
@@ -90,6 +85,13 @@ export class TileImageCache {
       .sort(compareLevelDistance(level))
   }
 
+  /**
+   * Cached tiles of other levels that stand in for `key`'s missing tile, scaled, in drawing
+   * order: levels from the one nearest `key`'s outward, each contributing the tiles it has over
+   * the area, until one covers all of it; drawn farthest first, so the nearest level ends on
+   * top and a coarser complete level fills whatever the nearer ones miss. Null when no level
+   * has a tile there.
+   */
   findFallback(key: TileKey, levels: number[]): CachedTile[] | null {
     const bounds = tileWorldBounds(key)
     // Shrink by a hair so a boundary shared with the next tile does not ask for that tile too.
@@ -99,7 +101,7 @@ export class TileImageCache {
       maxX: bounds.maxX - 1e-6,
       maxY: bounds.maxY - 1e-6
     }
-    let partial: CachedTile[] | null = null
+    const layers: CachedTile[][] = []
     for (const level of levels) {
       const tiles: CachedTile[] = []
       let complete = true
@@ -108,11 +110,11 @@ export class TileImageCache {
         if (tile) tiles.push(tile)
         else complete = false
       }
-      if (tiles.length === 0) continue
-      if (complete) return tiles
-      partial ??= tiles
+      if (tiles.length > 0) layers.push(tiles)
+      if (complete && tiles.length > 0) break
     }
-    return partial
+    if (layers.length === 0) return null
+    return layers.reverse().flat()
   }
 
   get(key: TileKey): CachedTile | null {

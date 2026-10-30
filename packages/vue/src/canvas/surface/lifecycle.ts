@@ -186,7 +186,10 @@ export function createCanvasSurfaceManager({
     options?.onFrame?.({ panX: view.panX, panY: view.panY, zoom: view.zoom })
     acknowledgePresentation()
     clearSceneBackingRenderTimer()
-    if (options?.layer === 'scene' && state.renderer.tiledScenePending) {
+    if (
+      options?.layer === 'scene' &&
+      (state.renderer.tiledScenePending || state.renderer.tiledSceneBackgroundPending)
+    ) {
       renderLoop.markDirty()
     }
     if (options?.layer === 'scene' && state.renderer.sceneBackingNeedsCrispRender) {

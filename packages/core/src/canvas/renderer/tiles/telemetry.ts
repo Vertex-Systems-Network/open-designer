@@ -11,6 +11,7 @@ export interface TileFrameTrace {
   presentedTileCount: number
   fallbackTileCount: number
   uncoveredAreaCount: number
+  uncoveredContentAreaCount: number
   covered: boolean
 }
 
@@ -40,6 +41,7 @@ export function emitTileFrameTrace(frame: TileFrameTrace): void {
     presentedTileCount: frame.presentedTileCount,
     fallbackTileCount: frame.fallbackTileCount,
     uncoveredAreaCount: frame.uncoveredAreaCount,
+    uncoveredContentAreaCount: frame.uncoveredContentAreaCount,
     covered: frame.covered
   })
 }
