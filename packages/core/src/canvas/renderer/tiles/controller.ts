@@ -35,7 +35,12 @@ const TILE_FRAME_BUDGET_MS = 8
 /** Tile work per frame while the viewport moves, leaving the rest to input and presentation. */
 const NAVIGATION_TILE_BUDGET_MS = 2
 /** The one tile a moving frame may still afford past its budget; dearer tiles wait for idle. */
-const NAVIGATION_FIRST_TILE_LIMIT_MS = 8
+const NAVIGATION_FIRST_TILE_LIMIT_MS = 4
+/**
+ * The one tile an idle frame may afford past its budget while only background stages remain,
+ * so a gesture that starts then never waits long for the frame; visible tiles have no limit.
+ */
+const BACKGROUND_FIRST_TILE_LIMIT_MS = 6
 const MAXIMUM_TILE_JOBS_PER_FRAME = 128
 const TILE_OVERSCAN = 1
 /** The backdrop is this many times coarser than the visible level, and reaches this far out. */
@@ -203,6 +208,7 @@ export class TiledSceneController {
         job.key.level !== backdropLevel &&
         job.key.level !== pageBackdrop?.level
     )
+    const zooming = renderer.navigationPhase === 'zoom'
     const planOptions: TilePlanOptions = {
       pageId: renderer.pageId,
       level,
@@ -210,29 +216,35 @@ export class TiledSceneController {
       overscanTiles: TILE_OVERSCAN,
       navigationGeneration,
       contentGeneration,
-      // A tile over nothing is free, whatever the tiles with content have cost.
-      estimateCost: (key) =>
-        tileChunks(index, key).length === 0
-          ? 0
-          : (this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0),
+      estimateCost: (key) => this.estimateCost(renderer, index, key, zooming),
       globalFallbackAvailable: true,
-      backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
-      pageBackdrop,
-      pyramid: { levels: PYRAMID_LEVELS }
+      // Background stages wait for idle: a moving frame has only its budget to give.
+      ...(this.navigationActive
+        ? {}
+        : {
+            backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
+            pageBackdrop,
+            pyramid: { levels: PYRAMID_LEVELS }
+          })
     }
     const plan = planTiles(this.tileCache, planOptions)
     this.scheduler.enqueue(plan.jobs)
+    const visibleOutstanding = plan.visible.some(
+      ({ tile }) => tile?.contentGeneration !== contentGeneration
+    )
+    const firstJobLimitMs = this.firstJobLimit(visibleOutstanding)
     const metrics = this.scheduler.runFrame(
       (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
       this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
-      this.navigationActive ? NAVIGATION_FIRST_TILE_LIMIT_MS : Number.POSITIVE_INFINITY
+      firstJobLimitMs
     )
     metrics.cancelledJobs += this.cancelledJobs
     this.cancelledJobs = 0
     // A stage is planned only once the previous one is done, so the plan is taken again after
     // the frame's work to learn whether anything remains for the next frame, and to queue it.
-    const next = planTiles(this.tileCache, planOptions)
-    this.scheduler.enqueue(next.jobs)
+    // While moving, only the visible tiles are planned, and the frame does not re-plan.
+    const next = this.navigationActive ? plan : planTiles(this.tileCache, planOptions)
+    if (!this.navigationActive) this.scheduler.enqueue(next.jobs)
 
     const visible = planTiles(
       this.tileCache,
@@ -288,7 +300,7 @@ export class TiledSceneController {
     return {
       covered,
       pending: visiblePending || !covered,
-      backgroundPending: this.scheduler.pending() > 0,
+      backgroundPending: !this.navigationActive && this.scheduler.pending() > 0,
       metrics,
       fallbackTileCount: presentation.fallback.length,
       uncoveredAreaCount: presentation.uncovered,
@@ -381,6 +393,39 @@ export class TiledSceneController {
     // A fresh index already reflects every change recorded before it was built.
     this.pendingInvalidations = []
     this.index = pageId ? RenderChunkIndex.build(graph, pageId).index : null
+  }
+
+  /** How far past its budget a frame's first job may run. */
+  private firstJobLimit(visibleOutstanding: boolean): number {
+    if (this.navigationActive) return NAVIGATION_FIRST_TILE_LIMIT_MS
+    if (visibleOutstanding) return Number.POSITIVE_INFINITY
+    return BACKGROUND_FIRST_TILE_LIMIT_MS
+  }
+
+  /**
+   * A tile over nothing is free; while zooming, a tile with a chunk picture still to record is
+   * beyond any frame, since recording cannot be bounded below one chunk; otherwise the tile's
+   * own smoothed cost, or that of any tile until it has been measured.
+   */
+  private estimateCost(
+    renderer: SkiaRenderer,
+    index: RenderChunkIndex,
+    key: TileKey,
+    zooming: boolean
+  ): number {
+    const chunks = tileChunks(index, key)
+    if (chunks.length === 0) return 0
+    if (
+      zooming &&
+      chunks.some(
+        (chunk) =>
+          (chunk.kind !== 'subtree' || chunk.interruptible) &&
+          !this.pictureCache.has(renderer, chunk)
+      )
+    ) {
+      return Number.POSITIVE_INFINITY
+    }
+    return this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0
   }
 
   /**

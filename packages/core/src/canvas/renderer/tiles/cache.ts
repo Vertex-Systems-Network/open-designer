@@ -35,6 +35,8 @@ function compareLevelDistance(target: number) {
  * A coarser level always covers a tile with at most four.
  */
 const MAX_FINER_FALLBACK_RATIO = 8
+/** How many levels a hole may draw from: the nearest complete one and the partials over it. */
+const MAX_FALLBACK_LAYERS = 2
 
 export class TileImageCache {
   private readonly entries: ResourceCache<string, CachedTile>
@@ -111,7 +113,7 @@ export class TileImageCache {
         else complete = false
       }
       if (tiles.length > 0) layers.push(tiles)
-      if (complete && tiles.length > 0) break
+      if ((complete && tiles.length > 0) || layers.length >= MAX_FALLBACK_LAYERS) break
     }
     if (layers.length === 0) return null
     return layers.reverse().flat()
