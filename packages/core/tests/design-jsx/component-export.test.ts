@@ -169,11 +169,15 @@ describe('component export', () => {
     const { graph, library: libraryId } = await library()
     const [instance] = await renderJSX(graph, '<Instance of="Button" Label="Go" />')
     expect(sceneNodeToJSX(instance.id, graph)).toContain('of="Button"')
+    // With its component, by a ref: the target may have a Button of its own.
+    const jsx = selectionToJSX([libraryId, instance.id], graph)
+    expect(jsx).toContain('of={button1}')
+    expect(jsx).not.toContain('ref={star1}')
 
     const target = new SceneGraph()
     const [copiedLibrary, copiedInstance] = await renderJSX(
       target,
-      `<>${selectionToJSX([libraryId, instance.id], graph)}</>`
+      selectionToJSX([libraryId, instance.id], graph)
     )
     const variant = named(target, 'State=On')
     expect(getNodeOrThrow(target, copiedInstance.id).componentId).toBe(variant.id)
@@ -242,7 +246,7 @@ describe('component export', () => {
     const target = new SceneGraph()
     const [copiedInstance, copiedLibrary] = await renderJSX(
       target,
-      `<>${selectionToJSX([instance.id, libraryId], graph)}</>`
+      selectionToJSX([instance.id, libraryId], graph)
     )
     expect(copiedInstance.type).toBe('INSTANCE')
     expect(copiedLibrary.type).toBe('FRAME')
@@ -266,6 +270,35 @@ describe('component export', () => {
     )
     expect(radio.type).toBe('INSTANCE')
     expect(graph.getChildren(swap.id)[0]?.componentId).toBe(star.id)
+  })
+
+  test('renders a component before the instances that name it, wherever they are written', async () => {
+    const graph = new SceneGraph()
+    const [instance, frame] = await renderJSX(
+      graph,
+      `<>
+        <Instance name="Root copy" of="Tile" />
+        <Frame name="Board">
+          <Instance name="Copy" of="Tile" />
+          <ComponentSet name="Tile"><Component name="Size=S" w={4} h={4} /></ComponentSet>
+          <Component name="Tile" w={8} h={8} />
+        </Frame>
+      </>`
+    )
+    expect(instance.type).toBe('INSTANCE')
+    expect(graph.getChildren(frame.id).map((child) => child.name)).toEqual(['Copy', 'Tile', 'Tile'])
+  })
+
+  test('leaves nothing behind when a root fails to render', async () => {
+    const graph = new SceneGraph()
+    const page = graph.getPages()[0]
+    await expect(
+      renderJSX(
+        graph,
+        '<><Instance of="Tile" properties={{ Missing: "x" }} /><Component name="Tile" w={4} h={4} /></>'
+      )
+    ).rejects.toThrow()
+    expect(graph.getChildren(page.id)).toEqual([])
   })
 
   test('keeps a Reka text field binding its own text property', async () => {

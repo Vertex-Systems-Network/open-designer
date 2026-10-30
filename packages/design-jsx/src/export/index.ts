@@ -15,7 +15,7 @@ import { elementTag } from '../elements'
 import { shapeWithTextLabelText, shapeWithTextProps } from '../shapes-with-text'
 import { stickyBody, stickyProps } from '../stickies'
 import { rekaExport, type RekaExport } from './behaviours'
-import { componentReferences, exportRefs, type ComponentReference } from './component-references'
+import { componentReferences, componentRefs, type ComponentReference } from './component-references'
 import { iconProps } from './icons'
 import { instanceProps } from './instances'
 import { propertyBindingProps } from './properties'
@@ -356,21 +356,40 @@ export function selectionToJSXWithLayers(
   graph: SceneGraph,
   options: JSXExportOptions = {}
 ): DesignJSXWithLayers {
-  const layerIds: Array<string | null> = []
   const declare = options.declarations ?? true
   const variables = variableExport(graph, nodeIds, declare)
   // Refs are named apart from the variables declared before them.
   const taken = new Set(variables.names)
   const connectors = connectorExportScope(graph, nodeIds, declare, taken)
-  const refs = exportRefs(graph, nodeIds, connectors.refs, declare, taken)
-  const scope = { connectors, refs, variables, reference: componentReferences(graph, refs) }
-  const roots = compact(
-    nodeIds.map((id) => {
-      const node = graph.getNode(id)
-      const syntax = node ? nodeToJSX(node, graph, 0, scope, layerIds).at(0) : undefined
-      return syntax ? jsx.printJSX(syntax) : ''
-    })
-  )
+  const write = (
+    refs: ReadonlyMap<string, string | null>,
+    onOf?: (component: SceneNode) => void
+  ) => {
+    const layerIds: Array<string | null> = []
+    const reference = componentReferences(graph, refs, onOf)
+    const scope = { connectors, refs, variables, reference }
+    const roots = compact(
+      nodeIds.map((id) => {
+        const node = graph.getNode(id)
+        const syntax = node ? nodeToJSX(node, graph, 0, scope, layerIds).at(0) : undefined
+        return syntax ? jsx.printJSX(syntax) : ''
+      })
+    )
+    return { roots, layerIds, written: new Set(layerIds) }
+  }
+  // A component written here that an instance names takes a ref, which needs a second pass:
+  // the first finds which components those are.
+  const named = new Set<string>()
+  const first = write(connectors.refs, (component) => named.add(component.id))
+  const refs = declare
+    ? componentRefs(
+        graph,
+        [...named].filter((id) => first.written.has(id)),
+        connectors.refs,
+        taken
+      )
+    : connectors.refs
+  const { roots, layerIds } = refs.size > connectors.refs.size ? write(refs) : first
   const elements = roots.join('\n\n')
   // Variables first: a ref names a layer, and nothing in a variable's definition refers to one.
   const declarations = compact([variables.declarations(), refDeclarations(refs)]).join('\n\n')

@@ -2,7 +2,7 @@ import { countBy } from 'es-toolkit/array'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-import { layersUnder, refName } from '../connectors'
+import { refName } from '../connectors'
 import { Reference, type JSXValue } from './value'
 
 /** How an export names a component. */
@@ -12,7 +12,7 @@ export interface ComponentReference {
    * it, else by its ID.
    */
   name: (component: SceneNode) => string
-  /** As `of` takes it: by name, by the `ref()` the export declares for it, or by ID. */
+  /** As `of` takes it: by the `ref()` the export declares for it, else as `name` does. */
   of: (component: SceneNode) => JSXValue
 }
 
@@ -21,14 +21,16 @@ function isComponent(node: SceneNode): boolean {
 }
 
 /**
- * Names `<Instance of>` resolves in this graph and in another that has the same components,
- * such as a fresh graph the same export renders into. A component whose name another shares is
- * written by the ref `refs` gives it, if any, else by its ID, which only this graph has. The
- * graph is read once, on the first reference.
+ * Names `<Instance of>` resolves in this graph and in another that has the same components.
+ * A component the export writes is named by the ref `refs` gives it, so its instances find the
+ * copy rendered with them, not a component the target already has by that name; `onOf` hears
+ * of each component `of` names. Otherwise a name two components share is written as the
+ * component's ID, which only this graph has. The graph is read once, on the first reference.
  */
 export function componentReferences(
   graph: SceneGraph,
-  refs: ReadonlyMap<string, string | null> = new Map()
+  refs: ReadonlyMap<string, string | null> = new Map(),
+  onOf?: (component: SceneNode) => void
 ): ComponentReference {
   let names: Record<string, number> | undefined
   const name = (component: SceneNode) => {
@@ -38,38 +40,28 @@ export function componentReferences(
   return {
     name,
     of: (component) => {
+      onOf?.(component)
       const ref = refs.get(component.id)
-      const named = name(component)
-      return ref && named === component.id ? new Reference(ref) : named
+      return ref ? new Reference(ref) : name(component)
     }
   }
 }
 
 /**
- * The refs an export declares: `connectorRefs`, and one for each component under `rootIds`
- * that an instance there is of and whose name another component shares, so a render into a
- * fresh graph finds it, named apart from the names in `taken`. A layer both need takes one ref.
+ * The refs an export declares: `connectorRefs`, and one for each component in `named` that it
+ * writes, named apart from the names in `taken`. A layer both need takes one ref.
  */
-export function exportRefs(
+export function componentRefs(
   graph: SceneGraph,
-  rootIds: readonly string[],
+  named: Iterable<string>,
   connectorRefs: ReadonlyMap<string, string | null>,
-  declare: boolean,
   taken: Set<string>
 ): ReadonlyMap<string, string | null> {
-  if (!declare) return connectorRefs
-  const layers = layersUnder(graph, rootIds)
-  const reference = componentReferences(graph)
-  const under = new Set(layers.map((layer) => layer.id))
   const refs = new Map(connectorRefs)
-  for (const layer of layers) {
-    if (layer.type !== 'INSTANCE') continue
-    const component = layer.componentId ? graph.getNode(layer.componentId) : undefined
-    const set = component?.parentId ? graph.getNode(component.parentId) : undefined
-    for (const named of [component, set]) {
-      if (!named || !isComponent(named) || !under.has(named.id) || refs.get(named.id)) continue
-      if (reference.name(named) === named.id) refs.set(named.id, refName(named.name, taken))
-    }
+  for (const id of named) {
+    const component = graph.getNode(id)
+    if (component && !refs.get(id) && isComponent(component))
+      refs.set(id, refName(component.name, taken))
   }
   return refs
 }

@@ -15,6 +15,7 @@ import {
   inferComponentSetProperties
 } from './component-properties'
 import { elementNodeType, elementOwnLayer, type OwnLayerRenderer } from './elements'
+import type { RenderOrder } from './order'
 import { placeVectorPaths } from './overrides/vector'
 import { applySizeOverrides, propsToOverrides, shapeOverrides } from './props-overrides'
 import { isLayerRef, type LayerRefs } from './refs'
@@ -298,24 +299,27 @@ export function componentPropNames(
   return component ? namesOnInstance(graph, component) : []
 }
 
+/** The error for an `<Instance>` whose component no name, ID, or ref finds. */
+function componentNotFound(props: Record<string, unknown>): Error {
+  const ref = props.component ?? props.componentId ?? props.of
+  if (isLayerRef(ref)) return new Error('<Instance> ref() marks no component rendered before it')
+  const label = typeof ref === 'string' || typeof ref === 'number' ? String(ref) : ''
+  return new Error(`<Instance> component not found: ${label}`)
+}
+
 async function renderInstanceNode(
   graph: SceneGraph,
   tree: TreeNode,
   parentId: string,
-  refs?: LayerRefs
+  context?: RenderContext
 ): Promise<SceneNode> {
   const parent = graph.getNode(parentId)
   const parentLayout = parent?.layoutMode ?? 'NONE'
   const modes = variableModes(graph, tree.props.mode)
   const bound = bindProperties(graph, tree.props, 'INSTANCE', parentId, componentIdNamed(graph))
   const { props, bindings } = preparePropsForRender(graph, bound.props, false, { parentId, modes })
-  const component = resolveComponent(graph, props, refs)
-  if (!component) {
-    const ref = props.component ?? props.componentId ?? props.of
-    if (isLayerRef(ref)) throw new Error('<Instance> ref() marks no component rendered before it')
-    const label = typeof ref === 'string' || typeof ref === 'number' ? String(ref) : ''
-    throw new Error(`<Instance> component not found: ${label}`)
-  }
+  const component = resolveComponent(graph, props, context?.refs)
+  if (!component) throw componentNotFound(props)
   const overrides: Partial<SceneNode> = {
     ...propsToOverrides(props, false, parentLayout),
     ...layerMetadata(modes, bound.references)
@@ -356,12 +360,15 @@ async function renderInstanceNode(
   }
 }
 
+/** Fields that place a layer in the tree, which only the graph's own moves may change. */
+const STRUCTURAL_FIELDS = new Set(['id', 'parentId', 'childIds'])
+
 /**
  * Apply child overrides to a freshly created instance. Keys are
  * `childName:prop` (e.g. 'label:text', 'icon:fills'); the child is resolved by
  * name among the instance's descendants, before any override renames one, and the
  * value is applied to both the child node and the instance's overrides record so
- * component sync keeps it.
+ * component sync keeps it. A name several descendants share is an error.
  */
 function applyInstanceOverrides(
   graph: SceneGraph,
@@ -388,7 +395,13 @@ function applyInstanceOverrides(
     if (sep === -1) return []
     const childName = key.slice(0, sep)
     const prop = key.slice(sep + 1)
-    const child = descendants.find((n) => n.name === childName)
+    if (STRUCTURAL_FIELDS.has(prop)) return []
+    const matches = descendants.filter((n) => n.name === childName)
+    if (matches.length > 1)
+      throw new Error(
+        `overrides key ${key} is ambiguous: ${matches.length} layers are named ${childName}`
+      )
+    const child = matches.at(0)
     return child && prop in child ? [{ child, prop, value }] : []
   })
   for (const { child, prop, value } of targets) {
@@ -468,6 +481,12 @@ export function elementOverrides(
   return { overrides, bindings }
 }
 
+/** What one render call shares across its elements: the layers refs marked, and their order. */
+export interface RenderContext {
+  refs: LayerRefs
+  order: RenderOrder
+}
+
 export async function renderNode<Artwork>(
   services: DesignJSXServices<Artwork>,
   graph: SceneGraph,
@@ -475,9 +494,9 @@ export async function renderNode<Artwork>(
   parentId: string,
   onNode?: RenderOptions['onNode'],
   scope?: RekaScope,
-  refs?: LayerRefs
+  context?: RenderContext
 ): Promise<SceneNode> {
-  const node = await renderNodeContent(services, graph, tree, parentId, onNode, scope, refs)
+  const node = await renderNodeContent(services, graph, tree, parentId, onNode, scope, context)
   onNode?.(tree, node)
   return node
 }
@@ -491,14 +510,14 @@ function renderOwnElement<Artwork>(
   graph: SceneGraph,
   tree: TreeNode,
   parentId: string,
-  refs?: LayerRefs
+  context?: RenderContext
 ): Promise<SceneNode> | null {
   switch (tree.type) {
     case 'icon':
     case 'svg':
       return renderArtworkNode(services, graph, tree, parentId)
     case 'instance':
-      return renderInstanceNode(graph, tree, parentId, refs)
+      return renderInstanceNode(graph, tree, parentId, context)
     default: {
       const element = elementOwnLayer(tree.type)
       return element ? Promise.resolve(renderOwnLayerElement(graph, tree, parentId, element)) : null
@@ -513,13 +532,13 @@ async function renderNodeContent<Artwork>(
   parentId: string,
   onNode?: RenderOptions['onNode'],
   scope?: RekaScope,
-  refs?: LayerRefs
+  context?: RenderContext
 ): Promise<SceneNode> {
-  const own = renderOwnElement(services, graph, tree, parentId, refs)
+  const own = renderOwnElement(services, graph, tree, parentId, context)
   if (own) return own
   const reka = await renderRekaNode(graph, tree, parentId, scope, {
     render: (child, childParentId, childScope) =>
-      renderNode(services, graph, child, childParentId, onNode, childScope, refs),
+      renderNode(services, graph, child, childParentId, onNode, childScope, context),
     create: (nodeType, element, elementParentId) => {
       const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
       const created = graph.createNode(nodeType, elementParentId, overrides)
@@ -528,7 +547,7 @@ async function renderNodeContent<Artwork>(
       return created
     },
     instance: (element, elementParentId) =>
-      renderInstanceNode(graph, element, elementParentId, refs),
+      renderInstanceNode(graph, element, elementParentId, context),
     finishSet: (setId) => inferComponentSetProperties(graph, setId)
   })
   if (reka) return reka
@@ -543,12 +562,26 @@ async function renderNodeContent<Artwork>(
   applyBindings(graph, node.id, bindings)
   placeVectorPaths(graph, node, tree.props, (network) => services.vectorBounds(network))
 
-  for (const child of tree.children) {
-    if (typeof child === 'string' || (node.type === 'TEXT' && isTextContent(child))) continue
-    if (isTreeNode(child)) {
-      await renderNode(services, graph, child, node.id, onNode, scope, refs)
-    }
+  const children = tree.children.filter(
+    (child): child is TreeNode =>
+      isTreeNode(child) && !(node.type === 'TEXT' && isTextContent(child))
+  )
+  // Components render before the siblings that use them, then the children take written order.
+  const order = context?.order.of(children) ?? children.map((_, index) => index)
+  const rendered: SceneNode[] = []
+  for (const index of order) {
+    rendered[index] = await renderNode(
+      services,
+      graph,
+      children[index],
+      node.id,
+      onNode,
+      scope,
+      context
+    )
   }
+  if (order.some((index, position) => index !== position))
+    rendered.forEach((child, index) => graph.insertChildAt(child.id, node.id, index))
 
   if (node.type === 'COMPONENT_SET') inferComponentSetProperties(graph, node.id)
 
