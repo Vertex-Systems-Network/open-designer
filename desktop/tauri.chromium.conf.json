@@ -15,7 +15,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/open-pencil/open-pencil/releases/download/chromium/latest.json"
+        "https://github.com/open-pencil/open-pencil/releases/latest/download/latest-chromium.json"
       ]
     }
   }
