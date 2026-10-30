@@ -1,6 +1,8 @@
 export {
+  MAX_TILE_LEVEL,
+  MIN_TILE_LEVEL,
   TILE_DEVICE_SIZE,
-  TILE_LEVEL_STEP,
+  TILE_LEVEL_STEPS_PER_OCTAVE,
   tileKeyString,
   tileKeysForWorldBounds,
   tileLevel,

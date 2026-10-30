@@ -1,4 +1,4 @@
-import type { Canvas } from 'canvaskit-wasm'
+import type { Canvas, FilterMode } from 'canvaskit-wasm'
 
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
@@ -12,6 +12,8 @@ import { rendererNow } from '#core/canvas/renderer/clock'
 
 import { type CachedTile, TileImageCache } from './cache'
 import {
+  MAX_TILE_LEVEL,
+  MIN_TILE_LEVEL,
   TILE_DEVICE_SIZE,
   type TileKey,
   tileLevel,
@@ -40,6 +42,18 @@ const TILE_OVERSCAN = 1
 const BACKDROP_LEVEL_RATIO = 4
 const BACKDROP_OVERSCAN = 1
 const TILE_COST_SMOOTHING = 0.3
+/** Exact levels are keyed to this many bits of the scale's logarithm: stable across float noise. */
+const EXACT_LEVEL_BITS = 20
+
+/**
+ * The level a settled view renders at: the device scale itself, so tiles draw on whole device
+ * pixels without resampling, rounded so a gesture that ends a few ulps from where it began
+ * finds its tiles again instead of rendering them anew. Quantized levels serve the backdrop.
+ */
+function exactTileLevel(scale: number): number {
+  const clamped = Math.min(MAX_TILE_LEVEL, Math.max(MIN_TILE_LEVEL, scale))
+  return 2 ** (Math.round(Math.log2(clamped) * 2 ** EXACT_LEVEL_BITS) / 2 ** EXACT_LEVEL_BITS)
+}
 
 function smoothCost(previous: number | undefined, costMs: number): number {
   if (previous === undefined) return costMs
@@ -125,6 +139,14 @@ export class TiledSceneController {
   }
 
   /**
+   * Whether a frame still has tile work to do: invalidations recorded since the last frame, or
+   * queued jobs. Unlike the renderer's settlement flags, this is current between frames.
+   */
+  hasPendingWork(): boolean {
+    return this.pendingInvalidations.length > 0 || this.scheduler.pending() > 0
+  }
+
+  /**
    * Renders due tiles within the frame's budget and presents the viewport from the cache: exact
    * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
    * colour where no level has one, until its tile renders. Nothing is drawn straight from the
@@ -151,7 +173,7 @@ export class TiledSceneController {
     const index = this.index
     if (!index || !renderer.pageId) return this.emptyResult()
 
-    const level = tileLevel(renderer.zoom * renderer.dpr)
+    const level = exactTileLevel(renderer.zoom * renderer.dpr)
     // Jobs planned at another level draw nothing the viewport shows now.
     const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
     this.cancelledJobs += this.scheduler.discard(
@@ -200,9 +222,13 @@ export class TiledSceneController {
       },
       true
     ).visible
-    const presentation = this.resolveVisible(visible)
+    const presentation = this.resolveVisible(visible, renderer.pageId, level)
     canvas.save()
-    canvas.translate(renderer.panX, renderer.panY)
+    // Snapped to device pixels, an exact tile lands texel on pixel and copies rather than samples.
+    canvas.translate(
+      Math.round(renderer.panX * renderer.dpr) / renderer.dpr,
+      Math.round(renderer.panY * renderer.dpr) / renderer.dpr
+    )
     canvas.scale(renderer.zoom, renderer.zoom)
     this.drawPresentation(renderer, canvas, presentation)
     canvas.restore()
@@ -370,15 +396,19 @@ export class TiledSceneController {
   }
 
   private resolveVisible(
-    visible: Array<{ key: TileKey; tile: CachedTile | null }>
+    visible: Array<{ key: TileKey; tile: CachedTile | null }>,
+    pageId: string,
+    level: number
   ): VisiblePresentation {
     const presentation: VisiblePresentation = { exact: [], fallback: [], uncovered: 0 }
+    let levels: number[] | undefined
     for (const { key, tile } of visible) {
       if (tile) {
         presentation.exact.push({ key, tile })
         continue
       }
-      const tiles = this.tileCache.findFallback(key)
+      levels ??= this.tileCache.fallbackLevels(pageId, level)
+      const tiles = this.tileCache.findFallback(key, levels)
       if (tiles) presentation.fallback.push({ key, tiles })
       else presentation.uncovered++
     }
@@ -395,13 +425,13 @@ export class TiledSceneController {
     paint.setAlphaf(1)
     paint.setBlendMode(renderer.ck.BlendMode.Src)
     const source = renderer.ck.LTRBRect(0, 0, TILE_DEVICE_SIZE, TILE_DEVICE_SIZE)
-    const drawTile = (tile: CachedTile) => {
+    const drawTile = (tile: CachedTile, filter: FilterMode) => {
       const bounds = tileWorldBounds(tile.key)
       canvas.drawImageRectOptions(
         tile.image,
         source,
         renderer.ck.LTRBRect(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY),
-        renderer.ck.FilterMode.Linear,
+        filter,
         renderer.ck.MipmapMode.None,
         paint
       )
@@ -415,10 +445,12 @@ export class TiledSceneController {
           renderer.ck.ClipOp.Intersect,
           false
         )
-        for (const tile of tiles) drawTile(tile)
+        for (const tile of tiles) drawTile(tile, renderer.ck.FilterMode.Linear)
         canvas.restore()
       }
-      for (const { tile } of presentation.exact) drawTile(tile)
+      // An exact tile sits texel on pixel; nearest sampling copies it, so float noise in the
+      // viewport can never shift a value at a seam.
+      for (const { tile } of presentation.exact) drawTile(tile, renderer.ck.FilterMode.Nearest)
     } finally {
       paint.setBlendMode(renderer.ck.BlendMode.SrcOver)
     }

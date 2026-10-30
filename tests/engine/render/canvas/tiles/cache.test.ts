@@ -94,15 +94,22 @@ describe('tile fallback lookup', () => {
     // Level 1 tiles span 256 world units; level 2 tiles span 128.
     cache.install(tileAt(1, 0, 0), 1)
     cache.install(tileAt(0.5, 0, 0), 1)
-    const fallback = cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })
+    const fallback = cache.findFallback(
+      { pageId: 'page', level: 2, x: 1, y: 1 },
+      cache.fallbackLevels('page', 2)
+    )
     expect(fallback?.map((entry) => entry.key.level)).toEqual([1])
 
     // Without the level-1 tile, the coarser level-0.5 tile still spans the area.
     cache.invalidateBounds('page', { minX: 0, minY: 0, maxX: 256, maxY: 256 }, 2)
-    expect(cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })).toBeNull()
+    expect(
+      cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 }, cache.fallbackLevels('page', 2))
+    ).toBeNull()
     cache.install(tileAt(0.5, 0, 0), 2)
     expect(
-      cache.findFallback({ pageId: 'page', level: 2, x: 1, y: 1 })?.map((entry) => entry.key.level)
+      cache
+        .findFallback({ pageId: 'page', level: 2, x: 1, y: 1 }, cache.fallbackLevels('page', 2))
+        ?.map((entry) => entry.key.level)
     ).toEqual([0.5])
   })
 
@@ -111,12 +118,16 @@ describe('tile fallback lookup', () => {
     cache.install(tileAt(2, 0, 0), 1)
     // One of four finer tiles still stands in for its quarter; the rest stays page colour.
     expect(
-      cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })?.map((entry) => entry.key.x)
+      cache
+        .findFallback({ pageId: 'page', level: 1, x: 0, y: 0 }, cache.fallbackLevels('page', 1))
+        ?.map((entry) => entry.key.x)
     ).toEqual([0])
     // A coarser level covering everything wins over a partial finer one.
     cache.install(tileAt(0.25, 0, 0), 1)
     expect(
-      cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })?.map((entry) => entry.key.level)
+      cache
+        .findFallback({ pageId: 'page', level: 1, x: 0, y: 0 }, cache.fallbackLevels('page', 1))
+        ?.map((entry) => entry.key.level)
     ).toEqual([0.25])
     cache.invalidateBounds('page', { minX: 0, minY: 0, maxX: 1024, maxY: 1024 }, 2)
     cache.install(tileAt(2, 0, 0), 2)
@@ -125,7 +136,18 @@ describe('tile fallback lookup', () => {
     cache.install(tileAt(2, 1, 1), 2)
     cache.install(tileAt(0.5, 0, 0), 2)
     // Both levels cover everything and sit one step away; the finer one wins the tie.
-    const fallback = cache.findFallback({ pageId: 'page', level: 1, x: 0, y: 0 })
+    const fallback = cache.findFallback(
+      { pageId: 'page', level: 1, x: 0, y: 0 },
+      cache.fallbackLevels('page', 1)
+    )
     expect(fallback?.map((entry) => entry.key.level)).toEqual([2, 2, 2, 2])
+  })
+
+  test('ignores levels more than eight times finer, which would need dozens of tiles per hole', () => {
+    const cache = new TileImageCache()
+    cache.install(tileAt(16, 0, 0), 1)
+    cache.install(tileAt(0.0625, 0, 0), 1)
+    expect(cache.fallbackLevels('page', 1)).toEqual([0.0625])
+    expect(cache.fallbackLevels('page', 4)).toEqual([16, 0.0625])
   })
 })

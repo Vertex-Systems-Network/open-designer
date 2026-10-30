@@ -87,9 +87,11 @@ export function renderTile(
       canvas.drawPicture(picture)
     }
     const drawMs = rendererNow() - drawStartedAt
-    // The tile's draws stay queued on the shared GPU context: the frame's own flush submits them
-    // once for every tile, in order, before the snapshots are drawn.
-    const flushMs = 0
+    // Each tile is submitted on its own: batched with its neighbours' draws, Skia may rasterize
+    // the same glyphs and paths along different routes, and a tile rendered twice must match.
+    const flushStartedAt = rendererNow()
+    surface.flush()
+    const flushMs = rendererNow() - flushStartedAt
     const snapshotStartedAt = rendererNow()
     const image = surface.makeImageSnapshot()
     const snapshotMs = rendererNow() - snapshotStartedAt

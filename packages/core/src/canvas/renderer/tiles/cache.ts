@@ -28,6 +28,13 @@ function compareLevelDistance(target: number) {
     Math.abs(Math.log2(a / target)) - Math.abs(Math.log2(b / target)) || b - a
 }
 
+/**
+ * A finer level stands in for a missing tile with (ratio)² of its own, so the ratio is capped:
+ * past it the lookup would enumerate thousands of keys per tile on every frame of a zoom out.
+ * A coarser level always covers a tile with at most four.
+ */
+const MAX_FINER_FALLBACK_RATIO = 8
+
 export class TileImageCache {
   private readonly entries: ResourceCache<string, CachedTile>
   /** How many tiles each page holds per level, so fallback lookups try only populated levels. */
@@ -59,10 +66,15 @@ export class TileImageCache {
    * level whose tiles cover all of its area, else the nearest level that has any tile over it,
    * which leaves the rest at the page colour. Null when no level has a tile there.
    */
-  findFallback(key: TileKey): CachedTile[] | null {
-    const levels = [...(this.levelCounts.get(key.pageId)?.keys() ?? [])]
-      .filter((level) => level !== key.level)
-      .sort(compareLevelDistance(key.level))
+  /** The levels `findFallback` may draw from for a page shown at `level`, nearest first. */
+  fallbackLevels(pageId: string, level: number): number[] {
+    return [...(this.levelCounts.get(pageId)?.keys() ?? [])]
+      .filter((candidate) => candidate < level || candidate / level <= MAX_FINER_FALLBACK_RATIO)
+      .filter((candidate) => candidate !== level)
+      .sort(compareLevelDistance(level))
+  }
+
+  findFallback(key: TileKey, levels: number[]): CachedTile[] | null {
     const bounds = tileWorldBounds(key)
     // Shrink by a hair so a boundary shared with the next tile does not ask for that tile too.
     const inset = {
