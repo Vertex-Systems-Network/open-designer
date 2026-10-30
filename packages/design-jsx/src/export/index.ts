@@ -4,17 +4,17 @@ import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
 
+import { rekaExport, type RekaExport } from '../behaviours/export'
+import { elementTag } from '../elements'
 import {
   connectorExportScope,
   connectorLabel,
   connectorProps,
-  refDeclarations,
   type ConnectorExportScope
-} from '../connectors'
-import { elementTag } from '../elements'
-import { shapeWithTextLabelText, shapeWithTextProps } from '../shapes-with-text'
-import { stickyBody, stickyProps } from '../stickies'
-import { rekaExport, type RekaExport } from './behaviours'
+} from '../figjam/connectors'
+import { shapeWithTextLabelText, shapeWithTextProps } from '../figjam/shapes-with-text'
+import { stickyBody, stickyProps } from '../figjam/stickies'
+import { refDeclarations } from '../refs'
 import { componentReferences, componentRefs, type ComponentReference } from './component-references'
 import { iconProps } from './icons'
 import { instanceProps } from './instances'

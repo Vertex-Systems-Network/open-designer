@@ -10,8 +10,8 @@ import type {
 } from '@open-pencil/scene-graph'
 import { modesDefaultFirst } from '@open-pencil/scene-graph/variables'
 
-import { layersUnder } from '../connectors'
 import { DESIGN_JSX_ELEMENTS } from '../elements'
+import { layersUnder } from '../figjam/connectors'
 import { DESIGN_JSX_HELPERS } from '../helpers'
 import { DEFAULT_MODE_NAME, designMode, designVar, type DesignVariable } from '../variables'
 import { collectionNamed, resolveVariableId, variableModes } from '../variables/graph'

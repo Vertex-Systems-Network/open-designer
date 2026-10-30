@@ -2,12 +2,12 @@ import { compact, pull, uniq } from 'es-toolkit/array'
 import { range } from 'es-toolkit/math'
 import { isPlainObject, isString } from 'es-toolkit/predicate'
 
-import { namesComponent, rekaRole } from './behaviours'
-import { isComponentProperty } from './component-properties'
-import { DESIGN_JSX_SUPPORTED_PROPERTIES } from './definitions'
-import { elementNodeType } from './elements'
-import { isLayerRef, type LayerRef } from './refs'
-import { isTreeNode, type TreeNode } from './tree'
+import { namesComponent, rekaRole } from '../behaviours'
+import { isComponentProperty } from '../components/properties'
+import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '../definitions'
+import { elementNodeType } from '../elements'
+import { isLayerRef, type LayerRef } from '../refs'
+import { isTreeNode, type TreeNode } from '../tree'
 
 /** A component as an element names it: by name, or by the `ref()` that marks it. */
 type ComponentKey = string | LayerRef

@@ -19,9 +19,9 @@ import {
 } from '@open-pencil/scene-graph/components'
 import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 
-import { DESIGN_JSX_SUPPORTED_PROPERTIES } from './definitions'
-import { isLayerRef, type LayerRef } from './refs'
-import { parseScriptInput } from './schema'
+import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '../definitions'
+import { isLayerRef, type LayerRef } from '../refs'
+import { parseScriptInput } from '../schema'
 
 const PROPERTY_SYMBOL = Symbol.for('open-pencil.component-property')
 

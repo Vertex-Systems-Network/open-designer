@@ -1,13 +1,13 @@
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-import { CONNECTOR_ELEMENT, resolveConnectorEnds } from './connectors'
+import { CONNECTOR_ELEMENT, resolveConnectorEnds } from '../figjam/connectors'
+import { LayerRefs } from '../refs'
+import type { DesignJSXServices } from '../services'
+import { FRAGMENT, isTreeNode, type TreeNode } from '../tree'
+import type { RenderOptions } from '../types'
+import { applyVariableDefinitions } from '../variables/graph'
+import { renderNode } from './node'
 import { RenderOrder } from './order'
-import { LayerRefs } from './refs'
-import { renderNode } from './renderer'
-import type { DesignJSXServices } from './services'
-import { FRAGMENT, isTreeNode, type TreeNode } from './tree'
-import type { RenderOptions } from './types'
-import { applyVariableDefinitions } from './variables/graph'
 
 export interface RenderResult {
   id: string

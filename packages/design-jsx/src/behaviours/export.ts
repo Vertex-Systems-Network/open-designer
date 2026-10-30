@@ -8,9 +8,9 @@ import {
 import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { slotPropertyId } from '@open-pencil/scene-graph/slots'
 
-import { REKA_ELEMENTS, rekaRole } from '../behaviours'
-import type { ComponentReference } from './component-references'
-import type { JSXProp, JSXValue } from './value'
+import { REKA_ELEMENTS, rekaRole } from '.'
+import type { ComponentReference } from '../export/component-references'
+import type { JSXProp, JSXValue } from '../export/value'
 
 /** The Reka namespace and element a kind's component is written as. */
 const ROOTS: Record<BehaviourKind, [namespace: string, element: string]> = {

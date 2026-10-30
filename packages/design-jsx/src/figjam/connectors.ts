@@ -1,8 +1,6 @@
-import { compact, countBy } from 'es-toolkit/array'
-import { camelCase } from 'es-toolkit/string'
+import { countBy } from 'es-toolkit/array'
 import type * as v from 'valibot'
 
-import { es } from '@open-pencil/emit'
 import type { ConnectorEndpoint, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { colorToHex } from '@open-pencil/scene-graph/color'
 import {
@@ -19,11 +17,11 @@ import {
 import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
 import type { Vector } from '@open-pencil/scene-graph/primitives'
 
-import { CONNECTOR_LINE, CONNECTOR_SIDE, STROKE_CAP } from './enums'
-import { Reference } from './export/value'
-import { isLayerRef, type LayerRefs } from './refs'
-import { connectorPropsSchema, readElementProps } from './schema'
-import { plainTextOf, type TreeNode } from './tree'
+import { CONNECTOR_LINE, CONNECTOR_SIDE, STROKE_CAP } from '../enums'
+import { Reference } from '../export/value'
+import { isLayerRef, refName, type LayerRefs } from '../refs'
+import { connectorPropsSchema, readElementProps } from '../schema'
+import { plainTextOf, type TreeNode } from '../tree'
 
 /**
  * `<Connector from="A" to="B">`: a FigJam connector whose ends name other layers of the same
@@ -170,17 +168,6 @@ export function resolveConnectorEnds(
   return warnings
 }
 
-/** `card1` for a layer named "Card": a name a declaration can take, numbered to stay unique. */
-export function refName(layerName: string, taken: Set<string>): string {
-  const camel = camelCase(layerName)
-  const base = es.isIdentifierName(camel) ? camel : 'layer'
-  let count = 1
-  while (taken.has(`${base}${count}`)) count++
-  const name = `${base}${count}`
-  taken.add(name)
-  return name
-}
-
 /** What an export of connectors writes: the layers under its roots, and how ends name them. */
 export interface ConnectorExportScope {
   roots: ReadonlySet<string>
@@ -222,13 +209,6 @@ export function connectorExportScope(
     refs.set(layer.id, declare ? refName(layer.name, taken) : null)
   }
   return { roots: new Set(rootIds), refs }
-}
-
-/** `const card1 = ref()` for each ref an export declares, one per line. */
-export function refDeclarations(refs: ReadonlyMap<string, string | null>): string {
-  return compact([...refs.values()])
-    .map((name) => `const ${name} = ref()`)
-    .join('\n')
 }
 
 /** How a connector end is written: by its layer's name or ref, or as the point it is drawn at. */

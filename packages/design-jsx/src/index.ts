@@ -18,7 +18,7 @@ export {
   Rect,
   Page,
   INTRINSIC_ELEMENTS
-} from './components'
+} from './elements/functions'
 export {
   Accordion,
   Button,
@@ -55,7 +55,7 @@ export {
   resolveToTree
 } from './tree'
 
-export type { RenderResult } from './roots'
+export type { RenderResult } from './render/roots'
 
 export {
   backgroundBlur,
@@ -95,7 +95,7 @@ export {
   type DesignVariable,
   type VariableInput
 } from './variables'
-export { isComponentProperty, property, type ComponentProperty } from './component-properties'
+export { isComponentProperty, property, type ComponentProperty } from './components/properties'
 export { isLayerRef, ref, type LayerRef } from './refs'
 
 export { createElement } from './mini-react'
@@ -143,7 +143,7 @@ export {
 } from './export'
 export { parseJSXAttributes } from './attributes'
 export { jsxNodeFields, type JSXNodeFields } from './fields'
-export { reconcileRenderedLayers } from './reconcile'
+export { reconcileRenderedLayers } from './render/reconcile'
 export { JSX_REFERENCE, AUTHORING_EXAMPLES, type AuthoringExample } from './reference'
 export {
   createStreamingJSXParser,

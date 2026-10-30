@@ -2,7 +2,7 @@ import { countBy } from 'es-toolkit/array'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-import { refName } from '../connectors'
+import { refName } from '../refs'
 import { Reference, type JSXValue } from './value'
 
 /**

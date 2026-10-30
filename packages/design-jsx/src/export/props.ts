@@ -19,7 +19,7 @@ import {
   formatTracks,
   getNodeContext
 } from './helpers'
-import { collectEffectProps, collectFillProps, collectStrokeProps } from './paint'
+import { collectEffectProps, collectFillProps, collectStrokeProps } from './paints'
 import { propertyBindingProps } from './properties'
 import { collectStateProps } from './state'
 import type { JSXProp } from './value'

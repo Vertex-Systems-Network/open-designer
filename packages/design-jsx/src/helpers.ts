@@ -1,7 +1,7 @@
 import { difference } from 'es-toolkit/array'
 import { isPlainObject } from 'es-toolkit/predicate'
 
-import { property } from './component-properties'
+import { property } from './components/properties'
 import type { DesignJSXHelperDefinition } from './definitions'
 import {
   backgroundBlur,

@@ -2,14 +2,16 @@ import { difference } from 'es-toolkit/array'
 
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-import { REKA_ELEMENTS, rekaRole } from './behaviours'
-import { connectorBindingTarget, renderConnectorNode } from './connectors'
+import { REKA_ELEMENTS, rekaRole } from '../behaviours'
 import {
   DESIGN_JSX_PARAGRAPH_PROPERTY_NAMES,
   DESIGN_JSX_SPAN_PROPERTY_NAMES,
   DESIGN_JSX_SUPPORTED_PROPERTY_NAMES,
   DESIGN_JSX_TEXT_PARAGRAPH_PROPERTY_NAMES
-} from './definitions'
+} from '../definitions'
+import { connectorBindingTarget, renderConnectorNode } from '../figjam/connectors'
+import { renderShapeNode } from '../figjam/shapes-with-text'
+import { renderStickyNode } from '../figjam/stickies'
 import {
   connectorPropsSchema,
   ownLayerPropsSchema,
@@ -18,10 +20,8 @@ import {
   shapePropsSchema,
   stickyPropsSchema,
   type ElementPropsSchema
-} from './schema'
-import { renderShapeNode } from './shapes-with-text'
-import { renderStickyNode } from './stickies'
-import type { TreeNode } from './tree'
+} from '../schema'
+import type { TreeNode } from '../tree'
 
 /** How an element that draws a layer of its own, such as a sticky note, renders it. */
 export interface OwnLayerRenderer {
