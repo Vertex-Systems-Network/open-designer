@@ -21,7 +21,7 @@ import {
   type TileWorldBounds
 } from './geometry'
 import { planTiles } from './planner'
-import { deleteRenderedTile, renderTile } from './render'
+import { childTileKeys, deleteRenderedTile, downsampleTile, renderTile } from './render'
 import {
   emptyTileSchedulerMetrics,
   TileScheduler,
@@ -41,6 +41,8 @@ const TILE_OVERSCAN = 1
 /** The backdrop is this many times coarser than the visible level, and reaches this far out. */
 const BACKDROP_LEVEL_RATIO = 4
 const BACKDROP_OVERSCAN = 1
+/** How many halvings of the visible level the pyramid keeps: 2⁶ covers a 64× zoom out. */
+const PYRAMID_LEVELS = 6
 const TILE_COST_SMOOTHING = 0.3
 /** Exact levels are keyed to this many bits of the scale's logarithm: stable across float noise. */
 const EXACT_LEVEL_BITS = 20
@@ -95,6 +97,7 @@ export class TiledSceneController {
     previousBounds: TileWorldBounds[]
   }> = []
   private lastCoveredGeneration = ''
+  private lastLevel: number | null = null
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
   private readonly surfacePool = new TileSurfacePool()
@@ -151,8 +154,9 @@ export class TiledSceneController {
    * tiles where they exist, the nearest level's tiles scaled where they do not, and the page
    * colour where no level has one, until its tile renders. Nothing is drawn straight from the
    * scene, whose whole-page picture a large document cannot afford. Navigation keeps presenting,
-   * shortens the budget while panning, and rasterizes nothing while zooming; the retained
-   * backing plays no part.
+   * shortens the budget while panning, and rasterizes nothing while the zoom changes; the
+   * retained backing plays no part. Idle time builds a pyramid of downsampled copies and a
+   * scene-rendered backdrop around the viewport, so a zoom out finds scaled stand-ins.
    */
   renderFrame(
     renderer: SkiaRenderer,
@@ -174,10 +178,14 @@ export class TiledSceneController {
     if (!index || !renderer.pageId) return this.emptyResult()
 
     const level = exactTileLevel(renderer.zoom * renderer.dpr)
-    // Jobs planned at another level draw nothing the viewport shows now.
+    const zooming = renderer.navigationPhase === 'zoom' && level !== this.lastLevel
+    this.lastLevel = level
+    // Jobs planned at another level draw nothing the viewport shows now; a downsample is cheap
+    // and feeds the fallback at any level, so it stays.
     const backdropLevel = tileLevel((level / BACKDROP_LEVEL_RATIO) * (1 - 1e-9))
     this.cancelledJobs += this.scheduler.discard(
-      (job) => job.key.level !== level && job.key.level !== backdropLevel
+      (job) =>
+        job.kind !== 'downsample' && job.key.level !== level && job.key.level !== backdropLevel
     )
     const plan = planTiles(this.tileCache, {
       pageId: renderer.pageId,
@@ -188,13 +196,15 @@ export class TiledSceneController {
       contentGeneration,
       estimateCost: (key) => this.measuredCosts.get(this.costKey(key)) ?? this.typicalCostMs ?? 0,
       globalFallbackAvailable: true,
-      backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
+      backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
+      pyramid: { levels: PYRAMID_LEVELS }
     })
     // A zoom changes level every few frames, and rasterizing each level as it passes costs more
-    // GPU time than the gesture leaves; the previous level's tiles stand in until the zoom ends.
-    // A pan keeps its level, so its newly exposed tiles fill in under the navigation budget.
+    // GPU time than the gesture leaves; the previous level's tiles stand in until the zoom ends
+    // or pauses. A pan keeps its level, so its newly exposed tiles fill in under the navigation
+    // budget, as do a paused zoom's.
     let metrics: TileSchedulerMetrics
-    if (renderer.navigationPhase === 'zoom') {
+    if (zooming) {
       metrics = emptyTileSchedulerMetrics()
       metrics.remaining = plan.jobs.length
       metrics.skippedWithFallback = plan.jobs.filter((job) => job.fallbackAvailable).length
@@ -272,6 +282,7 @@ export class TiledSceneController {
     this.pageId = null
     this.contentGeneration = -1
     this.lastCoveredGeneration = ''
+    this.lastLevel = null
     this.pendingInvalidations = []
     this.measuredCosts.clear()
     this.pictureCache.clear()
@@ -359,9 +370,12 @@ export class TiledSceneController {
     job: TileJob
   ) {
     const startedAt = this.now()
-    const tile = renderTile(renderer, graph, index, job.key, this.pictureCache, this.surfacePool)
-    if (!tile) return { renderMs: 0, overBudget: true }
-    this.recordCost(job.key, this.now() - startedAt)
+    const tile =
+      job.kind === 'downsample'
+        ? this.downsample(renderer, job)
+        : renderTile(renderer, graph, index, job.key, this.pictureCache, this.surfacePool)
+    if (!tile) return { renderMs: 0, overBudget: job.kind !== 'downsample' }
+    if (job.kind !== 'downsample') this.recordCost(job.key, this.now() - startedAt)
     if (
       job.navigationGeneration !== this.navigationGeneration ||
       job.contentGeneration !== this.contentGeneration
@@ -371,6 +385,22 @@ export class TiledSceneController {
     }
     this.tileCache.install(tile, job.contentGeneration)
     return this.jobResult(tile)
+  }
+
+  /** Null when a child has gone since the job was planned; the next plan decides again. */
+  private downsample(renderer: SkiaRenderer, job: TileJob) {
+    const children: CachedTile[] = []
+    for (const childKey of childTileKeys(job.key)) {
+      const child = this.tileCache.getIfPresent(childKey)
+      if (!child || child.contentGeneration !== job.contentGeneration) return null
+      children.push(child)
+    }
+    return downsampleTile(renderer, job.key, children, this.surfacePool)
+  }
+
+  /** Whether the cache holds a fresh tile for `key`. */
+  isRendered(key: TileKey): boolean {
+    return this.tileCache.getIfPresent(key)?.contentGeneration === this.contentGeneration
   }
 
   private jobResult(tile: NonNullable<ReturnType<typeof renderTile>>) {
@@ -426,6 +456,7 @@ export class TiledSceneController {
     paint.setBlendMode(renderer.ck.BlendMode.Src)
     const source = renderer.ck.LTRBRect(0, 0, TILE_DEVICE_SIZE, TILE_DEVICE_SIZE)
     const drawTile = (tile: CachedTile, filter: FilterMode) => {
+      if (!tile.image) return
       const bounds = tileWorldBounds(tile.key)
       canvas.drawImageRectOptions(
         tile.image,

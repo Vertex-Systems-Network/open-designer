@@ -14,7 +14,8 @@ import type { RenderedTile } from './render'
 
 export interface CachedTile {
   key: TileKey
-  image: CKImage
+  /** Null for a tile with nothing in it: it draws as the page colour and holds no texture. */
+  image: CKImage | null
   contentGeneration: number
   lastUsed: number
   bytes: number
@@ -37,28 +38,43 @@ const MAX_FINER_FALLBACK_RATIO = 8
 
 export class TileImageCache {
   private readonly entries: ResourceCache<string, CachedTile>
-  /** How many tiles each page holds per level, so fallback lookups try only populated levels. */
-  private readonly levelCounts = new Map<string, Map<number, number>>()
+  /** The tiles of each page by level, so fallback lookups and the pyramid walk only what exists. */
+  private readonly entriesByLevel = new Map<string, Map<number, Map<string, CachedTile>>>()
   private clock = 0
 
   constructor(maxBytes = DEFAULT_MAX_TILE_BYTES) {
     this.entries = new ResourceCache({
       maxWeight: maxBytes,
-      weight: (entry) => entry.bytes,
+      // An empty tile weighs one byte: the cache refuses weightless entries.
+      weight: (entry) => Math.max(1, entry.bytes),
       dispose: (entry) => {
-        this.countLevel(entry.key, -1)
-        entry.image.delete()
+        this.forgetLevelEntry(entry)
+        entry.image?.delete()
       }
     })
   }
 
-  private countLevel(key: TileKey, delta: number): void {
-    const levels = this.levelCounts.get(key.pageId) ?? new Map<number, number>()
-    const count = (levels.get(key.level) ?? 0) + delta
-    if (count > 0) levels.set(key.level, count)
-    else levels.delete(key.level)
-    if (levels.size > 0) this.levelCounts.set(key.pageId, levels)
-    else this.levelCounts.delete(key.pageId)
+  private rememberLevelEntry(id: string, entry: CachedTile): void {
+    const levels =
+      this.entriesByLevel.get(entry.key.pageId) ?? new Map<number, Map<string, CachedTile>>()
+    const tiles = levels.get(entry.key.level) ?? new Map<string, CachedTile>()
+    tiles.set(id, entry)
+    levels.set(entry.key.level, tiles)
+    this.entriesByLevel.set(entry.key.pageId, levels)
+  }
+
+  private forgetLevelEntry(entry: CachedTile): void {
+    const levels = this.entriesByLevel.get(entry.key.pageId)
+    const tiles = levels?.get(entry.key.level)
+    if (!levels || !tiles) return
+    tiles.delete(tileKeyString(entry.key))
+    if (tiles.size === 0) levels.delete(entry.key.level)
+    if (levels.size === 0) this.entriesByLevel.delete(entry.key.pageId)
+  }
+
+  /** The cached tiles of one level of a page, in no particular order. */
+  tilesAtLevel(pageId: string, level: number): Iterable<CachedTile> {
+    return this.entriesByLevel.get(pageId)?.get(level)?.values() ?? []
   }
 
   /**
@@ -68,7 +84,7 @@ export class TileImageCache {
    */
   /** The levels `findFallback` may draw from for a page shown at `level`, nearest first. */
   fallbackLevels(pageId: string, level: number): number[] {
-    return [...(this.levelCounts.get(pageId)?.keys() ?? [])]
+    return [...(this.entriesByLevel.get(pageId)?.keys() ?? [])]
       .filter((candidate) => candidate < level || candidate / level <= MAX_FINER_FALLBACK_RATIO)
       .filter((candidate) => candidate !== level)
       .sort(compareLevelDistance(level))
@@ -118,13 +134,13 @@ export class TileImageCache {
       image: tile.image,
       contentGeneration,
       lastUsed: ++this.clock,
-      bytes: tile.image.width() * tile.image.height() * 4
+      bytes: tile.image ? tile.image.width() * tile.image.height() * 4 : 0
     }
     if (!this.entries.set(id, entry)) {
-      entry.image.delete()
+      entry.image?.delete()
       return null
     }
-    this.countLevel(tile.key, 1)
+    this.rememberLevelEntry(id, entry)
     return entry
   }
 

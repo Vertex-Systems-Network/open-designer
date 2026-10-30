@@ -117,4 +117,35 @@ describe('tile planner', () => {
     expect(settled.jobs.every((job) => job.fallbackAvailable)).toBe(true)
     cache.clear()
   })
+
+  test('plans downsample jobs for every tile whose four finer tiles are fresh, one level per frame', () => {
+    const cache = new TileImageCache()
+    for (const x of [0, 1, 2, 3])
+      for (const y of [0, 1]) cache.install(renderedTile({ pageId: 'page', level: 1, x, y }), 2)
+    const pyramid = planTiles(
+      cache,
+      baseOptions({ viewport: { minX: 0, minY: 0, maxX: 1024, maxY: 512 }, pyramid: { levels: 3 } })
+    )
+    expect(
+      pyramid.jobs.map((job) => `${job.kind}:${job.key.level}:${job.key.x}:${job.key.y}`).sort()
+    ).toEqual(['downsample:0.5:0:0', 'downsample:0.5:1:0'])
+    for (const job of pyramid.jobs) cache.install(renderedTile(job.key), 2)
+    const next = planTiles(
+      cache,
+      baseOptions({ viewport: { minX: 0, minY: 0, maxX: 1024, maxY: 512 }, pyramid: { levels: 3 } })
+    )
+    // Two level-0.5 tiles side by side are only half of a level-0.25 tile, so nothing more builds.
+    expect(next.jobs).toEqual([])
+    cache.clear()
+  })
+
+  test('orders visible jobs from the viewport centre outward', () => {
+    const cache = new TileImageCache()
+    const plan = planTiles(
+      cache,
+      baseOptions({ viewport: { minX: 0, minY: 0, maxX: 1280, maxY: 256 } })
+    )
+    expect(plan.jobs.map((job) => job.key.x)).toEqual([2, 1, 3, 0, 4])
+    cache.clear()
+  })
 })

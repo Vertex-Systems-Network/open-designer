@@ -19,11 +19,12 @@ export type { CachedTile } from './cache'
 export { TileScheduler } from './scheduler'
 export type {
   TileJob,
+  TileJobKind,
   TileJobPriority,
   TileJobResult,
   TileSchedulerMetrics,
   TileSchedulerOptions
 } from './scheduler'
 export { TileSurfacePool } from './surface-pool'
-export { deleteRenderedTile, renderTile, tileChunks } from './render'
+export { childTileKeys, deleteRenderedTile, downsampleTile, renderTile, tileChunks } from './render'
 export type { RenderedTile } from './render'

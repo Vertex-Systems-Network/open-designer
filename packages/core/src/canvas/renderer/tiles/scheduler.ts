@@ -4,8 +4,12 @@ import type { TileKey } from './geometry'
 
 export type TileJobPriority = 'mandatory' | 'visible' | 'overscan'
 
+export type TileJobKind = 'render' | 'downsample'
+
 export interface TileJob {
   key: TileKey
+  /** Rendered from the scene, or downsampled from the four cached tiles twice as fine. */
+  kind?: TileJobKind
   navigationGeneration: number
   contentGeneration: number
   priority: TileJobPriority

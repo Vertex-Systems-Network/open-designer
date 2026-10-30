@@ -30,11 +30,11 @@ describe('tile image cache', () => {
     const cache = new TileImageCache(1)
     const oversized = tile(0)
     expect(cache.install(oversized, 1)).toBeNull()
-    expect(oversized.image.delete).toHaveBeenCalledTimes(1)
+    expect(oversized.image?.delete).toHaveBeenCalledTimes(1)
     expect(cache.size()).toBe(0)
     expect(cache.byteSize()).toBe(0)
     cache.clear()
-    expect(oversized.image.delete).toHaveBeenCalledTimes(1)
+    expect(oversized.image?.delete).toHaveBeenCalledTimes(1)
   })
 
   test('replaces native images and reports memory', () => {
@@ -44,11 +44,11 @@ describe('tile image cache', () => {
     cache.install(first, 1)
     cache.install(second, 2)
 
-    expect(first.image.delete).toHaveBeenCalledTimes(1)
+    expect(first.image?.delete).toHaveBeenCalledTimes(1)
     expect(cache.size()).toBe(1)
     expect(cache.byteSize()).toBe(256 * 256 * 4)
     cache.clear()
-    expect(second.image.delete).toHaveBeenCalledTimes(1)
+    expect(second.image?.delete).toHaveBeenCalledTimes(1)
   })
 
   test('invalidates intersecting tiles and advances unaffected generations', () => {
@@ -61,7 +61,7 @@ describe('tile image cache', () => {
     expect(cache.invalidateBounds('page', { minX: 300, minY: 10, maxX: 340, maxY: 40 }, 2)).toBe(1)
     expect(cache.get(first.key)?.contentGeneration).toBe(2)
     expect(cache.get(second.key)).toBeNull()
-    expect(second.image.delete).toHaveBeenCalledTimes(1)
+    expect(second.image?.delete).toHaveBeenCalledTimes(1)
     cache.clear()
   })
 
@@ -76,7 +76,7 @@ describe('tile image cache', () => {
     cache.get(first.key)
     cache.install(third, 1)
 
-    expect(second.image.delete).toHaveBeenCalledTimes(1)
+    expect(second.image?.delete).toHaveBeenCalledTimes(1)
     expect(cache.get(first.key)).not.toBeNull()
     expect(cache.get(third.key)).not.toBeNull()
     cache.clear()

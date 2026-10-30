@@ -157,7 +157,7 @@ export async function listFonts(): Promise<TauriFontFamily[]> {
 }
 
 interface FontRenderInvalidator {
-  invalidateAllPictures(): void
+  invalidateNodesForFonts(graph: SceneGraph, nodeIds: readonly string[]): void
 }
 
 export async function ensureGraphFonts(
@@ -186,7 +186,7 @@ export async function ensureGraphFonts(
     return fontManager.generation() !== generationBefore || fallbackScripts.length > 0
   } finally {
     fontManager.unblockNodes(nodeIds)
-    renderer?.invalidateAllPictures()
+    renderer?.invalidateNodesForFonts(graph, nodeIds)
   }
 }
 

@@ -19,31 +19,31 @@ function color(r: number, g: number, b: number) {
   return [{ type: 'SOLID' as const, color: { r, g, b, a: 1 }, opacity: 1, visible: true }]
 }
 
-describe('tile scheduling', () => {
-  function createGridScene() {
-    const graph = new SceneGraph()
-    const page = expectDefined(graph.getPages()[0], 'page')
-    for (let index = 0; index < 48; index++) {
-      graph.createNode('RECTANGLE', page.id, {
-        x: (index % 12) * 100,
-        y: Math.floor(index / 12) * 100,
-        width: 80,
-        height: 80,
-        fills: color(0.2, 0.4, 0.8)
-      })
-    }
-    const surface = expectDefined(ck.MakeSurface(1280, 800), 'scheduling surface')
-    const renderer = new SkiaRenderer(ck, surface)
-    renderer.pageId = page.id
-    renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
-    renderer.viewportWidth = 1280
-    renderer.viewportHeight = 800
-    renderer.dpr = 1
-    renderer.zoom = 1
-    renderer.navigationPhase = 'idle'
-    return { graph, surface, renderer }
+function createGridScene() {
+  const graph = new SceneGraph()
+  const page = expectDefined(graph.getPages()[0], 'page')
+  for (let index = 0; index < 48; index++) {
+    graph.createNode('RECTANGLE', page.id, {
+      x: (index % 12) * 100,
+      y: Math.floor(index / 12) * 100,
+      width: 80,
+      height: 80,
+      fills: color(0.2, 0.4, 0.8)
+    })
   }
+  const surface = expectDefined(ck.MakeSurface(1280, 800), 'scheduling surface')
+  const renderer = new SkiaRenderer(ck, surface)
+  renderer.pageId = page.id
+  renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
+  renderer.viewportWidth = 1280
+  renderer.viewportHeight = 800
+  renderer.dpr = 1
+  renderer.zoom = 1
+  renderer.navigationPhase = 'idle'
+  return { graph, surface, renderer, pageId: page.id }
+}
 
+describe('tile scheduling', () => {
   test('fills the frame budget with tiles whose cost is not measured yet', () => {
     const { graph, surface, renderer } = createGridScene()
     // A clock that never advances: every tile is free, so only the cost model can stop the frame.
@@ -301,6 +301,86 @@ describe('tiles with image previews', () => {
       }
       expect(result.covered).toBe(true)
       expect(centerPixel(renderer)).toEqual([255, 0, 0, 255])
+    } finally {
+      renderer.destroy()
+    }
+  })
+
+  test('builds a pyramid of downsampled levels once the visible level settles', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 12; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      expect(result.pending).toBe(false)
+      // The 1280×800 viewport at level 1 is five by four tiles; its halves exist down to one tile.
+      expect(controller.isRendered({ pageId, level: 0.5, x: 0, y: 0 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 0.25, x: 0, y: 0 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 0.125, x: 0, y: 0 })).toBe(true)
+
+      // Far out, the pyramid still stands in for everything that was rendered.
+      renderer.zoom = 1 / 16
+      renderer.navigationPhase = 'zoom'
+      const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(zoomed.fallbackTileCount).toBeGreaterThan(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('keeps rendering when a zoom gesture pauses at one level', () => {
+    const { graph, surface, renderer } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      renderer.zoom = 2
+      renderer.navigationPhase = 'zoom'
+      const changing = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(changing.metrics.interruptibleCompleted).toBe(0)
+      const paused = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      expect(paused.metrics.interruptibleCompleted).toBeGreaterThan(0)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('renders the tile under the viewport centre first', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += 10) })
+    try {
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      // The viewport spans world 0..1280 × 0..800: its centre lies in tile (2, 1).
+      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 1, x: 0, y: 0 })).toBe(false)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('a font arrival redraws only the text that waited for it', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    const text = graph.createNode('TEXT', pageId, { x: 20, y: 20, width: 100, height: 30 })
+    const controller = renderer.tiledScene
+    renderer.tiledSceneEnabled = true
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 12 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      renderer.invalidateNodesForFonts(graph, [pageId])
+      expect(controller.hasPendingWork()).toBe(true)
+      const redraw = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      expect(redraw.metrics.interruptibleCompleted).toBe(1)
+      expect(controller.isRendered({ pageId, level: 1, x: 0, y: 0 })).toBe(true)
+      void text
     } finally {
       renderer.destroy()
     }

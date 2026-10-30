@@ -7,8 +7,10 @@ import { SkiaRenderer } from '#core/canvas'
 import { RenderChunkIndex, RenderChunkPictureCache } from '#core/canvas/renderer/chunks'
 import {
   deleteRenderedTile,
+  downsampleTile,
   renderTile,
   TiledSceneController,
+  TileImageCache,
   TILE_DEVICE_SIZE,
   TileSurfacePool,
   tileKeysForWorldBounds,
@@ -430,7 +432,7 @@ describe('tile rendering', () => {
       for (const tile of rendered) {
         const bounds = tileWorldBounds(tile.key)
         tiledCanvas.drawImageRectOptions(
-          tile.image,
+          expectDefined(tile.image, 'tile image'),
           ck.LTRBRect(0, 0, TILE_DEVICE_SIZE, TILE_DEVICE_SIZE),
           ck.LTRBRect(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY),
           ck.FilterMode.Nearest,
@@ -446,7 +448,11 @@ describe('tile rendering', () => {
         differenceRatio(pixels(directImage, 320, 240), pixels(tiledImage, 320, 240))
       ).toBeLessThan(0.01)
       expect(rendered.every((tile) => tile.chunkCount < index.size())).toBe(true)
-      expect(rendered.every((tile) => tile.image.width() === TILE_DEVICE_SIZE)).toBe(true)
+      expect(
+        rendered.every(
+          (tile) => expectDefined(tile.image, 'tile image').width() === TILE_DEVICE_SIZE
+        )
+      ).toBe(true)
 
       directImage.delete()
       tiledImage.delete()
@@ -458,6 +464,87 @@ describe('tile rendering', () => {
       direct.destroy()
       tiled.destroy()
       tileFactory.destroy()
+    }
+  })
+
+  test('a tile over nothing takes no surface and downsampling empties stays empty', () => {
+    const graph = new SceneGraph()
+    const page = expectDefined(graph.getPages()[0], 'page')
+    graph.createNode('RECTANGLE', page.id, {
+      x: 20,
+      y: 20,
+      width: 40,
+      height: 40,
+      fills: color(1, 0, 0)
+    })
+    const surface = expectDefined(ck.MakeSurface(320, 240), 'empty tile surface')
+    const renderer = new SkiaRenderer(ck, surface)
+    renderer.pageColor = { r: 1, g: 1, b: 1, a: 1 }
+    const { index } = RenderChunkIndex.build(graph, page.id)
+    const pictureCache = new RenderChunkPictureCache()
+    const surfacePool = new TileSurfacePool()
+    try {
+      const empty = expectDefined(
+        renderTile(
+          renderer,
+          graph,
+          index,
+          { pageId: page.id, level: 1, x: 5, y: 5 },
+          pictureCache,
+          surfacePool
+        ),
+        'empty tile'
+      )
+      expect(empty.image).toBeNull()
+      expect(surfacePool.size()).toBe(0)
+      const cache = new TileImageCache()
+      const cached = expectDefined(cache.install(empty, 1), 'cached empty tile')
+      const children = [cached, cached, cached, cached]
+      const parent = expectDefined(
+        downsampleTile(
+          renderer,
+          { pageId: page.id, level: 0.5, x: 2, y: 2 },
+          children,
+          surfacePool
+        ),
+        'downsampled'
+      )
+      expect(parent.image).toBeNull()
+
+      const filled = expectDefined(
+        renderTile(
+          renderer,
+          graph,
+          index,
+          { pageId: page.id, level: 1, x: 0, y: 0 },
+          pictureCache,
+          surfacePool
+        ),
+        'filled tile'
+      )
+      const filledCached = expectDefined(cache.install(filled, 1), 'cached filled tile')
+      const mixed = expectDefined(
+        downsampleTile(
+          renderer,
+          { pageId: page.id, level: 0.5, x: 0, y: 0 },
+          [filledCached, cached, cached, cached],
+          surfacePool
+        ),
+        'mixed'
+      )
+      const image = expectDefined(mixed.image, 'mixed image')
+      const px = pixels(image, TILE_DEVICE_SIZE, TILE_DEVICE_SIZE)
+      // The red square at world 20..60 lands in the top-left quadrant at half size: 10..30.
+      const at = (x: number, y: number) =>
+        Array.from(px.slice((y * TILE_DEVICE_SIZE + x) * 4, (y * TILE_DEVICE_SIZE + x) * 4 + 3))
+      expect(at(20, 20)).toEqual([255, 0, 0])
+      expect(at(100, 100)).toEqual([255, 255, 255])
+      cache.clear()
+    } finally {
+      surfacePool.clear()
+      pictureCache.clear()
+      index.dispose()
+      renderer.destroy()
     }
   })
 })

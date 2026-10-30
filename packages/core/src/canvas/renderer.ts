@@ -474,6 +474,31 @@ export class SkiaRenderer {
     this.decodedPreviewHashes.clear()
   }
 
+  /**
+   * Redraws the text that just gained its fonts. Tiles keep everything else; the retained
+   * renderer rebuilds its whole backing either way, so it drops every picture as before.
+   */
+  invalidateNodesForFonts(graph: SceneGraph, nodeIds: readonly string[]): void {
+    if (!this.tiledSceneEnabled) {
+      this.invalidateAllPictures()
+      return
+    }
+    const pending = [...nodeIds]
+    const seen = new Set<string>()
+    while (pending.length > 0) {
+      const id = pending.pop()
+      if (id === undefined || seen.has(id)) continue
+      seen.add(id)
+      const node = graph.getNode(id)
+      if (!node) continue
+      if (node.type === 'TEXT') {
+        this.invalidateNodePicture(id)
+        this.tiledScene.invalidateNode(id, graph)
+      }
+      pending.push(...node.childIds)
+    }
+  }
+
   invalidateAllPictures(): void {
     RendererState.invalidateAllPictures(this)
   }
