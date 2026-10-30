@@ -2,6 +2,7 @@ import { isPlainObject } from 'es-toolkit/predicate'
 
 import { namesComponent, rekaRole } from './behaviours'
 import { isComponentProperty } from './component-properties'
+import { DESIGN_JSX_SUPPORTED_PROPERTIES } from './definitions'
 import { elementNodeType } from './elements'
 import { isLayerRef, type LayerRef } from './refs'
 import { isTreeNode, type TreeNode } from './tree'
@@ -19,17 +20,18 @@ const NO_USE: ComponentUse = { defines: new Set(), names: new Set() }
 
 /**
  * The components an element names: its `of`, or the default of the swap property bound there,
- * and the `ref()`s its props and `properties` give swap properties.
+ * and the values its property props and `properties` give, any of which may be a swap's. A text
+ * value that names no component here orders nothing.
  */
 function componentReferences(props: Record<string, unknown>): ComponentKey[] {
   const reference = props.component ?? props.componentId ?? props.of
   const value = isComponentProperty(reference) ? reference.defaultValue : reference
   const assigned = [
     ...Object.entries(props)
-      .filter(([key]) => key !== 'ref' && key !== 'of')
+      .filter(([key]) => !DESIGN_JSX_SUPPORTED_PROPERTIES.has(key))
       .map(([, prop]) => prop),
     ...(isPlainObject(props.properties) ? Object.values(props.properties) : [])
-  ].filter(isLayerRef)
+  ].filter((item): item is ComponentKey => typeof item === 'string' || isLayerRef(item))
   return [...(typeof value === 'string' || isLayerRef(value) ? [value] : []), ...assigned]
 }
 

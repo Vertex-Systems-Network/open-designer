@@ -22,16 +22,18 @@ test('finds an override layer among the instance children, by its name before re
   expect(children[1]?.opacity).toBe(0.5)
 })
 
-test('leaves tree fields alone and rejects a layer name several layers share', async () => {
+test('writes only fields an instance can override, and rejects a layer name several layers share', async () => {
   const graph = new SceneGraph()
   const [, created] = await renderJSX(
     graph,
     `<Component name="Pair" w={60} h={24}><Frame name="Dot" w={4} h={4} /><Frame name="Dot" w={4} h={4} /><Frame name="Box" w={4} h={4} /></Component>
-     <Instance of="Pair" overrides={{ 'Box:childIds': ['missing'], 'Box:parentId': 'missing' }} />`
+     <Instance of="Pair" overrides={{ 'Box:childIds': ['missing'], 'Box:parentId': 'missing', 'Box:type': 'TEXT', 'Box:x': 30 }} />`
   )
   const box = graph.getChildren(created.id)[2]
   expect(box?.childIds).toEqual([])
   expect(box?.parentId).toBe(created.id)
+  expect(box?.type).toBe('FRAME')
+  expect(box?.x).toBe(0)
   await expect(
     renderJSX(graph, `<Instance of="Pair" overrides={{ 'Dot:opacity': 0.5 }} />`)
   ).rejects.toThrow('ambiguous')

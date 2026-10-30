@@ -2,6 +2,7 @@ import { omitBy } from 'es-toolkit/object'
 
 import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-pencil/scene-graph'
 import { parseColor } from '@open-pencil/scene-graph/color'
+import { INSTANCE_OVERRIDE_FIELDS } from '@open-pencil/scene-graph/instances'
 import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
 
 import type { RekaScope } from './behaviours'
@@ -363,10 +364,10 @@ async function renderInstanceNode(
 }
 
 /**
- * Fields that place a layer in the tree or link it to its component, which only the graph's own
- * moves and swaps may change.
+ * The fields an instance may override in its layers, as Figma allows; where a layer sits, its
+ * shape, its place in the tree, and its component follow the component.
  */
-const STRUCTURAL_FIELDS = new Set(['id', 'parentId', 'childIds', 'componentId'])
+const OVERRIDE_FIELDS = new Set<string>(INSTANCE_OVERRIDE_FIELDS)
 
 /**
  * Apply child overrides to a freshly created instance. Keys are
@@ -400,14 +401,14 @@ function applyInstanceOverrides(
     if (sep === -1) return []
     const childName = key.slice(0, sep)
     const prop = key.slice(sep + 1)
-    if (STRUCTURAL_FIELDS.has(prop)) return []
+    if (!OVERRIDE_FIELDS.has(prop)) return []
     const matches = descendants.filter((n) => n.name === childName)
     if (matches.length > 1)
       throw new Error(
         `overrides key ${key} is ambiguous: ${matches.length} layers are named ${childName}`
       )
     const child = matches.at(0)
-    return child && prop in child ? [{ child, prop, value }] : []
+    return child ? [{ child, prop, value }] : []
   })
   for (const { child, prop, value } of targets) {
     graph.updateNode(child.id, { [prop]: value })

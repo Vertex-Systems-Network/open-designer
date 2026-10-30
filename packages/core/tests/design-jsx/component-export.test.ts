@@ -312,6 +312,21 @@ describe('component export', () => {
     expect(graph.getChildren(frame.id).map((child) => child.name)).toEqual(['Copy', 'Tile', 'Tile'])
   })
 
+  test('renders a component a swap names before the instance that assigns it', async () => {
+    const graph = new SceneGraph()
+    const [, instance, , heart] = await renderJSX(
+      graph,
+      `<>
+        <Component name="Star" w={4} h={4} />
+        <Instance of="Card" Icon="Heart" />
+        <Component name="Card"><Instance name="Icon" of={property('Icon', 'Star')} /></Component>
+        <Component name="Heart" w={4} h={4} />
+      </>`
+    )
+    const icon = graph.getChildren(instance.id).find((child) => child.type === 'INSTANCE')
+    expect(icon?.componentId).toBe(heart.id)
+  })
+
   test('leaves nothing behind when a root fails to render', async () => {
     const graph = new SceneGraph()
     const page = graph.getPages()[0]
