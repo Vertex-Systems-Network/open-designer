@@ -5,6 +5,7 @@ import type { SceneGraph } from '@open-pencil/scene-graph'
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import {
   nodeRequiresAtomicChunk,
+  type RenderChunk,
   RenderChunkIndex,
   RenderChunkPictureCache
 } from '#core/canvas/renderer/chunks'
@@ -107,6 +108,8 @@ export class TiledSceneController {
     nodeId: string
     previousBounds: TileWorldBounds[]
   }> = []
+  /** Layers added, removed, moved between parents, or changed in kind since the last frame. */
+  private pendingStructure: Array<{ nodeId: string; parentId: string | null }> = []
   private lastCoveredGeneration = ''
   private lastLevel: number | null = null
   /**
@@ -146,7 +149,7 @@ export class TiledSceneController {
       node &&
       owningChunks.some((chunk) => chunk.interruptible === nodeRequiresAtomicChunk(graph, node))
     ) {
-      this.invalidateStructure()
+      this.invalidateStructure(nodeId, node.parentId)
       return
     }
     this.pendingInvalidations.push({
@@ -155,8 +158,19 @@ export class TiledSceneController {
     })
   }
 
-  invalidateStructure(): void {
-    this.invalidate()
+  /**
+   * A structural change: `nodeId` was added, removed, moved under another parent, or changed in
+   * a way that reshapes its chunks. The page child whose subtree holds it is rebuilt at the next
+   * frame, with its pictures and the tiles it touched; the rest of the page keeps its tiles.
+   * Without a layer, as when a document loads or is replaced, everything is dropped.
+   */
+  invalidateStructure(nodeId?: string, parentId?: string | null): void {
+    if (nodeId === undefined) {
+      this.invalidate()
+      return
+    }
+    if (!this.index) return
+    this.pendingStructure.push({ nodeId, parentId: parentId ?? null })
   }
 
   /**
@@ -165,7 +179,7 @@ export class TiledSceneController {
    * settlement means the visible tiles.
    */
   hasPendingWork(): boolean {
-    return this.pendingInvalidations.length > 0
+    return this.pendingInvalidations.length > 0 || this.pendingStructure.length > 0
   }
 
   /** The tile cache's current byte budget. */
@@ -333,6 +347,7 @@ export class TiledSceneController {
     this.lastCoveredGeneration = ''
     this.lastLevel = null
     this.pendingInvalidations = []
+    this.pendingStructure = []
     this.measuredCosts.clear()
     this.pictureCache.clear()
     this.tileCache.clear()
@@ -367,6 +382,9 @@ export class TiledSceneController {
     // invalidateStructure(), so a new content generation on its own is a redraw request (every
     // requestRender() bumps it) and the rendered tiles stay valid. Invalidations also arrive
     // without a new generation, as when an image preview decodes.
+    if (this.index && this.pageId === renderer.pageId && this.pendingStructure.length > 0) {
+      this.applyPendingStructure(graph, contentGeneration)
+    }
     if (
       this.index &&
       this.pageId === renderer.pageId &&
@@ -397,6 +415,51 @@ export class TiledSceneController {
       }
     }
     this.pendingInvalidations = []
+    this.contentGeneration = contentGeneration
+  }
+
+  private applyPendingStructure(graph: SceneGraph, contentGeneration: number): void {
+    const index = this.index
+    const pageId = this.pageId
+    if (!index || !pageId) return
+    if (!graph.getNode(pageId)) {
+      this.invalidate()
+      return
+    }
+    this.tileCache.advanceGeneration(contentGeneration)
+    let reordered = false
+    const rebuiltIds = new Set<string>()
+    for (const { nodeId, parentId } of this.pendingStructure) {
+      // A page child added, removed, or reordered: its own subtree, and the draw order of all.
+      const atPageLevel = parentId === pageId || index.hasTop(nodeId)
+      let changed: { removed: RenderChunk[]; added: RenderChunk[] } | null
+      if (atPageLevel) {
+        changed = index.rebuildTop(graph, pageId, nodeId)
+      } else if (graph.getNode(nodeId)) {
+        // A layer that exists is rebuilt where it is now, once, however many parents reported it.
+        if (rebuiltIds.has(nodeId)) continue
+        rebuiltIds.add(nodeId)
+        const dropped = index.dropChunksOf(graph, nodeId)
+        changed = index.rebuildFrom(graph, pageId, nodeId)
+        if (changed) changed = { removed: [...dropped, ...changed.removed], added: changed.added }
+      } else {
+        changed = parentId ? index.pruneUnder(graph, pageId, parentId) : null
+      }
+      if (!changed) {
+        this.invalidate()
+        return
+      }
+      reordered ||= atPageLevel
+      for (const chunk of changed.removed) this.pictureCache.invalidate(chunk.id)
+      for (const chunk of changed.removed) {
+        this.tileCache.invalidateBounds(pageId, chunk, contentGeneration)
+      }
+      for (const chunk of changed.added) {
+        this.tileCache.invalidateBounds(pageId, chunk, contentGeneration)
+      }
+    }
+    if (reordered) index.renumber(graph, pageId)
+    this.pendingStructure = []
     this.contentGeneration = contentGeneration
   }
 

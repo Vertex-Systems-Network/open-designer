@@ -110,6 +110,8 @@ describe('recorded render chunks', () => {
       },
       interruptible: true,
       painterOrder: 0,
+      topId: node.id,
+      localOrder: 0,
       minX: 0,
       minY: 0,
       maxX: 10,

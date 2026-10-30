@@ -1,1 +1,2 @@
 - Large pages record faster: a layer costs fewer renderer calls, a chunk clips to its frames with one call, and a boolean operation keeps its result between draws.
+- Adding, removing, or moving a layer on a large page no longer re-renders the whole page: only the tiles it touched render again.

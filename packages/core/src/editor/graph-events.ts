@@ -102,7 +102,7 @@ function invalidateRenderersForChange(
     if (invalidation.nodePicture)
       renderer.invalidateNodePicture(id, Object.keys(changes) as (keyof SceneNode)[])
     if (Object.keys(changes).some((key) => TILED_CHUNK_TOPOLOGY_KEYS.has(key as keyof SceneNode))) {
-      renderer.tiledScene.invalidateStructure()
+      renderer.tiledScene.invalidateStructure(id, graph.getNode(id)?.parentId ?? null)
     } else {
       renderer.tiledScene.invalidateNode(id, graph)
     }
@@ -153,14 +153,11 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
 
   function onNodeStructureChanged(nodeId: string, parentId?: string | null) {
     const graph = options.getGraph()
-    invalidateBooleanAncestors(
-      graph,
-      options.getRenderers(),
-      parentId ?? graph.getNode(nodeId)?.parentId
-    )
+    const parent = parentId ?? graph.getNode(nodeId)?.parentId ?? null
+    invalidateBooleanAncestors(graph, options.getRenderers(), parent)
     for (const renderer of options.getRenderers()) {
       renderer.invalidateNodePicture(nodeId)
-      renderer.tiledScene.invalidateStructure()
+      renderer.tiledScene.invalidateStructure(nodeId, parent)
     }
     options.scheduleComponentSync(nodeId)
     requestRenderFor(options.getGraph())
@@ -197,7 +194,8 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
       },
       reparented: (nodeId, oldParentId, newParentId) => {
         options.emitEditorEvent('node:reparented', nodeId, oldParentId, newParentId)
-        onNodeStructureChanged(nodeId)
+        onNodeStructureChanged(nodeId, newParentId)
+        onNodeStructureChanged(nodeId, oldParentId)
         invalidateBooleanAncestors(options.getGraph(), options.getRenderers(), oldParentId)
         flowChanged(oldParentId)
         flowChanged(newParentId)
@@ -205,7 +203,10 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
       },
       reordered: (nodeId, parentId, index, previousParentId) => {
         options.emitEditorEvent('node:reordered', nodeId, parentId, index, previousParentId)
-        onNodeStructureChanged(nodeId)
+        onNodeStructureChanged(nodeId, parentId)
+        if (previousParentId && previousParentId !== parentId) {
+          onNodeStructureChanged(nodeId, previousParentId)
+        }
         flowChanged(parentId)
         flowChanged(previousParentId)
         if (previousParentId && previousParentId !== parentId) {

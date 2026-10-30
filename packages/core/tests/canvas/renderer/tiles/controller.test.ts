@@ -402,6 +402,47 @@ describe('tiles with image previews', () => {
     }
   })
 
+  test('a layer added to one page child keeps the tiles of the others', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 30 && (result.pending || result.backgroundPending); frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(result.covered).toBe(true)
+      const farTile = { pageId, level: 1, x: 2, y: 1 }
+      expect(controller.isRendered(farTile)).toBe(true)
+
+      // A new layer inside the first grid square: only its tile re-renders.
+      const first = expectDefined(graph.getChildren(pageId)[0], 'first square')
+      const added = graph.createNode('RECTANGLE', first.id, {
+        x: 10,
+        y: 10,
+        width: 20,
+        height: 20,
+        fills: color(1, 0, 0)
+      })
+      controller.invalidateStructure(added.id, first.id)
+      expect(controller.hasPendingWork()).toBe(true)
+      const changed = controller.renderFrame(renderer, surface.getCanvas(), graph, 2, 0)
+      expect(controller.isRendered(farTile)).toBe(true)
+      expect(changed.metrics.interruptibleCompleted + changed.metrics.mandatoryCompleted).toBe(1)
+      expect(changed.covered).toBe(true)
+
+      // Deleting it again touches only that tile too.
+      graph.deleteNode(added.id)
+      controller.invalidateStructure(added.id, first.id)
+      const deleted = controller.renderFrame(renderer, surface.getCanvas(), graph, 3, 0)
+      expect(controller.isRendered(farTile)).toBe(true)
+      expect(deleted.metrics.interruptibleCompleted + deleted.metrics.mandatoryCompleted).toBe(1)
+      expect(deleted.covered).toBe(true)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
   test('builds a pyramid of downsampled levels once the visible level settles', () => {
     const { graph, surface, renderer, pageId } = createGridScene()
     let step = 0
