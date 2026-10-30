@@ -1,6 +1,7 @@
 import type { ImageFilter, MaskFilter, Canvas, Paint, Path } from 'canvaskit-wasm'
 
 import type { Fill, SceneGraph, SceneNode, Stroke } from '@open-pencil/scene-graph'
+import type { Mat3 } from '@open-pencil/scene-graph/matrix'
 import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
 import type { SnapGuide } from '@open-pencil/scene-graph/snap'
 
@@ -217,18 +218,9 @@ const rendererMethods = {
     overlays: RenderOverlays,
     parentAbsX?: number,
     parentAbsY?: number,
-    hasTransformedAncestor?: boolean
+    frame?: Mat3 | null
   ): void {
-    SceneRender.renderNode(
-      this,
-      canvas,
-      graph,
-      nodeId,
-      overlays,
-      parentAbsX,
-      parentAbsY,
-      hasTransformedAncestor
-    )
+    SceneRender.renderNode(this, canvas, graph, nodeId, overlays, parentAbsX, parentAbsY, frame)
   },
 
   renderSection(canvas: Canvas, node: SceneNode, graph: SceneGraph): void {

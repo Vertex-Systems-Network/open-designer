@@ -81,6 +81,49 @@ describe('render chunk spatial index', () => {
     }
   })
 
+  test('composes translated square clips into one box and keeps shaped clips by ancestor', () => {
+    const graph = new SceneGraph()
+    const page = graph.getPages()[0]
+    if (!page) throw new Error('Expected default page')
+    const outer = graph.createNode('FRAME', page.id, {
+      x: 10,
+      y: 10,
+      width: 100,
+      height: 100,
+      clipsContent: true
+    })
+    const inner = graph.createNode('FRAME', outer.id, {
+      x: 20,
+      y: 20,
+      width: 100,
+      height: 100,
+      clipsContent: true
+    })
+    // Enough layers that both frames split, so the leaves carry the clips of both ancestors.
+    for (let index = 0; index < 40; index++) {
+      graph.createNode('RECTANGLE', inner.id, { x: index, y: 0, width: 10, height: 10 })
+    }
+    const leafId = graph.getChildren(inner.id)[0]?.id ?? ''
+    const built = RenderChunkIndex.build(graph, page.id)
+    try {
+      const leaf = built.index.getChunksForNode(leafId)[0]
+      expect(leaf?.context.clipRect).toEqual({ minX: 30, minY: 30, maxX: 110, maxY: 110 })
+      expect(leaf?.context.ancestorClipIds).toEqual([])
+    } finally {
+      built.index.dispose()
+    }
+
+    graph.updateNode(inner.id, { rotation: 45 })
+    const rotated = RenderChunkIndex.build(graph, page.id)
+    try {
+      const leaf = rotated.index.getChunksForNode(leafId)[0]
+      expect(leaf?.context.clipRect).toEqual({ minX: 10, minY: 10, maxX: 110, maxY: 110 })
+      expect(leaf?.context.ancestorClipIds).toEqual([inner.id])
+    } finally {
+      rotated.index.dispose()
+    }
+  })
+
   test('keeps a small top-level subtree as one retained chunk', () => {
     const { graph, pageId } = graphWithNodes(20)
     const { index, stats } = RenderChunkIndex.build(graph, pageId)

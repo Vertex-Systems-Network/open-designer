@@ -135,9 +135,9 @@ export function drawRulers(
 
   if (r.rulerTheme) {
     const { background, tick, text } = r.rulerTheme
-    r.rulerBgPaint.setColor(r.ck.Color4f(background.r, background.g, background.b, background.a))
-    r.rulerTickPaint.setColor(r.ck.Color4f(tick.r, tick.g, tick.b, tick.a))
-    r.rulerTextPaint.setColor(r.ck.Color4f(text.r, text.g, text.b, text.a))
+    r.rulerBgPaint.setColorComponents(background.r, background.g, background.b, background.a)
+    r.rulerTickPaint.setColorComponents(tick.r, tick.g, tick.b, tick.a)
+    r.rulerTextPaint.setColorComponents(text.r, text.g, text.b, text.a)
   }
 
   canvas.drawRect(r.ck.LTRBRect(0, 0, vw, R), r.rulerBgPaint)
@@ -225,7 +225,7 @@ function drawGuideRulerLabel(
   screenPosition: number
 ): void {
   const label = String(Math.round(position * 100) / 100)
-  r.auxFill.setColor(r.ck.Color4f(MEASUREMENT_COLOR.r, MEASUREMENT_COLOR.g, MEASUREMENT_COLOR.b, 1))
+  r.auxFill.setColorComponents(MEASUREMENT_COLOR.r, MEASUREMENT_COLOR.g, MEASUREMENT_COLOR.b, 1)
   if (axis === 'x') {
     const widths = font.getGlyphWidths(font.getGlyphIDs(label))
     const textWidth = widths.reduce((sum, width) => sum + width, 0)

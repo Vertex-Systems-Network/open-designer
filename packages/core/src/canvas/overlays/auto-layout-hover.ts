@@ -137,7 +137,7 @@ function drawValuePill(
   )
   r.auxFill.setColor(canvasColor(r, color))
   canvas.drawRRect(rect, r.auxFill)
-  r.auxFill.setColor(r.ck.Color4f(1, 1, 1, 1))
+  r.auxFill.setColorComponents(1, 1, 1, 1)
   canvas.drawText(text, x - advance / 2, y - (top + bottom) / 2, r.auxFill, font)
 }
 

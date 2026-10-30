@@ -143,7 +143,7 @@ function drawMarker(
     radius + ring,
     radius + ring
   )
-  r.auxFill.setColor(r.ck.Color4f(0, 0, 0, MARKER_SHADOW_ALPHA))
+  r.auxFill.setColorComponents(0, 0, 0, MARKER_SHADOW_ALPHA)
   r.auxFill.setMaskFilter(r.getCachedMaskBlur(MARKER_SHADOW_SIGMA))
   canvas.drawRRect(shadow, r.auxFill)
   r.auxFill.setMaskFilter(null)

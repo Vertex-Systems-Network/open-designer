@@ -59,6 +59,35 @@ export function rendererInvalidationForChanges(
   return { geometryCache, nodePicture }
 }
 
+/** The boolean operations `id` lies in, nearest first: any change inside one changes its result. */
+function booleanAncestorIds(graph: SceneGraph, id: string | null | undefined): string[] {
+  const ids: string[] = []
+  const seen = new Set<string>()
+  let node = id ? graph.getNode(id) : undefined
+  // Bad data can hold a parent cycle; the walk ends where it has been.
+  while (node && !seen.has(node.id)) {
+    seen.add(node.id)
+    if (node.type === 'BOOLEAN_OPERATION') ids.push(node.id)
+    node = node.parentId ? graph.getNode(node.parentId) : undefined
+  }
+  return ids
+}
+
+function invalidateBooleanAncestors(
+  graph: SceneGraph,
+  renderers: Iterable<GraphEventRenderer>,
+  id: string | null | undefined
+) {
+  const ancestorIds = booleanAncestorIds(graph, id)
+  if (ancestorIds.length === 0) return
+  for (const renderer of renderers) {
+    for (const ancestorId of ancestorIds) {
+      renderer.invalidateVectorPath(ancestorId)
+      renderer.invalidateNodePicture(ancestorId)
+    }
+  }
+}
+
 function invalidateRenderersForChange(
   graph: SceneGraph,
   renderers: Iterable<GraphEventRenderer>,
@@ -67,6 +96,7 @@ function invalidateRenderersForChange(
   invalidateNodePicture: boolean
 ) {
   const invalidation = rendererInvalidationForChanges(changes, { preview: !invalidateNodePicture })
+  invalidateBooleanAncestors(graph, renderers, graph.getNode(id)?.parentId)
   for (const renderer of renderers) {
     if (invalidation.geometryCache) renderer.invalidateVectorPath(id)
     if (invalidation.nodePicture)
@@ -121,7 +151,13 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
     options.emitEditorEvent('node:previewUpdated', id, changes)
   }
 
-  function onNodeStructureChanged(nodeId: string) {
+  function onNodeStructureChanged(nodeId: string, parentId?: string | null) {
+    const graph = options.getGraph()
+    invalidateBooleanAncestors(
+      graph,
+      options.getRenderers(),
+      parentId ?? graph.getNode(nodeId)?.parentId
+    )
     for (const renderer of options.getRenderers()) {
       renderer.invalidateNodePicture(nodeId)
       renderer.tiledScene.invalidateStructure()
@@ -155,13 +191,14 @@ export function createGraphEventSubscription(options: GraphEventOptions) {
       deleted: (id, parentId) => {
         options.emitEditorEvent('node:deleted', id, parentId)
         for (const renderer of options.getRenderers()) renderer.forgetNode(id)
-        onNodeStructureChanged(id)
+        onNodeStructureChanged(id, parentId)
         flowChanged(parentId)
         if (parentId) options.scheduleComponentSync(parentId)
       },
       reparented: (nodeId, oldParentId, newParentId) => {
         options.emitEditorEvent('node:reparented', nodeId, oldParentId, newParentId)
         onNodeStructureChanged(nodeId)
+        invalidateBooleanAncestors(options.getGraph(), options.getRenderers(), oldParentId)
         flowChanged(oldParentId)
         flowChanged(newParentId)
         if (oldParentId) options.scheduleComponentSync(oldParentId)

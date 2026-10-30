@@ -5,6 +5,7 @@ import type { GroupFitOptions } from '@open-pencil/scene-graph/group-bounds'
 
 import { getTextOutlineSupport } from '#core/text/outlines'
 
+import { clearFillShader } from './fills'
 import type { SkiaRenderer } from './renderer'
 import {
   configureStrokePaint,
@@ -237,7 +238,25 @@ function makeImportedFillGeometryPath(r: SkiaRenderer, node: SceneNode): Path | 
   return result.detachAndDelete()
 }
 
+/**
+ * The operation's result, which the caller owns: a copy of the cached path, built once from the
+ * children's paths and kept until one of them or the operation changes. Fills, every shadow, a
+ * knockout, and a background blur each ask for it per draw, so without the cache a boolean ran
+ * its path ops up to five times per record.
+ */
 export function makeBooleanOperationPath(
+  r: SkiaRenderer,
+  node: SceneNode,
+  graph: SceneGraph
+): Path | null {
+  const cached = r.nodePaths.boolean.get(node.id)
+  if (cached) return cached[0]?.copy() ?? null
+  const built = buildBooleanOperationPath(r, node, graph)
+  r.nodePaths.store(r.nodePaths.boolean, node.id, built ? [built] : [])
+  return built ? built.copy() : null
+}
+
+function buildBooleanOperationPath(
   r: SkiaRenderer,
   node: SceneNode,
   graph: SceneGraph
@@ -311,7 +330,7 @@ export function paintBooleanOperation(
       try {
         canvas.drawPath(path, r.fillPaint)
       } finally {
-        r.fillPaint.setShader(null)
+        clearFillShader(r)
       }
     }
     between?.()

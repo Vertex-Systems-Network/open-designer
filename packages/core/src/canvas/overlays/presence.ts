@@ -21,7 +21,7 @@ const LABEL_SPARKLE_GAP = 3
 function drawSelection(r: SkiaRenderer, canvas: Canvas, graph: SceneGraph, cursor: PresenceCursor) {
   if (!cursor.selection?.length && !cursor.outline?.length) return
   const { r: red, g, b } = cursor.color
-  r.auxStroke.setColor(r.ck.Color4f(red, g, b, 0.6))
+  r.auxStroke.setColorComponents(red, g, b, 0.6)
   r.auxStroke.setStrokeWidth(1.5)
   r.auxStroke.setPathEffect(null)
   // Outlines of what is not a layer yet, such as JSX an agent is still streaming.
@@ -101,7 +101,7 @@ function drawArrow(r: SkiaRenderer, canvas: Canvas, x: number, y: number, cursor
   r.auxStroke.setPathEffect(null)
   canvas.drawPath(path, r.auxStroke)
   const { r: red, g, b } = cursor.color
-  r.auxFill.setColor(r.ck.Color4f(red, g, b, 1))
+  r.auxFill.setColorComponents(red, g, b, 1)
   canvas.drawPath(path, r.auxFill)
   path.delete()
 }

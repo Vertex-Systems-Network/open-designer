@@ -110,6 +110,9 @@ export class SkiaRenderer {
   declare auxStroke: Paint
   declare opacityPaint: Paint
   declare effectLayerPaint: Paint
+  /** Whether the shared fill and stroke paints carry a shader, so clearing one is a call only when needed. */
+  fillPaintShaded = false
+  strokePaintShaded = false
   imageFilterCache = createImageFilterCache()
   maskFilterCache = createMaskFilterCache()
   _tmpColor = new Float32Array(4)

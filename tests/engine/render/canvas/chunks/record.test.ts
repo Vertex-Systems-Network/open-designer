@@ -103,7 +103,11 @@ describe('recorded render chunks', () => {
       id: `${node.id}:subtree`,
       nodeId: node.id,
       kind: 'subtree',
-      context: { parentTransform: [1, 0, 0, 0, 1, 0, 0, 0, 1], ancestorClipIds: [] },
+      context: {
+        parentTransform: [1, 0, 0, 0, 1, 0, 0, 0, 1],
+        clipRect: null,
+        ancestorClipIds: []
+      },
       interruptible: true,
       painterOrder: 0,
       minX: 0,

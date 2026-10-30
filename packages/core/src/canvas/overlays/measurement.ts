@@ -169,7 +169,7 @@ function drawPill(r: SkiaRenderer, canvas: Canvas, text: string, x: number, y: n
     MEASUREMENT_PILL_RADIUS,
     MEASUREMENT_PILL_RADIUS
   )
-  r.auxFill.setColor(r.ck.Color4f(MEASUREMENT_COLOR.r, MEASUREMENT_COLOR.g, MEASUREMENT_COLOR.b, 1))
+  r.auxFill.setColorComponents(MEASUREMENT_COLOR.r, MEASUREMENT_COLOR.g, MEASUREMENT_COLOR.b, 1)
   canvas.drawRRect(rect, r.auxFill)
   r.auxFill.setColor(r.ck.WHITE)
   canvas.drawText(

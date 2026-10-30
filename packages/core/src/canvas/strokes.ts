@@ -11,9 +11,10 @@ import {
 } from '@open-pencil/scene-graph/arrow-caps'
 import type { Color, Vector } from '@open-pencil/scene-graph/primitives'
 
-import { applyGradientFill, applyImageFill } from './fills'
+import { applyGradientFill, applyImageFill, clearFillShader, clearStrokeShader } from './fills'
 import type { SkiaRenderer } from './renderer'
 import {
+  clipNodeShape,
   drawOutline,
   makeShapeWithTextDetailsPath,
   nodeHasSmoothCorners,
@@ -72,7 +73,7 @@ export function drawDashedRRectWithSolidCorners(
   const bottom = node.height - inset
   const radius = Math.max(0, cornerRadius - inset)
 
-  r.strokePaint.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
+  r.strokePaint.setColorComponents(color.r, color.g, color.b, color.a)
   r.strokePaint.setStrokeWidth(stroke.weight)
   r.strokePaint.setAlphaf(stroke.opacity)
   r.strokePaint.setStrokeCap(r.ck.StrokeCap.Butt)
@@ -183,7 +184,7 @@ export function drawArrowHeads(
     const { x, y, angle } = endpoint
     switch (endpoint.cap) {
       case 'ARROW_LINES':
-        r.strokePaint.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
+        r.strokePaint.setColorComponents(color.r, color.g, color.b, color.a)
         r.strokePaint.setAlphaf(opacity)
         r.strokePaint.setStrokeWidth(weight)
         // One path, so the wings meet in a round join rather than overlapping at the tip.
@@ -220,7 +221,7 @@ function strokeWings(r: SkiaRenderer, canvas: Canvas, [first, second]: [ArrowWin
 }
 
 function setHeadPaint(r: SkiaRenderer, color: Color, opacity: number) {
-  r.fillPaint.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
+  r.fillPaint.setColorComponents(color.r, color.g, color.b, color.a)
   r.fillPaint.setAlphaf(opacity)
 }
 
@@ -253,8 +254,8 @@ export function applyStrokeShader(
   node: SceneNode,
   graph: SceneGraph
 ): boolean {
-  r.strokePaint.setShader(null)
-  r.fillPaint.setShader(null)
+  clearStrokeShader(r)
+  clearFillShader(r)
   if (stroke.type.startsWith('GRADIENT') && stroke.gradientStops && stroke.gradientTransform) {
     let built = true
     for (const paint of [r.strokePaint, r.fillPaint]) {
@@ -305,8 +306,8 @@ export function forVisibleStrokes(
     try {
       if (draws) draw(stroke, r.resolveStrokeColor(stroke, index, node, graph))
     } finally {
-      r.strokePaint.setShader(null)
-      r.fillPaint.setShader(null)
+      clearStrokeShader(r)
+      clearFillShader(r)
       r.strokePaint.setPathEffect(null)
     }
   }
@@ -344,7 +345,7 @@ export function configureStrokePaint(
   stroke: Stroke,
   color: Color
 ): void {
-  r.strokePaint.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
+  r.strokePaint.setColorComponents(color.r, color.g, color.b, color.a)
   r.strokePaint.setStrokeWidth(stroke.weight)
   r.strokePaint.setAlphaf(stroke.opacity)
   r.strokePaint.setStrokeCap(getStrokeCapEntity(r, stroke.cap ?? node.strokeCap))
@@ -387,20 +388,8 @@ export function drawStrokeWithAlign(
     canvas.restore()
   } else if (align === 'OUTSIDE') {
     canvas.save()
-    const bigRect = r.ck.LTRBRect(-node.width, -node.height, node.width * 2, node.height * 2)
-    const outerPath = new r.ck.PathBuilder()
-    outerPath.addRect(bigRect)
-    const innerPath = r.makeNodeShapePath(node)
-    const immutableOuterPath = outerPath.detachAndDelete()
-    const clipPath = r.ck.Path.MakeFromOp(immutableOuterPath, innerPath, r.ck.PathOp.Difference)
-    immutableOuterPath.delete()
-    innerPath.delete()
-    if (!clipPath) {
-      canvas.restore()
-      return
-    }
-    canvas.clipPath(clipPath, r.ck.ClipOp.Intersect, true)
-    clipPath.delete()
+    // Everything but the shape: the stroke at double weight then shows only its outer half.
+    clipNodeShape(r, canvas, node, r.ck.ClipOp.Difference)
     const origWidth = r.strokePaint.getStrokeWidth()
     r.strokePaint.setStrokeWidth(origWidth * 2)
     r.drawNodeStroke(canvas, node)
@@ -442,25 +431,7 @@ export function drawRRectStrokeWithAlign(
     canvas.restore()
   } else if (stroke.align === 'OUTSIDE') {
     canvas.save()
-    const outerPath = new r.ck.PathBuilder()
-    outerPath.addRect(r.ck.LTRBRect(-node.width, -node.height, node.width * 2, node.height * 2))
-    const innerPath = new r.ck.PathBuilder()
-    innerPath.addRRect(rrect)
-    const immutableOuterPath = outerPath.detachAndDelete()
-    const immutableInnerPath = innerPath.detachAndDelete()
-    const clipPath = r.ck.Path.MakeFromOp(
-      immutableOuterPath,
-      immutableInnerPath,
-      r.ck.PathOp.Difference
-    )
-    immutableOuterPath.delete()
-    immutableInnerPath.delete()
-    if (!clipPath) {
-      canvas.restore()
-      return
-    }
-    canvas.clipPath(clipPath, r.ck.ClipOp.Intersect, true)
-    clipPath.delete()
+    canvas.clipRRect(rrect, r.ck.ClipOp.Difference, true)
     r.strokePaint.setStrokeWidth(stroke.weight * 2)
     canvas.drawRRect(rrect, r.strokePaint)
     r.strokePaint.setStrokeWidth(stroke.weight)

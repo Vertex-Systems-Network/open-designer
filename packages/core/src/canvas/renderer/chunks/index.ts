@@ -1,17 +1,24 @@
 import RBush from 'rbush'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { computeDescendantVisualBounds } from '@open-pencil/scene-graph/geometry'
+import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
+import { computeDescendantVisualBounds, type VisualBounds } from '@open-pencil/scene-graph/geometry'
 import type { Mat3 } from '@open-pencil/scene-graph/matrix'
 import Matrix from '@open-pencil/scene-graph/matrix'
 
 import { worldNodeVisualBounds } from '#core/canvas/renderer/visual-bounds'
+import { nodeHasRadius, nodeHasSmoothCorners } from '#core/canvas/shapes'
 
 export type RenderChunkKind = 'self' | 'subtree'
 
 export interface RenderChunkContext {
   parentTransform: Mat3
+  /**
+   * The world box left by every clipping ancestor that is only translated and square-cornered,
+   * the usual frame, so a record clips to it with one call; null when none clips so.
+   */
+  clipRect: VisualBounds | null
+  /** Clipping ancestors that are rotated, flipped, scaled, or rounded, clipped under their matrix. */
   ancestorClipIds: string[]
 }
 
@@ -76,22 +83,42 @@ function subtreeBounds(graph: SceneGraph, nodeId: string) {
   )
 }
 
-function clipAncestorIds(graph: SceneGraph, node: SceneNode): string[] {
-  const ids: string[] = []
+/** One walk from the root composes the parent's transform and gathers the clips on the way. */
+function chunkContext(graph: SceneGraph, node: SceneNode): RenderChunkContext {
+  const chain: SceneNode[] = []
   let parent = node.parentId ? graph.getNode(node.parentId) : undefined
   while (parent) {
-    if (parent.clipsContent) ids.unshift(parent.id)
+    chain.push(parent)
     parent = parent.parentId ? graph.getNode(parent.parentId) : undefined
   }
-  return ids
-}
-
-function chunkContext(graph: SceneGraph, node: SceneNode): RenderChunkContext {
-  const parent = node.parentId ? graph.getNode(node.parentId) : undefined
-  return {
-    parentTransform: parent ? getWorldMatrix(parent, graph) : Matrix.identity(),
-    ancestorClipIds: clipAncestorIds(graph, node)
+  let matrix = Matrix.identity()
+  let clipRect: VisualBounds | null = null
+  const ancestorClipIds: string[] = []
+  for (let index = chain.length - 1; index >= 0; index--) {
+    const ancestor = chain[index]
+    matrix = Matrix.multiply(matrix, getNodeLocalMatrix(ancestor))
+    if (!ancestor.clipsContent) continue
+    const translated = matrix[0] === 1 && matrix[1] === 0 && matrix[3] === 0 && matrix[4] === 1
+    if (translated && !nodeHasRadius(ancestor) && !nodeHasSmoothCorners(ancestor)) {
+      const box = {
+        minX: matrix[2],
+        minY: matrix[5],
+        maxX: matrix[2] + ancestor.width,
+        maxY: matrix[5] + ancestor.height
+      }
+      clipRect = clipRect
+        ? {
+            minX: Math.max(clipRect.minX, box.minX),
+            minY: Math.max(clipRect.minY, box.minY),
+            maxX: Math.min(clipRect.maxX, box.maxX),
+            maxY: Math.min(clipRect.maxY, box.maxY)
+          }
+        : box
+    } else {
+      ancestorClipIds.push(ancestor.id)
+    }
   }
+  return { parentTransform: matrix, clipRect, ancestorClipIds }
 }
 
 function countDescendants(graph: SceneGraph, nodeIds: string[]) {

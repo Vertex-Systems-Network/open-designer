@@ -38,7 +38,7 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
   r.snapPaint = new ck.Paint()
   r.snapPaint.setStyle(ck.PaintStyle.Stroke)
   r.snapPaint.setStrokeWidth(1)
-  r.snapPaint.setColor(ck.Color4f(SNAP_COLOR.r, SNAP_COLOR.g, SNAP_COLOR.b, 1))
+  r.snapPaint.setColorComponents(SNAP_COLOR.r, SNAP_COLOR.g, SNAP_COLOR.b, 1)
   r.snapPaint.setAntiAlias(true)
 
   r.auxFill = new ck.Paint()
@@ -55,7 +55,7 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
 
   const bg = RULER_BG_COLOR
   r.rulerBgPaint = new ck.Paint()
-  r.rulerBgPaint.setColor(ck.Color4f(bg.r, bg.g, bg.b, 1))
+  r.rulerBgPaint.setColorComponents(bg.r, bg.g, bg.b, 1)
 
   r.rulerTickPaint = new ck.Paint()
   r.rulerTickPaint.setColor(
@@ -66,7 +66,7 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
 
   const tc = RULER_TEXT_COLOR
   r.rulerTextPaint = new ck.Paint()
-  r.rulerTextPaint.setColor(ck.Color4f(tc.r, tc.g, tc.b, 1))
+  r.rulerTextPaint.setColorComponents(tc.r, tc.g, tc.b, 1)
   r.rulerTextPaint.setAntiAlias(true)
 
   r.rulerHlPaint = new ck.Paint()
@@ -76,19 +76,19 @@ export function initializeRendererPaints(r: SkiaRenderer): void {
   r.rulerBadgePaint.setAntiAlias(true)
 
   r.rulerLabelPaint = new ck.Paint()
-  r.rulerLabelPaint.setColor(ck.Color4f(1, 1, 1, 1))
+  r.rulerLabelPaint.setColorComponents(1, 1, 1, 1)
   r.rulerLabelPaint.setAntiAlias(true)
 
   r.penPathPaint = new ck.Paint()
   r.penPathPaint.setStyle(ck.PaintStyle.Stroke)
   r.penPathPaint.setStrokeWidth(1)
-  r.penPathPaint.setColor(ck.Color4f(0.698, 0.698, 0.698, 1))
+  r.penPathPaint.setColorComponents(0.698, 0.698, 0.698, 1)
   r.penPathPaint.setAntiAlias(true)
 
   r.penLiveStrokePaint = new ck.Paint()
   r.penLiveStrokePaint.setStyle(ck.PaintStyle.Stroke)
   r.penLiveStrokePaint.setStrokeWidth(PEN_PATH_STROKE_WIDTH)
-  r.penLiveStrokePaint.setColor(ck.Color4f(0, 0, 0, 1))
+  r.penLiveStrokePaint.setColorComponents(0, 0, 0, 1)
   r.penLiveStrokePaint.setAntiAlias(true)
 
   r.pencilStrokePaint = new ck.Paint()

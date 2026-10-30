@@ -1,0 +1,1 @@
+- Large pages record faster: a layer costs fewer renderer calls, a chunk clips to its frames with one call, and a boolean operation keeps its result between draws.

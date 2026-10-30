@@ -37,7 +37,7 @@ function drawGuide(
   state: GuideVisualState = 'idle'
 ): void {
   const color = guideColor(state)
-  r.auxStroke.setColor(r.ck.Color4f(color.r, color.g, color.b, color.a))
+  r.auxStroke.setColorComponents(color.r, color.g, color.b, color.a)
   const segment = getGuideScreenSegment(
     graph,
     owner,

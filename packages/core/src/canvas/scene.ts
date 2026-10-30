@@ -8,10 +8,11 @@ import {
   hasTrimmedShaft,
   trimArrowShafts
 } from '@open-pencil/scene-graph/arrow-caps'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
+import Matrix, { type Mat3 } from '@open-pencil/scene-graph/matrix'
 import type { Color } from '@open-pencil/scene-graph/primitives'
 
-import { createSceneGeometry, nodeOrientationMatrix, projectedNode } from '#core/geometry'
+import { nodeOrientationMatrix, projectedNode } from '#core/geometry'
 import { shownText } from '#core/text/case'
 import { mayHoldEmoji } from '#core/text/emoji'
 import { fontManager } from '#core/text/fonts'
@@ -84,13 +85,44 @@ function hasOverflowPathTextPaint(node: SceneNode): boolean {
   )
 }
 
+/**
+ * The frame a node's children are placed in, composed on the way down: null while every ancestor
+ * is an unrotated, unflipped translation, which `absX`/`absY` carry more cheaply; from the first
+ * transformed layer on, its world matrix, so no node below it walks to the root to find its own.
+ */
+function childFrame(
+  frame: Mat3 | null,
+  node: SceneNode,
+  parentAbsX: number,
+  parentAbsY: number,
+  preview?: RenderOverlays['rotationPreview']
+): Mat3 | null {
+  const projected = projectedNode(node, preview)
+  if (frame) return Matrix.multiply(frame, getNodeLocalMatrix(projected))
+  if (!hasNodeTransform(projected)) return null
+  return Matrix.multiply(Matrix.translated(parentAbsX, parentAbsY), getNodeLocalMatrix(projected))
+}
+
+/** The node's world matrix from its frame, or from its absolute position when it has none. */
+function worldMatrixIn(
+  frame: Mat3 | null,
+  node: SceneNode,
+  parentAbsX: number,
+  parentAbsY: number,
+  preview?: RenderOverlays['rotationPreview']
+): Mat3 {
+  return (
+    childFrame(frame, node, parentAbsX, parentAbsY, preview) ??
+    Matrix.translated(parentAbsX + node.x, parentAbsY + node.y)
+  )
+}
+
 function isCulled(
   r: SkiaRenderer,
-  graph: SceneGraph,
   node: SceneNode,
   absX: number,
   absY: number,
-  hasTransformedAncestor: boolean,
+  frame: Mat3 | null,
   preview?: RenderOverlays['rotationPreview']
 ): boolean {
   const canCull =
@@ -100,34 +132,31 @@ function isCulled(
   if (!canCull || hasOverflowPathTextPaint(node)) return false
 
   const vp = r.worldViewport
-  if (hasTransformedAncestor) {
-    const bounds = createSceneGeometry(graph, preview).bounds(node)
-    return (
-      bounds.x > vp.x + vp.w ||
-      bounds.y > vp.y + vp.h ||
-      bounds.x + bounds.width < vp.x ||
-      bounds.y + bounds.height < vp.y
-    )
-  }
   const bw = node.width
   const bh = node.height
-  if (projectedNode(node, preview).rotation !== 0) {
-    const diag = Math.hypot(bw, bh)
-    const { x: cx, y: cy } = createSceneGeometry(graph, preview).toWorld(node, {
-      x: bw / 2,
-      y: bh / 2
-    })
+  if (frame || projectedNode(node, preview).rotation !== 0) {
+    const bounds = mapVisualBounds(
+      worldMatrixIn(frame, node, absX - node.x, absY - node.y, preview),
+      {
+        minX: 0,
+        minY: 0,
+        maxX: bw,
+        maxY: bh
+      }
+    )
     return (
-      cx - diag / 2 > vp.x + vp.w ||
-      cy - diag / 2 > vp.y + vp.h ||
-      cx + diag / 2 < vp.x ||
-      cy + diag / 2 < vp.y
+      bounds.minX > vp.x + vp.w ||
+      bounds.minY > vp.y + vp.h ||
+      bounds.maxX < vp.x ||
+      bounds.maxY < vp.y
     )
   }
   return absX > vp.x + vp.w || absY > vp.y + vp.h || absX + bw < vp.x || absY + bh < vp.y
 }
 
 function applyNodeTransforms(canvas: Canvas, node: SceneNode, overlays: RenderOverlays): void {
+  // Most layers are neither rotated nor flipped: their orientation is the identity, not a call.
+  if (!hasNodeTransform(projectedNode(node, overlays.rotationPreview))) return
   canvas.concat(nodeOrientationMatrix(node, overlays.rotationPreview))
 }
 function renderNodeContent(
@@ -156,7 +185,8 @@ function renderMaskNodeContent(
   node: SceneNode,
   overlays: RenderOverlays,
   absX: number,
-  absY: number
+  absY: number,
+  frame: Mat3 | null
 ): void {
   canvas.save()
   canvas.translate(node.x, node.y)
@@ -180,7 +210,16 @@ function renderMaskNodeContent(
   applyNodeTransforms(canvas, node, overlays)
   renderNodeContent(r, canvas, graph, node.maskType === 'VECTOR' ? opaqueFills(node) : node, {})
   // A group or frame used as a mask masks with what its layers draw, as in Figma.
-  renderChildren(r, canvas, graph, node, overlays, absX + node.x, absY + node.y, true)
+  renderChildren(
+    r,
+    canvas,
+    graph,
+    node,
+    overlays,
+    absX + node.x,
+    absY + node.y,
+    childFrame(frame, node, absX, absY, overlays.rotationPreview)
+  )
   if (layered) canvas.restore()
   canvas.restore()
 }
@@ -201,7 +240,7 @@ function renderChildIds(
   overlays: RenderOverlays,
   absX: number,
   absY: number,
-  hasTransformedAncestor: boolean
+  frame: Mat3 | null
 ): void {
   renderMaskedChildIds(
     r,
@@ -211,10 +250,10 @@ function renderChildIds(
       const child = graph.getNode(childId)
       return child?.visible && child.isMask ? child.maskType : null
     },
-    (childId) => r.renderNode(canvas, graph, childId, overlays, absX, absY, hasTransformedAncestor),
+    (childId) => r.renderNode(canvas, graph, childId, overlays, absX, absY, frame),
     (childId) => {
       const child = graph.getNode(childId)
-      if (child) renderMaskNodeContent(r, canvas, graph, child, overlays, absX, absY)
+      if (child) renderMaskNodeContent(r, canvas, graph, child, overlays, absX, absY, frame)
     },
     (childId) => {
       const child = graph.getNode(childId)
@@ -232,7 +271,7 @@ function renderChildren(
   overlays: RenderOverlays,
   absX: number,
   absY: number,
-  hasTransformedAncestor: boolean
+  frame: Mat3 | null
 ): void {
   if (node.type === 'BOOLEAN_OPERATION') return
   const isClippableContainer =
@@ -240,10 +279,10 @@ function renderChildren(
   if (isClippableContainer && node.clipsContent && node.childIds.length > 0) {
     canvas.save()
     r.clipNodeShape(canvas, node)
-    renderChildIds(r, canvas, graph, node.childIds, overlays, absX, absY, hasTransformedAncestor)
+    renderChildIds(r, canvas, graph, node.childIds, overlays, absX, absY, frame)
     canvas.restore()
   } else {
-    renderChildIds(r, canvas, graph, node.childIds, overlays, absX, absY, hasTransformedAncestor)
+    renderChildIds(r, canvas, graph, node.childIds, overlays, absX, absY, frame)
   }
 }
 export function renderNodeSelf(
@@ -271,15 +310,9 @@ export function renderNodeSelf(
   canvas.restore()
 }
 
-function viewportLayerBounds(
-  r: SkiaRenderer,
-  graph: SceneGraph,
-  node: SceneNode,
-  padding: number,
-  preview?: RenderOverlays['rotationPreview']
-): Float32Array | null {
+function viewportLayerBounds(r: SkiaRenderer, world: Mat3, padding: number): Float32Array | null {
   if (!r.boundEffectLayersToViewport) return null
-  const inverse = Matrix.invert(createSceneGeometry(graph, preview).worldMatrix(node))
+  const inverse = Matrix.invert(world)
   if (!inverse) return null
   const viewport = r.worldViewport
   const bounds = mapVisualBounds(inverse, {
@@ -304,9 +337,10 @@ function nodeIsolationLayerBounds(
   r: SkiaRenderer,
   graph: SceneGraph,
   node: SceneNode,
+  world: Mat3,
   preview?: RenderOverlays['rotationPreview']
 ): Float32Array {
-  const viewportBounds = viewportLayerBounds(r, graph, node, 0, preview)
+  const viewportBounds = viewportLayerBounds(r, world, 0)
   if (viewportBounds) return viewportBounds
   const bounds = subtreeVisualBounds(graph, node, nodeOrientationMatrix(node, preview), preview)
   return r.ck.LTRBRect(bounds.minX, bounds.minY, bounds.maxX, bounds.maxY)
@@ -322,6 +356,11 @@ function drawsNode(node: SceneNode, overlays: RenderOverlays): boolean {
   return overlays.nodeEditState?.nodeId !== node.id && !overlays.playIslands?.has(node.id)
 }
 
+/**
+ * Draws a layer and its subtree. `frame` is the world matrix of the nearest transformed ancestor,
+ * or null when `parentAbsX`/`parentAbsY` place the layer; a chunk recorded in world space passes
+ * its parent's transform.
+ */
 export function renderNode(
   r: SkiaRenderer,
   canvas: Canvas,
@@ -330,7 +369,7 @@ export function renderNode(
   overlays: RenderOverlays,
   parentAbsX = 0,
   parentAbsY = 0,
-  hasTransformedAncestor = false
+  frame: Mat3 | null = null
 ): void {
   const found = graph.getNode(nodeId)
   if (!found || !drawsNode(found, overlays)) return
@@ -341,7 +380,7 @@ export function renderNode(
   const absX = parentAbsX + node.x
   const absY = parentAbsY + node.y
 
-  if (isCulled(r, graph, node, absX, absY, hasTransformedAncestor, overlays.rotationPreview)) {
+  if (isCulled(r, node, absX, absY, frame, overlays.rotationPreview)) {
     r._culledCount++
     return
   }
@@ -349,9 +388,10 @@ export function renderNode(
   canvas.save()
   canvas.translate(node.x, node.y)
 
+  const world = () => worldMatrixIn(frame, node, parentAbsX, parentAbsY, overlays.rotationPreview)
   const needsNodeLayer = node.opacity < 1 || needsIsolatedBlendLayer(node.blendMode)
   if (needsNodeLayer) {
-    const layerBounds = nodeIsolationLayerBounds(r, graph, node, overlays.rotationPreview)
+    const layerBounds = nodeIsolationLayerBounds(r, graph, node, world(), overlays.rotationPreview)
     r.opacityPaint.setAlphaf(node.opacity)
     r.opacityPaint.setBlendMode(figmaBlendModeToSkia(r.ck, node.blendMode))
     canvas.saveLayer(r.opacityPaint, layerBounds)
@@ -370,7 +410,7 @@ export function renderNode(
     const blurPadding = layerBlur.radius * 2
     canvas.saveLayer(
       r.effectLayerPaint,
-      viewportLayerBounds(r, graph, node, blurPadding, overlays.rotationPreview) ??
+      viewportLayerBounds(r, world(), blurPadding) ??
         r.ck.LTRBRect(
           -blurPadding,
           -blurPadding,
@@ -392,7 +432,7 @@ export function renderNode(
     overlays,
     absX,
     absY,
-    hasTransformedAncestor || hasNodeTransform(projectedNode(node, overlays.rotationPreview))
+    childFrame(frame, node, parentAbsX, parentAbsY, overlays.rotationPreview)
   )
   renderLayerShadows(r, canvas, graph, node, 'front')
 
@@ -484,8 +524,7 @@ function shapeEffects(node: SceneNode): SceneNode['effects'] {
   )
 }
 
-function canRasterCacheEffects(node: SceneNode): boolean {
-  const visibleEffects = shapeEffects(node)
+function canRasterCacheEffects(visibleEffects: SceneNode['effects']): boolean {
   return (
     visibleEffects.length > 0 &&
     visibleEffects.every(
@@ -500,13 +539,13 @@ export function renderShape(
   node: SceneNode,
   graph: SceneGraph
 ): void {
-  const hasEffects = shapeEffects(node).length > 0
-  if (r.viewportImageRendering || !hasEffects) {
+  const effects = shapeEffects(node)
+  if (r.viewportImageRendering || effects.length === 0) {
     r.renderShapeUncached(canvas, node, graph)
     return
   }
 
-  const canRasterCache = r.renderingSceneBacking && canRasterCacheEffects(node)
+  const canRasterCache = r.renderingSceneBacking && canRasterCacheEffects(effects)
   const targetScale = effectRasterScale(r.zoom * r.dpr)
   const cachedRaster = canRasterCache ? r.effectRasterCache.get(node.id) : null
   if (
@@ -614,7 +653,7 @@ function drawVectorStrokeGeometry(
   sc: Color,
   opacity: number
 ): void {
-  r.fillPaint.setColor(r.ck.Color4f(sc.r, sc.g, sc.b, sc.a))
+  r.fillPaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
   r.fillPaint.setAlphaf(opacity)
   for (const p of sg) canvas.drawPath(p, r.fillPaint)
 }
@@ -641,7 +680,7 @@ function vectorStrokePaths(r: SkiaRenderer, node: SceneNode): Path[] | null {
 function strokeOutlineKey(
   node: SceneNode,
   stroke: SceneNode['strokes'][0],
-  source: 'runs' | 'regions'
+  source: 'runs' | 'regions' | 'trimmed'
 ): string {
   return `${node.id}|${source}|${stroke.weight}|${stroke.cap ?? node.strokeCap}|${stroke.join ?? node.strokeJoin}|${node.strokeMiterLimit}`
 }
@@ -657,7 +696,7 @@ function drawVectorPathStrokes(
 ): void {
   const dash = normalizeDashPattern(stroke.dashPattern)
   if (dash.length > 0) {
-    r.strokePaint.setColor(r.ck.Color4f(sc.r, sc.g, sc.b, sc.a))
+    r.strokePaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
     r.strokePaint.setAlphaf(stroke.opacity)
     r.strokePaint.setStrokeWidth(stroke.weight)
     r.strokePaint.setStrokeCap(getStrokeCapEntity(r, stroke.cap ?? 'NONE'))
@@ -676,7 +715,7 @@ function drawVectorPathStrokes(
     cap: getStrokeCapEntity(r, stroke.cap ?? 'NONE'),
     join: getStrokeJoinEntity(r, stroke.join ?? 'MITER')
   }
-  r.fillPaint.setColor(r.ck.Color4f(sc.r, sc.g, sc.b, sc.a))
+  r.fillPaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
   r.fillPaint.setAlphaf(stroke.opacity)
 
   const cached = outlineCacheKey ? r.nodePaths.strokeOutline.get(outlineCacheKey) : undefined
@@ -834,9 +873,13 @@ function paintNodeStrokes(
       node.type === 'VECTOR' &&
       node.vectorNetwork
     ) {
-      const centerline = vectorNetworkToCenterlinePath(r.ck, node.vectorNetwork, node.cornerRadius)
-      drawVectorPathStrokes(r, canvas, [centerline], stroke, color, node.strokeMiterLimit)
-      centerline.delete()
+      const key = `${node.id}|centerline|${node.cornerRadius}`
+      let centerline = r.nodePaths.strokeOutline.get(key)
+      if (!centerline) {
+        centerline = [vectorNetworkToCenterlinePath(r.ck, node.vectorNetwork, node.cornerRadius)]
+        r.nodePaths.store(r.nodePaths.strokeOutline, key, centerline)
+      }
+      drawVectorPathStrokes(r, canvas, centerline, stroke, color, node.strokeMiterLimit)
       drawNodeArrowHeads(r, canvas, node, stroke, color)
       return
     }
@@ -850,10 +893,22 @@ function paintNodeStrokes(
     ) {
       // The line stops short of a triangle or equilateral head, so it is stroked from its own
       // pulled-back copy rather than the cached paths; saved stroke geometry is already trimmed.
-      const network = trimArrowShafts(node.vectorNetwork, cap, stroke.weight)
-      const paths = vectorNetworkToPath(r.ck, network, node.cornerRadius)
-      drawVectorPathStrokes(r, canvas, paths, stroke, color, node.strokeMiterLimit)
-      for (const path of paths) path.delete()
+      const key = `${node.id}|trimmed|${cap}|${stroke.weight}|${node.cornerRadius}`
+      let paths = r.nodePaths.strokeOutline.get(key)
+      if (!paths) {
+        const network = trimArrowShafts(node.vectorNetwork, cap, stroke.weight)
+        paths = vectorNetworkToPath(r.ck, network, node.cornerRadius)
+        r.nodePaths.store(r.nodePaths.strokeOutline, key, paths)
+      }
+      drawVectorPathStrokes(
+        r,
+        canvas,
+        paths,
+        stroke,
+        color,
+        node.strokeMiterLimit,
+        strokeOutlineKey(node, stroke, 'trimmed')
+      )
       drawNodeArrowHeads(r, canvas, node, stroke, color)
       return
     }
