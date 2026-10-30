@@ -3,31 +3,19 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { chromiumAssets, chromiumVersion } from '#release/chromium/catalog'
+import { chromiumAssets, isChromiumAsset } from '#release/chromium/catalog'
 import { resolveReportedAssets } from '#release/native/artifacts'
+import { desktopAssets, desktopTargets } from '#release/native/catalog'
 
-test('builds a pre-release of the version after the last release', () => {
-  expect(chromiumVersion('0.16.0', 7)).toBe('0.17.0-chromium.7')
-  expect(chromiumVersion('1.9.3', 1)).toBe('1.10.0-chromium.1')
-})
+const VERSION = '0.17.0-beta.1'
 
-test('keeps the version a beta already names', () => {
-  expect(chromiumVersion('0.17.0-beta.2', 7)).toBe('0.17.0-chromium.7')
-})
-
-test('rejects versions that are not releases', () => {
-  expect(() => chromiumVersion('0.16.0-chromium.3', 7)).toThrow()
-  expect(() => chromiumVersion('0.16.0', 0)).toThrow()
-})
-
-test('names both architectures apart and feeds each to its updater platform', async () => {
+test('carries the release version and names each architecture apart', async () => {
   const root = await mkdtemp(join(tmpdir(), 'chromium-artifacts-'))
 
   try {
-    const version = '0.17.0-chromium.7'
     const reported = await Promise.all(
       [
-        'OpenPencil Chromium_0.17.0-chromium.7_x64.dmg',
+        `OpenPencil Chromium_${VERSION}_x64.dmg`,
         'OpenPencil Chromium.app.tar.gz',
         'OpenPencil Chromium.app.tar.gz.sig'
       ].map(async (name) => {
@@ -35,19 +23,43 @@ test('names both architectures apart and feeds each to its updater platform', as
         return join(root, name)
       })
     )
-    const expected = chromiumAssets('x86_64-apple-darwin', version)
-    const assets = await resolveReportedAssets(reported, expected, root)
+    const assets = await resolveReportedAssets(
+      reported,
+      chromiumAssets('x86_64-apple-darwin', VERSION),
+      root
+    )
 
     expect(assets.map((asset) => asset.name).sort()).toEqual([
-      'OpenPencil-Chromium_0.17.0-chromium.7_x64.dmg',
+      'OpenPencil-Chromium_0.17.0-beta.1_x64.dmg',
       'OpenPencil-Chromium_x64.app.tar.gz',
       'OpenPencil-Chromium_x64.app.tar.gz.sig'
-    ])
-    expect(expected.flatMap((asset) => asset.updaterKeys)).toEqual([
-      'darwin-x86_64',
-      'darwin-x86_64-app'
     ])
   } finally {
     await rm(root, { recursive: true, force: true })
   }
+})
+
+test('feeds each architecture to its updater platform', () => {
+  expect(
+    chromiumAssets('aarch64-apple-darwin', VERSION).map((asset) => [asset.name, asset.updaterKeys])
+  ).toEqual([
+    ['OpenPencil-Chromium_0.17.0-beta.1_aarch64.dmg', []],
+    ['OpenPencil-Chromium_aarch64.app.tar.gz', ['darwin-aarch64', 'darwin-aarch64-app']]
+  ])
+  expect(
+    chromiumAssets('x86_64-apple-darwin', VERSION).flatMap((asset) => asset.updaterKeys)
+  ).toEqual(['darwin-x86_64', 'darwin-x86_64-app'])
+})
+
+test('rejects versions that are not releases', () => {
+  expect(() => chromiumAssets('aarch64-apple-darwin', '0.17.0-chromium.3')).toThrow()
+})
+
+test('tells its files apart from every stable release file', () => {
+  const stable = desktopTargets.flatMap((target) => desktopAssets(target, VERSION))
+  for (const asset of stable) expect(isChromiumAsset(asset.name)).toBeFalse()
+  for (const name of ['latest.json', 'SHA256SUMS', 'release-manifest.json']) {
+    expect(isChromiumAsset(name)).toBeFalse()
+  }
+  expect(isChromiumAsset('latest-chromium.json')).toBeTrue()
 })

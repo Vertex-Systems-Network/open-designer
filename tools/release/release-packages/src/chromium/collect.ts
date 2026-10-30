@@ -1,13 +1,14 @@
 import { copyFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 
+import { releaseVersionSchema } from '#release/version'
 import * as v from 'valibot'
 
 import { resolveReportedAssets } from '../native/artifacts.ts'
-import { chromiumAssets, chromiumTargets, chromiumVersionSchema } from './catalog.ts'
+import { chromiumAssets, chromiumTargets } from './catalog.ts'
 
 const target = v.parse(v.picklist(chromiumTargets), process.env.CHROMIUM_TARGET)
-const version = v.parse(chromiumVersionSchema, process.env.CHROMIUM_VERSION)
+const version = v.parse(releaseVersionSchema, process.env.CHROMIUM_VERSION)
 const reported = v.parse(
   v.pipe(v.string(), v.parseJson(), v.array(v.string())),
   process.env.TAURI_ARTIFACT_PATHS
