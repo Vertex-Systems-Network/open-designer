@@ -1,0 +1,1 @@
+- Progressive rendering is the default canvas renderer; the previous renderer remains available in Settings under Rendering.

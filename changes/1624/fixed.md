@@ -1,0 +1,3 @@
+- A dashed ellipse, polygon, or vector no longer leaves its dash on the section or boolean drawn after it.
+- Boolean operations draw each stroke with its own colour binding, gradient or image, cap, join, and dash.
+- Flashes and AI highlights outline a layer inside a rotated or flipped frame where it is drawn.

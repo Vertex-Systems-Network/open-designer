@@ -531,7 +531,10 @@ export class SkiaRenderer {
       const image = source && this.surface.makeImageFromTextureSource(textureSource(source))
       if (image) this.liveImages.set(hash, { image, surface: this.surface })
     }
-    for (const id of nodeIds) this.invalidateNodePicture(id)
+    for (const id of nodeIds) {
+      this.invalidateNodePicture(id)
+      this.tiledScene.invalidateNode(id)
+    }
     return this.liveImages.has(hash)
   }
 
