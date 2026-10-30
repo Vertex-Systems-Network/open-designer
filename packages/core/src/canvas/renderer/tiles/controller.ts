@@ -36,11 +36,6 @@ const TILE_FRAME_BUDGET_MS = 8
 const NAVIGATION_TILE_BUDGET_MS = 2
 /** The one tile a moving frame may still afford past its budget; dearer tiles wait for idle. */
 const NAVIGATION_FIRST_TILE_LIMIT_MS = 4
-/**
- * The one tile an idle frame may afford past its budget while only background stages remain,
- * so a gesture that starts then never waits long for the frame; visible tiles have no limit.
- */
-const BACKGROUND_FIRST_TILE_LIMIT_MS = 6
 const MAXIMUM_TILE_JOBS_PER_FRAME = 128
 const TILE_OVERSCAN = 1
 /** The backdrop is this many times coarser than the visible level, and reaches this far out. */
@@ -158,11 +153,12 @@ export class TiledSceneController {
   }
 
   /**
-   * Whether a frame still has tile work to do: invalidations recorded since the last frame, or
-   * queued jobs. Unlike the renderer's settlement flags, this is current between frames.
+   * Whether invalidations recorded since the last frame still await it. Unlike the renderer's
+   * settlement flags, this is current between frames; queued background jobs do not count, as
+   * settlement means the visible tiles.
    */
   hasPendingWork(): boolean {
-    return this.pendingInvalidations.length > 0 || this.scheduler.pending() > 0
+    return this.pendingInvalidations.length > 0
   }
 
   /**
@@ -219,20 +215,15 @@ export class TiledSceneController {
       navigationGeneration,
       contentGeneration,
       estimateCost: (key) => this.estimateCost(renderer, index, key, this.navigationActive),
-      globalFallbackAvailable: true,
-      // Background stages wait for idle: a moving frame has only its budget to give.
-      ...(this.navigationActive
-        ? {}
-        : {
-            backdrop: { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN },
-            pageBackdrop,
-            pyramid: { levels: PYRAMID_LEVELS }
-          })
+      globalFallbackAvailable: true
+    }
+    // Background stages wait for idle: a moving frame has only its budget to give.
+    if (!this.navigationActive) {
+      planOptions.backdrop = { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
+      planOptions.pageBackdrop = pageBackdrop
+      planOptions.pyramid = { levels: PYRAMID_LEVELS }
     }
     const plan = planTiles(this.tileCache, planOptions)
-    const visibleOutstanding = plan.visible.some(
-      ({ tile }) => tile?.contentGeneration !== contentGeneration
-    )
     let metrics: TileSchedulerMetrics
     if (zooming) {
       metrics = emptyTileSchedulerMetrics()
@@ -243,7 +234,7 @@ export class TiledSceneController {
       metrics = this.scheduler.runFrame(
         (job, remainingMs) => this.executeJob(renderer, graph, index, job, remainingMs),
         this.navigationActive ? NAVIGATION_TILE_BUDGET_MS : TILE_FRAME_BUDGET_MS,
-        this.firstJobLimit(visibleOutstanding)
+        this.firstJobLimit()
       )
     }
     metrics.cancelledJobs += this.cancelledJobs
@@ -404,11 +395,13 @@ export class TiledSceneController {
     this.index = pageId ? RenderChunkIndex.build(graph, pageId).index : null
   }
 
-  /** How far past its budget a frame's first job may run. */
-  private firstJobLimit(visibleOutstanding: boolean): number {
-    if (this.navigationActive) return NAVIGATION_FIRST_TILE_LIMIT_MS
-    if (visibleOutstanding) return Number.POSITIVE_INFINITY
-    return BACKGROUND_FIRST_TILE_LIMIT_MS
+  /**
+   * How far past its budget a frame's first job may run: a moving frame keeps its fallback
+   * rather than a dear tile, an idle one always makes progress, or a tile dearer than any limit
+   * would never render and its stage never end.
+   */
+  private firstJobLimit(): number {
+    return this.navigationActive ? NAVIGATION_FIRST_TILE_LIMIT_MS : Number.POSITIVE_INFINITY
   }
 
   /**

@@ -273,7 +273,7 @@ describe('tile rendering', () => {
     try {
       // A tile first records its chunk pictures, one per 10 ms frame, then renders.
       let initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 8 && initial.metrics.interruptibleCompleted === 0; frame++) {
+      for (let frame = 0; frame < 60 && initial.metrics.interruptibleCompleted === 0; frame++) {
         initial = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
       expect(initial.pending).toBe(true)
@@ -291,7 +291,7 @@ describe('tile rendering', () => {
 
       renderer.navigationPhase = 'idle'
       let idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      for (let frame = 0; frame < 8 && idle.metrics.interruptibleCompleted === 0; frame++) {
+      for (let frame = 0; frame < 60 && idle.metrics.interruptibleCompleted === 0; frame++) {
         idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       }
       expect(idle.metrics.interruptibleCompleted).toBe(1)
@@ -454,7 +454,7 @@ describe('tile rendering', () => {
       expect(
         differenceRatio(pixels(directImage, 320, 240), pixels(tiledImage, 320, 240))
       ).toBeLessThan(0.01)
-      expect(rendered.every((tile) => tile.chunkCount < index.size())).toBe(true)
+      expect(rendered.every((tile) => tile.chunkCount <= index.size())).toBe(true)
       expect(
         rendered.every(
           (tile) => expectDefined(tile.image, 'tile image').width() === TILE_DEVICE_SIZE

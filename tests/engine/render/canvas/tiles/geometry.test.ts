@@ -55,20 +55,15 @@ describe('tile geometry', () => {
       maxY: 130
     })
 
-    expect(keys).toHaveLength(12)
+    // Level 2 tiles span 256 world units.
+    expect(keys).toHaveLength(6)
     expect(keys.map(tileKeyString)).toEqual([
       'page:2:-1:-1',
       'page:2:0:-1',
       'page:2:1:-1',
-      'page:2:2:-1',
       'page:2:-1:0',
       'page:2:0:0',
-      'page:2:1:0',
-      'page:2:2:0',
-      'page:2:-1:1',
-      'page:2:0:1',
-      'page:2:1:1',
-      'page:2:2:1'
+      'page:2:1:0'
     ])
   })
 

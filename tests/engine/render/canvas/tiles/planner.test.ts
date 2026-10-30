@@ -39,7 +39,7 @@ function baseOptions(overrides: Partial<TilePlanOptions> = {}): TilePlanOptions 
   return {
     pageId: 'page',
     level: 1,
-    viewport: { minX: 0, minY: 0, maxX: 512, maxY: 256 },
+    viewport: { minX: 0, minY: 0, maxX: 1024, maxY: 512 },
     overscanTiles: 0,
     navigationGeneration: 3,
     contentGeneration: 2,
@@ -145,7 +145,7 @@ describe('tile planner', () => {
       cache,
       baseOptions({ viewport: { minX: 0, minY: 0, maxX: 1280, maxY: 256 } })
     )
-    expect(plan.jobs.map((job) => job.key.x)).toEqual([2, 1, 3, 0, 4])
+    expect(plan.jobs.map((job) => job.key.x)).toEqual([1, 0, 2])
     cache.clear()
   })
 
@@ -157,7 +157,7 @@ describe('tile planner', () => {
     cache.install(rendered(0), 2)
     cache.install(rendered(1), 2)
     const page = planTiles(cache, baseOptions({ overscanTiles: 1, pageBackdrop }))
-    expect(page.jobs.length).toBe(3 * 2)
+    expect(page.jobs.length).toBe(2 * 1)
     expect(page.jobs.every((job) => job.key.level === 0.25 && job.priority === 'overscan')).toBe(
       true
     )

@@ -146,14 +146,14 @@ describe('tile scheduling', () => {
       }
       expect(result.pending).toBe(false)
 
-      // At a quarter the viewport spans 5120 × 3200 world units: twenty tiles, nine of them
-      // inside the page's bounds, which the page level covers; the rest is empty canvas.
+      // At a quarter the viewport spans 5120 × 3200 world units: six tiles of 2048, four of
+      // them inside the page's bounds, which the page level covers; the rest is empty canvas.
       step = 10
       renderer.zoom = 0.25
       renderer.navigationPhase = 'zoom'
       const zoomed = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
-      expect(zoomed.fallbackTileCount + (zoomed.covered ? 20 : 0)).toBeGreaterThanOrEqual(9)
-      expect(zoomed.uncoveredAreaCount).toBeLessThanOrEqual(11)
+      expect(zoomed.uncoveredContentAreaCount).toBe(0)
+      expect(zoomed.uncoveredAreaCount).toBeLessThanOrEqual(2)
     } finally {
       controller.destroy()
       renderer.destroy()
@@ -197,10 +197,11 @@ describe('tile scheduling', () => {
       // Idle, the first job may overrun the budget so the frame makes progress, once its
       // chunk pictures are recorded.
       let idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 8 && idle.metrics.interruptibleCompleted === 0; frame++) {
+      for (let frame = 0; frame < 60 && idle.metrics.interruptibleCompleted === 0; frame++) {
         idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
-      const visibleTiles = 5 * 4
+      // The 1280 × 800 viewport at level 1 is three by two tiles of 512.
+      const visibleTiles = 3 * 2
       expect(idle.metrics.interruptibleCompleted).toBe(1)
       expect(idle.uncoveredAreaCount).toBe(visibleTiles - 1)
 
@@ -396,16 +397,16 @@ describe('tiles with image previews', () => {
       const first = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       expect(first.metrics.deferredJobs).toBe(1)
       expect(first.metrics.interruptibleCompleted).toBe(0)
-      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(false)
+      expect(controller.isRendered({ pageId, level: 1, x: 1, y: 0 })).toBe(false)
       let result = first
       for (
         let frame = 0;
-        frame < 8 && !controller.isRendered({ pageId, level: 1, x: 2, y: 1 });
+        frame < 60 && !controller.isRendered({ pageId, level: 1, x: 1, y: 0 });
         frame++
       ) {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
-      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 1, x: 1, y: 0 })).toBe(true)
       expect(result.metrics.interruptibleCompleted).toBe(1)
     } finally {
       controller.destroy()
@@ -419,12 +420,12 @@ describe('tiles with image previews', () => {
     const controller = new TiledSceneController({ now: () => (time += 10) })
     try {
       let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
-      for (let frame = 0; frame < 8 && result.metrics.interruptibleCompleted === 0; frame++) {
+      for (let frame = 0; frame < 60 && result.metrics.interruptibleCompleted === 0; frame++) {
         result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
-      // The viewport spans world 0..1280 × 0..800: its centre lies in tile (2, 1).
+      // The viewport spans world 0..1280 × 0..800: its centre lies in tile (1, 0).
       expect(result.metrics.interruptibleCompleted).toBe(1)
-      expect(controller.isRendered({ pageId, level: 1, x: 2, y: 1 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 1, x: 1, y: 0 })).toBe(true)
       expect(controller.isRendered({ pageId, level: 1, x: 0, y: 0 })).toBe(false)
     } finally {
       controller.destroy()

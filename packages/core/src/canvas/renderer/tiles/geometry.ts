@@ -1,4 +1,4 @@
-export const TILE_DEVICE_SIZE = 256
+export const TILE_DEVICE_SIZE = 512
 /**
  * Quantized levels are powers of two split into this many steps, so neighbouring levels differ
  * by about 19 % at every zoom and a zoom from 1 % to 20,000 % crosses some sixty, not thousands.

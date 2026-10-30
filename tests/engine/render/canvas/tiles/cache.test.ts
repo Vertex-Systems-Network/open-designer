@@ -58,7 +58,7 @@ describe('tile image cache', () => {
     cache.install(first, 1)
     cache.install(second, 1)
 
-    expect(cache.invalidateBounds('page', { minX: 300, minY: 10, maxX: 340, maxY: 40 }, 2)).toBe(1)
+    expect(cache.invalidateBounds('page', { minX: 600, minY: 10, maxX: 640, maxY: 40 }, 2)).toBe(1)
     expect(cache.get(first.key)?.contentGeneration).toBe(2)
     expect(cache.get(second.key)).toBeNull()
     expect(second.image?.delete).toHaveBeenCalledTimes(1)
