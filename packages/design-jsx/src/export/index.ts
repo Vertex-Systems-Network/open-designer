@@ -2,7 +2,7 @@ import { compact } from 'es-toolkit/array'
 
 import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { componentPropertyDefinitions } from '@open-pencil/scene-graph/components'
+import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-pencil/scene-graph/components'
 import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
 
@@ -150,9 +150,9 @@ function componentPropertyProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
         helperCall('property', definition.name, definition.defaultValue === 'true')
       ])
     } else if (ref.field === 'INSTANCE_SWAP' && node.type === 'INSTANCE') {
-      const defaultComponent = graph.getNode(definition.defaultValue)
+      const defaultComponent = resolveComponentPropertyValue(graph, definition.defaultValue)
       if (defaultComponent) {
-        props.push(['of', helperCall('property', definition.name, defaultComponent.name)])
+        props.push(['of', helperCall('property', definition.name, defaultComponent.id)])
       }
     }
   }
@@ -169,7 +169,7 @@ function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
   const props: JSXProp[] = []
-  if (component) props.push(['of', component.name])
+  if (component) props.push(['of', component.id])
   const definitions = componentPropertyDefinitions(graph, node)
   const values = Object.fromEntries(
     Object.entries(node.componentPropertyAssignments)
@@ -268,7 +268,8 @@ export function sceneNodeAttributes(
   const props = own
     ? own.props
     : [...collectProps(node, graph), ...componentPropertyProps(graph, node), ...instanceProps(graph, node)]
-  if (node.type === 'TEXT') props.push(['text', node.text])
+  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
+  if (node.type === 'TEXT' && !hasTextBinding) props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
     name: prop[0],
@@ -311,7 +312,7 @@ export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXEl
   const hasContent = node.type === 'TEXT' || own !== undefined
   const attributes = Object.fromEntries(
     printed
-      .filter(({ name }) => !hasContent || name !== 'text')
+      .filter(({ name }) => !hasContent || name !== 'text' || hasTextBinding)
       .map(({ name, source }) => [name, source])
   )
   if (node.type === 'TEXT') {
