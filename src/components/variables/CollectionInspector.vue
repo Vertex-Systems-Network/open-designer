@@ -47,6 +47,7 @@ const emit = defineEmits<{
   done: []
   rename: [name: string]
   remove: []
+  makeLocal: []
   setModeAttribute: [name: string]
   addMode: []
   renameMode: [modeId: string, name: string]
@@ -220,6 +221,15 @@ function attributeDone(event: KeyboardEvent) {
           <DropdownMenuPortal>
             <DropdownMenuContent side="bottom" :side-offset="4" align="end" :class="menu.content">
               <MenuScrollArea>
+
+                <DropdownMenuItem
+                  v-if="isLibraryCollection(collection)"
+                  :class="menu.item"
+                  data-test-id="variables-make-collection-local"
+                  @select="emit('makeLocal')"
+                >
+                  Make local
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   :class="dangerItem"
                   data-test-id="variables-delete-collection"
