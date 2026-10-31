@@ -134,6 +134,8 @@ export function createCanvasSurfaceManager({
     state.renderer.onImagePreviewReady = () => renderLoop.markDirty()
     state.renderer.onRenderHealthChange = (report) => {
       canvas.dataset.renderHealth = report.health
+      if (report.error) canvas.dataset.renderHealthError = report.error
+      else delete canvas.dataset.renderHealthError
     }
     state.renderer.imagePreviews.setDecoder(createImagePreviewDecoder())
     state.renderer.presentationColorSpace = result.presentation ?? 'srgb'
