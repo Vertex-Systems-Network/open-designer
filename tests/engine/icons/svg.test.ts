@@ -81,6 +81,17 @@ describe('SVG XML parsing', () => {
     expect(nonUniform?.strokeWidth).toBe(6)
   })
 
+  test('preserves a nearly closed arc when scaling a path down', () => {
+    const [path] = scalePathInfos(
+      extractPaths('<path d="M12 3A9 9 0 1 1 11.99 3ZM12 7V12L15 14" fill="none" stroke="black" stroke-width="2.5"/>'),
+      0.5,
+      0.5
+    )
+
+    expect(path?.vectorNetwork.regions.length).toBeGreaterThan(0)
+    expect(path?.strokeWidth).toBe(1.25)
+  })
+
   test('does not interpret attribute-like path text as markup', () => {
     const paths = extractPaths(`<path d="M0 0L10 10" data-note="fill='red' stroke='blue'"/>`)
 
