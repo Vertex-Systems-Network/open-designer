@@ -65,6 +65,27 @@ const { paneId } = defineProps<{
 const store = useEditorStore()
 const sceneCanvasRef = ref<HTMLCanvasElement | null>(null)
 const canvasRef = ref<HTMLCanvasElement | null>(null)
+const renderHealth = ref<{ health: string; error: string | null } | null>(null)
+watch(
+  canvasRef,
+  (canvas, _previous, onCleanup) => {
+    if (!canvas) return
+    const updateHealth = (event: Event) => {
+      renderHealth.value = (event as CustomEvent<{ health: string; error: string | null }>).detail
+    }
+    canvas.addEventListener('render-health-change', updateHealth)
+    renderHealth.value = {
+      health: canvas.dataset.renderHealth ?? 'healthy',
+      error: canvas.dataset.renderHealthError ?? null
+    }
+    onCleanup(() => canvas.removeEventListener('render-health-change', updateHealth))
+  },
+  { immediate: true }
+)
+
+function restartEditor() {
+  window.location.reload()
+}
 
 const isActivePane = computed(() => !paneId || store.activePaneId.value === paneId)
 const followView = useFollowView(useTemplateRef<HTMLElement>('area'))
@@ -294,6 +315,24 @@ const cursor = computed(() =>
           :style="{ cursor }"
           class="absolute inset-0 block size-full touch-none outline-none"
         />
+        <div
+          v-if="renderHealth?.health === 'disabled'"
+          role="alert"
+          class="absolute inset-0 z-40 flex items-center justify-center bg-background/90 p-6 text-center"
+        >
+          <div class="max-w-md space-y-3 rounded-lg border bg-background p-5 shadow-lg">
+            <h2 class="text-base font-semibold">Canvas stopped after a rendering error</h2>
+            <p class="text-sm text-muted-foreground">
+              Reload the editor to restart the renderer. Your latest changes may not be saved.
+            </p>
+            <p v-if="renderHealth.error" class="break-words text-xs text-muted-foreground">
+              {{ renderHealth.error }}
+            </p>
+            <button class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground" @click="restartEditor">
+              Reload editor
+            </button>
+          </div>
+        </div>
         <PlayIslands :view="paneView" :drawn="drawnView" :canvas="canvasRef" />
         <AppDropOverlay :visible="isDraggingOver" />
         <IssueMarkerTooltip :marker="hoveredIssueMarker" :canvas="canvasRef" />

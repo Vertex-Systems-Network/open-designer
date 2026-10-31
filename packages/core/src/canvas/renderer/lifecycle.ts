@@ -10,7 +10,8 @@ function clearRetainedSceneState(r: SkiaRenderer): void {
   r.sceneBackingBuild = null
 }
 
-function disposePathCaches(r: SkiaRenderer): void {
+/** Frees and forgets every cached path, including glyph outlines. */
+export function disposePathCaches(r: SkiaRenderer): void {
   r.nodePaths.clear()
   r.glyphSilhouetteCache.clear()
   r.derivedGlyphPathCache.clear()
@@ -42,6 +43,7 @@ export function destroyRenderer(r: SkiaRenderer): void {
   r.transientPreviews.clear()
 
   r.onImagePreviewReady = null
+  r.onRenderHealthChange = null
   r.imagePreviews.destroy()
   r.imageCache.clear()
   releaseLiveImages(r)

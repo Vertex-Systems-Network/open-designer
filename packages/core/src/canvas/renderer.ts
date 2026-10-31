@@ -31,6 +31,7 @@ import { labelHitOptions } from './labels/style'
 import { NodePathCaches } from './paths/cache'
 import * as RenderColors from './renderer/colors'
 import * as RendererFonts from './renderer/fonts'
+import { FrameGuard, type RenderHealthReport } from './renderer/frame-guard'
 import { destroyRenderer, releaseLiveImages } from './renderer/lifecycle'
 import { installRendererDomainMethods, type RendererDomainMethods } from './renderer/methods'
 import { initializeRendererPaints, initializeSelectionPaintColors } from './renderer/paints'
@@ -49,6 +50,7 @@ export type {
   RulerTheme,
   SelectionTheme
 } from './renderer/types'
+export type { RenderHealth, RenderHealthReport } from './renderer/frame-guard'
 import type {
   CanvasKit,
   Surface,
@@ -144,6 +146,10 @@ export class SkiaRenderer {
   imageMemoryGraph: SceneGraph | null = null
   imageMemoryPage: string | null = null
   onImagePreviewReady: (() => void) | null = null
+  /** Tracks repeated frame failures and recovery. */
+  readonly frameGuard = new FrameGuard()
+  /** Lets the host report renderer-health changes to the user. */
+  onRenderHealthChange: ((report: RenderHealthReport) => void) | null = null
   readonly imagePreviews = new ImagePreviewCache(() => this.onImagePreviewReady?.())
   nodePaths = new NodePathCaches()
   /** Path-text glyph silhouettes (stroke-and-union, font units) keyed by blob hash + relative weight. */
@@ -595,9 +601,9 @@ export class SkiaRenderer {
     showRulers = true,
     layer: RenderPipeline.RenderLayer = 'full',
     interactive = false
-  ): void {
+  ): boolean {
     const dpr = IS_BROWSER ? window.devicePixelRatio || 1 : 1
-    RenderPipeline.renderFromEditorState(
+    return RenderPipeline.renderFromEditorState(
       this,
       state,
       graph,
@@ -617,8 +623,13 @@ export class SkiaRenderer {
     overlays: RenderOverlays = {},
     sceneVersion = -1,
     layer: RenderPipeline.RenderLayer = 'full'
-  ): void {
-    RenderPipeline.render(this, graph, selectedIds, overlays, sceneVersion, layer)
+  ): boolean {
+    return RenderPipeline.render(this, graph, selectedIds, overlays, sceneVersion, layer)
+  }
+
+  /** Resets a renderer disabled after repeated or fatal frame failures. */
+  resetRenderHealth(): void {
+    if (this.frameGuard.reset()) this.onRenderHealthChange?.(this.frameGuard.report())
   }
 
   invalidateVectorPath(nodeId: string): void {
