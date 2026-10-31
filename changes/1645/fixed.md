@@ -1,0 +1,1 @@
+- When Figma Hand is unavailable, FigJam text uses the licensed Caveat font as a measured stand-in while preserving Figma Hand in the document and reporting Caveat as the substitute.
