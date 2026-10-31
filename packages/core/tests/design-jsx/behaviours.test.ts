@@ -196,9 +196,17 @@ describe('Reka UI elements in JSX export', () => {
     )
     const [group] = await renderJSX(
       graph,
-      `<RadioGroup.Root name="Plan"><RadioGroup.Item of="${radio.id}" /></RadioGroup.Root>`
+      `<RadioGroup.Root name="Plan">
+        <RadioGroup.Item of="${radio.id}" />
+        <RadioGroup.Item of="${radio.id}" Checked="On" />
+      </RadioGroup.Root>`
     )
-    expect(sceneNodeToJSX(group.id, graph)).toContain(`<RadioGroup.Item of="${radio.id}" />`)
+    // Each item keeps its variant, so a checked item renders back checked.
+    const exported = sceneNodeToJSX(group.id, graph)
+    expect(exported).toContain('<RadioGroup.Item of="Radio" Checked="Off" />')
+    expect(exported).toContain('<RadioGroup.Item of="Radio" Checked="On" />')
+    const [copy] = await renderJSX(graph, exported)
+    expect(sceneNodeToJSX(copy.id, graph)).toBe(exported)
 
     const [tabs] = await renderJSX(
       graph,
