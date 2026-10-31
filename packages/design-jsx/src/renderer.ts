@@ -420,14 +420,19 @@ function applyInstanceOverrides(
   const entries = Object.entries(overridesProp)
   if (entries.length === 0) return
 
-  const descendants: SceneNode[] = []
-  const walk = (id: string) => {
-    const node = graph.getNode(id)
-    if (!node) return
-    descendants.push(node)
-    for (const cid of node.childIds) walk(cid)
+  const findDescendantByName = (name: string): SceneNode | undefined => {
+    const walk = (id: string): SceneNode | undefined => {
+      const node = graph.getNode(id)
+      if (!node) return undefined
+      if (node.name === name) return node
+      for (const childId of node.childIds) {
+        const match = walk(childId)
+        if (match) return match
+      }
+      return undefined
+    }
+    return walk(instance.id)
   }
-  walk(instance.id)
 
   let mutated = false
   for (const [key, value] of entries) {
@@ -446,11 +451,11 @@ function applyInstanceOverrides(
         if (!child) break
       }
     } else {
-      child = descendants.find((n) => n.name === target)
+      child = findDescendantByName(target)
       if (!child) {
         try {
           const decodedName = decodeURIComponent(target)
-          child = descendants.find((n) => n.name === decodedName)
+          child = findDescendantByName(decodedName)
         } catch {
           // Keep the literal name when it is not valid percent-encoding.
         }
