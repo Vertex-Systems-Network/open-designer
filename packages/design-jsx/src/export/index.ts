@@ -310,6 +310,7 @@ export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXEl
   // children, not as the `text` attribute; the layers they generate are not written at all.
   const own = ownElement(graph, node)
   const hasContent = node.type === 'TEXT' || own !== undefined
+  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
   const attributes = Object.fromEntries(
     printed
       .filter(({ name }) => !hasContent || name !== 'text' || hasTextBinding)
