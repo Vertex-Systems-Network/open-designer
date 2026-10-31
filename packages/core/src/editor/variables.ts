@@ -139,7 +139,7 @@ export function createVariableActions(ctx: EditorContext) {
     const collection = graph.variableCollections.get(id)
     if (!collection?.key) return false
 
-    const previousCollection = { key: collection.key, version: collection.version }
+    const previousCollection = { key: collection.key, version: collection.version, isLocal: collection.isLocal }
     const previousVariables = [...graph.variables.values()]
       .filter((variable) => variable.collectionId === id)
       .map((variable) => ({
@@ -156,6 +156,9 @@ export function createVariableActions(ctx: EditorContext) {
       else delete current.key
       if (collectionLink?.version) current.version = collectionLink.version
       else delete current.version
+      if (collectionLink === null) current.isLocal = true
+      else if (collectionLink.isLocal) current.isLocal = true
+      else delete current.isLocal
       for (const link of variableLinks) {
         const variable = graph.variables.get(link.id)
         if (!variable || variable.collectionId !== id) continue
@@ -163,6 +166,8 @@ export function createVariableActions(ctx: EditorContext) {
         else delete variable.key
         if (link.version) variable.version = link.version
         else delete variable.version
+        if (collectionLink === null || link.isLocal) variable.isLocal = true
+        else delete variable.isLocal
       }
       ctx.requestRefresh()
     }
