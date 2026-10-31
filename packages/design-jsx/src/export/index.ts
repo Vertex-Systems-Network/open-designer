@@ -180,9 +180,7 @@ function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode)
           })
         )
         if (Object.keys(values).length > 0) {
-          overrides[`@${childPath.join('.')}:componentPropertyAssignments`] = Object.fromEntries(
-            Object.entries(child.componentPropertyAssignments)
-          )
+          overrides[`@path(${childPath.join('.')}):properties`] = values
         }
       }
       visit(child, childPath)
