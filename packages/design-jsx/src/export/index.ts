@@ -179,7 +179,7 @@ function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode)
           })
         )
         if (Object.keys(values).length > 0) {
-          overrides[`${child.name}:componentPropertyAssignments`] = Object.fromEntries(
+          overrides[`${encodeURIComponent(child.name)}:componentPropertyAssignments`] = Object.fromEntries(
             Object.entries(child.componentPropertyAssignments)
           )
         }
