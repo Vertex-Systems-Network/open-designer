@@ -69,15 +69,33 @@ export const exportSVG = defineTool({
   description: 'Export nodes as SVG markup. Returns the SVG string.',
   execution: { kind: 'async', mutation: 'none' },
   exposure: { webmcp: false },
-  input: v.strictObject({ ...exportInputs }),
+  input: v.strictObject({
+    ...exportInputs,
+    skip_unsupported_effects: v.optional(
+      v.pipe(
+        v.boolean(),
+        v.description('Omit unsupported SVG effects such as background blur instead of returning a warning.')
+      ),
+      false
+    )
+  }),
   execute: async (figma, args) => {
-    const { renderNodesToLaidOutSVG } = await import('#core/io/formats/svg/text/layout')
+    const { renderNodesToLaidOutSVGWithWarnings } = await import('#core/io/formats/svg/text/layout')
     const pageId = figma.currentPageId
     const ids =
       args.ids && args.ids.length > 0 ? args.ids : figma.currentPage.children.map((node) => node.id)
-    const svg = await renderNodesToLaidOutSVG(figma.graph, pageId, ids)
-    if (!svg) return { error: 'No visible nodes to export' }
-    return { svg }
+    const result = await renderNodesToLaidOutSVGWithWarnings(figma.graph, pageId, ids, {
+      skipUnsupportedEffects: args.skip_unsupported_effects
+    })
+    if (!result.svg) return { error: 'No visible nodes to export' }
+    if (result.warnings.length > 0 && !args.skip_unsupported_effects) {
+      return {
+        error: 'SVG export cannot faithfully represent one or more effects.',
+        warnings: result.warnings,
+        retry: { skip_unsupported_effects: true }
+      }
+    }
+    return { svg: result.svg, warnings: result.warnings }
   }
 })
 
