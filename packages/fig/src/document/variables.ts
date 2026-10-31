@@ -225,6 +225,7 @@ export function materializeVariableResources(
       variableIds: [],
       modeAttribute: readModeAttribute(resource),
       pluginData: pluginData.length > 0 ? pluginData : undefined,
+      isLocal: hasLocalLibraryMarker(sourcePluginData) || undefined,
       key: typeof resource.key === 'string' ? resource.key : undefined,
       version: typeof resource.version === 'string' ? resource.version : undefined
     })
