@@ -255,7 +255,6 @@ export class SkiaRenderer {
 
   declare drawHoverHighlight: RendererDomainMethods['drawHoverHighlight']
   declare drawMeasurements: RendererDomainMethods['drawMeasurements']
-  declare drawEnteredContainer: RendererDomainMethods['drawEnteredContainer']
   declare drawSelection: RendererDomainMethods['drawSelection']
   declare drawNodeSelection: RendererDomainMethods['drawNodeSelection']
   declare drawSelectionLabels: RendererDomainMethods['drawSelectionLabels']
