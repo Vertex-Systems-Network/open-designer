@@ -46,9 +46,16 @@ function parseFigFileSync(buffer: ArrayBuffer, options: ParseFigFileOptions = {}
   return reader.graph
 }
 
+/**
+ * How long the page waits for the parser worker to report `started`. A stalled worker script may
+ * never fire an error event; the worker reports as soon as it receives the request, before parsing.
+ */
+export const FIG_WORKER_START_TIMEOUT_MS = 10_000
+
 export async function parseFigFileViaWorker(
   buffer: ArrayBuffer,
-  options: ParseFigFileOptions
+  options: ParseFigFileOptions,
+  startTimeoutMs = FIG_WORKER_START_TIMEOUT_MS
 ): Promise<SceneGraph> {
   options.signal?.throwIfAborted()
   // The worker loads its own; this thread patches the archive on save, which reads it again.
@@ -57,16 +64,28 @@ export async function parseFigFileViaWorker(
     options.signal?.throwIfAborted()
     const worker = createFigSessionWorker()
     const channel = new MessageChannel()
+    let startTimer: ReturnType<typeof setTimeout> | undefined
+    const clearStartTimer = () => {
+      clearTimeout(startTimer)
+      startTimer = undefined
+    }
     const abort = () => {
+      clearStartTimer()
       channel.port1.postMessage({ type: 'dispose' })
       channel.port1.close()
       worker.terminate()
       reject(new DOMException('Aborted', 'AbortError'))
     }
     options.signal?.addEventListener('abort', abort, { once: true })
-    const cleanupAbort = () => options.signal?.removeEventListener('abort', abort)
-
+    const cleanupAbort = () => {
+      clearStartTimer()
+      options.signal?.removeEventListener('abort', abort)
+    }
     channel.port1.onmessage = (e: MessageEvent<FigSessionResponse>) => {
+      if (e.data.type === 'started') {
+        clearStartTimer()
+        return
+      }
       if (e.data.type === 'page-manifest') {
         options.onPages?.(e.data.pages)
         return
@@ -122,6 +141,14 @@ export async function parseFigFileViaWorker(
       port: channel.port2
     }
     worker.postMessage(request, [workerBuffer, channel.port2])
+    // Start after the file copy and transfer, so large files do not consume the worker startup time.
+    startTimer = setTimeout(() => {
+      cleanupAbort()
+      channel.port1.close()
+      worker.terminate()
+      // Not a ReaderSemanticError, so parseFigFile falls back to the main thread.
+      reject(new Error('The .fig parser worker did not start within ' + startTimeoutMs + ' ms'))
+    }, startTimeoutMs)
   })
 }
 
