@@ -140,12 +140,13 @@ export function createVariableActions(ctx: EditorContext) {
     if (!collection?.key) return false
 
     const previousCollection = { key: collection.key, version: collection.version }
-    const previousVariables = collection.variableIds.flatMap((variableId) => {
-      const variable = graph.variables.get(variableId)
-      return variable
-        ? [{ id: variableId, key: variable.key, version: variable.version }]
-        : []
-    })
+    const previousVariables = [...graph.variables.values()]
+      .filter((variable) => variable.collectionId === id)
+      .map((variable) => ({
+        id: variable.id,
+        key: variable.key,
+        version: variable.version
+      }))
 
     const apply = (collectionLink: typeof previousCollection | null, variableLinks: typeof previousVariables) => {
       if (ctx.graph !== graph) return
