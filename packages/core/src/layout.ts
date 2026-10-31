@@ -197,6 +197,7 @@ function insertFlexChildren(
   direction: 'LTR' | 'RTL'
 ): void {
   const overlap = siblingOverlap(parent)
+  const capHugOverlap = overlap > 0 && parent.primaryAxisSizing === 'HUG'
   const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
   const primarySize = parent.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
   const yogaDirection = direction === 'RTL' ? Direction.RTL : Direction.LTR
@@ -209,19 +210,19 @@ function insertFlexChildren(
       yogaChild.setDisplay(Display.None)
     } else {
       configureInFlowChild(yogaChild, child, parent, graph, direction)
-      yogaChild.calculateLayout(undefined, undefined, yogaDirection)
+      if (capHugOverlap) yogaChild.calculateLayout(undefined, undefined, yogaDirection)
     }
     return { child, yogaChild }
   })
-  const inFlowSizes = children
-    .filter(({ child }) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
-    .map(({ yogaChild }) =>
-      primarySize === 'width' ? yogaChild.getComputedWidth() : yogaChild.getComputedHeight()
-    )
+  const inFlowSizes = capHugOverlap
+    ? children
+        .filter(({ child }) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
+        .map(({ yogaChild }) =>
+          primarySize === 'width' ? yogaChild.getComputedWidth() : yogaChild.getComputedHeight()
+        )
+    : []
   const hugOverlap =
-    parent.primaryAxisSizing === 'HUG' && inFlowSizes.length > 0
-      ? Math.min(overlap, ...inFlowSizes)
-      : overlap
+    capHugOverlap && inFlowSizes.length > 0 ? Math.min(overlap, ...inFlowSizes) : overlap
   let followsInFlowSibling = false
   for (const { child, yogaChild } of children) {
     if (child.layoutPositioning !== 'ABSOLUTE' && child.visible) {
