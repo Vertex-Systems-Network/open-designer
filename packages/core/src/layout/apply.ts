@@ -64,6 +64,13 @@ function writeLayoutGeometry(
  */
 const huggedSizes = new WeakMap<SceneNode, { width: number; height: number }>()
 
+function rememberPlacedSize(frame: SceneNode): void {
+  const placed = huggedSizes.get(frame)
+  if (!placed) return
+  placed.width = frame.width
+  placed.height = frame.height
+}
+
 const CONSTRAINT_PARENT_TYPES: ReadonlySet<SceneNode['type']> = new Set([
   'FRAME',
   'COMPONENT',
