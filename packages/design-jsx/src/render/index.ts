@@ -13,8 +13,8 @@ import type { DesignJSXServices } from '../services'
 import { TEXT_CONTENT_NAMES } from '../text-content'
 import { transformDesignJSXExpression } from '../transform'
 import { isTreeNode, resolveToTree, type TreeNode } from '../tree'
-import type { RenderOptions as RenderJSXOptions } from '../types'
 import { renderRoots, renderTree, type RenderResult } from './roots'
+import type { RenderOptions as RenderJSXOptions } from './types'
 
 /** `const Switch = { Root: 'Switch.Root', … }`: each Reka namespace as element types. */
 const REKA_ALIASES = Object.entries(REKA_ELEMENTS)

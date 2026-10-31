@@ -102,7 +102,7 @@ export { createElement } from './mini-react'
 
 export { buildComponent, createDesignJSXRenderer, type DesignJSXRenderer } from './render'
 export type { ArtworkPlacement, DesignJSXServices, SVGSource } from './services'
-export type { RenderOptions } from './types'
+export type { RenderOptions } from './render/types'
 export {
   DESIGN_JSX_ELEMENTS,
   elementPropsByName,

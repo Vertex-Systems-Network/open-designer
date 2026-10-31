@@ -16,11 +16,11 @@ import type { DesignJSXServices } from '../services'
 import { isTextContent, TEXT_CONTENT_NAMES, textContentFields } from '../text-content'
 import { isTreeNode } from '../tree'
 import type { TreeNode } from '../tree'
-import type { RenderOptions } from '../types'
 import { isVariable } from '../variables'
 import { requireVariableId, resolveForLayer, variableModes } from '../variables/graph'
 import type { RenderOrder } from './order'
 import { applyBindings, layerMetadata, preparePropsForRender } from './props'
+import type { RenderOptions } from './types'
 
 /**
  * An element that draws its own layer. Its props are resolved as any layer's are, so a

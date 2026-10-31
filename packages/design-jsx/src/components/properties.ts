@@ -1,7 +1,4 @@
 import { compact } from 'es-toolkit/array'
-import { omitBy, pickBy } from 'es-toolkit/object'
-import { isPlainObject } from 'es-toolkit/predicate'
-import * as v from 'valibot'
 
 import type {
   ComponentPropertyDefinition,
@@ -10,18 +7,13 @@ import type {
   SceneNode
 } from '@open-pencil/scene-graph'
 import {
-  applyComponentPropertyValue,
   componentPropertyDefinitions,
   createComponentPropertyId,
   exposableInstances,
-  exposedInstances,
   instanceExposureIssue
 } from '@open-pencil/scene-graph/components'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 
-import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '../definitions'
 import { isLayerRef, type LayerRef } from '../refs'
-import { parseScriptInput } from '../schema'
 
 const PROPERTY_SYMBOL = Symbol.for('open-pencil.component-property')
 
@@ -179,201 +171,8 @@ export function componentPropertyScope(
   return undefined
 }
 
-/** The one property with this name; a name several properties share is an error. */
-function namedDefinition(
-  definitions: readonly ComponentPropertyDefinition[],
-  name: string
-): ComponentPropertyDefinition | undefined {
-  const matches = definitions.filter((item) => item.name === name)
-  if (matches.length > 1)
-    throw new Error(
-      `Component property name ${name} is ambiguous; use one of the IDs: ${matches.map((item) => item.id).join(', ')}`
-    )
-  return matches[0]
-}
-
 /** The ID of the component a name, ID, or `ref()` names, as `<Instance of>` finds it. */
 export type ComponentLookup = (reference: string | LayerRef) => string | undefined
-
-/** A value as an assignment takes it: a swap's `ref()` as it is, anything else as text. */
-function assignable(value: unknown): string | LayerRef {
-  return isLayerRef(value) ? value : String(value)
-}
-
-function assignValue(
-  graph: SceneGraph,
-  instance: SceneNode,
-  definition: ComponentPropertyDefinition,
-  key: string,
-  value: string | LayerRef,
-  componentId: ComponentLookup
-): void {
-  if (isLayerRef(value)) {
-    if (definition.type !== 'INSTANCE_SWAP')
-      throw new Error(`A ref() names a component, for a swap property, not ${key}`)
-    const id = componentId(value)
-    if (!id) throw new Error(`${key} names a ref() that marks no component rendered before it`)
-    if (!applyComponentPropertyValue(graph, instance.id, definition, id))
-      throw new Error(`Cannot assign component property: ${key}`)
-    return
-  }
-  if (definition.type === 'VARIANT')
-    throw new Error('Select a component-set variant when creating the instance')
-  if (definition.type === 'BOOLEAN' && value !== 'true' && value !== 'false')
-    throw new Error(`Expected true or false for component property: ${key}`)
-  // A swap names its component as `of` does: by ID or by name.
-  const assigned = definition.type === 'INSTANCE_SWAP' ? (componentId(value) ?? value) : value
-  if (!applyComponentPropertyValue(graph, instance.id, definition, assigned))
-    throw new Error(`Cannot assign component property: ${key}`)
-}
-
-/** A value an instance gives a property, or an exposed nested instance's values by name. */
-const assignedValueSchema = v.union([v.string(), v.boolean(), v.number()])
-const exposedValuesSchema = v.record(v.string(), assignedValueSchema)
-
-/** The one exposed nested instance with this name; a name several share is an error. */
-function exposedInstanceNamed(
-  graph: SceneGraph,
-  instance: SceneNode,
-  name: string
-): SceneNode | undefined {
-  const matches = exposedInstances(graph, instance).filter((node) => node.name === name)
-  if (matches.length > 1)
-    throw new Error(`Exposed instance name ${name} is shared by ${matches.length} layers`)
-  return matches[0]
-}
-
-/**
- * Pick the variant of an exposed instance's set that has the values it names, keeping its own
- * for the rest, as its panel group does.
- */
-function selectNestedVariant(
-  graph: SceneGraph,
-  nested: SceneNode,
-  name: string,
-  values: Record<string, string>
-): void {
-  if (Object.keys(values).length === 0) return
-  const component = instanceMainComponent(graph, nested)
-  const set = component?.parentId ? graph.getNode(component.parentId) : undefined
-  if (!component || set?.type !== 'COMPONENT_SET') return
-  const wanted = { ...component.componentPropertyValues, ...values }
-  const variant = graph
-    .getChildren(set.id)
-    .find(
-      (node) =>
-        node.type === 'COMPONENT' &&
-        Object.entries(wanted).every(([key, value]) => node.componentPropertyValues[key] === value)
-    )
-  if (!variant)
-    throw new Error(
-      `${name} has no variant ${Object.entries(values)
-        .map(([key, value]) => `${key}=${value}`)
-        .join(', ')}`
-    )
-  if (variant.id !== component.id) graph.swapInstanceComponent(nested.id, variant.id)
-}
-
-/**
- * Give the exposed nested instance named `name` its values: variants and properties by name,
- * the way the instance itself takes them.
- */
-function assignExposedInstance(
-  graph: SceneGraph,
-  instance: SceneNode,
-  name: string,
-  input: unknown,
-  componentId: ComponentLookup
-): void {
-  const nested = exposedInstanceNamed(graph, instance, name)
-  if (!nested) throw new Error(`Unknown component property or exposed instance: ${name}`)
-  const values = parseScriptInput(`Invalid values for ${name}`, exposedValuesSchema, input)
-  const variantNames = new Set(
-    componentPropertyDefinitions(graph, nested)
-      .filter((definition) => definition.type === 'VARIANT')
-      .map((definition) => definition.name)
-  )
-  const variants = Object.fromEntries(
-    Object.entries(values)
-      .filter(([key]) => variantNames.has(key))
-      .map(([key, value]) => [key, String(value)])
-  )
-  selectNestedVariant(graph, nested, name, variants)
-  const definitions = componentPropertyDefinitions(graph, nested)
-  for (const [key, value] of Object.entries(values)) {
-    if (variantNames.has(key)) continue
-    const definition = namedDefinition(definitions, key)
-    if (!definition) throw new Error(`Unknown component property on ${name}: ${key}`)
-    assignValue(graph, nested, definition, key, assignable(value), componentId)
-  }
-}
-
-/**
- * Set text, boolean, and swap properties an instance names as props, as in `Title="Hello"`, the
- * way it picks a variant, and an exposed nested instance's values, as in `Action={{ Label: 'Save' }}`;
- * design JSX props keep their meaning.
- */
-export function assignNamedProperties(
-  graph: SceneGraph,
-  instance: SceneNode,
-  props: Record<string, unknown>,
-  componentId: ComponentLookup
-): void {
-  const definitions = componentPropertyDefinitions(graph, instance).filter(
-    (definition) => definition.type !== 'VARIANT'
-  )
-  for (const [key, value] of Object.entries(props)) {
-    if (DESIGN_JSX_SUPPORTED_PROPERTIES.has(key)) continue
-    if (isPlainObject(value) && exposedInstanceNamed(graph, instance, key)) {
-      assignExposedInstance(graph, instance, key, value, componentId)
-      continue
-    }
-    const definition = namedDefinition(definitions, key)
-    if (!definition) continue
-    if (
-      typeof value !== 'string' &&
-      typeof value !== 'boolean' &&
-      typeof value !== 'number' &&
-      !isLayerRef(value)
-    )
-      throw new Error(`Expected a string, boolean, or ref() for component property: ${key}`)
-    assignValue(graph, instance, definition, key, assignable(value), componentId)
-  }
-}
-
-/**
- * Keys are property IDs or, because saving to `.fig` replaces authored IDs
- * with GUIDs, names, which survive a reload; an object gives an exposed nested instance its values.
- */
-export function assignComponentProperties(
-  graph: SceneGraph,
-  instance: SceneNode,
-  input: unknown,
-  componentId: ComponentLookup
-): void {
-  if (input === undefined) return
-  // A swap's ref() is not data to validate; it is kept as it is.
-  const refs = isPlainObject(input) ? pickBy(input, (value) => isLayerRef(value)) : {}
-  const assignments = {
-    ...parseScriptInput(
-      'Invalid properties on <Instance>',
-      v.record(v.string(), v.union([assignedValueSchema, exposedValuesSchema])),
-      isPlainObject(input) ? omitBy(input, (value) => isLayerRef(value)) : input
-    ),
-    ...refs
-  }
-  const definitions = componentPropertyDefinitions(graph, instance)
-  for (const [key, value] of Object.entries(assignments)) {
-    if (isPlainObject(value)) {
-      assignExposedInstance(graph, instance, key, value, componentId)
-      continue
-    }
-    const definition =
-      definitions.find((item) => item.id === key) ?? namedDefinition(definitions, key)
-    if (!definition) throw new Error(`Unknown component property: ${key}`)
-    assignValue(graph, instance, definition, key, assignable(value), componentId)
-  }
-}
 
 /** Mark an instance in a component's layers as exposed, under Figma's rules for exposing one. */
 export function exposeInstance(graph: SceneGraph, instance: SceneNode): void {

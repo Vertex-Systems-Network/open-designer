@@ -8,9 +8,8 @@ import type { RenderContext } from '../render/node'
 import { applyBindings, layerMetadata, preparePropsForRender } from '../render/props'
 import type { TreeNode } from '../tree'
 import { variableModes } from '../variables/graph'
+import { assignComponentProperties, assignNamedProperties } from './assignments'
 import {
-  assignComponentProperties,
-  assignNamedProperties,
   bindProperties,
   componentPropNames as namesOnInstance,
   exposeInstance,
