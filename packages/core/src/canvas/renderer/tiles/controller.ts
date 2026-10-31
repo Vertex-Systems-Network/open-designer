@@ -52,6 +52,13 @@ const BACKDROP_OVERSCAN = 1
 const PYRAMID_LEVELS = 6
 /** The whole page is kept at a level where its longer side spans this many tiles. */
 const PAGE_BACKDROP_TILES = 4
+/**
+ * How long after a content change the background stages wait: an edit in progress, such as
+ * typing, invalidates the page copy and the backdrop under it at every keystroke, and a coarse
+ * tile over thousands of chunks costs a frame or more to render from the scene, so they are
+ * rebuilt once the content has been still for this long.
+ */
+const BACKGROUND_QUIET_MS = 300
 /** Structural changes a frame applies one subtree at a time; more rebuild the whole page. */
 const MAX_INCREMENTAL_STRUCTURE_CHANGES = 32
 /** Exact levels are keyed to this many bits of the scale's logarithm: stable across float noise. */
@@ -121,6 +128,10 @@ export class TiledSceneController {
    * the plan, so the stages stop rather than render each other out until the view changes.
    */
   private backgroundSaturated = false
+  /** When the content last changed, so the background stages wait for a quiet spell. */
+  private lastContentChangeAt = Number.NEGATIVE_INFINITY
+  /** The last frame withheld the background stages for the quiet spell: frames must go on. */
+  private backgroundWaiting = false
   private readonly tileCacheBudget: (viewportBytes: number) => number
   private readonly pictureCache = new RenderChunkPictureCache()
   private readonly tileCache = new TileImageCache()
@@ -320,7 +331,8 @@ export class TiledSceneController {
     return {
       covered,
       pending: visiblePending || !covered,
-      backgroundPending: !this.navigationActive && this.scheduler.pending() > 0,
+      backgroundPending:
+        !this.navigationActive && (this.scheduler.pending() > 0 || this.backgroundWaiting),
       metrics,
       fallbackTileCount: presentation.fallback.length,
       uncoveredAreaCount: presentation.uncovered,
@@ -330,9 +342,9 @@ export class TiledSceneController {
 
   /**
    * A level arrives whole: until every visible tile exists, those that do stay hidden behind
-   * the nearest level, which the zoom just rendered, and the level is committed once they all
-   * exist, after which tiles present as they land. A page first shown has no level to stand in,
-   * and holding its tiles would show the page colour instead, so it commits at once.
+   * the nearest level, which the zoom just rendered, or behind the page colour when a page is
+   * first shown, and the level is committed once they all exist, after which tiles present as
+   * they land.
    */
   private presentLevel(
     visible: TilePlan['visible'],
@@ -340,17 +352,12 @@ export class TiledSceneController {
     level: number,
     content: TileWorldBounds | null
   ): VisiblePresentation {
-    if (this.committedLevel === level) {
-      return resolveVisible(this.tileCache, visible, pageId, level, content)
+    if (this.committedLevel !== level && visible.every(({ tile }) => tile !== null)) {
+      this.committedLevel = level
     }
-    const complete = visible.every(({ tile }) => tile !== null)
-    if (!complete) {
-      const hidden = visible.map(({ key }) => ({ key, tile: null }))
-      const held = resolveVisible(this.tileCache, hidden, pageId, level, content)
-      if (held.uncovered === 0) return held
-    }
-    this.committedLevel = level
-    return resolveVisible(this.tileCache, visible, pageId, level, content)
+    const presented =
+      this.committedLevel === level ? visible : visible.map(({ key }) => ({ key, tile: null }))
+    return resolveVisible(this.tileCache, presented, pageId, level, content)
   }
 
   invalidate(): void {
@@ -362,6 +369,8 @@ export class TiledSceneController {
     this.lastCoveredGeneration = ''
     this.lastLevel = null
     this.committedLevel = null
+    this.lastContentChangeAt = Number.NEGATIVE_INFINITY
+    this.backgroundWaiting = false
     this.pendingInvalidations = []
     this.pendingStructure = []
     this.costs.clear()
@@ -429,6 +438,7 @@ export class TiledSceneController {
         this.tileCache.invalidateBounds(this.pageId, bounds, contentGeneration)
       }
     }
+    if (this.pendingInvalidations.length > 0) this.lastContentChangeAt = this.now()
     this.pendingInvalidations = []
     this.contentGeneration = contentGeneration
   }
@@ -482,6 +492,7 @@ export class TiledSceneController {
     if (reordered) index.renumber(graph, pageId)
     this.pendingStructure = []
     this.contentGeneration = contentGeneration
+    this.lastContentChangeAt = this.now()
   }
 
   private ensureIndex(graph: SceneGraph, pageId: string | null, contentGeneration: number): void {
@@ -598,8 +609,12 @@ export class TiledSceneController {
       estimateCost: (key) => this.estimateCost(renderer, index, key, this.navigationActive),
       globalFallbackAvailable: true
     }
-    // Background stages wait for idle: a moving frame has only its budget to give.
-    const background = !this.navigationActive && !this.backgroundSaturated
+    // Background stages wait for idle, a moving frame having only its budget to give, and for
+    // the content to have been still a while, so an edit in progress rebuilds the visible tiles
+    // alone.
+    const quiet = this.now() - this.lastContentChangeAt >= BACKGROUND_QUIET_MS
+    const background = !this.navigationActive && !this.backgroundSaturated && quiet
+    this.backgroundWaiting = !this.navigationActive && !this.backgroundSaturated && !quiet
     if (background) {
       planOptions.backdrop = { level: backdropLevel, overscanTiles: BACKDROP_OVERSCAN }
       planOptions.pageBackdrop = pageBackdrop

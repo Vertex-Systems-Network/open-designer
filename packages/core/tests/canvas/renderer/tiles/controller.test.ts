@@ -244,10 +244,11 @@ describe('tile scheduling', () => {
       for (let frame = 0; frame < 60 && idle.metrics.interruptibleCompleted === 0; frame++) {
         idle = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
       }
-      // The 1280 × 800 viewport at level 1 is three by two tiles of 512.
+      // The 1280 × 800 viewport at level 1 is three by two tiles of 512. The page is first
+      // shown whole, so the one tile stays hidden with the rest at the page colour.
       const visibleTiles = 3 * 2
       expect(idle.metrics.interruptibleCompleted).toBe(1)
-      expect(idle.uncoveredAreaCount).toBe(visibleTiles - 1)
+      expect(idle.uncoveredAreaCount).toBe(visibleTiles)
 
       // Panning, a job estimated over the budget is skipped and the holes stay page colour.
       renderer.navigationPhase = 'pan'
@@ -256,8 +257,17 @@ describe('tile scheduling', () => {
       // Every queued tile is too dear, and each is tried before the frame gives up.
       expect(panning.metrics.skippedWithFallback).toBe(visibleTiles - 1)
       expect(panning.fallbackTileCount).toBe(0)
-      expect(panning.uncoveredAreaCount).toBe(visibleTiles - 1)
+      expect(panning.uncoveredAreaCount).toBe(visibleTiles)
       expect(panning.pending).toBe(true)
+
+      // Idle again, the level presents once its last tile renders.
+      renderer.navigationPhase = 'idle'
+      let settled = panning
+      for (let frame = 0; frame < 60 && !settled.covered; frame++) {
+        settled = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+        expect(settled.uncoveredAreaCount).toBe(settled.covered ? 0 : visibleTiles)
+      }
+      expect(settled.covered).toBe(true)
     } finally {
       controller.destroy()
       renderer.destroy()
