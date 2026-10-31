@@ -199,33 +199,35 @@ function insertFlexChildren(
   const overlap = siblingOverlap(parent)
   const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
   const primarySize = parent.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
-  const hugOverlap =
-    parent.layoutWrap === 'WRAP' ||
-    (parent.primaryAxisSizing === 'HUG' && parent.layoutMode === 'HORIZONTAL') ||
-    (parent.primaryAxisSizing === 'HUG' && parent.layoutMode === 'VERTICAL')
-      ? Math.min(
-          overlap,
-          ...graph
-            .getChildren(parent.id)
-            .filter((child) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
-            .map((child) => child[primarySize])
-        )
-      : overlap
-  let followsInFlowSibling = false
-  for (const node of graph.getChildren(parent.id)) {
+  const yogaDirection = direction === 'RTL' ? Direction.RTL : Direction.LTR
+  const children = graph.getChildren(parent.id).map((node) => {
     const child = asLaidOutIn(graph, node, parent)
     const yogaChild = createYogaNode()
-
     if (child.layoutPositioning === 'ABSOLUTE') {
       configureAbsoluteChild(yogaChild, child)
     } else if (!child.visible) {
       yogaChild.setDisplay(Display.None)
     } else {
       configureInFlowChild(yogaChild, child, parent, graph, direction)
+      yogaChild.calculateLayout(undefined, undefined, yogaDirection)
+    }
+    return { child, yogaChild }
+  })
+  const inFlowSizes = children
+    .filter(({ child }) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
+    .map(({ yogaChild }) =>
+      primarySize === 'width' ? yogaChild.getComputedWidth() : yogaChild.getComputedHeight()
+    )
+  const hugOverlap =
+    parent.primaryAxisSizing === 'HUG' && inFlowSizes.length > 0
+      ? Math.min(overlap, ...inFlowSizes)
+      : overlap
+  let followsInFlowSibling = false
+  for (const { child, yogaChild } of children) {
+    if (child.layoutPositioning !== 'ABSOLUTE' && child.visible) {
       if (followsInFlowSibling && hugOverlap > 0) yogaChild.setMargin(leadingEdge, -hugOverlap)
       followsInFlowSibling = true
     }
-
     yogaParent.insertChild(yogaChild, yogaParent.getChildCount())
   }
 }
@@ -361,12 +363,15 @@ function sizesFitParent(
     axis === 'width'
       ? parent.paddingLeft + parent.paddingRight
       : parent.paddingTop + parent.paddingBottom
-  const gap =
-    parent.primaryAxisAlign === 'SPACE_BETWEEN'
-      ? 0
-      : parent.itemSpacing * Math.max(0, childCount - 1)
+  const overlap = siblingOverlap(parent)
+  const sizesList = sizes.map((size) => size ?? 0)
+  const effectiveOverlap =
+    parent.primaryAxisSizing === 'HUG' && sizesList.length > 0
+      ? Math.min(overlap, ...sizesList)
+      : overlap
+  const gap = (primaryAxisGap(parent) - effectiveOverlap) * Math.max(0, childCount - 1)
   const available = axis === 'width' ? parent.width : parent.height
-  const total = sizes.reduce<number>((sum, size) => sum + (size ?? 0), padding + gap)
+  const total = sizesList.reduce<number>((sum, size) => sum + size, padding + gap)
   return Math.abs(total - available) < 0.001
 }
 
