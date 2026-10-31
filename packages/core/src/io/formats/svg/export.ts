@@ -508,7 +508,12 @@ export function renderNodesToSVG(
   options: SVGExportOptions = {}
 ): string | null {
   const result = renderNodesToSVGWithWarnings(graph, pageId, nodeIds, options)
-  if (result.warnings.length > 0 && !options.skipUnsupportedEffects) return null
+  if (result.warnings.length > 0 && !options.skipUnsupportedEffects) {
+    const effects = [...new Set(result.warnings.map((warning) => warning.effectType))]
+    throw new Error(
+      `Unsupported SVG effects: ${effects.join(', ')}. Retry with skipUnsupportedEffects to omit them.`
+    )
+  }
   return result.svg
 }
 
