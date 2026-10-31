@@ -17,7 +17,7 @@ import {
 
 import { extractPluginData } from '../node-change/plugin-data'
 import { formulaOperatorOfFigmaFunction } from '../node-change/variable/formula'
-import { readVariableMetadata } from '../node-change/variable/metadata'
+import { hasLocalLibraryMarker, readVariableMetadata, withoutLocalLibraryMarker } from '../node-change/variable/metadata'
 import {
   readModeAttribute,
   readModeConditions,
@@ -206,7 +206,8 @@ export function materializeVariableResources(
       report(resource, 'missing collection identity or modes')
       continue
     }
-    const pluginData = withoutTokenPluginData(extractPluginData(resource))
+    const sourcePluginData = extractPluginData(resource)
+    const pluginData = withoutTokenPluginData(withoutLocalLibraryMarker(sourcePluginData))
     const conditions = readModeConditions(resource)
     graph.addCollection({
       id: guidToString(resource.guid),
@@ -224,6 +225,7 @@ export function materializeVariableResources(
       variableIds: [],
       modeAttribute: readModeAttribute(resource),
       pluginData: pluginData.length > 0 ? pluginData : undefined,
+      isLocal: hasLocalLibraryMarker(sourcePluginData) || undefined,
       key: typeof resource.key === 'string' ? resource.key : undefined,
       version: typeof resource.version === 'string' ? resource.version : undefined
     })

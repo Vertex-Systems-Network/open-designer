@@ -5,6 +5,11 @@ export interface UndoEntry {
   coalesceKey?: string
 }
 
+export interface UndoHistorySnapshot {
+  undoStack: UndoEntry[]
+  redoStack: UndoEntry[]
+}
+
 export interface UndoManagerOptions {
   limit?: number
   /** Called after recording, undoing, redoing, or clearing committed history. */
@@ -135,6 +140,18 @@ export class UndoManager {
   /** Abandon provisional history without replaying it or changing committed undo/redo entries. */
   discardBatches(): void {
     this.batches = []
+  }
+
+  snapshotHistory(): UndoHistorySnapshot {
+    this.settle()
+    return { undoStack: [...this.undoStack], redoStack: [...this.redoStack] }
+  }
+
+  restoreHistory(snapshot: UndoHistorySnapshot, notify = true): void {
+    this.undoStack = [...snapshot.undoStack]
+    this.redoStack = [...snapshot.redoStack]
+    this.discardBatches()
+    if (notify) this.onChange?.()
   }
 
   clear(): void {

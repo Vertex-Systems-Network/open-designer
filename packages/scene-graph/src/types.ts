@@ -1042,6 +1042,8 @@ export interface Variable {
   pluginData?: PluginDataEntry[]
   /** Published library key (from NodeChange.key). Used for assetRef resolution in colorVar. */
   key?: string
+  /** True when copied from a library and intentionally converted to a document-local variable. */
+  isLocal?: boolean
   /** Published library version (from NodeChange.version). Used for assetRef resolution in colorVar. */
   version?: string
 }
@@ -1081,6 +1083,8 @@ export interface VariableCollection {
    * belongs to the library: Figma lists it with the library's, not the file's own.
    */
   key?: string
+  /** True when copied from a library and intentionally converted to a document-local collection. */
+  isLocal?: boolean
   /** Published library version, which references by key carry with it. */
   version?: string
 }
