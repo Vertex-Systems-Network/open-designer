@@ -32,7 +32,7 @@ import type { SceneGraph, SceneNode, Fill, Stroke, VectorNetwork } from '@open-p
 import { looseSegments, regionSVGPaths } from '@open-pencil/scene-graph/vector-network'
 
 import { arrowHeadElements, openPathElements, vectorArrowHeads } from './arrows'
-import type { SVGExportContext, SVGFontAlias } from './defs'
+import type { SVGExportContext, SVGExportWarning, SVGFontAlias } from './defs'
 import { svg, renderSVGNode } from './node'
 import type { SVGNode } from './node'
 import { alignedStroke, alignedStrokeElement, shapeWithTextDetailElements } from './strokes'
