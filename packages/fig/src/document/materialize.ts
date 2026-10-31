@@ -549,5 +549,6 @@ function materializeReaderInto(
     applyDocumentPaintBindings(graph, materialized)
     applyDocumentValueBindings(graph, materialized)
   })
+  repairHierarchy(graph)
   return state
 }
