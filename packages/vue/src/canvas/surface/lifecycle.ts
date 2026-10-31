@@ -132,11 +132,14 @@ export function createCanvasSurfaceManager({
     const glCtx = canvas.getContext('webgl2') ?? null
     state.renderer = new SkiaRenderer(ck, surface, glCtx)
     state.renderer.onImagePreviewReady = () => renderLoop.markDirty()
-    state.renderer.onRenderHealthChange = (report) => {
+    const updateRenderHealth = (report: { health: string; error: string | null }) => {
       canvas.dataset.renderHealth = report.health
       if (report.error) canvas.dataset.renderHealthError = report.error
       else delete canvas.dataset.renderHealthError
+      canvas.dispatchEvent(new CustomEvent('render-health-change', { detail: report }))
     }
+    state.renderer.onRenderHealthChange = updateRenderHealth
+    updateRenderHealth(state.renderer.frameGuard.report())
     state.renderer.imagePreviews.setDecoder(createImagePreviewDecoder())
     state.renderer.presentationColorSpace = result.presentation ?? 'srgb'
     state.renderer.tracksSceneSettlement = options?.layer !== 'overlays'
@@ -192,6 +195,7 @@ export function createCanvasSurfaceManager({
       return
     }
     renderLoop.markRendered()
+    if (state.renderer.frameGuard.health === 'degraded') renderLoop.markDirty()
     options?.onFrame?.({ panX: view.panX, panY: view.panY, zoom: view.zoom })
     acknowledgePresentation()
     clearSceneBackingRenderTimer()
