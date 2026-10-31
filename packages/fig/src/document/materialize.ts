@@ -1,6 +1,7 @@
 import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
 import { guidToString } from '@open-pencil/kiwi/fig/guid'
 import { generateId, SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+import { repairHierarchy } from '@open-pencil/scene-graph/hierarchy'
 import { OPEN_PENCIL_PLUGIN_DATA } from '@open-pencil/scene-graph/plugin-data'
 import { remapStyleRunReferences } from '@open-pencil/scene-graph/text'
 
@@ -549,5 +550,6 @@ function materializeReaderInto(
     applyDocumentPaintBindings(graph, materialized)
     applyDocumentValueBindings(graph, materialized)
   })
+  repairHierarchy(graph)
   return state
 }

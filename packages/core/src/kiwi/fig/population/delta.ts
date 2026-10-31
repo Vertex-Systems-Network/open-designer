@@ -1,6 +1,7 @@
 import { isEqual } from 'es-toolkit/predicate'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { repairHierarchy } from '@open-pencil/scene-graph/hierarchy'
 
 export interface FigPopulationDelta {
   created: Array<[string, SceneNode]>
@@ -129,6 +130,7 @@ export function applyFigPopulationDelta(graph: SceneGraph, delta: FigPopulationD
     for (const [id, changes] of delta.updated) graph.updateNode(id, changes)
     for (const id of delta.deleted) graph.deleteNode(id)
   })
+  repairHierarchy(graph)
   graph.instanceIndex.clear()
   for (const node of graph.getAllNodes()) {
     if (node.type !== 'INSTANCE' || !node.componentId) continue

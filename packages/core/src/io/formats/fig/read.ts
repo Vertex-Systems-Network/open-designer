@@ -1,6 +1,7 @@
 import type { FigPageManifestEntry } from '@open-pencil/kiwi/fig'
 import { loadFigDataDecompressor } from '@open-pencil/kiwi/fig/container'
 import type { SceneGraph } from '@open-pencil/scene-graph'
+import { repairHierarchy } from '@open-pencil/scene-graph/hierarchy'
 
 import { IS_BROWSER } from '#core/constants'
 import { deserializeSceneGraph } from '#core/kiwi/fig/parse/transfer'
@@ -41,6 +42,8 @@ function parseFigFileSync(buffer: ArrayBuffer, options: ParseFigFileOptions = {}
   // Taken now, while the records are decoded: the archive outlives the reader's session.
   const archiveInfo = reader.session.archiveRecordInfo()
   const archive = localFigArchive(bytes, () => archiveInfo)
+  const repairs = repairHierarchy(reader.graph)
+  if (repairs > 0) console.warn(`[fig] repaired ${repairs} broken parent/child links on load`)
   registerFigArchive(reader.graph, archive)
   registerOriginalArchiveRequest(reader.graph, () => archive.original())
   return reader.graph
