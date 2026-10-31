@@ -5,7 +5,6 @@ import { sessionStore, type ReloadStorage } from './chunk-reload-storage'
 /** Where the time of the last reload is kept, so a chunk that stays missing cannot loop. */
 const RELOAD_KEY = 'openpencil:chunk-reload-at'
 const RELOAD_WINDOW_MS = 60_000
-let optionalChunkLoads = 0
 
 /**
  * Whether this page may reload for a missing chunk, and if so, records that it did. A page reloads
@@ -17,27 +16,15 @@ export function claimChunkReload(storage: ReloadStorage | null, now: number): bo
     const stored = storage.getItem(RELOAD_KEY)
     const last = stored === null ? Number.NaN : Number(stored)
     if (Number.isFinite(last)) {
-      if (last > now) {
-        // A backward clock jump must not permit another immediate reload.
-        storage.setItem(RELOAD_KEY, String(now))
-        return false
-      }
+      // Keep the original future timestamp on a clock rollback so returning to the old time
+      // cannot grant an early second reload.
+      if (last > now) return false
       if (now - last < RELOAD_WINDOW_MS) return false
     }
     storage.setItem(RELOAD_KEY, String(now))
     return true
   } catch {
     return false
-  }
-}
-
-/** Run an optional dynamic import without spending the stale-chunk recovery attempt. */
-export async function loadOptionalChunk<T>(load: () => Promise<T>): Promise<T> {
-  optionalChunkLoads++
-  try {
-    return await load()
-  } finally {
-    optionalChunkLoads--
   }
 }
 
@@ -66,7 +53,7 @@ export function reloadOnceOnChunkError(options: ChunkReloadOptions = {}): void {
     now = Date.now
   } = options
   target.addEventListener('vite:preloadError', (event) => {
-    if (optionalChunkLoads > 0 || navigator.onLine === false) return
+    if (navigator.onLine === false) return
     if (!claimChunkReload(storage, now())) return
     event.preventDefault()
     reload()
