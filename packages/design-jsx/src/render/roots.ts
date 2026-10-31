@@ -5,7 +5,7 @@ import { LayerRefs } from '../refs'
 import type { DesignJSXServices } from '../services'
 import { FRAGMENT, isTreeNode, type TreeNode } from '../tree'
 import { applyVariableDefinitions } from '../variables/graph'
-import { renderNode } from './node'
+import { renderNode, type RenderContext } from './node'
 import { RenderOrder } from './order'
 import type { RenderOptions } from './types'
 
@@ -15,6 +15,12 @@ export interface RenderResult {
   type: NodeType
   childIds: string[]
   warnings?: string[]
+}
+
+/** `nodeId` and the layers it is in, nearest first. */
+function ancestors(graph: SceneGraph, nodeId: string): SceneNode[] {
+  const node = graph.getNode(nodeId)
+  return node ? [node, ...ancestors(graph, node.parentId ?? '')] : []
 }
 
 /** The nodes a tree renders as: a fragment's children, or the tree itself. */
@@ -40,7 +46,12 @@ export async function renderRoots<Artwork>(
   const nodes: SceneNode[] = []
   const eventsByRoot: Array<Array<[TreeNode, SceneNode]>> = []
   const connectorsByRoot: Array<Array<{ node: SceneNode; tree: TreeNode }>> = []
-  const context = { refs: new LayerRefs(), order: new RenderOrder() }
+  const context: RenderContext = { refs: new LayerRefs(), order: new RenderOrder(), warnings: [] }
+  // property() adds definitions to the component the parent is in, which a failure must undo.
+  const owners = ancestors(graph, parentId).filter(
+    (node) => node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
+  )
+  const definitions = owners.map((owner) => owner.componentPropertyDefinitions)
   const { refs } = context
   try {
     for (const index of context.order.of(roots)) {
@@ -70,6 +81,9 @@ export async function renderRoots<Artwork>(
     // A failed render leaves nothing behind, roots rendered before the failing one included.
     for (const child of graph.getChildren(parentId))
       if (!originalChildIds.has(child.id)) graph.deleteNode(child.id)
+    owners.forEach((owner, index) =>
+      graph.updateNode(owner.id, { componentPropertyDefinitions: definitions[index] })
+    )
     throw error
   }
 
@@ -79,7 +93,11 @@ export async function renderRoots<Artwork>(
   }
   const connectors = connectorsByRoot.flat()
   const rootIds = nodes.map((node) => node.id)
-  const warnings = [...refs.warnings, ...resolveConnectorEnds(graph, rootIds, connectors, refs)]
+  const warnings = [
+    ...refs.warnings,
+    ...context.warnings,
+    ...resolveConnectorEnds(graph, rootIds, connectors, refs)
+  ]
   if (!options.deferLayout) services.layout(graph, rootIds)
 
   return nodes.map((node) => ({

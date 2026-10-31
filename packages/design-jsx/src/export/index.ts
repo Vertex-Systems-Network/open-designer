@@ -18,7 +18,7 @@ import { refDeclarations } from '../refs'
 import { componentReferences, componentRefs, type ComponentReference } from './component-references'
 import { iconProps } from './icons'
 import { instanceProps } from './instances'
-import { propertyBindingProps } from './properties'
+import { propertyBindingProps, withPropertyBindings } from './properties'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
 import { plainValue, propAttribute, Reference, type JSXProp } from './value'
@@ -115,7 +115,10 @@ function ownElement(
   node: SceneNode,
   scope?: ConnectorExportScope
 ): OwnElement | undefined {
-  return isGeneratedFrame(node) ? OWN_ELEMENTS[node.type](graph, node, scope) : undefined
+  if (!isGeneratedFrame(node)) return undefined
+  const own = OWN_ELEMENTS[node.type](graph, node, scope)
+  // Its visibility can be a component property, as any layer's can.
+  return { ...own, props: withPropertyBindings(own.props, node, graph, componentReferences(graph)) }
 }
 
 /**

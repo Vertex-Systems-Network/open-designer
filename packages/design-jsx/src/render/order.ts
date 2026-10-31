@@ -12,7 +12,7 @@ type ComponentKey = string | LayerRef
 
 /**
  * The components an element and its descendants define and name. `mayName` holds the text values
- * property props give: a swap takes one as a component's name, other properties as plain text,
+ * property props give, an exposed nested instance's included: a swap takes one as a component's name, other properties as plain text,
  * and which is which is known only once the component renders.
  */
 interface ComponentUse {
@@ -43,13 +43,15 @@ function ownUse(node: TreeNode): ComponentUse {
       .map(([, value]) => value),
     ...(isPlainObject(props.properties) ? Object.values(props.properties) : [])
   ]
+  // An exposed nested instance's values, as in `Action={{ Icon: 'Arrow' }}`.
+  const nested = assigned.filter(isPlainObject).flatMap((values) => Object.values(values))
   return {
     defines: [],
     names: [
       ...(isString(component) || isLayerRef(component) ? [component] : []),
       ...assigned.filter(isLayerRef)
     ],
-    mayName: assigned.filter(isString)
+    mayName: [...assigned, ...nested].filter(isString)
   }
 }
 

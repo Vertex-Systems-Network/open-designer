@@ -46,6 +46,17 @@ function defaultValue(
   return component ? reference.of(component) : definition.defaultValue
 }
 
+/** `props` with each field bound to a component property written as the binding instead. */
+export function withPropertyBindings(
+  props: JSXProp[],
+  node: SceneNode,
+  graph: SceneGraph,
+  reference: ComponentReference
+): JSXProp[] {
+  const bound = propertyBindingProps(node, graph, reference)
+  return [...props.filter(([name]) => !bound.some(([key]) => key === name)), ...bound]
+}
+
 /**
  * The fields of a main component's layer bound to its properties, as `property()` calls:
  * `text={property('Label', 'Hi')}`. A Reka text field's text and a part's slot are left to

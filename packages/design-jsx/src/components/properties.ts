@@ -232,6 +232,15 @@ export function inferComponentSetProperties(graph: SceneGraph, componentSetId: s
     variants.flatMap(({ values }) => Object.entries(values)),
     ([name]) => name
   )
+  for (const name of Object.keys(options)) {
+    const other = existingDefinitions.find(
+      (definition) => definition.name === name && definition.type !== 'VARIANT'
+    )
+    if (other)
+      throw new Error(
+        `Variant property ${name} of ${componentSet.name} has the name of its ${other.type} property`
+      )
+  }
   const definitions: ComponentPropertyDefinition[] = Object.entries(options)
     .filter(([name]) => !defined.has(name))
     .map(([name, entries]) => {

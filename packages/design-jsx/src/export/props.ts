@@ -20,7 +20,7 @@ import {
   getNodeContext
 } from './helpers'
 import { collectEffectProps, collectFillProps, collectStrokeProps } from './paints'
-import { propertyBindingProps } from './properties'
+import { withPropertyBindings } from './properties'
 import { collectStateProps } from './state'
 import type { JSXProp } from './value'
 import { variableReferences, type VariableExport } from './variables'
@@ -368,7 +368,5 @@ export function collectProps(
   collectShapeNodeProps(node, props)
   collectStateProps(node, ctx, props, variables)
 
-  // A field bound to a component property is written as the binding, in place of its value.
-  const bound = propertyBindingProps(node, graph, reference)
-  return [...props.filter(([name]) => !bound.some(([key]) => key === name)), ...bound]
+  return withPropertyBindings(props, node, graph, reference)
 }

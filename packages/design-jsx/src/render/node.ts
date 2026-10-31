@@ -1,4 +1,4 @@
-import { omitBy } from 'es-toolkit'
+import { omitBy, range } from 'es-toolkit'
 
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { parseColor } from '@open-pencil/scene-graph/color'
@@ -34,12 +34,14 @@ function renderOwnLayerElement(
   element: OwnLayerRenderer
 ): SceneNode {
   const modes = variableModes(graph, tree.props.mode)
-  const { props, bindings } = preparePropsForRender(graph, tree.props, false, { parentId, modes })
+  const nodeType = elementNodeType(tree.type) ?? 'FRAME'
+  const bound = bindProperties(graph, tree.props, nodeType, parentId, componentIdNamed(graph))
+  const { props, bindings } = preparePropsForRender(graph, bound.props, false, { parentId, modes })
   const parentLayout = graph.getNode(parentId)?.layoutMode ?? 'NONE'
   const layer = omitBy(
     {
       ...propsToOverrides(readElementProps(element.layer, props), false, parentLayout),
-      ...(modes && { variableModes: modes })
+      ...layerMetadata(modes, bound.references)
     },
     (value) => value === undefined
   )
@@ -197,6 +199,28 @@ export function elementOverrides(
 export interface RenderContext {
   refs: LayerRefs
   order: RenderOrder
+  /** What the render skipped, for the author: reported with the results. */
+  warnings: string[]
+}
+
+/**
+ * Render `children` under `parentId`: components before the siblings that name them, then in
+ * written order. Returns the rendered layers in written order.
+ */
+async function renderChildren(
+  graph: SceneGraph,
+  children: TreeNode[],
+  parentId: string,
+  context: RenderContext | undefined,
+  render: (child: TreeNode) => Promise<SceneNode>
+): Promise<SceneNode[]> {
+  const start = graph.getChildren(parentId).length
+  const order = context?.order.of(children) ?? range(children.length)
+  const rendered: SceneNode[] = []
+  for (const index of order) rendered[index] = await render(children[index])
+  if (order.some((index, position) => index !== position))
+    rendered.forEach((child, index) => graph.insertChildAt(child.id, parentId, start + index))
+  return rendered
 }
 
 export async function renderNode<Artwork>(
@@ -249,8 +273,10 @@ async function renderNodeContent<Artwork>(
   const own = renderOwnElement(services, graph, tree, parentId, context)
   if (own) return own
   const reka = await renderRekaNode(graph, tree, parentId, scope, {
-    render: (child, childParentId, childScope) =>
-      renderNode(services, graph, child, childParentId, onNode, childScope, context),
+    renderChildren: (children, childParentId, childScope) =>
+      renderChildren(graph, children, childParentId, context, (child) =>
+        renderNode(services, graph, child, childParentId, onNode, childScope, context)
+      ),
     create: (nodeType, element, elementParentId) => {
       const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
       const created = graph.createNode(nodeType, elementParentId, overrides)
@@ -278,22 +304,9 @@ async function renderNodeContent<Artwork>(
     (child): child is TreeNode =>
       isTreeNode(child) && !(node.type === 'TEXT' && isTextContent(child))
   )
-  // Components render before the siblings that use them, then the children take written order.
-  const order = context?.order.of(children) ?? children.map((_, index) => index)
-  const rendered: SceneNode[] = []
-  for (const index of order) {
-    rendered[index] = await renderNode(
-      services,
-      graph,
-      children[index],
-      node.id,
-      onNode,
-      scope,
-      context
-    )
-  }
-  if (order.some((index, position) => index !== position))
-    rendered.forEach((child, index) => graph.insertChildAt(child.id, node.id, index))
+  await renderChildren(graph, children, node.id, context, (child) =>
+    renderNode(services, graph, child, node.id, onNode, scope, context)
+  )
 
   if (node.type === 'COMPONENT_SET') inferComponentSetProperties(graph, node.id)
 
