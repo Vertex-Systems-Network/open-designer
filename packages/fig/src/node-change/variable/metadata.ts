@@ -47,6 +47,7 @@ type VariableMetadata = Pick<
   | 'pluginData'
   | 'key'
   | 'version'
+  | 'isLocal'
 >
 
 type ModeKey = (modeId: string) => string
@@ -67,13 +68,15 @@ function readCodeSyntax(nc: NodeChange): Variable['codeSyntax'] {
 /** Figma keeps the description twice, as `description` and `symbolDescription`. */
 export function readVariableMetadata(nc: NodeChange): VariableMetadata {
   const scopes = nc.variableScopes?.filter(isScope)
-  const sourcePluginData = extractPluginData(nc)\n  const pluginData = withoutTokenPluginData(withoutLocalLibraryMarker(sourcePluginData))
+  const sourcePluginData = extractPluginData(nc)
+  const pluginData = withoutTokenPluginData(withoutLocalLibraryMarker(sourcePluginData))
   const metadata: VariableMetadata = {
     description: nc.description ?? nc.symbolDescription ?? '',
     hiddenFromPublishing: nc.isPublishable === false,
     scopes: scopes?.length ? scopes : undefined,
     codeSyntax: readCodeSyntax(nc),
-    pluginData: pluginData.length > 0 ? pluginData : undefined,\n    isLocal: hasLocalLibraryMarker(sourcePluginData) || undefined
+    pluginData: pluginData.length > 0 ? pluginData : undefined,
+    isLocal: hasLocalLibraryMarker(sourcePluginData) || undefined
   }
   // A library variable's identity, which records naming it use in place of its GUID.
   if (typeof nc.key === 'string') metadata.key = nc.key
@@ -93,7 +96,8 @@ export function variableMetadataNodeChange(
     isPublishable: !variable.hiddenFromPublishing,
     variableScopes: variable.scopes?.length ? variable.scopes : ['ALL_SCOPES'],
     pluginData: pluginDataNodeChange([
-      ...withoutTokenPluginData(variable.pluginData ?? []),
+      ...withoutTokenPluginData(withoutLocalLibraryMarker(variable.pluginData ?? [])),
+      ...(variable.isLocal ? [LOCAL_LIBRARY_MARKER] : []),
       ...(token ? [token] : [])
     ])
   }
@@ -112,7 +116,8 @@ export function collectionPluginDataNodeChange(
   const conditions = modeConditionsPluginData(collection, modeKey)
   const attribute = modeAttributePluginData(collection)
   return pluginDataNodeChange([
-    ...withoutTokenPluginData(collection.pluginData ?? []),
+    ...withoutTokenPluginData(withoutLocalLibraryMarker(collection.pluginData ?? [])),
+    ...(collection.isLocal ? [LOCAL_LIBRARY_MARKER] : []),
     ...(conditions ? [conditions] : []),
     ...(attribute ? [attribute] : [])
   ])
