@@ -152,7 +152,9 @@ fn build_submenu<R: tauri::Runtime>(
                 item = item.id(id);
             }
             if let Some(accelerator) = &entry.accelerator {
-                item = item.accelerator(accelerator);
+                if should_register_native_accelerator(entry.id.as_deref(), accelerator) {
+                    item = item.accelerator(accelerator);
+                }
             }
             builder = builder.item(&item.build(app)?);
             continue;
@@ -162,13 +164,8 @@ fn build_submenu<R: tauri::Runtime>(
         if let Some(id) = &entry.id {
             item = item.id(id);
         }
-        // On Linux, muda's predefined edit commands depend on optional X11
-        // automation and do not work on Wayland. Leave these accelerators to the
-        // WebView instead, which preserves native input and canvas paste events.
-        let webview_handles_accelerator = cfg!(target_os = "linux")
-            && matches!(entry.id.as_deref(), Some("copy" | "cut" | "paste"));
-        if !webview_handles_accelerator {
-            if let Some(accelerator) = &entry.accelerator {
+        if let Some(accelerator) = &entry.accelerator {
+            if should_register_native_accelerator(entry.id.as_deref(), accelerator) {
                 item = item.accelerator(accelerator);
             }
         }
@@ -176,6 +173,25 @@ fn build_submenu<R: tauri::Runtime>(
     }
 
     builder.build()
+}
+
+fn should_register_native_accelerator(id: Option<&str>, accelerator: &str) -> bool {
+    if !cfg!(target_os = "linux") {
+        return true;
+    }
+
+    // Linux keeps copy, cut, and paste on the WebView path so focused inputs
+    // and canvas clipboard handling continue to work.
+    if matches!(id, Some("copy" | "cut" | "paste")) {
+        return false;
+    }
+
+    accelerator.split('+').any(|part| {
+        matches!(
+            part.trim().to_ascii_lowercase().as_str(),
+            "ctrl" | "control" | "alt" | "option" | "meta" | "super" | "cmd" | "command" | "cmdorctrl"
+        )
+    })
 }
 
 fn recent_file_label(path: &str) -> String {
