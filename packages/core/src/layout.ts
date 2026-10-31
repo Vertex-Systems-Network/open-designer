@@ -210,10 +210,13 @@ function insertFlexChildren(
       yogaChild.setDisplay(Display.None)
     } else {
       configureInFlowChild(yogaChild, child, parent, graph, direction)
-      if (capHugOverlap) yogaChild.calculateLayout(undefined, undefined, yogaDirection)
     }
+    yogaParent.insertChild(yogaChild, yogaParent.getChildCount())
     return { child, yogaChild }
   })
+  // Resolve children with this frame's cross-axis size, constraints, and aspect ratios before
+  // choosing the overlap cap. A standalone child layout can report zero for a stretched child.
+  if (capHugOverlap) yogaParent.calculateLayout(undefined, undefined, yogaDirection)
   const inFlowSizes = capHugOverlap
     ? children
         .filter(({ child }) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
@@ -229,10 +232,8 @@ function insertFlexChildren(
       if (followsInFlowSibling && hugOverlap > 0) yogaChild.setMargin(leadingEdge, -hugOverlap)
       followsInFlowSibling = true
     }
-    yogaParent.insertChild(yogaChild, yogaParent.getChildCount())
   }
 }
-
 function configureInFlowChild(
   yogaChild: YogaNode,
   child: SceneNode,
