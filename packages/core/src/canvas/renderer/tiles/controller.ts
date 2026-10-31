@@ -52,6 +52,8 @@ const PYRAMID_LEVELS = 6
 /** The whole page is kept at a level where its longer side spans this many tiles. */
 const PAGE_BACKDROP_TILES = 4
 const TILE_COST_SMOOTHING = 0.3
+/** Structural changes a frame applies one subtree at a time; more rebuild the whole page. */
+const MAX_INCREMENTAL_STRUCTURE_CHANGES = 32
 /** Exact levels are keyed to this many bits of the scale's logarithm: stable across float noise. */
 const EXACT_LEVEL_BITS = 20
 
@@ -423,6 +425,12 @@ export class TiledSceneController {
     const pageId = this.pageId
     if (!index || !pageId) return
     if (!graph.getNode(pageId)) {
+      this.invalidate()
+      return
+    }
+    // A bulk edit, such as a paste of hundreds of layers, rebuilds the page in one pass rather
+    // than one subtree per layer, each of which reads the whole index.
+    if (this.pendingStructure.length > MAX_INCREMENTAL_STRUCTURE_CHANGES) {
       this.invalidate()
       return
     }

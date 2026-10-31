@@ -1031,7 +1031,11 @@ function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
   }
   if (saved) drawSavedEmoji(r, canvas, node)
   else {
-    withTextParagraph(r, node, r.ck.BLACK, { halfLeading: true }, (paragraph) =>
+    // The paragraph the fills just drew with: its colour keys the prepared text, and a solid fill
+    // leaves it on the fill paint, so no second paragraph is shaped for the emoji.
+    const lastFill = node.fills.findLast((fill) => fill.visible)
+    const color = hasComplexTextFill(lastFill) ? r.ck.Color4f(0, 0, 0, 1) : r.fillPaint.getColor()
+    withTextParagraph(r, node, color, { halfLeading: true }, (paragraph) =>
       drawLaidOutEmoji(r, canvas, node, paragraph, textVerticalOffset(node, paragraph.getHeight()))
     )
   }

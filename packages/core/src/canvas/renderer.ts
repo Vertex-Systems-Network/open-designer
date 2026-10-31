@@ -747,8 +747,21 @@ export class SkiaRenderer {
     return RenderText.measureTextNode(this, node, maxWidth)
   }
 
+  /** Readiness of a text's fonts, found once per layer per font generation; a change to the layer drops it. */
+  readonly textReadiness = new Map<
+    string,
+    { node: SceneNode; generation: number; readiness: RenderText.NodeFontReadiness }
+  >()
+
   nodeFontReadiness(node: SceneNode): RenderText.NodeFontReadiness {
-    return RenderText.nodeFontReadiness(this, node)
+    if (node.type !== 'TEXT') return 'ready'
+    const cached = this.textReadiness.get(node.id)
+    if (cached && cached.node === node && cached.generation === this.fontGeneration) {
+      return cached.readiness
+    }
+    const readiness = RenderText.nodeFontReadiness(this, node)
+    this.textReadiness.set(node.id, { node, generation: this.fontGeneration, readiness })
+    return readiness
   }
 
   isNodeFontLoaded(node: SceneNode): boolean {
