@@ -20,7 +20,7 @@ import { rekaExport, type RekaExport } from './behaviours'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
-import { HelperCall, helperCall, plainValue, propAttribute, Reference, type JSXProp } from './value'
+import { helperCall, plainValue, propAttribute, Reference, type JSXProp } from './value'
 import { variableExport, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
@@ -216,8 +216,12 @@ function nodeToJSX(
     ...instanceProps(graph, node)
   ]
   // Instances are references to components; writing their copied child layers would detach them.
-  if (ownProps.some(([name]) => name === 'of'))
-    return [jsx.element(tag, withRef(ownProps).map(propAttribute), [], depth)]
+  if (ownProps.some(([name]) => name === 'of')) {
+    const attributes = withRef([...collectProps(node, graph, variables), ...ownProps]).map(
+      propAttribute
+    )
+    return [jsx.element(tag, attributes, [], depth)]
+  }
   const attributes = withRef([...collectProps(node, graph, variables), ...ownProps]).map(
     propAttribute
   )
@@ -255,7 +259,9 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !elementTag(node.type)) return null
   const own = ownElement(graph, node)
-  const props = own ? own.props : [...collectProps(node, graph), ...componentPropertyProps(graph, node)]
+  const props = own
+    ? own.props
+    : [...collectProps(node, graph), ...componentPropertyProps(graph, node), ...instanceProps(graph, node)]
   if (node.type === 'TEXT') props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
