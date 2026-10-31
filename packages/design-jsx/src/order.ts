@@ -1,4 +1,6 @@
-import { isPlainObject } from 'es-toolkit/predicate'
+import { compact, pull, uniq } from 'es-toolkit/array'
+import { range } from 'es-toolkit/math'
+import { isPlainObject, isString } from 'es-toolkit/predicate'
 
 import { namesComponent, rekaRole } from './behaviours'
 import { isComponentProperty } from './component-properties'
@@ -11,42 +13,14 @@ import { isTreeNode, type TreeNode } from './tree'
 type ComponentKey = string | LayerRef
 
 /**
- * The components an element and its descendants define, those they name, and those a text value
- * may name: a property prop's text is a swap's component or just text, which only the
- * component's properties tell, and they are not known before it renders.
+ * The components an element and its descendants define and name. `mayName` holds the text values
+ * property props give: a swap takes one as a component's name, other properties as plain text,
+ * and which is which is known only once the component renders.
  */
 interface ComponentUse {
-  defines: ReadonlySet<ComponentKey>
-  names: ReadonlySet<ComponentKey>
-  mayName: ReadonlySet<ComponentKey>
-}
-
-const NO_USE: ComponentUse = { defines: new Set(), names: new Set(), mayName: new Set() }
-
-/**
- * The components an element names: its `of`, or the default of the swap property bound there,
- * and the `ref()`s its property props and `properties` give; and the text values they give,
- * which a swap may take as a component's name.
- */
-function componentReferences(props: Record<string, unknown>): {
+  defines: ComponentKey[]
   names: ComponentKey[]
   mayName: string[]
-} {
-  const reference = props.component ?? props.componentId ?? props.of
-  const value = isComponentProperty(reference) ? reference.defaultValue : reference
-  const assigned = [
-    ...Object.entries(props)
-      .filter(([key]) => !DESIGN_JSX_SUPPORTED_PROPERTIES.has(key))
-      .map(([, prop]) => prop),
-    ...(isPlainObject(props.properties) ? Object.values(props.properties) : [])
-  ]
-  return {
-    names: [
-      ...(typeof value === 'string' || isLayerRef(value) ? [value] : []),
-      ...assigned.filter(isLayerRef)
-    ],
-    mayName: assigned.filter((item): item is string => typeof item === 'string')
-  }
 }
 
 /** Whether an element defines a component: a component, a set, or a Reka root naming none. */
@@ -56,6 +30,31 @@ function definesComponent(node: TreeNode): boolean {
   return rekaRole(node.type)?.role === 'root' && !namesComponent(node.props)
 }
 
+/** What the element itself defines or names, without its descendants. */
+function ownUse(node: TreeNode): ComponentUse {
+  const { props } = node
+  if (definesComponent(node)) {
+    const name = isString(props.name) ? props.name : ''
+    return { defines: compact([name, isLayerRef(props.ref) && props.ref]), names: [], mayName: [] }
+  }
+  const of = props.component ?? props.componentId ?? props.of
+  const component = isComponentProperty(of) ? of.defaultValue : of
+  const assigned = [
+    ...Object.entries(props)
+      .filter(([key]) => !DESIGN_JSX_SUPPORTED_PROPERTIES.has(key))
+      .map(([, value]) => value),
+    ...(isPlainObject(props.properties) ? Object.values(props.properties) : [])
+  ]
+  return {
+    defines: [],
+    names: [
+      ...(isString(component) || isLayerRef(component) ? [component] : []),
+      ...assigned.filter(isLayerRef)
+    ],
+    mayName: assigned.filter(isString)
+  }
+}
+
 /** Reads each element's components once, for every level an order is asked at. */
 export class RenderOrder {
   private readonly uses = new WeakMap<TreeNode, ComponentUse>()
@@ -63,68 +62,48 @@ export class RenderOrder {
   private use(node: TreeNode): ComponentUse {
     const known = this.uses.get(node)
     if (known) return known
-    const children = node.children.filter(isTreeNode).map((child) => this.use(child))
-    const own: ComponentKey[] = []
-    const references = definesComponent(node)
-      ? { names: [], mayName: [] }
-      : componentReferences(node.props)
-    if (definesComponent(node)) {
-      const { name, ref } = node.props
-      if (typeof name === 'string' && name) own.push(name)
-      if (isLayerRef(ref)) own.push(ref)
+    const parts = [
+      ownUse(node),
+      ...node.children.filter(isTreeNode).map((child) => this.use(child))
+    ]
+    const use = {
+      defines: uniq(parts.flatMap((part) => part.defines)),
+      names: uniq(parts.flatMap((part) => part.names)),
+      mayName: uniq(parts.flatMap((part) => part.mayName))
     }
-    const use =
-      own.length === 0 &&
-      references.names.length === 0 &&
-      references.mayName.length === 0 &&
-      children.every((child) => child === NO_USE)
-        ? NO_USE
-        : {
-            defines: new Set([...own, ...children.flatMap((child) => [...child.defines])]),
-            names: new Set([...references.names, ...children.flatMap((child) => [...child.names])]),
-            mayName: new Set([
-              ...references.mayName,
-              ...children.flatMap((child) => [...child.mayName])
-            ])
-          }
     this.uses.set(node, use)
     return use
   }
 
   /**
    * The indices of `siblings` in render order: those that define a component before those that
-   * name it, otherwise as written. When none is ready, what text values may name gives way first,
-   * so a text that happens to match a component's name never holds back a real reference; only
-   * components that do reference each other keep the written order.
+   * name it, otherwise as written. When none is ready, what text values may name gives way
+   * first, so a text that matches a component's name never holds back a real reference; only
+   * components that do name each other keep the written order.
    */
   of(siblings: readonly TreeNode[]): number[] {
     const uses = siblings.map((sibling) => this.use(sibling))
-    const identity = siblings.map((_, index) => index)
-    if (uses.every((use) => use.defines.size === 0)) return identity
+    if (uses.every((use) => use.defines.length === 0)) return range(siblings.length)
+
     const owners = new Map<ComponentKey, number[]>()
     uses.forEach((use, index) => {
       for (const key of use.defines) owners.set(key, [...(owners.get(key) ?? []), index])
     })
-    const ownersOf = (keys: ReadonlySet<ComponentKey>, index: number) =>
-      [...keys].flatMap((key) => owners.get(key) ?? []).filter((owner) => owner !== index)
-    const names = uses.map((use, index) => ownersOf(use.names, index))
-    const mayName = uses.map((use, index) => ownersOf(use.mayName, index))
-    const rendered = new Set<number>()
+    const siblingsDefining = (keys: ComponentKey[], index: number) =>
+      uniq(keys.flatMap((key) => owners.get(key) ?? [])).filter((owner) => owner !== index)
+    const needs = uses.map((use, index) => siblingsDefining(use.names, index))
+    const mayNeed = uses.map((use, index) => siblingsDefining(use.mayName, index))
+
     const order: number[] = []
-    const readyBy = (dependencies: number[][]) =>
-      identity.find(
-        (index) =>
-          !rendered.has(index) &&
-          (dependencies[index] ?? []).every((dependency) => rendered.has(dependency))
-      )
-    while (order.length < siblings.length) {
-      const index =
-        readyBy(names.map((dependencies, at) => [...dependencies, ...(mayName[at] ?? [])])) ??
-        readyBy(names) ??
-        identity.find((candidate) => !rendered.has(candidate))
-      if (index === undefined) break
-      rendered.add(index)
-      order.push(index)
+    const pending = range(siblings.length)
+    const rendered = (indices: number[]) => indices.every((index) => order.includes(index))
+    while (pending.length > 0) {
+      const next =
+        pending.find((index) => rendered(needs[index]) && rendered(mayNeed[index])) ??
+        pending.find((index) => rendered(needs[index])) ??
+        pending[0]
+      order.push(next)
+      pull(pending, [next])
     }
     return order
   }
