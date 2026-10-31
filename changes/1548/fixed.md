@@ -1,0 +1,1 @@
+- The Linux desktop can opt in to NVIDIA explicit-sync and WebKit shared-memory workarounds with `OPENDESIGNER_NVIDIA_WAYLAND_WORKAROUND=1`; they apply only when the proprietary NVIDIA driver is loaded and preserve any existing values.
