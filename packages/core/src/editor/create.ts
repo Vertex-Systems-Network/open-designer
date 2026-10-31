@@ -3,7 +3,7 @@ import { createNanoEvents } from 'nanoevents'
 import type { Emitter } from 'nanoevents'
 
 import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { UndoManager } from '@open-pencil/scene-graph/undo'
+import { UndoManager, type UndoHistorySnapshot } from '@open-pencil/scene-graph/undo'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { prefetchFigmaSchema } from '#core/clipboard'
@@ -408,6 +408,18 @@ export function createEditor(options?: EditorOptions) {
     requestRender()
   }
 
+  function captureUndoHistory(): UndoHistorySnapshot {
+    return undo.snapshotHistory()
+  }
+
+  function restoreUndoHistory(snapshot: UndoHistorySnapshot, notify = true): void {
+    undo.restoreHistory(snapshot, notify)
+  }
+
+  function clearUndoHistory(): void {
+    undo.clear()
+  }
+
   function dispose() {
     releaseTextMeasurer()
     nodes.cancelNodePreviews()
@@ -455,6 +467,9 @@ export function createEditor(options?: EditorOptions) {
     setNavigationPhase,
     removeCanvasRenderer,
     replaceGraph,
+    captureUndoHistory,
+    restoreUndoHistory,
+    clearUndoHistory,
     subscribeToGraph,
     dispose,
     releaseGraphResources,
