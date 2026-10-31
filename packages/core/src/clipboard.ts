@@ -69,14 +69,14 @@ export function importClipboardNodes(
  */
 function clipboardGraph(graph: SceneGraph): SceneGraph {
   const unkeyed =
-    [...graph.variables.values()].some((variable) => !variable.key) ||
-    [...graph.variableCollections.values()].some((collection) => !collection.key)
+    [...graph.variables.values()].some((variable) => !variable.key && !variable.isLocal) ||
+    [...graph.variableCollections.values()].some((collection) => !collection.key && !collection.isLocal)
   if (!unkeyed) return graph
   const copy = cloneSceneGraphForFigExport(graph)
   copy.variableCollections = new Map(
     [...graph.variableCollections].map(([id, collection]) => [
       id,
-      collection.key
+      collection.key || collection.isLocal
         ? collection
         : {
             ...collection,
@@ -88,7 +88,7 @@ function clipboardGraph(graph: SceneGraph): SceneGraph {
   copy.variables = new Map(
     [...graph.variables].map(([id, variable]) => [
       id,
-      variable.key
+      variable.key || variable.isLocal
         ? variable
         : {
             ...variable,
