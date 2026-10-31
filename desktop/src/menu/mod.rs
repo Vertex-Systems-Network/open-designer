@@ -152,7 +152,7 @@ fn build_submenu<R: tauri::Runtime>(
                 item = item.id(id);
             }
             if let Some(accelerator) = &entry.accelerator {
-                if should_register_native_accelerator(accelerator) {
+                if should_register_native_accelerator(entry.id.as_deref(), accelerator) {
                     item = item.accelerator(accelerator);
                 }
             }
@@ -165,7 +165,7 @@ fn build_submenu<R: tauri::Runtime>(
             item = item.id(id);
         }
         if let Some(accelerator) = &entry.accelerator {
-            if should_register_native_accelerator(accelerator) {
+            if should_register_native_accelerator(entry.id.as_deref(), accelerator) {
                 item = item.accelerator(accelerator);
             }
         }
@@ -175,15 +175,21 @@ fn build_submenu<R: tauri::Runtime>(
     builder.build()
 }
 
-fn should_register_native_accelerator(accelerator: &str) -> bool {
+fn should_register_native_accelerator(id: Option<&str>, accelerator: &str) -> bool {
     if !cfg!(target_os = "linux") {
         return true;
+    }
+
+    // Linux keeps copy, cut, and paste on the WebView path so focused inputs
+    // and canvas clipboard handling continue to work.
+    if matches!(id, Some("copy" | "cut" | "paste")) {
+        return false;
     }
 
     accelerator.split('+').any(|part| {
         matches!(
             part.trim().to_ascii_lowercase().as_str(),
-            "ctrl" | "control" | "alt" | "option" | "meta" | "super" | "cmd" | "command"
+            "ctrl" | "control" | "alt" | "option" | "meta" | "super" | "cmd" | "command" | "cmdorctrl"
         )
     })
 }
