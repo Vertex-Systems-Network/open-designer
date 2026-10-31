@@ -53,12 +53,10 @@ export function makeFigmaFromStore(
         maxY = Math.max(maxY, bounds.y + bounds.height)
       }
       store.zoomToBounds(minX, minY, maxX, maxY)
-      const { width, height } = store.getViewportSize()
       return {
-        center: {
-          x: (-store.state.panX + width / 2) / store.state.zoom,
-          y: (-store.state.panY + height / 2) / store.state.zoom
-        },
+        // zoomToBounds centers the fitted bounds with symmetric padding. Derive center from
+        // those bounds so it remains correct before the canvas reports its viewport dimensions.
+        center: { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
         zoom: store.state.zoom
       }
     })
