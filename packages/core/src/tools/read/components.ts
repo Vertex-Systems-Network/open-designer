@@ -9,7 +9,7 @@ interface DocumentComponentResult {
   type: string
   page: string
   source: 'document'
-  properties: Array<{ id: string; name: string; type: string; defaultValue: string }>
+  properties: Record<string, { type: string; defaultValue: string | boolean }>
 }
 
 interface LibraryComponentResult {
