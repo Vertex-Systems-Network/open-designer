@@ -594,6 +594,7 @@ export function createVariableActions(ctx: EditorContext) {
     getCollectionCount,
     getVariableCount,
     renameCollection,
+    makeCollectionLocal,
     addCollection,
     removeCollection,
     addVariable,
