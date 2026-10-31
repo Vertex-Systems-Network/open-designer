@@ -4,6 +4,7 @@ import {
   noCloudSecretLoggingRule
 } from '#lint/rules/cloud.ts'
 import {
+  noEditorProfileInputs,
   noConditionalObjectSpreads,
   noFlatKiwiModules,
   noMixedCaseAcronymIdentifiers
@@ -501,6 +502,7 @@ const plugin = {
     'no-flat-kiwi-modules': noFlatKiwiModules,
     'no-bun-globals-in-cli': noBunGlobalsInCli,
     'no-top-level-prefixed-test-files': noTopLevelPrefixedTestFiles,
+    'no-editor-profile-inputs': noEditorProfileInputs,
     'no-conditional-object-spreads': noConditionalObjectSpreads,
     'no-hand-rolled-base64': noHandRolledBase64Rule,
     'no-raw-sql': noRawSQLRule,
