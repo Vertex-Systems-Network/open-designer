@@ -327,6 +327,35 @@ describe('component export', () => {
     expect(icon?.componentId).toBe(heart.id)
   })
 
+  test('renders a component a swap names in properties before the instance', async () => {
+    const graph = new SceneGraph()
+    const [, instance, , heart] = await renderJSX(
+      graph,
+      `<>
+        <Component name="Star" w={4} h={4} />
+        <Instance of="Card" properties={{ Icon: 'Heart' }} />
+        <Component name="Card"><Instance name="Icon" of={property('Icon', 'Star')} /></Component>
+        <Component name="Heart" w={4} h={4} />
+      </>`
+    )
+    const icon = graph.getChildren(instance.id).find((child) => child.type === 'INSTANCE')
+    expect(icon?.componentId).toBe(heart.id)
+  })
+
+  test('lets a text that matches a component name give way to the components it needs', async () => {
+    const graph = new SceneGraph()
+    const [, board] = await renderJSX(
+      graph,
+      `<>
+        <Component name="Badge"><Instance of="Tag" /></Component>
+        <Frame name="Board"><Component name="Tag" w={4} h={4} /><Instance of="Card" Title="Badge" /></Frame>
+        <Component name="Card"><Text name="Title" text={property('Title', 'Hi')} /></Component>
+      </>`
+    )
+    const card = graph.getChildren(board.id).find((child) => child.type === 'INSTANCE')
+    expect(graph.getChildren(card?.id ?? '')[0]?.text).toBe('Badge')
+  })
+
   test('leaves nothing behind when a root fails to render', async () => {
     const graph = new SceneGraph()
     const page = graph.getPages()[0]
