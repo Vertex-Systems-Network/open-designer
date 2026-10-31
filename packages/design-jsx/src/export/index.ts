@@ -159,6 +159,12 @@ function componentPropertyProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   return props
 }
 
+function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
+  const merged = new Map<string, JSXProp[1]>()
+  for (const group of groups) for (const [name, value] of group) merged.set(name, value)
+  return [...merged.entries()]
+}
+
 function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
@@ -217,12 +223,12 @@ function nodeToJSX(
   ]
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
-    const attributes = withRef([...collectProps(node, graph, variables), ...ownProps]).map(
+    const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
       propAttribute
     )
     return [jsx.element(tag, attributes, [], depth)]
   }
-  const attributes = withRef([...collectProps(node, graph, variables), ...ownProps]).map(
+  const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
     propAttribute
   )
   if (node.type === 'TEXT') {
