@@ -72,6 +72,15 @@ export function nodeProxyToJSON(
   // Include variable bindings with resolved values
   const bindings = resolveBindings(graph, n)
   if (bindings) obj.boundVariables = bindings
+  if (n.componentPropertyDefinitions.length > 0) {
+    obj.componentPropertyDefinitions = n.componentPropertyDefinitions
+  }
+  if (n.componentPropertyReferences.length > 0) {
+    obj.componentPropertyReferences = n.componentPropertyReferences
+  }
+  if (n.componentPropertyAssignments.length > 0) {
+    obj.componentPropertyAssignments = n.componentPropertyAssignments
+  }
   const children = pluginChildren(graph, nodeId)
   if (children.length > 0) {
     if (maxDepth !== undefined && currentDepth >= maxDepth) {
