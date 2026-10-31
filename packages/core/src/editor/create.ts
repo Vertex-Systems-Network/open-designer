@@ -381,10 +381,10 @@ export function createEditor(options?: EditorOptions) {
     if (_renderers.size === 0) releaseTextMeasurer()
   }
 
-  function replaceGraph(newGraph: SceneGraph) {
+  function replaceGraph(newGraph: SceneGraph, options: { preserveHistory?: boolean } = {}) {
     nodes.cancelNodePreviews()
     _graph = newGraph
-    undo.clear()
+    if (!options.preserveHistory) undo.clear()
     state.documentKind = _graph.documentKind
     setActiveTool(offeredTool(state, state.activeTool))
     pendingTextLayout.clear()
