@@ -38,6 +38,9 @@ export function makeFigmaFromStore(
   }
   if (pageId === store.state.currentPageId) {
     api.setViewportFitHandler((nodes) => {
+      if (pageId !== store.state.currentPageId || api.currentPageId !== store.state.currentPageId) {
+        return false
+      }
       if (nodes.length === 0) return
       let minX = Number.POSITIVE_INFINITY
       let minY = Number.POSITIVE_INFINITY
@@ -50,6 +53,14 @@ export function makeFigmaFromStore(
         maxY = Math.max(maxY, bounds.y + bounds.height)
       }
       store.zoomToBounds(minX, minY, maxX, maxY)
+      const { width, height } = store.getViewportSize()
+      return {
+        center: {
+          x: (-store.state.panX + width / 2) / store.state.zoom,
+          y: (-store.state.panY + height / 2) / store.state.zoom
+        },
+        zoom: store.state.zoom
+      }
     })
   }
   api.exportImage = async (nodeIds, opts) =>
