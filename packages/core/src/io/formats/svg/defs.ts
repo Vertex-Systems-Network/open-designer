@@ -36,6 +36,14 @@ export interface SVGFontRequest extends FontFaceRef {
 /** The family to name a font face by instead of its own, or null to keep the face. */
 export type SVGFontAlias = (font: SVGFontRequest) => string | null
 
+export interface SVGExportWarning {
+  code: 'unsupported-effect'
+  nodeId: string
+  nodeName: string
+  effectType: string
+  message: string
+}
+
 export interface SVGExportContext {
   defs: SVGNode[]
   defIdCounter: number
@@ -48,6 +56,8 @@ export interface SVGExportContext {
   /** Measured line breaks. Without them, only explicit newlines start a new baseline. */
   textLayout?: SVGTextLayout
   fontAlias?: SVGFontAlias
+  skipUnsupportedEffects?: boolean
+  warnings?: SVGExportWarning[]
 }
 
 export function nextDefId(ctx: SVGExportContext, prefix: string): string {
@@ -211,15 +221,29 @@ function createImagePattern(
 
 export function createFilterDef(
   effects: Effect[],
-  ctx: SVGExportContext
+  ctx: SVGExportContext,
+  node: SceneNode
 ): { id: string; node: SVGNode } | null {
   const visible = effects.filter((e) => e.visible)
   if (visible.length === 0) return null
 
+  const supported = visible.filter((effect) => {
+    if (effect.type !== 'BACKGROUND_BLUR') return true
+    ctx.warnings?.push({
+      code: 'unsupported-effect',
+      nodeId: node.id,
+      nodeName: node.name,
+      effectType: effect.type,
+      message: 'SVG cannot apply background blur to content behind this node.'
+    })
+    return false
+  })
+  if (supported.length === 0) return null
+
   const id = nextDefId(ctx, 'fx')
   const primitives: SVGNode[] = []
 
-  for (const effect of visible) {
+  for (const effect of supported) {
     if (effect.type === 'DROP_SHADOW') {
       const stdDev = round(effect.radius / 2)
       primitives.push(
@@ -258,7 +282,7 @@ export function createFilterDef(
           operator: 'over'
         })
       )
-    } else {
+    } else if (effect.type === 'LAYER_BLUR') {
       const stdDev = round(effect.radius / 2)
       primitives.push(svg('feGaussianBlur', { stdDeviation: stdDev }))
     }
