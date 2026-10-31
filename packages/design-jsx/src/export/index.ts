@@ -179,7 +179,7 @@ function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode)
           })
         )
         if (Object.keys(values).length > 0) {
-          overrides[`${encodeURIComponent(child.name)}:componentPropertyAssignments`] = Object.fromEntries(
+          overrides[`@${childPath.join('.')}:componentPropertyAssignments`] = Object.fromEntries(
             Object.entries(child.componentPropertyAssignments)
           )
         }
@@ -195,7 +195,8 @@ function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
   const props: JSXProp[] = []
-  if (component) props.push(['of', component.id])
+  const hasSwapBinding = node.componentPropertyReferences.some((reference) => reference.field === 'INSTANCE_SWAP')
+  if (component && !hasSwapBinding) props.push(['of', component.id])
   const definitions = componentPropertyDefinitions(graph, node)
   const values = Object.fromEntries(
     Object.entries(node.componentPropertyAssignments)
