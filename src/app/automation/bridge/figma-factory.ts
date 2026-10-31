@@ -36,6 +36,31 @@ export function makeFigmaFromStore(
     },
     zoom: store.state.zoom
   }
+  if (pageId === store.state.currentPageId) {
+    api.setViewportFitHandler((nodes) => {
+      if (pageId !== store.state.currentPageId || api.currentPageId !== store.state.currentPageId) {
+        return false
+      }
+      if (nodes.length === 0) return
+      let minX = Number.POSITIVE_INFINITY
+      let minY = Number.POSITIVE_INFINITY
+      let maxX = Number.NEGATIVE_INFINITY
+      let maxY = Number.NEGATIVE_INFINITY
+      for (const { absoluteBoundingBox: bounds } of nodes) {
+        minX = Math.min(minX, bounds.x)
+        minY = Math.min(minY, bounds.y)
+        maxX = Math.max(maxX, bounds.x + bounds.width)
+        maxY = Math.max(maxY, bounds.y + bounds.height)
+      }
+      store.zoomToBounds(minX, minY, maxX, maxY)
+      return {
+        // zoomToBounds centers the fitted bounds with symmetric padding. Derive center from
+        // those bounds so it remains correct before the canvas reports its viewport dimensions.
+        center: { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
+        zoom: store.state.zoom
+      }
+    })
+  }
   api.exportImage = async (nodeIds, opts) =>
     renderAutomationImage(
       store,

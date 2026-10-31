@@ -491,6 +491,16 @@ export class FigmaAPI implements NodeProxyHost {
   // --- Viewport ---
 
   private _viewport = { x: 0, y: 0, zoom: 1 }
+  private _viewportFitHandler:
+    | ((nodes: readonly { absoluteBoundingBox: Rect }[]) => { center: Vector; zoom: number } | false | void)
+    | null = null
+
+  /** Lets an app-backed host fit nodes using its live canvas viewport and navigation state. */
+  setViewportFitHandler(
+    handler: (nodes: readonly { absoluteBoundingBox: Rect }[]) => { center: Vector; zoom: number } | false | void
+  ): void {
+    this._viewportFitHandler = handler
+  }
 
   get viewport(): {
     center: Vector
@@ -501,6 +511,13 @@ export class FigmaAPI implements NodeProxyHost {
       center: { x: this._viewport.x, y: this._viewport.y },
       zoom: this._viewport.zoom,
       scrollAndZoomIntoView: (nodes) => {
+        if (this._viewportFitHandler) {
+          const fitted = this._viewportFitHandler(nodes)
+          if (fitted !== false) {
+            if (fitted) this._viewport = { x: fitted.center.x, y: fitted.center.y, zoom: fitted.zoom }
+            return
+          }
+        }
         const b = computeBounds(nodes.map((n) => n.absoluteBoundingBox))
         if (b.width === 0 && b.height === 0 && nodes.length === 0) return
 
