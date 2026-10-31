@@ -41,6 +41,8 @@ function parseFigFileSync(buffer: ArrayBuffer, options: ParseFigFileOptions = {}
   // Taken now, while the records are decoded: the archive outlives the reader's session.
   const archiveInfo = reader.session.archiveRecordInfo()
   const archive = localFigArchive(bytes, () => archiveInfo)
+  const repairs = repairHierarchy(reader.graph)
+  if (repairs > 0) console.warn(`[fig] repaired ${repairs} broken parent/child links on load`)
   registerFigArchive(reader.graph, archive)
   registerOriginalArchiveRequest(reader.graph, () => archive.original())
   return reader.graph
