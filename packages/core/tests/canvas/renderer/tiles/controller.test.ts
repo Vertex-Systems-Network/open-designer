@@ -89,7 +89,7 @@ describe('tile scheduling', () => {
     }
   })
 
-  test('zooms over the previous level scaled and renders the exact level once the zoom pauses', () => {
+  test('zooms over the quantized step rendered mid-gesture and the exact level once it pauses', () => {
     const { graph, surface, renderer, pageId } = createGridScene()
     const controller = new TiledSceneController({ now: () => 0 })
     try {
@@ -99,12 +99,15 @@ describe('tile scheduling', () => {
       }
       expect(result.covered).toBe(true)
 
-      // The level moves: nothing renders, the level-1 tiles stand in scaled.
+      // The level moves: the quantized step above 1.3, √2, renders under the moving budget and
+      // stands in for the exact level with the level-1 tiles.
       renderer.zoom = 1.3
       renderer.navigationPhase = 'zoom'
       const moving = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
       expect(moving.covered).toBe(false)
-      expect(moving.metrics.interruptibleCompleted).toBe(0)
+      expect(moving.metrics.interruptibleCompleted).toBeGreaterThan(0)
+      expect(controller.isRendered({ pageId, level: 2 ** 0.5, x: 0, y: 0 })).toBe(true)
+      expect(controller.isRendered({ pageId, level: 1.3, x: 0, y: 0 })).toBe(false)
       expect(moving.fallbackTileCount).toBeGreaterThan(0)
       expect(moving.uncoveredAreaCount).toBe(0)
 
@@ -119,7 +122,48 @@ describe('tile scheduling', () => {
       }
       expect(settled.covered).toBe(true)
       expect(settled.fallbackTileCount).toBe(0)
-      void pageId
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('presents a new level once every visible tile exists, then tiles as they land', () => {
+    const { graph, surface, renderer } = createGridScene()
+    // Free while settling; afterwards 10 ms a reading, so an idle frame renders one tile.
+    let step = 0
+    let time = 0
+    const controller = new TiledSceneController({ now: () => (time += step) })
+    try {
+      for (let frame = 0; frame < 12; frame++) {
+        controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      // At 1.3 the viewport is three by two tiles, all inside the settled level-1 area.
+      step = 10
+      renderer.zoom = 1.3
+      renderer.navigationPhase = 'zoom'
+      controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      renderer.navigationPhase = 'idle'
+      const visibleTiles = 3 * 2
+      let settling = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      let frames = 0
+      // The exact tiles rendered so far stay hidden: the whole viewport is still a stand-in.
+      for (; !settling.covered && frames < 60; frames++) {
+        expect(settling.fallbackTileCount).toBe(visibleTiles)
+        expect(settling.uncoveredAreaCount).toBe(0)
+        settling = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 1)
+      }
+      expect(frames).toBeGreaterThan(1)
+      expect(settling.covered).toBe(true)
+      expect(settling.fallbackTileCount).toBe(0)
+
+      // Committed, the level shows the tiles a pan reveals one by one over the stand-ins.
+      renderer.panX = -600
+      renderer.navigationPhase = 'pan'
+      const panning = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 2)
+      expect(panning.covered).toBe(false)
+      expect(panning.fallbackTileCount).toBeGreaterThan(0)
+      expect(panning.fallbackTileCount).toBeLessThan(visibleTiles)
     } finally {
       controller.destroy()
       renderer.destroy()

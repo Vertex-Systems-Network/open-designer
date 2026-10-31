@@ -1,1 +1,2 @@
 - Progressive rendering is the default canvas renderer; the previous renderer remains available in Settings under Rendering.
+- Zooming under progressive rendering keeps rendering during the gesture and sharpens the whole viewport in one frame when it ends, instead of tile by tile.
