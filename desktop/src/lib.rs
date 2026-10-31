@@ -1,5 +1,6 @@
 mod agents;
 mod credentials;
+#[cfg(target_os = "linux")]
 mod explicit_sync;
 mod files;
 mod fonts;
