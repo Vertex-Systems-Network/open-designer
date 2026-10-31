@@ -29,6 +29,7 @@ import {
   type HostFontLoader,
   type LocalFontAccessState
 } from '#core/text/font/sources'
+import { fontStandIn, standInFont } from '#core/text/font/stand-in'
 import {
   fontAxes,
   hasNamedInstance,
@@ -38,6 +39,7 @@ import {
   type NamedInstance
 } from '#core/text/font/variation'
 import { collectGraphFontKeys } from '#core/text/requirements/collect'
+import { sfntFont } from '#core/text/font/woff2'
 import { normalizedCoverageText, WebFontResolver } from '#core/text/web-font/resolver'
 import type { WebFontFetch, WebFontProviderId } from '#core/text/web-font/resolver'
 
@@ -395,8 +397,21 @@ export class FontManager {
     return (
       (await this.loadBundledFont(family, style)) ??
       (await this.loadCachedFont(family, style, characters)) ??
-      (await this.loadRemoteFont(family, style, characters, signal))
+      (await this.loadRemoteFont(family, style, characters, signal)) ??
+      (await this.loadStandIn(family, style))
     )
+  }
+
+  /**
+   * Loads the open stand-in for a family we cannot bundle or fetch.
+   */
+  private async loadStandIn(family: string, style: string): Promise<ArrayBuffer | null> {
+    const standIn = fontStandIn(family)
+    if (!standIn) return null
+    const file = await this.fetchBundledFont(standIn.file)
+    if (!file) return null
+    const font = standInFont(await sfntFont(file), standIn)
+    return font ? this.registerAndCache(family, style, font, 'stand-in') : null
   }
 
   /**
