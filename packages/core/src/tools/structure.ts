@@ -21,3 +21,5 @@ export { nodeReplaceWith } from './structure/replace'
 export { arrangeNodes } from './structure/arrange'
 
 export { batchUpdate } from './structure/batch'
+
+export { movePage } from './structure/pages'
