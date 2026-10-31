@@ -1,0 +1,1 @@
+- Vector path geometry now follows layout-driven size changes, so small component instances keep their paths within their resized boxes, including across collapse and recovery.
