@@ -198,6 +198,19 @@ function insertFlexChildren(
 ): void {
   const overlap = siblingOverlap(parent)
   const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
+  const primarySize = parent.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
+  const hugOverlap =
+    parent.layoutWrap === 'WRAP' ||
+    (parent.primaryAxisSizing === 'HUG' && parent.layoutMode === 'HORIZONTAL') ||
+    (parent.primaryAxisSizing === 'HUG' && parent.layoutMode === 'VERTICAL')
+      ? Math.min(
+          overlap,
+          ...graph
+            .getChildren(parent.id)
+            .filter((child) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
+            .map((child) => child[primarySize])
+        )
+      : overlap
   let followsInFlowSibling = false
   for (const node of graph.getChildren(parent.id)) {
     const child = asLaidOutIn(graph, node, parent)
@@ -209,7 +222,7 @@ function insertFlexChildren(
       yogaChild.setDisplay(Display.None)
     } else {
       configureInFlowChild(yogaChild, child, parent, graph, direction)
-      if (followsInFlowSibling && overlap > 0) yogaChild.setMargin(leadingEdge, -overlap)
+      if (followsInFlowSibling && hugOverlap > 0) yogaChild.setMargin(leadingEdge, -hugOverlap)
       followsInFlowSibling = true
     }
 
