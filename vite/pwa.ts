@@ -9,11 +9,11 @@ import { VitePWA } from 'vite-plugin-pwa'
  * path with its query, so a page root may be followed by `?` as well as `/`.
  */
 export const NOT_EDITOR_PAGES = [
-  /^\\/oauth\\//,
-  /^\\/oauth2\\//,
-  /^\\/api\\//,
-  /^\\/\\.well-known\\//,
-  /^\\/(?:welcome|auth|account|admin)(?:[/?]|$)/
+  /^\/oauth\//,
+  /^\/oauth2\//,
+  /^\/api\//,
+  /^\/\.well-known\//,
+  /^\/(?:welcome|auth|account|admin)(?:[/?]|$)/
 ]
 
 function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
@@ -23,14 +23,17 @@ function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
     .filter((prefix) => prefix !== '')
   for (const prefix of prefixes) {
     if (!prefix.startsWith('/')) {
-      throw new Error(`OPENDESIGNER_PWA_SERVER_PATHS entries must start with "/": ${prefix}`)
+      throw new Error('OPENDESIGNER_PWA_SERVER_PATHS entries must start with "/": ' + prefix)
     }
   }
   return prefixes.map((prefix) => {
-    const escaped = prefix.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')
+    const special = '.*+?^' + '$' + '{}()|[]' + '\\'
+    const escaped = Array.from(prefix, (character) =>
+      special.includes(character) ? '\\' + character : character
+    ).join('')
     return prefix.endsWith('/')
-      ? new RegExp(`^${escaped}`)
-      : new RegExp(`^${escaped}(?:[/?]|$)`)
+      ? new RegExp('^' + escaped)
+      : new RegExp('^' + escaped + '(?:[/?]|$)')
   })
 }
 
