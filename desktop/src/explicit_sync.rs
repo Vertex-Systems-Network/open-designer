@@ -1,9 +1,11 @@
 //! Keep WebKitGTK from disconnecting a Wayland session on NVIDIA.
 //!
 //! Disabling explicit sync alone does not stop WebKitGTK from selecting a hardware
-//! DMABUF renderer. For the proprietary NVIDIA driver, forcing shared memory keeps
-//! WebKitGTK from using the affected transport. These variables are set before
-//! Tauri creates the webview.
+//! DMABUF renderer. For affected setups, forcing shared memory keeps WebKitGTK from
+//! using the affected transport. A loaded NVIDIA module does not prove the WebView uses
+//! it, so this workaround requires explicit opt-in with
+//! `OPENDESIGNER_NVIDIA_WAYLAND_WORKAROUND=1`. Variables are set before Tauri creates
+//! the webview.
 
 use std::path::Path;
 
