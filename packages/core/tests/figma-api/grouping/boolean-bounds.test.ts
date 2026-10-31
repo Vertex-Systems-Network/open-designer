@@ -103,6 +103,8 @@ describe('boolean operation bounds', () => {
       expect(resultSize()).toEqual([30, 30])
       editor.updateNode(booleanId ?? '', { booleanOperation: 'UNION' })
       expect(resultSize()).toEqual([70, 70])
+      // And the boolean takes the box of that result, as it does when an operand moves.
+      expect(booleanNode && box(booleanNode)).toEqual([0, 0, 70, 70])
     } finally {
       editor.dispose()
     }
