@@ -166,6 +166,14 @@ export class SkiaRenderer {
     this.decodedPreviewHashes.add(hash)
     this.onImagePreviewReady?.(hash)
   })
+  /**
+   * Device pixels per world unit the drawing in progress is for: the viewport's scale in a frame,
+   * a tile's level while it records. Image previews are chosen at this detail, so a picture that
+   * drew them is recorded again when a finer tile asks for more.
+   */
+  imageDetailScale = 1
+  /** Whether the drawing in progress drew an image preview; chunk pictures note it to re-record. */
+  previewsDrawn = false
   /** Nodes whose image fills drew each image while previews were on, for redrawing them sharper. */
   readonly imageFillUsers = new Map<string, Set<string>>()
   /** Images whose sharper preview has decoded since the last frame. */

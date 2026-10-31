@@ -295,8 +295,10 @@ describe('tiles with image previews', () => {
     const decoded = new Promise<void>((resolve) => {
       release = resolve
     })
+    const edges: number[] = []
     const decoder: ImagePreviewDecoder = {
       decode: async (source, edge): Promise<ImagePreview> => {
+        edges.push(edge)
         await decoded
         return { bytes: new Uint8Array(source), originalWidth: edge, originalHeight: edge }
       },
@@ -333,6 +335,16 @@ describe('tiles with image previews', () => {
       }
       expect(result.covered).toBe(true)
       expect(centerPixel(renderer)).toEqual([255, 0, 0, 255])
+      expect(edges).toEqual([256])
+
+      // Four times closer, the tiles record the chunk again with a preview for their level.
+      renderer.zoom = 4
+      renderer.imageDetailScale = 4
+      result = controller.renderFrame(renderer, canvas, graph, 1, 1)
+      for (let frame = 0; frame < 10 && result.pending; frame++) {
+        result = controller.renderFrame(renderer, canvas, graph, 1, 1)
+      }
+      expect(edges).toEqual([256, 1024])
     } finally {
       renderer.destroy()
     }

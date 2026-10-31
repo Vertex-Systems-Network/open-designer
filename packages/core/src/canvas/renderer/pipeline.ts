@@ -269,6 +269,7 @@ export function render(
     w: r.viewportWidth / r.zoom,
     h: r.viewportHeight / r.zoom
   }
+  r.imageDetailScale = r.zoom * r.dpr
   updateSceneBackingPreviewState(r, layer)
 
   const { requiresUncachedSceneRender, canUsePicture, cacheMissReason } = getSceneRenderPolicy(

@@ -532,12 +532,19 @@ export class TiledSceneController {
   ): boolean {
     const deadline = this.now() + remainingMs
     let recorded = 0
-    for (const chunk of tileChunks(index, key)) {
-      if (chunk.kind === 'subtree' && !chunk.interruptible) continue
-      if (this.pictureCache.has(renderer, chunk)) continue
-      if (recorded > 0 && this.now() >= deadline) return false
-      this.pictureCache.get(renderer, graph, chunk)
-      recorded++
+    // Pictures record at the tile's detail, so their image previews suit its level.
+    const previousDetail = renderer.imageDetailScale
+    renderer.imageDetailScale = key.level
+    try {
+      for (const chunk of tileChunks(index, key)) {
+        if (chunk.kind === 'subtree' && !chunk.interruptible) continue
+        if (this.pictureCache.has(renderer, chunk)) continue
+        if (recorded > 0 && this.now() >= deadline) return false
+        this.pictureCache.get(renderer, graph, chunk)
+        recorded++
+      }
+    } finally {
+      renderer.imageDetailScale = previousDetail
     }
     return true
   }
