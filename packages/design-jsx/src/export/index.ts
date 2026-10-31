@@ -168,8 +168,9 @@ function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
 
 function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode): Record<string, unknown> {
   const overrides: Record<string, unknown> = {}
-  const visit = (node: SceneNode) => {
-    for (const child of graph.getChildren(node.id)) {
+  const visit = (node: SceneNode, path: number[]) => {
+    for (const [index, child] of graph.getChildren(node.id).entries()) {
+      const childPath = [...path, index]
       if (child.type === 'INSTANCE') {
         const definitions = componentPropertyDefinitions(graph, child)
         const values = Object.fromEntries(
@@ -184,10 +185,10 @@ function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode)
           )
         }
       }
-      visit(child)
+      visit(child, childPath)
     }
   }
-  visit(instance)
+  visit(instance, [])
   return overrides
 }
 
