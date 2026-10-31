@@ -37,6 +37,15 @@ commands, email, storage, backups, and upgrades are covered in the
 repository root, and [`compose.self-hosted.yml`](./compose.self-hosted.yml) runs it on one machine
 with [`self-hosted/openpencil-cloud.toml`](./self-hosted/openpencil-cloud.toml).
 
+The Cloud image builds the editor and its service worker before the container starts. If a deployment's sign-in proxy owns additional callback paths, pass them when building the image; setting them only at container runtime cannot update the already-generated service worker denylist:
+
+```sh
+docker build --build-arg OPENDESIGNER_PWA_SERVER_PATHS='/sso/,/.auth/' \
+  -f packages/cloud/deploy/Dockerfile -t ghcr.io/open-pencil/cloud .
+```
+
+Use comma-separated absolute path prefixes. The default image already excludes `/oauth/`, `/oauth2/`, and the Cloud server's own paths.
+
 ## End-to-end tests
 
 ```sh
