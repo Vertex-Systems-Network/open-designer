@@ -41,7 +41,7 @@ The Cloud image builds the editor and its service worker before the container st
 
 ```sh
 docker build --build-arg OPENDESIGNER_PWA_SERVER_PATHS='/sso/,/.auth/' \
-  -f packages/cloud/deploy/Dockerfile -t openpencil-cloud .
+  -f packages/cloud/deploy/Dockerfile -t ghcr.io/open-pencil/cloud .
 ```
 
 Use comma-separated absolute path prefixes. The default image already excludes `/oauth/`, `/oauth2/`, and the Cloud server's own paths.
