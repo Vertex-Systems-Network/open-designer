@@ -73,7 +73,6 @@ import {
   nodeBounds,
   nodeChildren,
   nodeMove,
-  movePage,
   nodeReplaceWith,
   nodeToComponent,
   nodeTree,
@@ -183,6 +182,7 @@ export const EXTENDED_TOOLS: ToolDef[] = [
   nodeBindings,
   nodeReplaceWith,
   arrangeNodes,
+  movePage,
   // Variables
   listVariables,
   listCollections,
