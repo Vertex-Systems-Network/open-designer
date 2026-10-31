@@ -11,7 +11,7 @@ Status: design, not implemented. It extends [Behaviours and Preview](./behaviour
 
 Figma's variables play two roles that look the same in a file.
 
-- **Tokens.** Colours, sizes, and fonts that change only with a mode, such as light and dark. Code export already writes a bound field as `var(--name)` where CSS resolves it as drawn (`DesignTokens`, `packages/dom-css/src/tokens/references.ts`), and a mode as an attribute on the element that sets it (`modeAttribute`, `tokens/stylesheet.ts`), so CSS switches them without script.
+- **Tokens.** Colours, sizes, and fonts that change only with a mode, such as light and dark. Code export already writes a bound field as `var(--name)` where CSS resolves it as drawn (`DesignTokens`, `packages/dom-css/src/tokens/references.ts`), and an unconditional/manual mode as an attribute on the element that sets it (`modeAttribute`, `tokens/stylesheet.ts`), so CSS switches it without script. Conditional modes remain under their existing CSS at-rules in the first version; they are not driven as reactive prototype state until their runtime behavior is designed.
 - **State.** Values a prototype changes while it runs: a counter, the selected tab, whether a panel is open, a subtotal shown as text.
 
 A variable is state when an interaction targets it, through a Set variable action, and a collection is state when a Set variable mode action targets it. Every other variable stays a token. The split reads an explicit reference in the file; it never guesses from names or values.
@@ -24,7 +24,7 @@ A layer's interactions are `prototypeInteractions` in the `.fig` schema, today k
 - An action's `connectionType` says what it does. `SET_VARIABLE` writes `targetVariableData` to `targetVariable`; `SET_VARIABLE_MODE` sets `targetVariableModeID` on a collection; `CONDITIONAL` holds `conditionalActions`, each a `condition` and its actions, the last without a condition as the else branch. Navigation, overlays, URLs, media, and animation are other connection types.
 - Values and conditions are `VariableData`: a constant, an alias, or an expression. The functions Figma's interaction editor writes are `ADDITION`, `SUBTRACTION`, `MULTIPLY`, `DIVIDE`, `EQUALS`, `NOT_EQUAL`, the four comparisons, `AND`, `OR`, `NOT`, and `NEGATE`; string `+` is `ADDITION` on strings. Text content bound to a number or boolean is `STRINGIFY` of an alias, which the reader decodes as a plain binding.
 
-The set is closed and small, so an expression compiles to readable code and evaluates without a general interpreter.
+These are the expression operators the first prototype evaluator plans to support. Imported `.fig` values and variable formulas can also contain functions such as ternary, truthiness, mode lookup, variant resolution, keyframes, and color composition. The reader must preserve formulas it does not interpret for round trip; preview and generated code leave those expressions unevaluated until support is designed.
 
 ## Model
 
@@ -38,7 +38,7 @@ Each step is its own module with its own tests.
 
 An island already keeps each control's state and shows it through `resolvePlayState` in a private copy of the page; the document never changes. Prototype state is one more layer on that copy: the current value of each state variable and the current mode of each state collection, kept per pane.
 
-An event on a layer runs its actions through the evaluator and updates that state. Text, visibility, and every other binding then resolve in the private graph through the binding resolution the canvas uses on a mode or variable change, and modes switch as an explicit mode on the island root. A behaviour's value bound to a state variable, such as a Switch's checked, reads and writes the same state, so a control and a prototype action can drive one another.
+An event on a layer runs supported actions through the evaluator and updates that state. Text, visibility, and every other supported binding then resolve in the private graph through the binding resolution the canvas uses on a mode or variable change. The first version binds only unconditional/manual collection modes on the island root; conditional modes keep their existing CSS at-rules and are outside runtime state switching. A behaviour's value bound to a state variable, such as a Switch's checked, reads and writes the same state, so a control and a prototype action can drive one another.
 
 ## Code export
 
@@ -48,7 +48,7 @@ An event on a layer runs its actions through the evaluator and updates that stat
 | Text bound to a state variable     | <code v-pre>{{ variableText(state.subtotal) }}</code>                                     | `{variableText(state.subtotal)}`                       |
 | Visibility bound to a boolean      | `v-if="state.open"`                                                                       | `{state.open && …}`                                    |
 | A number or colour bound to state  | a custom property set on the page root from state, read by the stylesheet's `var(--name)` | the same through `style`                               |
-| A state collection's mode          | the mode attribute bound to state, `:data-theme="state.theme"`                            | the same                                               |
+| An unconditional/manual state collection mode | the mode attribute bound to state, `:data-theme="state.theme"`                     | the same                                               |
 | An interaction                     | a handler on the layer's element for its event                                            | the same                                               |
 | Set variable, Conditional          | assignments and `if` / `else` in the handler                                              | the same                                               |
 | A behaviour's value bound to state | `v-model` on the Reka component                                                           | `checked` and `onCheckedChange` on the Radix component |
