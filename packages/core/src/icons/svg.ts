@@ -377,6 +377,10 @@ function transformStrokeScale(transform: string | null | undefined): number {
   return Math.min(xScale, yScale)
 }
 
+function roundPathCoordinate(value: number): number {
+  return Number(value.toFixed(2))
+}
+
 function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
   let x = 0
   let y = 0
@@ -404,8 +408,8 @@ function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
     const endX = values.at(-2)
     const endY = values.at(-1)
     if (endX === undefined || endY === undefined) return
-    if (command === 'A' && Math.round(x * 100) === Math.round(endX * 100) &&
-        Math.round(y * 100) === Math.round(endY * 100)) {
+    if (command === 'A' && roundPathCoordinate(x) === roundPathCoordinate(endX) &&
+        roundPathCoordinate(y) === roundPathCoordinate(endY)) {
       collapsed = true
     }
     x = endX
