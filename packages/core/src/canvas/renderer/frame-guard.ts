@@ -30,8 +30,20 @@ function describeError(error: unknown): string {
   return String(error)
 }
 
-function isWasmTrap(error: unknown): boolean {
-  return error instanceof WebAssembly.RuntimeError
+function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
+  if (error == null || seen.has(error)) return []
+  seen.add(error)
+  if (error instanceof AggregateError)
+    return [...errorMessages(error.message, seen), ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()]
+  if (error instanceof Error) return [error.message, ...errorMessages(error.cause, seen)]
+  return [String(error)]
+}
+
+function isFatalCorruption(error: unknown): boolean {
+  if (error instanceof WebAssembly.RuntimeError) return true
+  return errorMessages(error).some((message) =>
+    /out[- ]of[- ]bounds|call_indirect|ResourceCache cleanup failed/i.test(message)
+  )
 }
 
 export class FrameGuard {
@@ -71,7 +83,7 @@ export class FrameGuard {
     this.cleanFrames = 0
     this.lastError = describeError(error)
     this.backoffFrames = Math.min(2 ** this.consecutiveFailures, this.policy.maxBackoffFrames)
-    if (isWasmTrap(error) || this.consecutiveFailures >= this.policy.disableAfter)
+    if (isFatalCorruption(error) || this.consecutiveFailures >= this.policy.disableAfter)
       return this.escalate('disabled')
     if (this.consecutiveFailures >= this.policy.degradeAfter) return this.escalate('degraded')
     return false
