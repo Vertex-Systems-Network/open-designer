@@ -22,4 +22,4 @@ export { arrangeNodes } from './structure/arrange'
 
 export { batchUpdate } from './structure/batch'
 
-export { movePage } from './tools/structure/pages'
+export { movePage } from './structure/pages'
