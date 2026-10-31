@@ -78,10 +78,7 @@ function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
 export function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
   const saved = drawsSavedText(node)
   if (!saved && !drawsLaidOutText(r, node)) return
-  canvas.save()
-  if (shouldClipTextToLayoutBox(node)) {
-    canvas.clipRect(r.ck.LTRBRect(0, 0, node.width, node.height), r.ck.ClipOp.Intersect, false)
-  }
+  saveClippedToLayoutBox(r, canvas, node)
   if (saved) drawSavedEmoji(r, canvas, node)
   else {
     // The paragraph the fills just drew with: its colour keys the prepared text, and a solid fill
@@ -95,6 +92,14 @@ export function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode):
   canvas.restore()
 }
 
+/** Saves the canvas and clips to the text's box where its layout calls for it; the caller restores. */
+function saveClippedToLayoutBox(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
+  canvas.save()
+  if (shouldClipTextToLayoutBox(node)) {
+    canvas.clipRect(r.ck.LTRBRect(0, 0, node.width, node.height), r.ck.ClipOp.Intersect, false)
+  }
+}
+
 function drawSavedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): boolean {
   return canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
 }
@@ -103,11 +108,7 @@ export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fil
   const text = node.text
   if (!text) return
 
-  canvas.save()
-  if (shouldClipTextToLayoutBox(node)) {
-    canvas.clipRect(r.ck.LTRBRect(0, 0, node.width, node.height), r.ck.ClipOp.Intersect, false)
-  }
-
+  saveClippedToLayoutBox(r, canvas, node)
   if (drawSavedText(r, canvas, node, fill)) {
     canvas.restore()
     return

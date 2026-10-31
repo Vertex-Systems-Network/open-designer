@@ -76,13 +76,7 @@ export class RenderChunkIndex {
   }
 
   bulkLoad(chunks: RenderChunk[], graph?: SceneGraph): void {
-    this.tree.clear()
-    this.chunks.clear()
-    this.chunkIdsByNode.clear()
-    this.chunkIdsByDependency.clear()
-    this.dependenciesByChunk.clear()
-    this.chunkIdsByTop.clear()
-    this.cachedBounds = undefined
+    this.dispose()
     this.tree.load(chunks)
     for (const chunk of chunks) this.register(chunk, graph)
   }
@@ -158,16 +152,10 @@ export class RenderChunkIndex {
     const found = this.chunkOwnerOf(graph, nodeId)
     if (!found) return null
     const { owner, ownerChunk, path } = found
-    if (ownerChunk.kind === 'subtree') {
-      if (owner.parentId === pageId) return this.rebuildTop(graph, pageId, owner.id)
-      return this.replaceSubtree(graph, pageId, ownerChunk.topId, owner.id, owner.id)
-    }
+    if (ownerChunk.kind === 'subtree') return this.rebuildOwner(graph, pageId, owner, ownerChunk)
     // The owner draws itself and each child subtree apart: only the one on the path changes.
     const child = path.at(-1)
-    if (!child) {
-      if (owner.parentId === pageId) return this.rebuildTop(graph, pageId, owner.id)
-      return this.replaceSubtree(graph, pageId, ownerChunk.topId, owner.id, owner.id)
-    }
+    if (!child) return this.rebuildOwner(graph, pageId, owner, ownerChunk)
     return this.replaceSubtree(graph, pageId, ownerChunk.topId, owner.id, child.id)
   }
 
@@ -175,6 +163,17 @@ export class RenderChunkIndex {
    * The nearest layer from `nodeId` upward that owns a chunk, its chunk, and the layers passed
    * on the way, nearest the owner last; null off the page or on a parent cycle.
    */
+  /** Rebuilds the chunks of `owner` whole: the top it is, or its subtree within its top. */
+  private rebuildOwner(
+    graph: SceneGraph,
+    pageId: string,
+    owner: SceneNode,
+    ownerChunk: RenderChunk
+  ): { removed: RenderChunk[]; added: RenderChunk[] } | null {
+    if (owner.parentId === pageId) return this.rebuildTop(graph, pageId, owner.id)
+    return this.replaceSubtree(graph, pageId, ownerChunk.topId, owner.id, owner.id)
+  }
+
   private chunkOwnerOf(
     graph: SceneGraph,
     nodeId: string
@@ -253,10 +252,7 @@ export class RenderChunkIndex {
     const found = this.chunkOwnerOf(graph, parentId)
     if (!found) return null
     const { owner, ownerChunk } = found
-    if (ownerChunk.kind === 'subtree') {
-      if (owner.parentId === pageId) return this.rebuildTop(graph, pageId, owner.id)
-      return this.replaceSubtree(graph, pageId, ownerChunk.topId, owner.id, owner.id)
-    }
+    if (ownerChunk.kind === 'subtree') return this.rebuildOwner(graph, pageId, owner, ownerChunk)
     const { removed, stale } = this.danglingUnder(graph, owner.id)
     for (const chunk of removed) this.unregister(chunk)
     const added: RenderChunk[] = []

@@ -1,5 +1,7 @@
 import type { Image as CKImage } from 'canvaskit-wasm'
 
+import { intersectVisualBounds } from '@open-pencil/scene-graph/geometry'
+
 import { ResourceCache } from '#core/cache/resource'
 
 import {
@@ -47,15 +49,6 @@ export function viewportTileCacheBudget(viewportBytes: number): number {
     MAXIMUM_TILE_CACHE_BYTES,
     Math.max(DEFAULT_MAX_TILE_BYTES, viewportBytes * TILE_CACHE_VIEWPORTS)
   )
-}
-
-/** The overlap of two areas, or null where they share none; a tile off the page keeps its own. */
-function intersection(a: TileWorldBounds, b: TileWorldBounds): TileWorldBounds | null {
-  const minX = Math.max(a.minX, b.minX)
-  const minY = Math.max(a.minY, b.minY)
-  const maxX = Math.min(a.maxX, b.maxX)
-  const maxY = Math.min(a.maxY, b.maxY)
-  return minX < maxX && minY < maxY ? { minX, minY, maxX, maxY } : null
 }
 
 /** Levels are compared by zoom distance; a finer level wins a tie, as it stays sharp scaled down. */
@@ -176,7 +169,8 @@ export class TileImageCache {
     content: TileWorldBounds | null = null
   ): CachedTile[] | null {
     const bounds = tileWorldBounds(key)
-    const area = content ? (intersection(bounds, content) ?? bounds) : bounds
+    // A tile off the page keeps its own area.
+    const area = content ? (intersectVisualBounds(bounds, content) ?? bounds) : bounds
     // Shrink by a hair so a boundary shared with the next tile does not ask for that tile too.
     const inset = {
       minX: area.minX + 1e-6,
