@@ -239,6 +239,13 @@ export function render(
   let canvas: Canvas | null = null
   let saveCount = 1
   try {
+    if (guard.health === 'degraded') {
+      invalidateAllPictures(r)
+      r.imageCache.clear()
+      r.effectRasterCache.clear()
+      r.labelParagraphCache.clear()
+      disposePathCaches(r)
+    }
     canvas = r.surface.getCanvas()
     saveCount = canvas.getSaveCount()
     drawFrame(r, graph, selectedIds, overlays, sceneVersion, layer, interactive || guard.health === 'degraded')
@@ -268,6 +275,8 @@ function recoverFromFailedFrame(
         invalidateAllPictures(r)
         r.imageCache.clear()
         disposePathCaches(r)
+        r.effectRasterCache.clear()
+        r.labelParagraphCache.clear()
       }
     } catch (recoveryError) {
       changed = guard.disable(recoveryError) || changed
