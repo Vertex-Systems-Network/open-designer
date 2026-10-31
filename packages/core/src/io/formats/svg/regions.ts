@@ -1,5 +1,9 @@
 import type { Fill, SceneNode, WindingRule } from '@open-pencil/scene-graph'
-import { hasRegionFills, regionSVGPaths } from '@open-pencil/scene-graph/vector-network'
+import {
+  fillGeometryMatchesRegions,
+  hasRegionFills,
+  regionSVGPaths
+} from '@open-pencil/scene-graph/vector-network'
 
 import { resolveFill, solidFillOpacity, type SVGExportContext } from './defs'
 import { svg, type SVGNode } from './node'
@@ -12,27 +16,37 @@ export interface FillOutline {
   fills?: Fill[]
 }
 
+/** A vector's filled outlines, and whether they were traced from its network's regions. */
+export interface FillOutlines {
+  outlines: FillOutline[]
+  traced: boolean
+}
+
 /**
- * A vector's filled outlines with their region's paints: its fill geometry, one outline per
- * region; or, for a pasted vector with region paints and no fill geometry, its traced regions.
+ * A vector's filled outlines as the canvas draws them. Regions with paints of their own fill
+ * their outlines from the fill geometry when it has one per region, or else their traced loops.
  */
-export function fillOutlines(node: SceneNode): FillOutline[] | null {
-  const regions = node.vectorNetwork?.regions ?? []
-  if (node.fillGeometry.length > 0) {
-    const regionGeometry = node.fillGeometry.length === regions.length
-    return node.fillGeometry.flatMap((geometry, index) => {
-      const d = geometryBlobToSVGPath(geometry.commandsBlob)
+export function fillOutlines(node: SceneNode): FillOutlines | null {
+  const network = node.vectorNetwork
+  if (network && hasRegionFills(network)) {
+    const traced = !fillGeometryMatchesRegions(node.fillGeometry, network)
+    const paths = traced
+      ? regionSVGPaths(network)
+      : node.fillGeometry.map((geometry) => geometryBlobToSVGPath(geometry.commandsBlob))
+    const outlines = network.regions.flatMap((region, index) => {
+      const d = paths[index]
       if (!d) return []
-      const fills = regionGeometry ? regions[index].fills : undefined
-      return [{ d, windingRule: geometry.windingRule, fills }]
+      const windingRule = traced ? region.windingRule : node.fillGeometry[index].windingRule
+      return [{ d, windingRule, fills: region.fills }]
     })
+    return { outlines, traced }
   }
-  if (!node.vectorNetwork || !hasRegionFills(node.vectorNetwork)) return null
-  return regionSVGPaths(node.vectorNetwork).map((d, index) => ({
-    d,
-    windingRule: regions[index].windingRule,
-    fills: regions[index].fills
-  }))
+  if (node.fillGeometry.length === 0) return null
+  const outlines = node.fillGeometry.flatMap((geometry) => {
+    const d = geometryBlobToSVGPath(geometry.commandsBlob)
+    return d ? [{ d, windingRule: geometry.windingRule }] : []
+  })
+  return { outlines, traced: false }
 }
 
 /** An outline painted once per visible paint, the last one carrying the stroke. */

@@ -442,6 +442,42 @@ describe('solid paint opacity exported to SVG', () => {
     ])
     expect(paths(svg)).toEqual(['<path d="M0 0L10 0L0 10L0 0Z" fill="#FF0000"/>'])
   })
+
+  test("traces a vector's painted regions when its fill geometry has fewer outlines", () => {
+    const zero = { x: 0, y: 0 }
+    const svg = svgOf((graph, pageId) => [
+      graph.createNode('VECTOR', pageId, {
+        width: 10,
+        height: 10,
+        fills: [solid(0.5, 0.5, 0.5, 1, 1)],
+        vectorNetwork: {
+          vertices: [
+            { x: 0, y: 0 },
+            { x: 10, y: 0 },
+            { x: 0, y: 10 },
+            { x: 10, y: 10 }
+          ],
+          segments: [
+            { start: 0, end: 1, tangentStart: zero, tangentEnd: zero },
+            { start: 1, end: 2, tangentStart: zero, tangentEnd: zero },
+            { start: 2, end: 0, tangentStart: zero, tangentEnd: zero },
+            { start: 1, end: 3, tangentStart: zero, tangentEnd: zero },
+            { start: 3, end: 2, tangentStart: zero, tangentEnd: zero }
+          ],
+          regions: [
+            { windingRule: 'NONZERO', loops: [[0, 1, 2]], fills: [solid(1, 0, 0, 1, 1)] },
+            { windingRule: 'NONZERO', loops: [[3, 4, 1]], fills: [solid(0, 0, 1, 1, 1)] }
+          ]
+        },
+        // An import skipped the second region's empty outline.
+        fillGeometry: [{ windingRule: 'NONZERO', commandsBlob: moveTo(0, 0) }]
+      }).id
+    ])
+    expect(paths(svg)).toEqual([
+      '<path d="M0 0L10 0L0 10L0 0Z" fill="#FF0000"/>',
+      '<path d="M10 0L10 10L0 10L10 0Z" fill="#0000FF"/>'
+    ])
+  })
 })
 
 describe('FigJam shapes exported to SVG', () => {

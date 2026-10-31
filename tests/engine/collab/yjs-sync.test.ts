@@ -134,7 +134,9 @@ describe('collab yjs-sync', () => {
               visible: true
             }
           ]
-        }
+        },
+        // Paints that are not a list leave the region drawing the layer's fills.
+        { windingRule: 'NONZERO', loops: [], fills: null }
       ]
     })
     ynode.set('strokeGeometry', 'invalid')
@@ -142,7 +144,8 @@ describe('collab yjs-sync', () => {
     const props = decodeNodeFromYjs(ynode)
     const source = props.source as SceneNode['source']
     const fillGeometry = props.fillGeometry as GeometryPath[]
-    const fills = (props.vectorNetwork as VectorNetwork).regions[0]?.fills
+    const regions = (props.vectorNetwork as VectorNetwork).regions
+    const fills = regions[0]?.fills
 
     expect(source).toEqual({
       ...createDefaultSourceMetadata(),
@@ -161,6 +164,7 @@ describe('collab yjs-sync', () => {
       gradientTransform: { m00: 1, m01: 0, m02: 0, m10: 0, m11: 1, m12: 0 }
     })
     expect(fills?.[1]?.type).toBe('SOLID')
+    expect(regions[1]).not.toHaveProperty('fills')
     expect(props.strokeGeometry).toEqual([])
   })
 

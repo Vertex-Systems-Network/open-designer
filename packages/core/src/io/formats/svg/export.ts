@@ -70,8 +70,8 @@ function vectorShapeElements(
   fallbackFills?: Fill[]
 ): SVGNode[] {
   const elements: SVGNode[] = []
-  const outlines = fillOutlines(node)
-  for (const outline of outlines ?? []) {
+  const filled = fillOutlines(node)
+  for (const outline of filled?.outlines ?? []) {
     const attrs = {
       d: outline.d,
       'fill-rule': outline.windingRule === 'EVENODD' ? 'evenodd' : undefined,
@@ -80,9 +80,9 @@ function vectorShapeElements(
     elements.push(...paintedOutline(node, attrs, ctx, outline.fills ?? fallbackFills))
   }
   const network = node.vectorNetwork
-  if (network && !outlines) elements.push(...networkElements(node, network, common))
+  if (network && !filled) elements.push(...networkElements(node, network, common))
   // Traced regions leave the open segments, which the canvas strokes, to add here.
-  else if (network && node.fillGeometry.length === 0 && looseSegments(network).length > 0)
+  else if (network && filled?.traced && looseSegments(network).length > 0)
     elements.push(...openPathElements(node, network, common, looseSegments))
   if (node.strokeGeometry.length > 0 && strokeAttrs.stroke && strokeAttrs.stroke !== 'none') {
     for (const geo of node.strokeGeometry) {

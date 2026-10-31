@@ -4,7 +4,7 @@ import type { SceneNode, SceneGraph, Fill } from '@open-pencil/scene-graph'
 import { invertGradientTransform } from '@open-pencil/scene-graph/gradient'
 import Matrix from '@open-pencil/scene-graph/matrix'
 import type { Color, Rect, Vector } from '@open-pencil/scene-graph/primitives'
-import { hasRegionFills } from '@open-pencil/scene-graph/vector-network'
+import { fillGeometryMatchesRegions, hasRegionFills } from '@open-pencil/scene-graph/vector-network'
 
 import { figmaBlendModeToSkia } from './blend'
 import { makeDiamondGradient } from './gradients/diamond'
@@ -51,10 +51,8 @@ export function drawVectorMultiStyleFills(
   const network = node.type === 'VECTOR' ? node.vectorNetwork : null
   if (!network || !hasRegionFills(network)) return false
   const { regions } = network
-  // Fill geometry is one outline per region, as the file or an edit wrote it; a pasted vector has
-  // none, so its regions draw from the network.
   const paths =
-    (node.fillGeometry.length === regions.length ? r.getFillGeometry(node) : null) ??
+    (fillGeometryMatchesRegions(node.fillGeometry, network) ? r.getFillGeometry(node) : null) ??
     r.getVectorPaths(node)
   if (!paths) return false
 

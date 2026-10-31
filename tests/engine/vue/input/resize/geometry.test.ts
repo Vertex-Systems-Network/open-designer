@@ -18,6 +18,8 @@ const RED: Fill = {
   blendMode: 'NORMAL'
 }
 
+const BLUE: Fill = { ...RED, color: { r: 0, g: 0, b: 1, a: 1 } }
+
 const NETWORK: VectorNetwork = {
   vertices: [
     { x: 0, y: 0 },
@@ -31,8 +33,15 @@ const NETWORK: VectorNetwork = {
     { start: 2, end: 3, tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } },
     { start: 3, end: 0, tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }
   ],
-  regions: [{ windingRule: 'NONZERO', loops: [[0, 1, 2, 3]], fills: [RED] }]
+  // Two regions with paints of their own, so a resize that drops or swaps one shows.
+  regions: [
+    { windingRule: 'NONZERO', loops: [[0, 1, 2, 3]], fills: [RED] },
+    { windingRule: 'EVENODD', loops: [[0, 1, 2, 3]], fills: [BLUE] }
+  ]
 }
+
+/** One fill outline per region. */
+const FILL_GEOMETRY = [movePath(10, 10), movePath(0, 10)]
 
 const STROKE: Stroke = {
   type: 'SOLID',
@@ -102,10 +111,13 @@ function expectGeometry(node: SceneNode, size: number) {
   expect(node.width).toBe(size)
   expect(node.height).toBe(size)
   expect(node.vectorNetwork?.vertices[2]).toMatchObject({ x: size, y: size })
-  expect(pathPoint(node.fillGeometry[0])).toEqual([size, size])
+  expect(node.fillGeometry.map(pathPoint)).toEqual([
+    [size, size],
+    [0, size]
+  ])
   if (size === 10) expect(pathPoint(node.strokeGeometry[0])).toEqual([5, 5])
   else expect(node.strokeGeometry).toEqual([])
-  expect(node.vectorNetwork?.regions[0]?.fills?.[0]?.color.r).toBe(1)
+  expect(node.vectorNetwork?.regions.map((region) => region.fills)).toEqual([[RED], [BLUE]])
 }
 
 describe('vector resize geometry', () => {
@@ -116,7 +128,7 @@ describe('vector resize geometry', () => {
       width: 10,
       height: 10,
       vectorNetwork: cloneVectorNetwork(NETWORK),
-      fillGeometry: [movePath(10, 10)],
+      fillGeometry: copyGeometryPaths(FILL_GEOMETRY),
       strokeGeometry: [movePath(5, 5)]
     })
     const drag = dragFor(vector)
@@ -140,7 +152,7 @@ describe('vector resize geometry', () => {
       width: 10,
       height: 10,
       vectorNetwork: cloneVectorNetwork(NETWORK),
-      fillGeometry: [movePath(10, 10)],
+      fillGeometry: copyGeometryPaths(FILL_GEOMETRY),
       strokeGeometry: [movePath(5, 5)]
     })
     const descendants = collectResizeDescendants(editor.graph, group.id)

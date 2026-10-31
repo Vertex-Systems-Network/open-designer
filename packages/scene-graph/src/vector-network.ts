@@ -4,7 +4,7 @@ import { copyVectorRegion } from './copy'
 import type { Mat3 } from './matrix'
 import type { VectorPathWindingRule } from './parse-path'
 import type { Vector } from './primitives'
-import type { Fill, VectorNetwork, VectorSegment, VectorVertex } from './types'
+import type { Fill, GeometryPath, VectorNetwork, VectorSegment, VectorVertex } from './types'
 
 /** Concatenate vector networks while preserving independent geometry. */
 export function mergeVectorNetworks(networks: readonly VectorNetwork[]): VectorNetwork {
@@ -69,6 +69,17 @@ export function transformVectorNetwork(m: Mat3, vn: VectorNetwork): VectorNetwor
 /** Whether any region has paints of its own, which it draws instead of the layer's fills. */
 export function hasRegionFills(network: VectorNetwork | null): boolean {
   return network?.regions.some((region) => region.fills !== undefined) ?? false
+}
+
+/**
+ * Whether fill geometry is the regions' outlines, one each, as a file or an edit writes it. A
+ * pasted vector has none, and an import skips empty outlines; their regions draw traced.
+ */
+export function fillGeometryMatchesRegions(
+  fillGeometry: readonly GeometryPath[],
+  network: VectorNetwork
+): boolean {
+  return fillGeometry.length === network.regions.length
 }
 
 /** The paints regions carry of their own. */

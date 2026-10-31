@@ -126,16 +126,19 @@ function normalizeGeometryPaths(value: unknown): GeometryPath[] {
   return paths
 }
 
-/** A remote network's region paints, keeping only the ones that are valid fills. */
+/**
+ * A remote network's region paints, keeping only the ones that are valid fills. Paints that are
+ * not a list are none of the region's own, so it draws the layer's rather than nothing.
+ */
 function normalizeRegionFills(value: unknown): unknown {
   if (!isPlainObject(value) || !Array.isArray(value.regions)) return value
   return {
     ...value,
-    regions: value.regions.map((region: unknown) =>
-      isPlainObject(region) && 'fills' in region
-        ? { ...region, fills: normalizeFills(region.fills) }
-        : region
-    )
+    regions: value.regions.map((region: unknown) => {
+      if (!isPlainObject(region) || !('fills' in region)) return region
+      if (!Array.isArray(region.fills)) return omit(region, ['fills'])
+      return { ...region, fills: normalizeFills(region.fills) }
+    })
   }
 }
 
