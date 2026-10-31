@@ -1,4 +1,5 @@
 import harfBuzzSubset from 'harfbuzzjs/dist/harfbuzz-subset.wasm?url'
+import caveatVariable from '@open-pencil/core/assets/CaveatVariable.woff2?url'
 
 import interSemiBold from '@open-pencil/core/assets/Inter-SemiBold.ttf?url'
 import interVariableItalic from '@open-pencil/core/assets/InterVariable-Italic.ttf?url'
@@ -18,7 +19,8 @@ const BUNDLED_FONT_URLS: Record<string, string> = {
   'InterVariable-Italic.ttf': interVariableItalic,
   'Inter-SemiBold.ttf': interSemiBold,
   'NotoNaskhArabic-Regular.ttf': notoNaskhArabic,
-  'OpenPencilEmojiMetrics-Regular.ttf': emojiMetrics
+  'OpenPencilEmojiMetrics-Regular.ttf': emojiMetrics,
+  'CaveatVariable.woff2': caveatVariable
 }
 
 /**
