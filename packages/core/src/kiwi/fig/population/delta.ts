@@ -129,6 +129,7 @@ export function applyFigPopulationDelta(graph: SceneGraph, delta: FigPopulationD
     for (const [id, changes] of delta.updated) graph.updateNode(id, changes)
     for (const id of delta.deleted) graph.deleteNode(id)
   })
+  repairHierarchy(graph)
   graph.instanceIndex.clear()
   for (const node of graph.getAllNodes()) {
     if (node.type !== 'INSTANCE' || !node.componentId) continue
