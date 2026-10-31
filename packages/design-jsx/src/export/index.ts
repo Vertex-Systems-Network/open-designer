@@ -4,6 +4,7 @@ import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-pencil/scene-graph/components'
 import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
+import { ownsSlotContent } from '@open-pencil/scene-graph/slots'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
 
 import {
@@ -253,7 +254,8 @@ function nodeToJSX(
     const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
       propAttribute
     )
-    return [jsx.element(tag, attributes, [], depth)]
+    const instanceChildren = ownsSlotContent(graph, node) ? children(depth + 1) : []
+    return [jsx.element(tag, attributes, instanceChildren, depth)]
   }
   const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
     propAttribute
