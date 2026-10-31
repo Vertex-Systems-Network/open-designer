@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::path::Path;
 use std::sync::Mutex;
 use tauri::menu::{
-    CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder, MenuItemKind, Submenu, SubmenuBuilder,
+    CheckMenuItemBuilder, Menu, MenuBuilder, MenuItemBuilder, MenuItemKind, Submenu, SubmenuBuilder,
 };
 
 #[cfg(any(target_os = "macos", target_os = "windows"))]
@@ -265,10 +265,18 @@ fn collect_checked<R: tauri::Runtime>(
 
 fn current_checked<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> HashMap<String, bool> {
     let mut checked = HashMap::new();
-    if let Some(items) = app.menu().and_then(|menu| menu.items().ok()) {
+    if let Some(items) = editor_menu(app).and_then(|menu| menu.items().ok()) {
         collect_checked(items, &mut checked);
     }
     checked
+}
+
+/// The menu installed for the editor: app-wide on macOS, attached to the main window elsewhere.
+fn editor_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> Option<Menu<R>> {
+    #[cfg(target_os = "macos")]
+    return app.menu();
+    #[cfg(not(target_os = "macos"))]
+    return tauri::Manager::get_webview_window(app, "main").and_then(|window| window.menu());
 }
 
 fn find_menu_item<R: tauri::Runtime>(
@@ -295,9 +303,7 @@ pub fn native_menu_checked<R: tauri::Runtime>(
     app: tauri::AppHandle<R>,
     id: String,
 ) -> Result<bool, String> {
-    let menu = app
-        .menu()
-        .ok_or_else(|| "Application menu is unavailable".to_string())?;
+    let menu = editor_menu(&app).ok_or_else(|| "Application menu is unavailable".to_string())?;
     let item = find_menu_item(menu.items().map_err(|error| error.to_string())?, &id)
         .ok_or_else(|| format!("Menu item not found: {id}"))?;
     match item {
@@ -312,9 +318,7 @@ pub fn set_native_menu_checked<R: tauri::Runtime>(
     id: String,
     checked: bool,
 ) -> Result<(), String> {
-    let menu = app
-        .menu()
-        .ok_or_else(|| "Application menu is unavailable".to_string())?;
+    let menu = editor_menu(&app).ok_or_else(|| "Application menu is unavailable".to_string())?;
     let item = find_menu_item(menu.items().map_err(|error| error.to_string())?, &id)
         .ok_or_else(|| format!("Menu item not found: {id}"))?;
     match item {
@@ -379,7 +383,15 @@ pub fn install_app_menu<R: tauri::Runtime>(
         builder = builder.item(menu);
     }
 
-    app.set_menu(builder.build()?)?;
+    let menu = builder.build()?;
+    // On Windows and Linux an app-wide menu is inherited by every window without its own menu,
+    // including the Software Update window, so attach it to the editor window alone there.
+    #[cfg(target_os = "macos")]
+    app.set_menu(menu)?;
+    #[cfg(not(target_os = "macos"))]
+    if let Some(window) = tauri::Manager::get_webview_window(app, "main") {
+        window.set_menu(menu)?;
+    }
     Ok(())
 }
 
