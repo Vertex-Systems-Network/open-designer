@@ -56,7 +56,7 @@ export async function previewDOMCode(
     const pageId = graph.getPages()[0]?.id ?? graph.rootId
     session.previewGraph = graph
     session.previewPageId = pageId
-    store.replaceGraph(graph)
+    store.replaceGraph(graph, { preserveHistory: true })
     return { ok: true }
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : String(error) }
@@ -64,7 +64,7 @@ export async function previewDOMCode(
 }
 
 export function resetDOMCodePreview(store: EditorStore, session: DOMCodeSession): void {
-  store.replaceGraph(session.originalGraph)
+  store.replaceGraph(session.originalGraph, { preserveHistory: true })
   void store.switchPage(session.originalPageId)
   session.previewGraph = null
   session.previewPageId = null
@@ -77,11 +77,11 @@ export function commitDOMCodeSession(store: EditorStore, session: DOMCodeSession
   store.pushUndoEntry({
     label: 'Edit HTML/CSS',
     forward: () => {
-      store.replaceGraph(after)
+      store.replaceGraph(after, { preserveHistory: true })
       void store.switchPage(afterPageId)
     },
     inverse: () => {
-      store.replaceGraph(session.originalGraph)
+      store.replaceGraph(session.originalGraph, { preserveHistory: true })
       void store.switchPage(session.originalPageId)
     }
   })
