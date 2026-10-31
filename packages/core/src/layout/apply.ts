@@ -54,12 +54,13 @@ function writeLayoutGeometry(
   if (graph.isApplyingDerivedLayout && !constrained) return
   if (from.width !== node.width || from.height !== node.height) {
     constrainChildren(graph, node, from, computeLayout)
+    rememberPlacedSize(node)
   }
 }
 
 /**
- * The size each Hug frame had after layout last ran on it. Keyed by the node, so a deleted
- * frame's entry goes with it and a restored one starts afresh.
+ * The size each Hug frame's constrained children were last placed for by layout. Keyed by the
+ * node, so a deleted frame's entry goes with it and a restored one starts afresh.
  */
 const huggedSizes = new WeakMap<SceneNode, { width: number; height: number }>()
 
