@@ -1,29 +1,83 @@
 import type { Node as YogaNode } from 'yoga-layout'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
+import { scaleGeometryPaths } from '@open-pencil/scene-graph/copy'
 import { enforcedAspectRatio } from '@open-pencil/scene-graph/layout'
-import { layoutConstrainedChildRect } from '@open-pencil/scene-graph/resize'
+import {
+  layoutConstrainedChildRect,
+  scaleVectorNetworkForResize
+} from '@open-pencil/scene-graph/resize'
 
 import { keepsSavedLayout, usesDetachedDerivedLayout } from './derived'
 
 export type ComputeLayoutFn = (graph: SceneGraph, frameId: string) => void
 
-function preservesImportedHugCrossSize(
-  graph: SceneGraph,
-  frame: SceneNode,
-  axis: 'width' | 'height'
-): boolean {
-  if (frame.source.format !== 'fig' || frame.counterAxisSizing !== 'HUG') return false
-  const expectedMode = axis === 'width' ? 'VERTICAL' : 'HORIZONTAL'
-  if (frame.layoutMode !== expectedMode) return false
-  return graph
-    .getChildren(frame.id)
-    .some(
-      (child) => child.layoutAlignSelf === 'STRETCH' && child.derivedLayout?.[axis] !== undefined
-    )
+/** The per-axis extent of a network, including Bézier control points. */
+function networkExtent(
+  network: VectorNetwork | null
+): { width: number; height: number } | null {
+  if (!network || network.vertices.length === 0) return null
+  let minX = Number.POSITIVE_INFINITY
+  let maxX = Number.NEGATIVE_INFINITY
+  let minY = Number.POSITIVE_INFINITY
+  let maxY = Number.NEGATIVE_INFINITY
+  const include = (x: number, y: number) => {
+    if (x < minX) minX = x
+    if (x > maxX) maxX = x
+    if (y < minY) minY = y
+    if (y > maxY) maxY = y
+  }
+  for (const vertex of network.vertices) include(vertex.x, vertex.y)
+  for (const segment of network.segments) {
+    const start = network.vertices[segment.start]
+    const end = network.vertices[segment.end]
+    if (start) include(start.x + segment.tangentStart.x, start.y + segment.tangentStart.y)
+    if (end) include(end.x + segment.tangentEnd.x, end.y + segment.tangentEnd.y)
+  }
+  const width = maxX - minX
+  const height = maxY - minY
+  return { width, height }
 }
 
-type LayoutGeometry = Partial<Pick<SceneNode, 'x' | 'y' | 'width' | 'height'>>
+/** Dimensions survive collapse and history restoration while keyed by the stable node id. */
+const lastBoxWithSize = new Map<string, { width?: number; height?: number }>()
+
+function positiveSize(value: number | undefined): number | undefined {
+  return value !== undefined && Number.isFinite(value) && value > 0 ? value : undefined
+}
+
+/**
+ * Rescale a vector network per axis. A collapsed target axis keeps its geometry so it can recover;
+ * an unknown source dimension uses a factor of one while the other known axis still scales.
+ */
+export function rescaleVectorNetworkForLayout(
+  network: VectorNetwork | null,
+  fromWidth: number,
+  fromHeight: number,
+  toWidth: number,
+  toHeight: number,
+  remembered?: { width?: number; height?: number }
+): VectorNetwork | null {
+  if (!network) return null
+  const extent = networkExtent(network)
+  const sourceWidth =
+    positiveSize(fromWidth) ?? positiveSize(remembered?.width) ?? positiveSize(extent?.width)
+  const sourceHeight =
+    positiveSize(fromHeight) ?? positiveSize(remembered?.height) ?? positiveSize(extent?.height)
+  const targetWidth = positiveSize(toWidth) ?? sourceWidth ?? 1
+  const targetHeight = positiveSize(toHeight) ?? sourceHeight ?? 1
+  const effectiveWidth = sourceWidth ?? targetWidth
+  const effectiveHeight = sourceHeight ?? targetHeight
+  return scaleVectorNetworkForResize(
+    network,
+    effectiveWidth,
+    effectiveHeight,
+    toWidth > 0 ? targetWidth : effectiveWidth,
+    toHeight > 0 ? targetHeight : effectiveHeight
+  )
+}
+
+type LayoutGeometry = Partial<Pick<SceneNode, 'x' | 'y' | 'width' | 'height' | 'vectorNetwork' | 'fillGeometry' | 'strokeGeometry'>>
 
 /**
  * Writes only the geometry layout changed. Laying out a large page leaves most layers where they
@@ -46,6 +100,59 @@ function writeLayoutGeometry(
   for (const key of ['x', 'y', 'width', 'height'] as const) {
     const value = geometry[key]
     if (value !== undefined && value !== node[key]) changes[key] = value
+  }
+  // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
+  // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
+  // which is what an instance smaller than its component turns into.
+  if (node.type === 'VECTOR') {
+    const toWidth = changes.width ?? node.width
+    const toHeight = changes.height ?? node.height
+    const remembered = lastBoxWithSize.get(id)
+    const extent = networkExtent(node.vectorNetwork)
+    const sourceWidth =
+      positiveSize(node.width) ??
+      positiveSize(remembered?.width) ??
+      positiveSize(extent?.width)
+    const sourceHeight =
+      positiveSize(node.height) ??
+      positiveSize(remembered?.height) ??
+      positiveSize(extent?.height)
+    const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
+    const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
+    const targetWidth = positiveSize(toWidth) ?? effectiveWidth
+    const targetHeight = positiveSize(toHeight) ?? effectiveHeight
+    const sx = targetWidth / effectiveWidth
+    const sy = targetHeight / effectiveHeight
+    const network = rescaleVectorNetworkForLayout(
+      node.vectorNetwork,
+      node.width,
+      node.height,
+      toWidth,
+      toHeight,
+      remembered
+    )
+    if (network) changes.vectorNetwork = network
+    if (sx !== 1 || sy !== 1) {
+      if (node.fillGeometry.length > 0) {
+        changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
+      }
+      // Live paths regenerate their strokes; outline-only vectors keep their saved outline.
+      if (node.strokeGeometry.length > 0) {
+        changes.strokeGeometry =
+          node.vectorNetwork && node.vectorNetwork.segments.length > 0
+            ? []
+            : scaleGeometryPaths(node.strokeGeometry, sx, sy)
+      }
+    }
+
+    if (toWidth <= 0 || toHeight <= 0) {
+      lastBoxWithSize.set(id, {
+        width: positiveSize(toWidth) ?? sourceWidth,
+        height: positiveSize(toHeight) ?? sourceHeight
+      })
+    } else {
+      lastBoxWithSize.delete(id)
+    }
   }
   if (Object.keys(changes).length > 0) graph.updateNode(id, changes)
   if (!CONSTRAINT_PARENT_TYPES.has(node.type)) return
