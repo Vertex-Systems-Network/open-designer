@@ -22,8 +22,10 @@ export const movePage = defineTool({
     for (const [position, pageId] of figma.graph.getNode(figma.graph.rootId)!.childIds.entries()) {
       const movedPage = figma.graph.getNode(pageId)
       if (!movedPage) continue
+      const orderKey = fractionalPosition(position)
+      if (movedPage.source.orderKey === orderKey) continue
       figma.graph.updateNode(movedPage.id, {
-        source: { ...movedPage.source, orderKey: fractionalPosition(position) }
+        source: { ...movedPage.source, orderKey }
       })
     }
     return { page: target.name, id: target.id, index: destination }
