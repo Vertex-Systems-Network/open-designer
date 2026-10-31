@@ -109,3 +109,26 @@ describe('reparentNode keeps the node where it is drawn', () => {
     expect(node?.rotation).toBe(45)
   })
 })
+
+
+describe('reparentNode source metadata', () => {
+  test('marks only transform fields whose values changed', () => {
+    const { graph, pageId } = setup()
+    const left = graph.createNode('FRAME', pageId, { x: 0, y: 0, width: 200, height: 200 })
+    const right = graph.createNode('FRAME', pageId, { x: 300, y: 40, width: 200, height: 200 })
+    const rect = graph.createNode('RECTANGLE', left.id, {
+      x: 20,
+      y: 30,
+      width: 60,
+      height: 20,
+      rotation: 45
+    })
+    rect.source.format = 'fig'
+    rect.source.editedFields = []
+
+    graph.reparentNode(rect.id, right.id)
+
+    expect(rect.source.editedFields).toEqual(['x', 'y'])
+    expect(rect.rotation).toBe(45)
+  })
+})
