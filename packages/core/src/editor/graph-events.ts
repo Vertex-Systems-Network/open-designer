@@ -100,7 +100,8 @@ function invalidateRenderersForChange(
   invalidateNodePicture: boolean
 ) {
   const invalidation = rendererInvalidationForChanges(changes, { preview: !invalidateNodePicture })
-  invalidateBooleanAncestors(graph, renderers, graph.getNode(id)?.parentId)
+  // From the layer itself: a boolean operation's own change, such as its operation, counts too.
+  invalidateBooleanAncestors(graph, renderers, id)
   for (const renderer of renderers) {
     if (invalidation.geometryCache) renderer.invalidateVectorPath(id)
     if (invalidation.nodePicture)

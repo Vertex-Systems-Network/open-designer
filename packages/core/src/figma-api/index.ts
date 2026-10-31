@@ -140,7 +140,7 @@ export class FigmaAPI implements NodeProxyHost {
       invalidateBooleanAncestors(graph, [renderer], id)
     this._unbindRendererEvents = graph.onNodeEvents({
       created: (node) => invalidate(node.parentId),
-      updated: (id) => invalidate(graph.getNode(id)?.parentId),
+      updated: (id) => invalidate(id),
       deleted: (_id, parentId) => invalidate(parentId),
       reparented: (id, oldParentId) => {
         invalidate(oldParentId)
