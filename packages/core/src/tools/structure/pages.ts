@@ -19,8 +19,12 @@ export const movePage = defineTool({
 
     const destination = Math.min(index, pages.length - 1)
     figma.graph.insertChildAt(target.id, figma.graph.rootId, destination)
-    for (const [position, movedPage] of figma.root.children.entries()) {
-      movedPage.source.orderKey = fractionalPosition(position)
+    for (const [position, pageId] of figma.graph.getNode(figma.graph.rootId)!.childIds.entries()) {
+      const movedPage = figma.graph.getNode(pageId)
+      if (!movedPage) continue
+      figma.graph.updateNode(movedPage.id, {
+        source: { ...movedPage.source, orderKey: fractionalPosition(position) }
+      })
     }
     return { page: target.name, id: target.id, index: destination }
   }
