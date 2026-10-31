@@ -165,6 +165,31 @@ function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
   return [...merged.entries()]
 }
 
+function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode): Record<string, unknown> {
+  const overrides: Record<string, unknown> = {}
+  const visit = (node: SceneNode) => {
+    for (const child of graph.getChildren(node.id)) {
+      if (child.type === 'INSTANCE') {
+        const definitions = componentPropertyDefinitions(graph, child)
+        const values = Object.fromEntries(
+          Object.entries(child.componentPropertyAssignments).flatMap(([id, value]) => {
+            const definition = definitions.find((candidate) => candidate.id === id)
+            return definition ? [[definition.name, value]] : []
+          })
+        )
+        if (Object.keys(values).length > 0) {
+          overrides[`${child.name}:componentPropertyAssignments`] = Object.fromEntries(
+            Object.entries(child.componentPropertyAssignments)
+          )
+        }
+      }
+      visit(child)
+    }
+  }
+  visit(instance)
+  return overrides
+}
+
 function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
@@ -179,6 +204,8 @@ function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
       })
   )
   if (Object.keys(values).length > 0) props.push(['properties', values])
+  const nestedOverrides = nestedInstancePropertyOverrides(graph, node)
+  if (Object.keys(nestedOverrides).length > 0) props.push(['overrides', nestedOverrides])
   return props
 }
 
