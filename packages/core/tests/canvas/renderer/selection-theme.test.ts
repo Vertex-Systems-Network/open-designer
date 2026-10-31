@@ -59,3 +59,16 @@ test('an unset theme returns to the default', () => {
     expect(rgb(renderer.selectionPaint.getColor())).toEqual(rgb(renderer.selColor()))
   })
 })
+
+test('chrome colours are allocated once per theme and again after it changes', () => {
+  withRenderer((renderer) => {
+    const blue = renderer.selColor()
+    expect(renderer.selColor()).toBe(blue)
+    expect(renderer.selColor(0.5)).not.toBe(blue)
+    expect(renderer.selColor(0.5)).toBe(renderer.selColor(0.5))
+    renderer.setSelectionTheme(GREEN_THEME)
+    const green = renderer.selColor()
+    expect(green).not.toBe(blue)
+    expect(rgb(green)).toEqual(rgb(ck.Color4f(0.08, 0.5, 0.24, 1)))
+  })
+})

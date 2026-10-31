@@ -11,6 +11,20 @@ const renderer = new SkiaRenderer(ck, expectDefined(ck.MakeSurface(8, 8), 'surfa
 
 afterAll(() => renderer.destroy())
 
+test('forgetting a layer drops the fonts it was waiting for and its text picture state', () => {
+  const graph = new SceneGraph()
+  const page = expectDefined(graph.getPages()[0], 'page')
+  const node = graph.createNode('TEXT', page.id, { text: 'hello' })
+  renderer.trackFontDemand(node, 'Inter|400')
+  renderer.textPictureGenerations.set(node.id, { data: new Uint8Array(1), generation: 0 })
+  expect(renderer.pendingFontNodes.has(node.id)).toBe(true)
+
+  renderer.forgetNode(node.id)
+
+  expect(renderer.pendingFontNodes.has(node.id)).toBe(false)
+  expect(renderer.textPictureGenerations.has(node.id)).toBe(false)
+})
+
 test("a text's font readiness is found once per layer until the layer or the fonts change", () => {
   const graph = new SceneGraph()
   const page = expectDefined(graph.getPages()[0], 'page')

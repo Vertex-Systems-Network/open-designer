@@ -4,7 +4,6 @@ import { expectDefined } from '#core-tests/helpers/assert'
 
 import { SkiaRenderer } from '@open-pencil/core/canvas'
 import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
-import { SceneGraph } from '@open-pencil/scene-graph'
 
 const ck = await initCanvasKit()
 const renderer = new SkiaRenderer(ck, expectDefined(ck.MakeSurface(1, 1), 'surface'))
@@ -28,18 +27,4 @@ test('filters are shared by their parameters and bounded, freeing the ones that 
   for (let step = 0; step < 300; step++) renderer.getCachedMaskBlur(2 + step * 0.01)
   expect(renderer.maskFilterCache.size).toBeLessThanOrEqual(256)
   expect(mask.isDeleted()).toBe(true)
-})
-
-test('forgetting a layer drops the fonts it was waiting for and its text picture state', () => {
-  const graph = new SceneGraph()
-  const page = expectDefined(graph.getPages()[0], 'page')
-  const node = graph.createNode('TEXT', page.id, { text: 'hello' })
-  renderer.trackFontDemand(node, 'Inter|400')
-  renderer.textPictureGenerations.set(node.id, { data: new Uint8Array(1), generation: 0 })
-  expect(renderer.pendingFontNodes.has(node.id)).toBe(true)
-
-  renderer.forgetNode(node.id)
-
-  expect(renderer.pendingFontNodes.has(node.id)).toBe(false)
-  expect(renderer.textPictureGenerations.has(node.id)).toBe(false)
 })
