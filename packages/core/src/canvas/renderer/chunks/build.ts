@@ -163,8 +163,7 @@ export function buildChunks(
   rootId: string,
   topId: string,
   topIndex: number,
-  counts: Map<string, number>,
-  order: (position: number) => number = (position) => painterOrderOf(topIndex, position)
+  counts: Map<string, number>
 ) {
   const chunks: RenderChunk[] = []
   let position = 0
@@ -186,9 +185,9 @@ export function buildChunks(
         kind,
         context: chunkContext(graph, node),
         interruptible: split || !nodeRequiresAtomicChunk(graph, node),
-        painterOrder: order(position),
+        painterOrder: painterOrderOf(topIndex, position),
         topId,
-        localOrder: order(position++) - topIndex * PAINTER_ORDER_SPAN,
+        localOrder: position++,
         ...bounds,
         nodeCount,
         estimatedCost: estimateCost(nodeCount, node)

@@ -195,6 +195,27 @@ describe('render chunk spatial index', () => {
     }
   })
 
+  test('numbers a split frame afresh once inserted layers exhaust the order between two', () => {
+    const { graph, pageId } = graphWithNodes(40)
+    const frame = graph.getChildren(pageId)[0]
+    if (!frame) throw new Error('Expected the frame')
+    const { index } = RenderChunkIndex.build(graph, pageId)
+    // Each layer lands between the first and the one before it: the same gap, halved each time.
+    for (let count = 0; count < 60; count++) {
+      const added = graph.createNode('RECTANGLE', frame.id, { x: 5, y: 5, width: 2, height: 2 })
+      graph.insertChildAt(added.id, frame.id, 1)
+      const changed = index.rebuildFrom(graph, pageId, added.id)
+      if (!changed) throw new Error('Expected a rebuild')
+    }
+    const orders = index
+      .search({ minX: -1e9, minY: -1e9, maxX: 1e9, maxY: 1e9 })
+      .filter((chunk) => chunk.nodeId !== frame.id)
+      .map((chunk) => chunk.painterOrder)
+    expect(orders.every((order, at) => at === 0 || order > (orders[at - 1] ?? -1))).toBe(true)
+    expect(orders).toHaveLength(100)
+    index.dispose()
+  })
+
   test('keeps a small top-level subtree as one retained chunk', () => {
     const { graph, pageId } = graphWithNodes(20)
     const { index, stats } = RenderChunkIndex.build(graph, pageId)

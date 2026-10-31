@@ -393,7 +393,13 @@ export class SkiaRenderer {
   /** The geometry of this frame, shared by every overlay that draws from the graph. */
   sceneGeometry(graph: SceneGraph, preview?: RotationPreview | null): SceneGeometry {
     const current = this.frameGeometry
-    if (current && current.graph === graph && current.preview === (preview ?? null)) {
+    // A caller that knows no preview takes the frame's geometry as it stands, previewed or not:
+    // a flash follows the layer where it is shown, and the frame keeps one geometry.
+    if (
+      current &&
+      current.graph === graph &&
+      (preview === undefined || current.preview === preview)
+    ) {
       return current.geometry
     }
     const geometry = createSceneGeometry(graph, preview)
@@ -766,7 +772,11 @@ export class SkiaRenderer {
       return cached.readiness
     }
     const readiness = RenderText.nodeFontReadiness(this, node)
-    this.textReadiness.set(node.id, { node, generation: this.fontGeneration, readiness })
+    // A text waiting on a demand another text raised is told nothing when that demand settles,
+    // so a pending reading is asked again each frame until the fonts arrive or give up.
+    if (readiness !== 'pending') {
+      this.textReadiness.set(node.id, { node, generation: this.fontGeneration, readiness })
+    }
     return readiness
   }
 

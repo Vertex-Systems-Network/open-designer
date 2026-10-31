@@ -1,5 +1,7 @@
 import { beforeAll, describe, expect, mock, test } from 'bun:test'
 
+import type { Surface } from 'canvaskit-wasm'
+
 import { expectDefined } from '#core-tests/helpers/assert'
 
 import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
@@ -41,6 +43,24 @@ function createGridScene() {
   renderer.zoom = 1
   renderer.navigationPhase = 'idle'
   return { graph, surface, renderer, pageId: page.id }
+}
+
+/** The red, green, and blue of the surface's pixel at `x`, `y`, after a flush. */
+function pixelAt(surface: Surface, x: number, y: number): number[] {
+  surface.flush()
+  const image = surface.makeImageSnapshot()
+  const pixels = expectDefined(
+    image.readPixels(x, y, {
+      width: 1,
+      height: 1,
+      colorType: ck.ColorType.RGBA_8888,
+      alphaType: ck.AlphaType.Unpremul,
+      colorSpace: ck.ColorSpace.SRGB
+    }),
+    'pixel'
+  )
+  image.delete()
+  return Array.from(pixels as Uint8Array).slice(0, 3)
 }
 
 describe('tile scheduling', () => {
@@ -503,6 +523,45 @@ describe('tiles with image previews', () => {
       expect(controller.isRendered(farTile)).toBe(true)
       expect(deleted.metrics.interruptibleCompleted + deleted.metrics.mandatoryCompleted).toBe(1)
       expect(deleted.covered).toBe(true)
+    } finally {
+      controller.destroy()
+      renderer.destroy()
+    }
+  })
+
+  test('a layer moved between frames leaves no ghost behind and appears where it went', () => {
+    const { graph, surface, renderer, pageId } = createGridScene()
+    const controller = new TiledSceneController({ now: () => 0 })
+    try {
+      // Two small frames, each one retained chunk, so a move must rebuild both chunks.
+      const left = graph.createNode('FRAME', pageId, { x: 0, y: 400, width: 100, height: 100 })
+      const right = graph.createNode('FRAME', pageId, { x: 200, y: 400, width: 100, height: 100 })
+      const mover = graph.createNode('RECTANGLE', left.id, {
+        x: 10,
+        y: 10,
+        width: 40,
+        height: 40,
+        fills: color(1, 0, 0)
+      })
+      let result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      for (let frame = 0; frame < 30 && (result.pending || result.backgroundPending); frame++) {
+        result = controller.renderFrame(renderer, surface.getCanvas(), graph, 1, 0)
+      }
+      expect(pixelAt(surface, 30, 430)).toEqual([255, 0, 0])
+      expect(pixelAt(surface, 230, 430)).toEqual([255, 255, 255])
+
+      // Moved keeping its own coordinates, so it draws at the same offset in the other frame.
+      graph.insertChildAt(mover.id, right.id, 0)
+      // The editor reports a move to its new parent and to its old one.
+      controller.invalidateStructure(mover.id, right.id)
+      controller.invalidateStructure(mover.id, left.id)
+      let moved = controller.renderFrame(renderer, surface.getCanvas(), graph, 2, 0)
+      for (let frame = 0; frame < 30 && moved.pending; frame++) {
+        moved = controller.renderFrame(renderer, surface.getCanvas(), graph, 2, 0)
+      }
+      expect(moved.covered).toBe(true)
+      expect(pixelAt(surface, 30, 430)).toEqual([255, 255, 255])
+      expect(pixelAt(surface, 230, 430)).toEqual([255, 0, 0])
     } finally {
       controller.destroy()
       renderer.destroy()

@@ -231,6 +231,21 @@ export class RenderChunkIndex {
    * Removes the chunks `nodeId` and its descendants own, before the layer is rebuilt where it
    * now is; a chunk of an ancestor's subtree that holds the layer stays for `rebuildFrom`.
    */
+  /** Whether the chunk `id` is still in the index. */
+  has(id: string): boolean {
+    return this.chunks.has(id)
+  }
+
+  /**
+   * The subtree chunks of `nodeId`'s ancestors that drew it, as the index last built them: after
+   * a move they still hold the layer at its old place until they are built again.
+   */
+  chunksHolding(graph: SceneGraph, nodeId: string): RenderChunk[] {
+    return this.getChunksDependingOnNode(nodeId).filter(
+      (chunk) => chunk.nodeId !== nodeId && !this.isUnder(graph, chunk.nodeId, nodeId)
+    )
+  }
+
   dropChunksOf(graph: SceneGraph, nodeId: string): RenderChunk[] {
     const removed = this.getChunksDependingOnNode(nodeId).filter(
       (chunk) => chunk.nodeId === nodeId || this.isUnder(graph, chunk.nodeId, nodeId)
@@ -281,8 +296,14 @@ export class RenderChunkIndex {
     const { start, end } = this.orderWindow(graph, topId, topIndex, ownerId, rootId, removed)
     for (const chunk of removed) this.unregister(chunk)
     const counts = countDescendants(graph, [rootId]).counts
-    const built = buildChunks(graph, rootId, topId, topIndex, counts, (position) => position)
+    const built = buildChunks(graph, rootId, topId, topIndex, counts)
     const step = (end - start) / (built.length + 1)
+    // Each insertion halves the gap to the neighbour; once the gap is below a double's
+    // resolution the orders would collide, so the top is numbered afresh instead.
+    if (start + step === start || end - step === end) {
+      const top = this.rebuildTop(graph, pageId, topId)
+      return { removed: [...removed, ...top.removed], added: top.added }
+    }
     for (const [position, chunk] of built.entries()) {
       chunk.painterOrder = start + step * (position + 1)
       chunk.localOrder = chunk.painterOrder - topIndex * PAINTER_ORDER_SPAN

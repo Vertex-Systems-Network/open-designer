@@ -1,6 +1,6 @@
 import type { Canvas } from 'canvaskit-wasm'
 
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import {
@@ -461,26 +461,19 @@ export class TiledSceneController {
     let reordered = false
     const rebuiltIds = new Set<string>()
     for (const { nodeId, parentId } of this.pendingStructure) {
-      // A page child added, removed, or reordered: its own subtree, and the draw order of all.
-      const atPageLevel = parentId === pageId || index.hasTop(nodeId)
-      let changed: { removed: RenderChunk[]; added: RenderChunk[] } | null
-      if (atPageLevel) {
-        changed = index.rebuildTop(graph, pageId, nodeId)
-      } else if (graph.getNode(nodeId)) {
-        // A layer that exists is rebuilt where it is now, once, however many parents reported it.
-        if (rebuiltIds.has(nodeId)) continue
-        rebuiltIds.add(nodeId)
-        const dropped = index.dropChunksOf(graph, nodeId)
-        changed = index.rebuildFrom(graph, pageId, nodeId)
-        if (changed) changed = { removed: [...dropped, ...changed.removed], added: changed.added }
-      } else {
-        changed = parentId ? index.pruneUnder(graph, pageId, parentId) : null
-      }
+      // A layer is rebuilt once, however many parents reported it: a move reports both.
+      if (rebuiltIds.has(nodeId)) continue
+      rebuiltIds.add(nodeId)
+      const node = graph.getNode(nodeId)
+      let changed: { removed: RenderChunk[]; added: RenderChunk[]; reordered?: boolean } | null =
+        null
+      if (node) changed = this.rebuildLayer(graph, index, pageId, node)
+      else if (parentId) changed = index.pruneUnder(graph, pageId, parentId)
       if (!changed) {
         this.invalidate()
         return
       }
-      reordered ||= atPageLevel
+      reordered ||= changed.reordered === true
       for (const chunk of changed.removed) this.pictureCache.invalidate(chunk.id)
       for (const chunk of changed.removed) {
         this.tileCache.invalidateBounds(pageId, chunk, contentGeneration)
@@ -493,6 +486,42 @@ export class TiledSceneController {
     this.pendingStructure = []
     this.contentGeneration = contentGeneration
     this.lastContentChangeAt = this.now()
+  }
+
+  /**
+   * Rebuilds the chunks of a layer added, moved, or reordered, where it is now: a page child's
+   * top whole, which also drops the chunks of a layer that left the page, or else the layer's own
+   * chunks under its nearest chunk owner; and the subtree chunks that drew it on its old path are
+   * built again without it, so a move leaves no ghost behind. A page child changes the draw
+   * order of all, which the caller renumbers.
+   */
+  private rebuildLayer(
+    graph: SceneGraph,
+    index: RenderChunkIndex,
+    pageId: string,
+    node: SceneNode
+  ): { removed: RenderChunk[]; added: RenderChunk[]; reordered: boolean } | null {
+    const holding = index.chunksHolding(graph, node.id)
+    const removed: RenderChunk[] = []
+    const added: RenderChunk[] = []
+    const merge = (change: { removed: RenderChunk[]; added: RenderChunk[] } | null) => {
+      if (!change) return false
+      removed.push(...change.removed)
+      added.push(...change.added)
+      return true
+    }
+    const reordered = node.parentId === pageId || index.hasTop(node.id)
+    if (reordered) merge(index.rebuildTop(graph, pageId, node.id))
+    if (node.parentId !== pageId) {
+      removed.push(...index.dropChunksOf(graph, node.id))
+      if (!merge(index.rebuildFrom(graph, pageId, node.id))) return null
+    }
+    for (const chunk of holding) {
+      // Replaced already when the old path and the new one share the owner.
+      if (!index.has(chunk.id)) continue
+      if (!merge(index.rebuildFrom(graph, pageId, chunk.nodeId))) return null
+    }
+    return { removed, added, reordered }
   }
 
   private ensureIndex(graph: SceneGraph, pageId: string | null, contentGeneration: number): void {
