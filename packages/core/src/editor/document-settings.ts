@@ -2,18 +2,21 @@ import { isEqual } from 'es-toolkit'
 
 import { SceneGraph, type DocumentKind, type EnabledLibraryBinding } from '@open-pencil/scene-graph'
 
-import { BOARD_PAGE_BACKGROUND } from '#core/constants'
+import { BOARD_PAGE_BACKGROUND, type InterfaceTheme } from '#core/constants'
 import { offeredTool } from '#core/editor/views'
-import { setPageBackgrounds } from '#core/figma-api/page-backgrounds'
+import { setDefaultPageBackground, setPageBackgrounds } from '#core/figma-api/page-backgrounds'
 
 import type { EditorContext } from './types'
 
-/** An empty document of this kind: a board starts on FigJam's light page. */
-export function createDocumentGraph(kind: DocumentKind): SceneGraph {
+/** A design starts on its interface theme's page; a board keeps FigJam's light page. */
+export function createDocumentGraph(kind: DocumentKind, theme: InterfaceTheme = 'light'): SceneGraph {
   const graph = new SceneGraph()
   graph.documentKind = kind
-  if (kind === 'board') {
-    setPageBackgrounds(graph, graph.getPages()[0], [
+  const [page] = graph.getPages()
+  if (kind === 'design') {
+    setDefaultPageBackground(graph, page, theme)
+  } else {
+    setPageBackgrounds(graph, page, [
       {
         type: 'SOLID',
         color: BOARD_PAGE_BACKGROUND,
