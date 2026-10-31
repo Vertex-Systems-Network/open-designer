@@ -1,6 +1,7 @@
 import { isEqual } from 'es-toolkit/predicate'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { repairHierarchy } from '@open-pencil/scene-graph/hierarchy'
 
 export interface FigPopulationDelta {
   created: Array<[string, SceneNode]>
