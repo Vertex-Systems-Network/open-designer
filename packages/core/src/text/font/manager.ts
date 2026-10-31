@@ -29,6 +29,7 @@ import {
   type HostFontLoader,
   type LocalFontAccessState
 } from '#core/text/font/sources'
+import { fontStandIn, standInFont } from '#core/text/font/stand-in'
 import {
   fontAxes,
   hasNamedInstance,
@@ -38,6 +39,7 @@ import {
   type NamedInstance
 } from '#core/text/font/variation'
 import { collectGraphFontKeys } from '#core/text/requirements/collect'
+import { sfntFont } from '#core/text/font/woff2'
 import { normalizedCoverageText, WebFontResolver } from '#core/text/web-font/resolver'
 import type { WebFontFetch, WebFontProviderId } from '#core/text/web-font/resolver'
 
@@ -381,22 +383,45 @@ export class FontManager {
   ): Promise<ArrayBuffer | null> {
     signal?.throwIfAborted()
     const loaded = this.loadedData(family, style)
-    if (loaded) {
+    const loadedSource = this.loadedFamilySources.get(`${family}|${style}`)
+    if (loaded && loadedSource !== 'stand-in') {
       this.registerFontInCanvasKit(family, loaded)
       return this.withRemoteCoverage(family, style, loaded, characters, signal)
     }
-    // An installed face of the style comes first; otherwise a variable file the family already
-    // loaded draws it.
+    // A stand-in is provisional: an installed face that becomes available later takes precedence.
+    // An installed face of the style otherwise comes first; then a variable file already loaded.
     const installed = await this.loadInstalledFont(family, style)
     if (installed) return installed
+    if (loaded) {
+      this.registerFontInCanvasKit(family, loaded)
+      return loaded
+    }
     const shared = this.sharedVariableFace(family, style)
     if (shared) return this.withRemoteCoverage(family, style, shared, characters, signal)
 
     return (
       (await this.loadBundledFont(family, style)) ??
       (await this.loadCachedFont(family, style, characters)) ??
-      (await this.loadRemoteFont(family, style, characters, signal))
+      (await this.loadRemoteFont(family, style, characters, signal)) ??
+      (await this.loadStandIn(family, style))
     )
+  }
+
+  /**
+   * Loads the open stand-in for a family we cannot bundle or fetch.
+   */
+  private async loadStandIn(family: string, style: string): Promise<ArrayBuffer | null> {
+    const standIn = fontStandIn(family)
+    if (!standIn) return null
+    try {
+      const file = await this.fetchBundledFont(standIn.file)
+      if (!file) return null
+      const font = standInFont(await sfntFont(file), standIn)
+      return font ? this.registerAndCache(family, style, font, 'stand-in') : null
+    } catch (error) {
+      console.warn(`Stand-in font load failed for "${family}" ${style}:`, error)
+      return null
+    }
   }
 
   /**
