@@ -167,9 +167,15 @@ export const DESIGN_JSX_ELEMENTS: DesignJSXElementDefinition[] = [
     name: 'ComponentSet',
     runtimeType: 'component-set',
     description: 'A component variant set.',
-    nodeType: 'COMPONENT_SET'
+    nodeType: 'COMPONENT_SET',
+    writes: ['COMPONENT_SET']
   },
-  { name: 'Instance', runtimeType: 'instance', description: 'An instance of a component.' },
+  {
+    name: 'Instance',
+    runtimeType: 'instance',
+    description: 'An instance of a component.',
+    writes: ['INSTANCE']
+  },
   { name: 'View', runtimeType: 'frame', description: 'An alias for Frame.', nodeType: 'FRAME' },
   {
     name: 'Rect',
