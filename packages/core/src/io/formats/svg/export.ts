@@ -264,7 +264,7 @@ function buildGroupAttrs(
     attrs.style = `mix-blend-mode: ${blend}`
   }
 
-  const filterDef = createFilterDef(node.effects, ctx)
+  const filterDef = createFilterDef(node.effects, ctx, node)
   if (filterDef) {
     ctx.defs.push(filterDef.node)
     attrs.filter = `url(#${filterDef.id})`
@@ -492,16 +492,34 @@ export interface SVGExportOptions {
    * file under. Text in an aliased face is written in that family at normal weight and style.
    */
   fontAlias?: SVGFontAlias
+  /** Unsupported effects are omitted when explicitly requested. */
+  skipUnsupportedEffects?: boolean
+}
+
+export interface SVGExportResult {
+  svg: string | null
+  warnings: SVGExportWarning[]
 }
 
 export function renderNodesToSVG(
   graph: SceneGraph,
-  _pageId: string,
+  pageId: string,
   nodeIds: string[],
   options: SVGExportOptions = {}
 ): string | null {
+  const result = renderNodesToSVGWithWarnings(graph, pageId, nodeIds, options)
+  if (result.warnings.length > 0 && !options.skipUnsupportedEffects) return null
+  return result.svg
+}
+
+export function renderNodesToSVGWithWarnings(
+  graph: SceneGraph,
+  _pageId: string,
+  nodeIds: string[],
+  options: SVGExportOptions = {}
+): SVGExportResult {
   const bounds = computeContentBounds(graph, nodeIds)
-  if (!bounds) return null
+  if (!bounds) return { svg: null, warnings: [] }
 
   const { minX, minY, maxX, maxY } = bounds
   const width = round(maxX - minX)
@@ -513,7 +531,9 @@ export function renderNodesToSVG(
     graph,
     colorSpace: options.colorSpace ?? 'srgb',
     textLayout: options.textLayout,
-    fontAlias: options.fontAlias
+    fontAlias: options.fontAlias,
+    skipUnsupportedEffects: options.skipUnsupportedEffects,
+    warnings: []
   }
 
   const contentNodes: SVGNode[] = []
@@ -533,7 +553,7 @@ export function renderNodesToSVG(
     if (rendered) contentNodes.push(rendered)
   }
 
-  if (contentNodes.length === 0) return null
+  if (contentNodes.length === 0) return { svg: null, warnings: ctx.warnings ?? [] }
 
   const rootChildren: (SVGNode | string)[] = []
   if (ctx.defs.length > 0) {
@@ -555,7 +575,7 @@ export function renderNodesToSVG(
 
   const svgStr = renderSVGNode(root)
   const xmlDecl = options.xmlDeclaration !== false ? '<?xml version="1.0" encoding="UTF-8"?>\n' : ''
-  return xmlDecl + svgStr
+  return { svg: xmlDecl + svgStr, warnings: ctx.warnings ?? [] }
 }
 
 /**
