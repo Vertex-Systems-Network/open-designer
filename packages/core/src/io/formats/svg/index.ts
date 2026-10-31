@@ -1,5 +1,7 @@
 export {
   renderNodesToSVG,
+  renderNodesToSVGWithWarnings,
+  type SVGExportResult,
   type SVGExportOptions,
   geometryBlobToSVGPath,
   nodeOutlinePath,
