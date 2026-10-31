@@ -1,4 +1,4 @@
-import { countBy } from 'es-toolkit/array'
+import { countBy } from 'es-toolkit'
 import type * as v from 'valibot'
 
 import type { ConnectorEndpoint, SceneGraph, SceneNode } from '@open-pencil/scene-graph'

@@ -1,4 +1,4 @@
-import { countBy } from 'es-toolkit/array'
+import { countBy } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 

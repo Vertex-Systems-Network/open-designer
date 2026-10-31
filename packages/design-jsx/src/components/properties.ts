@@ -1,4 +1,4 @@
-import { compact } from 'es-toolkit/array'
+import { compact, groupBy, isEqual, pick, uniq } from 'es-toolkit'
 
 import type {
   ComponentPropertyDefinition,
@@ -171,6 +171,11 @@ export function componentPropertyScope(
   return undefined
 }
 
+/** Whether a variant has every value `wanted` names, by variant property. */
+export function hasVariantValues(variant: SceneNode, wanted: Record<string, string>): boolean {
+  return isEqual(pick(variant.componentPropertyValues, Object.keys(wanted)), wanted)
+}
+
 /** The ID of the component a name, ID, or `ref()` names, as `<Instance of>` finds it. */
 export type ComponentLookup = (reference: string | LayerRef) => string | undefined
 
@@ -213,32 +218,24 @@ export function inferComponentSetProperties(graph: SceneGraph, componentSetId: s
   if (componentSet?.type !== 'COMPONENT_SET') return
   const existingDefinitions = componentSet.componentPropertyDefinitions
 
-  const variants = graph.getChildren(componentSetId).filter((node) => node.type === 'COMPONENT')
-  const options = new Map<string, Set<string>>()
-  const valuesById = new Map<string, Record<string, string>>()
-
-  for (const variant of variants) {
-    const values = parseVariantValues(variant.name)
-    valuesById.set(variant.id, values)
-    for (const [property, value] of Object.entries(values)) {
-      let set = options.get(property)
-      if (!set) {
-        set = new Set()
-        options.set(property, set)
-      }
-      set.add(value)
-    }
-  }
-
-  const definitions: ComponentPropertyDefinition[] = [...options.entries()]
-    .filter(
-      ([name]) =>
-        !existingDefinitions.some(
-          (definition) => definition.type === 'VARIANT' && definition.name === name
-        )
-    )
-    .map(([name, values]) => {
-      const variantOptions = [...values]
+  const variants = graph
+    .getChildren(componentSetId)
+    .filter((node) => node.type === 'COMPONENT')
+    .map((variant) => ({ id: variant.id, values: parseVariantValues(variant.name) }))
+  const defined = new Set(
+    existingDefinitions
+      .filter((definition) => definition.type === 'VARIANT')
+      .map((definition) => definition.name)
+  )
+  // Each property's values in the order the variants first use them.
+  const options = groupBy(
+    variants.flatMap(({ values }) => Object.entries(values)),
+    ([name]) => name
+  )
+  const definitions: ComponentPropertyDefinition[] = Object.entries(options)
+    .filter(([name]) => !defined.has(name))
+    .map(([name, entries]) => {
+      const variantOptions = uniq(entries.map(([, value]) => value))
       return {
         id: createComponentPropertyId(),
         name,
@@ -248,9 +245,7 @@ export function inferComponentSetProperties(graph: SceneGraph, componentSetId: s
       }
     })
 
-  for (const [id, values] of valuesById) {
-    graph.updateNode(id, { componentPropertyValues: values })
-  }
+  for (const { id, values } of variants) graph.updateNode(id, { componentPropertyValues: values })
   graph.updateNode(componentSetId, {
     componentPropertyDefinitions: [...existingDefinitions, ...definitions]
   })

@@ -1,5 +1,4 @@
-import { omitBy, pickBy } from 'es-toolkit/object'
-import { isPlainObject } from 'es-toolkit/predicate'
+import { isPlainObject, mapValues, omit, omitBy, pick, pickBy } from 'es-toolkit'
 import * as v from 'valibot'
 
 import type { ComponentPropertyDefinition, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
@@ -13,7 +12,7 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '../definitions'
 import { isLayerRef, type LayerRef } from '../refs'
 import { parseScriptInput } from '../schema'
-import type { ComponentLookup } from './properties'
+import { hasVariantValues, type ComponentLookup } from './properties'
 
 /** The one property with this name; a name several properties share is an error. */
 function namedDefinition(
@@ -93,11 +92,7 @@ function selectNestedVariant(
   const wanted = { ...component.componentPropertyValues, ...values }
   const variant = graph
     .getChildren(set.id)
-    .find(
-      (node) =>
-        node.type === 'COMPONENT' &&
-        Object.entries(wanted).every(([key, value]) => node.componentPropertyValues[key] === value)
-    )
+    .find((node) => node.type === 'COMPONENT' && hasVariantValues(node, wanted))
   if (!variant)
     throw new Error(
       `${name} has no variant ${Object.entries(values)
@@ -121,20 +116,12 @@ function assignExposedInstance(
   const nested = exposedInstanceNamed(graph, instance, name)
   if (!nested) throw new Error(`Unknown component property or exposed instance: ${name}`)
   const values = parseScriptInput(`Invalid values for ${name}`, exposedValuesSchema, input)
-  const variantNames = new Set(
-    componentPropertyDefinitions(graph, nested)
-      .filter((definition) => definition.type === 'VARIANT')
-      .map((definition) => definition.name)
-  )
-  const variants = Object.fromEntries(
-    Object.entries(values)
-      .filter(([key]) => variantNames.has(key))
-      .map(([key, value]) => [key, String(value)])
-  )
-  selectNestedVariant(graph, nested, name, variants)
+  const variantNames = componentPropertyDefinitions(graph, nested)
+    .filter((definition) => definition.type === 'VARIANT')
+    .map((definition) => definition.name)
+  selectNestedVariant(graph, nested, name, mapValues(pick(values, variantNames), String))
   const definitions = componentPropertyDefinitions(graph, nested)
-  for (const [key, value] of Object.entries(values)) {
-    if (variantNames.has(key)) continue
+  for (const [key, value] of Object.entries(omit(values, variantNames))) {
     const definition = namedDefinition(definitions, key)
     if (!definition) throw new Error(`Unknown component property on ${name}: ${key}`)
     assignValue(graph, nested, definition, key, assignable(value), componentId)

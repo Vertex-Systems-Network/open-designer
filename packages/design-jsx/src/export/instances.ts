@@ -1,5 +1,4 @@
-import { countBy } from 'es-toolkit/array'
-import { isEqual } from 'es-toolkit/predicate'
+import { countBy, isEqual } from 'es-toolkit'
 
 import { es } from '@open-pencil/emit'
 import type {

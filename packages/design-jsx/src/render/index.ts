@@ -1,4 +1,4 @@
-import { uniq } from 'es-toolkit/array'
+import { uniq } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 

@@ -1,3 +1,5 @@
+import { mapValues, pick } from 'es-toolkit'
+
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { INSTANCE_OVERRIDE_FIELDS } from '@open-pencil/scene-graph/instances'
 import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
@@ -13,6 +15,7 @@ import {
   bindProperties,
   componentPropNames as namesOnInstance,
   exposeInstance,
+  hasVariantValues,
   type ComponentLookup
 } from './properties'
 
@@ -28,23 +31,12 @@ function findVariantInSet(
   componentSet: SceneNode,
   props: Record<string, unknown>
 ) {
-  const requested = Object.fromEntries(
-    Object.entries(props)
-      .filter(([key]) =>
-        componentSet.componentPropertyDefinitions.some(
-          (definition) => definition.type === 'VARIANT' && definition.name === key
-        )
-      )
-      .map(([key, value]) => [key, String(value)])
-  )
+  const variantNames = componentSet.componentPropertyDefinitions
+    .filter((definition) => definition.type === 'VARIANT')
+    .map((definition) => definition.name)
+  const requested = mapValues(pick(props, variantNames), String)
   const variants = graph.getChildren(componentSet.id).filter((node) => node.type === 'COMPONENT')
-  return (
-    variants.find((variant) =>
-      Object.entries(requested).every(
-        ([key, value]) => variant.componentPropertyValues[key] === value
-      )
-    ) ?? variants[0]
-  )
+  return variants.find((variant) => hasVariantValues(variant, requested)) ?? variants[0]
 }
 
 /** The component or component set an element names by id or name. */

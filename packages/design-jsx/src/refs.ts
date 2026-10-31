@@ -1,5 +1,4 @@
-import { compact } from 'es-toolkit/array'
-import { camelCase } from 'es-toolkit/string'
+import { camelCase, compact } from 'es-toolkit'
 
 import { es } from '@open-pencil/emit'
 import type { SceneNode } from '@open-pencil/scene-graph'

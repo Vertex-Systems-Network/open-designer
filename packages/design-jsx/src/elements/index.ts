@@ -1,4 +1,4 @@
-import { difference } from 'es-toolkit/array'
+import { difference } from 'es-toolkit'
 
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 

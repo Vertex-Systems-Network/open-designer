@@ -1,4 +1,4 @@
-import { omitBy } from 'es-toolkit/object'
+import { omitBy } from 'es-toolkit'
 
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { parseColor } from '@open-pencil/scene-graph/color'

@@ -1,4 +1,4 @@
-import { compact } from 'es-toolkit/array'
+import { compact } from 'es-toolkit'
 
 import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'

@@ -1,6 +1,4 @@
-import { compact, pull, uniq } from 'es-toolkit/array'
-import { range } from 'es-toolkit/math'
-import { isPlainObject, isString } from 'es-toolkit/predicate'
+import { compact, isPlainObject, isString, pull, range, uniq } from 'es-toolkit'
 
 import { namesComponent, rekaRole } from '../behaviours'
 import { isComponentProperty } from '../components/properties'

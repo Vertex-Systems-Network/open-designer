@@ -1,3 +1,5 @@
+import { findKey } from 'es-toolkit'
+
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import {
   behaviourToSpec,
@@ -130,9 +132,7 @@ export function rekaExport(
   )
   for (const layer of descendants(graph, owner)) {
     if (layer.type === 'INSTANCE') continue
-    const partId = Object.entries(behaviour.parts).find(
-      ([, id]) => id === slotPropertyId(layer)
-    )?.[0]
+    const partId = findKey(behaviour.parts, (id) => id === slotPropertyId(layer))
     if (partId) {
       exportPart(graph, namespace, layer, partId, result, componentRef)
       continue

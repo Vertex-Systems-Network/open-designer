@@ -1,3 +1,5 @@
+import { omit } from 'es-toolkit'
+
 import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
 import { designJSXProp } from '../definitions'
@@ -24,12 +26,7 @@ export type CreateElement = (nodeType: NodeType, tree: TreeNode, parentId: strin
 export type RenderInstance = (tree: TreeNode, parentId: string) => Promise<SceneNode>
 
 function withoutBehaviourProps(tree: TreeNode): TreeNode {
-  const props = Object.fromEntries(
-    Object.entries(tree.props).filter(
-      ([key]) => !(BEHAVIOUR_PROPS as readonly string[]).includes(key)
-    )
-  )
-  return { ...tree, props }
+  return { ...tree, props: omit(tree.props, BEHAVIOUR_PROPS) }
 }
 
 async function renderChildren(

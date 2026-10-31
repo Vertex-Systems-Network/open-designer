@@ -1,5 +1,4 @@
-import { difference } from 'es-toolkit/array'
-import { isPlainObject } from 'es-toolkit/predicate'
+import { difference, isPlainObject } from 'es-toolkit'
 
 import { property } from './components/properties'
 import type { DesignJSXHelperDefinition } from './definitions'
