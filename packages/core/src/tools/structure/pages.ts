@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 
+import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
+
 import { defineTool } from '#core/tools/schema'
 
 export const movePage = defineTool({
@@ -17,6 +19,9 @@ export const movePage = defineTool({
 
     const destination = Math.min(index, pages.length - 1)
     figma.graph.insertChildAt(target.id, figma.graph.rootId, destination)
+    for (const [position, movedPage] of figma.root.children.entries()) {
+      movedPage.source.orderKey = fractionalPosition(position)
+    }
     return { page: target.name, id: target.id, index: destination }
   }
 })
