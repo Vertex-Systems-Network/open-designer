@@ -132,6 +132,9 @@ export function createCanvasSurfaceManager({
     const glCtx = canvas.getContext('webgl2') ?? null
     state.renderer = new SkiaRenderer(ck, surface, glCtx)
     state.renderer.onImagePreviewReady = () => renderLoop.markDirty()
+    state.renderer.onRenderHealthChange = (report) => {
+      canvas.dataset.renderHealth = report.health
+    }
     state.renderer.imagePreviews.setDecoder(createImagePreviewDecoder())
     state.renderer.presentationColorSpace = result.presentation ?? 'srgb'
     state.renderer.tracksSceneSettlement = options?.layer !== 'overlays'
@@ -172,7 +175,7 @@ export function createCanvasSurfaceManager({
     if (!state.renderer || isDestroyed()) return
     state.renderer.overlayObstacles = overlayObstacles()
     const view = options?.getRenderState?.() ?? editor.state
-    state.renderer.renderFromEditorState(
+    const drawn = state.renderer.renderFromEditorState(
       view,
       editor.graph,
       editor.textEditor,
@@ -182,6 +185,10 @@ export function createCanvasSurfaceManager({
       options?.layer ?? 'full',
       editor.isInteractiveEditing()
     )
+    if (!drawn) {
+      if (state.renderer.frameGuard.retryPending) renderLoop.markDirty()
+      return
+    }
     renderLoop.markRendered()
     options?.onFrame?.({ panX: view.panX, panY: view.panY, zoom: view.zoom })
     acknowledgePresentation()
