@@ -433,7 +433,12 @@ function applyInstanceOverrides(
   for (const [key, value] of entries) {
     const sep = key.indexOf(':')
     if (sep === -1) continue
-    const childName = key.slice(0, sep)
+    let childName: string
+    try {
+      childName = decodeURIComponent(key.slice(0, sep))
+    } catch {
+      childName = key.slice(0, sep)
+    }
     const prop = key.slice(sep + 1)
     const child = descendants.find((n) => n.name === childName)
     if (!child || !(prop in child)) continue
