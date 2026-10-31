@@ -1,5 +1,6 @@
 import { createHead } from '@unhead/vue/client'
 import { createApp, nextTick } from 'vue'
+import { registerSW } from 'virtual:pwa-register'
 
 import { ReadOnlyDocumentError } from '@open-pencil/core'
 import { createRetainedScopePlugin } from '@open-pencil/vue/lifecycle/retention'
@@ -49,9 +50,9 @@ export async function boot(): Promise<void> {
   }
 
   if (!IS_TAURI) {
-    void import('virtual:pwa-register').then(({ registerSW }) => {
-      registerSW({ immediate: true })
-      return undefined
+    void Promise.resolve(registerSW({ immediate: true })).catch((error: unknown) => {
+      recordRuntimeError(error, 'vue', 'service worker registration')
+      console.warn('Unable to register the service worker', error)
     })
   }
 }
