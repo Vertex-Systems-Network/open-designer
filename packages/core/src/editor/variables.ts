@@ -134,6 +134,47 @@ export function createVariableActions(ctx: EditorContext) {
     ctx.requestRefresh()
   }
 
+  function makeCollectionLocal(id: string) {
+    const graph = ctx.graph
+    const collection = graph.variableCollections.get(id)
+    if (!collection?.key) return false
+
+    const previousCollection = { key: collection.key, version: collection.version }
+    const previousVariables = collection.variableIds.flatMap((variableId) => {
+      const variable = graph.variables.get(variableId)
+      return variable
+        ? [{ id: variableId, key: variable.key, version: variable.version }]
+        : []
+    })
+
+    const apply = (collectionLink: typeof previousCollection | null, variableLinks: typeof previousVariables) => {
+      if (ctx.graph !== graph) return
+      const current = graph.variableCollections.get(id)
+      if (!current) return
+      if (collectionLink?.key) current.key = collectionLink.key
+      else delete current.key
+      if (collectionLink?.version) current.version = collectionLink.version
+      else delete current.version
+      for (const link of variableLinks) {
+        const variable = graph.variables.get(link.id)
+        if (!variable || variable.collectionId !== id) continue
+        if (link.key) variable.key = link.key
+        else delete variable.key
+        if (link.version) variable.version = link.version
+        else delete variable.version
+      }
+      ctx.requestRefresh()
+    }
+
+    apply(null, previousVariables.map(({ id }) => ({ id })))
+    ctx.undo.push({
+      label: 'Make collection local',
+      forward: () => apply(null, previousVariables.map(({ id }) => ({ id }))),
+      inverse: () => apply(previousCollection, previousVariables)
+    })
+    return true
+  }
+
   function addCollection(collection: VariableCollection) {
     ctx.graph.addCollection(collection)
     ctx.undo.push({
