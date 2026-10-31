@@ -73,11 +73,15 @@ function booleanAncestorIds(graph: SceneGraph, id: string | null | undefined): s
   return ids
 }
 
-function invalidateBooleanAncestors(
+/**
+ * Drops the cached result of every boolean operation `id` lies in, on each renderer: a change
+ * inside an operation changes what it draws and the box it takes.
+ */
+export function invalidateBooleanAncestors(
   graph: SceneGraph,
   renderers: Iterable<GraphEventRenderer>,
   id: string | null | undefined
-) {
+): void {
   const ancestorIds = booleanAncestorIds(graph, id)
   if (ancestorIds.length === 0) return
   for (const renderer of renderers) {
