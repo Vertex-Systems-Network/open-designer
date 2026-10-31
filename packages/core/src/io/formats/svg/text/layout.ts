@@ -1,7 +1,12 @@
 import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import { withPDFTextLayout } from '#core/io/formats/pdf/prepare'
-import { renderNodesToSVG, type SVGExportOptions } from '#core/io/formats/svg/export'
+import {
+  renderNodesToSVG,
+  renderNodesToSVGWithWarnings,
+  type SVGExportOptions,
+  type SVGExportResult
+} from '#core/io/formats/svg/export'
 import { prepareGraphFonts } from '#core/text/prepare'
 
 /**
@@ -18,5 +23,18 @@ export async function renderNodesToLaidOutSVG(
   await prepareGraphFonts(graph, nodeIds)
   return withPDFTextLayout(async (textLayout) =>
     renderNodesToSVG(graph, pageId, nodeIds, { textLayout, ...options })
+  )
+}
+
+/** SVG with explicit warnings for effects the SVG format cannot represent faithfully. */
+export async function renderNodesToLaidOutSVGWithWarnings(
+  graph: SceneGraph,
+  pageId: string,
+  nodeIds: string[],
+  options: SVGExportOptions = {}
+): Promise<SVGExportResult> {
+  await prepareGraphFonts(graph, nodeIds)
+  return withPDFTextLayout(async (textLayout) =>
+    renderNodesToSVGWithWarnings(graph, pageId, nodeIds, { textLayout, ...options })
   )
 }
