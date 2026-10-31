@@ -1042,6 +1042,8 @@ export interface Variable {
   pluginData?: PluginDataEntry[]
   /** Published library key (from NodeChange.key). Used for assetRef resolution in colorVar. */
   key?: string
+  /** True when copied from a library and intentionally converted to a document-local variable. */
+  isLocal?: boolean
   /** Published library version (from NodeChange.version). Used for assetRef resolution in colorVar. */
   version?: string
 }
