@@ -232,9 +232,6 @@ function nodeToJSX(
     propAttribute
   )
   if (node.type === 'TEXT') {
-    if (ownProps.some(([name]) => name === 'text')) {
-      return [jsx.element(tag, attributes, [], depth)]
-    }
     const { children: content, inline } = textChildren(node, depth)
     for (let count = elementCount(content); count > 0; count--) layerIds?.push(null)
     return [jsx.element(tag, attributes, content, depth, inline)]
