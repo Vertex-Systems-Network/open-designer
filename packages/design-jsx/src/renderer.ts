@@ -433,14 +433,26 @@ function applyInstanceOverrides(
   for (const [key, value] of entries) {
     const sep = key.indexOf(':')
     if (sep === -1) continue
-    let childName: string
-    try {
-      childName = decodeURIComponent(key.slice(0, sep))
-    } catch {
-      childName = key.slice(0, sep)
-    }
+    const target = key.slice(0, sep)
     const prop = key.slice(sep + 1)
-    const child = descendants.find((n) => n.name === childName)
+    let child: SceneNode | undefined
+    if (target.startsWith('@')) {
+      child = instance
+      for (const part of target.slice(1).split('.')) {
+        const index = Number(part)
+        const childId = Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
+        child = childId ? graph.getNode(childId) : undefined
+        if (!child) break
+      }
+    } else {
+      let childName: string
+      try {
+        childName = decodeURIComponent(target)
+      } catch {
+        childName = target
+      }
+      child = descendants.find((n) => n.name === childName)
+    }
     if (!child || !(prop in child)) continue
     graph.updateNode(child.id, { [prop]: value })
     setInstanceOverride(instance.instanceOverrides, instance.id, child.id, prop, value)
