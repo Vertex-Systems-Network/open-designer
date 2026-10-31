@@ -195,7 +195,7 @@ export function useCanvasInput(
   } = createCanvasTransformInput(editor, setDrag)
 
   function onDblClick(e: MouseEvent) {
-    if (profile().pointer === 'pan') return
+    if (editor.state.activeTool === 'COMMENT' || profile().pointer === 'pan') return
     const { cx, cy } = getCoords(e)
     if (profile().edits && valueEdit.start(cx, cy)) {
       e.preventDefault()
@@ -257,7 +257,9 @@ export function useCanvasInput(
       e.preventDefault()
       return
     }
-    editor.setSelectedGuide(null)
+    if (e.button === 0 || editor.state.activeTool !== 'COMMENT') {
+      editor.setSelectedGuide(null)
+    }
 
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
     const clickCount = recordClick(sx, sy)
