@@ -46,12 +46,13 @@ test('warns about override keys it skips', async () => {
   const [, created] = await renderJSX(
     graph,
     `<Component name="Card" w={60} h={24}><Frame name="Dot" w={4} h={4} /></Component>
-     <Instance of="Card" overrides={{ 'Dot:visible': 'false', 'Ghost:opacity': 0.5, 'Dot:x': 3, plain: 1 }} />`
+     <Instance of="Card" overrides={{ 'Dot:visible': 'false', 'Dot:fills': [null], 'Ghost:opacity': 0.5, 'Dot:x': 3, plain: 1 }} />`
   )
   expect(graph.getChildren(created.id)[0]?.visible).toBe(true)
   expect(created.warnings).toEqual(
     expect.arrayContaining([
       'overrides key "Dot:visible" takes a boolean, not a string; it is ignored.',
+      'overrides key "Dot:fills" holds an empty entry or one of another kind; it is ignored.',
       'overrides key "Ghost:opacity" names no layer "Ghost" in the instance; it is ignored.',
       'overrides key "Dot:x" names x, which an instance cannot override; it is ignored.',
       'overrides key "plain" is not layer:field; it is ignored.'

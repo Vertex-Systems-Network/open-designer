@@ -132,6 +132,13 @@ function storedValue(
  * Create or update the collections a tree defines, by name: their modes, their variables, and
  * each variable's value in each mode, a mode's missing values taken from the first mode.
  */
+/** Whether `tree` defines variables, which rendering it adds to the graph or changes. */
+export function definesVariables(tree: TreeNode): boolean {
+  const found = new Map<string, CollectionDefinition>()
+  collectDefinitions(tree, found)
+  return found.size > 0
+}
+
 export function applyVariableDefinitions(graph: SceneGraph, tree: TreeNode): void {
   const found = new Map<string, CollectionDefinition>()
   collectDefinitions(tree, found)

@@ -1,4 +1,4 @@
-import { isEmptyObject, mapValues, pick } from 'es-toolkit'
+import { isEmptyObject, isUndefined, mapValues, omitBy, pick } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { INSTANCE_OVERRIDE_FIELDS } from '@open-pencil/scene-graph/instances'
@@ -40,7 +40,8 @@ function findVariantInSet(
         definition.type === 'VARIANT' && !DESIGN_JSX_SUPPORTED_PROPERTIES.has(definition.name)
     )
     .map((definition) => definition.name)
-  const requested = mapValues(pick(props, variantNames), String)
+  // A prop set to undefined, as a conditional value can be, picks no variant.
+  const requested = mapValues(omitBy(pick(props, variantNames), isUndefined), String)
   const variants = graph.getChildren(componentSet.id).filter((node) => node.type === 'COMPONENT')
   if (isEmptyObject(requested)) return variants.at(0)
   const variant = variants.find((item) => hasVariantValues(item, requested))
@@ -179,10 +180,18 @@ function kind(value: unknown): string {
   return typeof value === 'object' ? 'an object' : `a ${typeof value}`
 }
 
-/** Whether `value` can take the place of `current`: the same kind, or either is empty. */
+/**
+ * Whether `value` can take the place of `current`: the same kind, or either is empty. A list's
+ * entries can't be empty, and are of the kind the field's own entries are.
+ */
 function sameKind(current: unknown, value: unknown): boolean {
-  return (
-    current === undefined || current === null || value === null || kind(current) === kind(value)
+  if (current === undefined || current === null || value === null) return true
+  if (kind(current) !== kind(value)) return false
+  if (!Array.isArray(value) || !Array.isArray(current)) return true
+  const entry: unknown = current[0]
+  return value.every(
+    (item: unknown) =>
+      item !== null && item !== undefined && (entry === undefined || kind(entry) === kind(item))
   )
 }
 
@@ -234,7 +243,13 @@ function applyInstanceOverrides(
     const child = matches.at(0)
     if (!child) return skip(key, `names no layer "${childName}" in the instance`)
     const current: unknown = child[prop as keyof SceneNode]
-    if (!sameKind(current, value)) return skip(key, `takes ${kind(current)}, not ${kind(value)}`)
+    if (!sameKind(current, value))
+      return skip(
+        key,
+        kind(current) === kind(value)
+          ? 'holds an empty entry or one of another kind'
+          : `takes ${kind(current)}, not ${kind(value)}`
+      )
     return [{ child, prop, value }]
   })
   for (const { child, prop, value } of targets) {

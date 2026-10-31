@@ -18,6 +18,50 @@ describe('component rendering', () => {
     )
   })
 
+  test('takes a variant prop set to undefined as no choice', async () => {
+    const graph = new SceneGraph()
+    const [set] = await renderJSX(
+      graph,
+      '<ComponentSet name="Button"><Component name="State=On" /><Component name="State=Off" /></ComponentSet>'
+    )
+    const [instance] = await renderJSX(graph, '<Instance of="Button" State={undefined} />')
+    expect(getNodeOrThrow(graph, instance.id).componentId).toBe(graph.getChildren(set.id)[0]?.id)
+  })
+
+  test('runs renders into one graph one after another, so a failure undoes only its own', async () => {
+    const graph = new SceneGraph()
+    const page = graph.getPages()[0]
+    const [failed, rendered] = await Promise.allSettled([
+      renderJSX(graph, '<><Frame name="A" /><Instance of="Missing" /></>'),
+      renderJSX(graph, '<Frame name="B" />')
+    ])
+    expect(failed?.status).toBe('rejected')
+    expect(rendered?.status).toBe('fulfilled')
+    expect(graph.getChildren(page.id).map((node) => node.name)).toEqual(['B'])
+  })
+
+  test('undoes a render whose steps after drawing fail, and the variables it defined', async () => {
+    const graph = new SceneGraph()
+    const page = graph.getPages()[0]
+    await expect(
+      renderJSX(graph, '<Frame name="X" />', {
+        onNode: () => {
+          throw new Error('boom')
+        }
+      })
+    ).rejects.toThrow('boom')
+    expect(graph.getChildren(page.id)).toEqual([])
+    await expect(
+      renderJSX(
+        graph,
+        `const theme = defineVars('Theme', { Accent: '#FF0000' })
+        return <><Frame bg={theme.Accent} /><Instance of="Missing" /></>`
+      )
+    ).rejects.toThrow('component not found')
+    expect(graph.variableCollections.size).toBe(0)
+    expect(graph.variables.size).toBe(0)
+  })
+
   test('rejects an instance that would put its component inside itself', async () => {
     const graph = new SceneGraph()
     await expect(
