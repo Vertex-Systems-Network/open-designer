@@ -1083,6 +1083,8 @@ export interface VariableCollection {
    * belongs to the library: Figma lists it with the library's, not the file's own.
    */
   key?: string
+  /** True when copied from a library and intentionally converted to a document-local collection. */
+  isLocal?: boolean
   /** Published library version, which references by key carry with it. */
   version?: string
 }
