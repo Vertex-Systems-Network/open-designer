@@ -1,0 +1,1 @@
+- Auto-width text now wraps and truncates at its max width during measuring and drawing, including after edits and relayout.
