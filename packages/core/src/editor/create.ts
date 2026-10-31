@@ -383,8 +383,8 @@ export function createEditor(options?: EditorOptions) {
 
   function replaceGraph(newGraph: SceneGraph) {
     nodes.cancelNodePreviews()
-    undo.discardBatches()
     _graph = newGraph
+    undo.clear()
     state.documentKind = _graph.documentKind
     setActiveTool(offeredTool(state, state.activeTool))
     pendingTextLayout.clear()
