@@ -4,6 +4,7 @@ import { DEFAULT_FONT_FAMILY } from '#core/constants'
 import { fontManager, type FontManager } from '#core/text/font/manager'
 import { collectNamedNodeFontFaces } from '#core/text/font/names'
 import type { FontLoadedSource, FontUnavailableReason } from '#core/text/font/sources'
+import { fontStandIn } from '#core/text/font/stand-in'
 
 export type FontFaceStatus = 'available' | 'substituted' | 'unresolved'
 
@@ -74,6 +75,20 @@ function collectFaceUses(graph: SceneGraph, rootIds: readonly string[]): Mutable
 
 function faceStatus(use: MutableFontFaceUse, manager: FontManager): DocumentFontFaceStatus {
   const exactSource = manager.loadedFontSource(use.family, use.style)
+  const standIn = exactSource === 'stand-in' ? fontStandIn(use.family) : null
+  if (standIn) {
+    return {
+      family: use.family,
+      style: use.style,
+      name: use.name,
+      status: 'substituted',
+      source: exactSource,
+      substituteFamily: standIn.family,
+      reason: null,
+      nodeIds: [...use.nodeIds],
+      nodeNames: [...use.nodeNames]
+    }
+  }
   if (exactSource) {
     return {
       family: use.family,
