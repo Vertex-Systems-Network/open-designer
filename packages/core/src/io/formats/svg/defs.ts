@@ -282,7 +282,7 @@ export function createFilterDef(
           operator: 'over'
         })
       )
-    } else if (effect.type === 'LAYER_BLUR') {
+    } else if (effect.type === 'LAYER_BLUR' || effect.type === 'FOREGROUND_BLUR') {
       const stdDev = round(effect.radius / 2)
       primitives.push(svg('feGaussianBlur', { stdDeviation: stdDev }))
     }
