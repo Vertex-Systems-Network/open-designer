@@ -68,14 +68,20 @@ export class DocumentFontUses {
     for (const node of rootTextNodes(graph, this.roots)) this.remember(node)
   }
 
-  /** `nodeId` changed, arrived, or moved: its faces are read again, if it is text under a root. */
+  /**
+   * `nodeId` changed, arrived, or moved: the faces of the text it is or holds are read again
+   * where they are now, and those moved off the roots are forgotten.
+   */
   update(nodeId: string): void {
-    const node = this.graph.getNode(nodeId)
-    if (node?.type !== 'TEXT' || !this.underRoots(nodeId)) {
+    if (!this.graph.getNode(nodeId)) {
       this.byNode.delete(nodeId)
       return
     }
-    this.remember(node)
+    const under = this.underRoots(nodeId)
+    for (const node of rootTextNodes(this.graph, [nodeId])) {
+      if (under) this.remember(node)
+      else this.byNode.delete(node.id)
+    }
   }
 
   /** `nodeId` left the document, with whatever was under it. */

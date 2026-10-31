@@ -209,6 +209,15 @@ describe('DocumentFontUses', () => {
     graph.deleteNode(title.id)
     uses.remove(title.id)
     expect(families()).toEqual([])
+
+    // A frame moved off the page takes the text it holds with it, reported as the frame.
+    graph.reparentNode(frame.id, otherPage.id)
+    graph.createNode('TEXT', frame.id, { text: 'Hi', fontFamily: 'Inter', fontWeight: 400 })
+    uses.update(frame.id)
+    expect(families()).toEqual([])
+    graph.reparentNode(frame.id, page)
+    uses.update(frame.id)
+    expect(families()).toEqual(['Inter'])
   })
 
   test('skips the text under an ancestor that was deleted', async () => {
