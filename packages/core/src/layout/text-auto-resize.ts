@@ -1,7 +1,7 @@
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { TEXT_METRIC_FIELDS } from '@open-pencil/scene-graph/fields'
 
-import { measureTextForLayout } from './text-measurement'
+import { autoWidthWrapWidth, measureTextForLayout } from './text-measurement'
 
 /** Case and direction change what the lines hold, so how wide they are and where they break. */
 const TEXT_CONTENT_FIELDS = ['textCase', 'textDirection'] as const
