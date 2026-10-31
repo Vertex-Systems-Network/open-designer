@@ -265,7 +265,7 @@ fn collect_checked<R: tauri::Runtime>(
 
 fn current_checked<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> HashMap<String, bool> {
     let mut checked = HashMap::new();
-    if let Some(items) = app.menu().and_then(|menu| menu.items().ok()) {
+    if let Some(items) = editor_menu(app).and_then(|menu| menu.items().ok()) {
         collect_checked(items, &mut checked);
     }
     checked
