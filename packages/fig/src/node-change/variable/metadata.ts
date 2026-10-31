@@ -19,14 +19,14 @@ const LOCAL_LIBRARY_MARKER: PluginDataEntry = {
   value: 'true'
 }
 
-function hasLocalLibraryMarker(entries: readonly PluginDataEntry[]): boolean {
+export function hasLocalLibraryMarker(entries: readonly PluginDataEntry[]): boolean {
   return entries.some(
     ({ pluginId, key, value }) =>
       pluginId === LOCAL_LIBRARY_PLUGIN_ID && key === LOCAL_LIBRARY_PLUGIN_KEY && value === 'true'
   )
 }
 
-function withoutLocalLibraryMarker(entries: readonly PluginDataEntry[]): PluginDataEntry[] {
+export function withoutLocalLibraryMarker(entries: readonly PluginDataEntry[]): PluginDataEntry[] {
   return entries.filter(
     ({ pluginId, key }) => pluginId !== LOCAL_LIBRARY_PLUGIN_ID || key !== LOCAL_LIBRARY_PLUGIN_KEY
   )
