@@ -1,5 +1,6 @@
 import { createHead } from '@unhead/vue/client'
 import { createApp, nextTick } from 'vue'
+import { registerSW } from 'virtual:pwa-register'
 
 import { ReadOnlyDocumentError } from '@open-pencil/core'
 import { createRetainedScopePlugin } from '@open-pencil/vue/lifecycle/retention'
@@ -11,7 +12,6 @@ import { installCanvasKitBinary, preloadCanvasKit } from '@/app/editor/canvas/ca
 import { preloadFonts } from '@/app/editor/fonts'
 import { installBundledFonts } from '@/app/editor/fonts/bundled'
 import { observeBootErrors } from '@/app/shell/support/boot'
-import { loadOptionalChunk } from '@/app/shell/support/chunk-reload'
 import { reportBootFailure } from '@/app/shell/support/gate'
 import { IS_TAURI } from '@/constants'
 
@@ -50,10 +50,9 @@ export async function boot(): Promise<void> {
   }
 
   if (!IS_TAURI) {
-    void loadOptionalChunk(() => import('virtual:pwa-register'))
-      .then(({ registerSW }) => registerSW({ immediate: true }))
-      .catch((error: unknown) => {
-        console.warn('Unable to register the service worker', error)
-      })
+    void Promise.resolve(registerSW({ immediate: true })).catch((error: unknown) => {
+      recordRuntimeError(error, 'vue', 'service worker registration')
+      console.warn('Unable to register the service worker', error)
+    })
   }
 }
