@@ -377,6 +377,48 @@ function transformStrokeScale(transform: string | null | undefined): number {
   return Math.min(xScale, yScale)
 }
 
+function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
+  let x = 0
+  let y = 0
+  let startX = 0
+  let startY = 0
+  let collapsed = false
+
+  path.abs().iterate((segment) => {
+    const command = String(segment[0]).toUpperCase()
+    const values = segment.slice(1).map(Number)
+    if (command === 'Z') {
+      x = startX
+      y = startY
+      return
+    }
+    if (command === 'H') {
+      x = values.at(-1) ?? x
+      return
+    }
+    if (command === 'V') {
+      y = values.at(-1) ?? y
+      return
+    }
+
+    const endX = values.at(-2)
+    const endY = values.at(-1)
+    if (endX === undefined || endY === undefined) return
+    if (command === 'A' && Math.round(x * 100) === Math.round(endX * 100) &&
+        Math.round(y * 100) === Math.round(endY * 100)) {
+      collapsed = true
+    }
+    x = endX
+    y = endY
+    if (command === 'M') {
+      startX = x
+      startY = y
+    }
+  })
+
+  return collapsed
+}
+
 /** Scale extracted SVG path info into IconData paths (shared by buildIconData and design-jsx <svg>). */
 export function scalePathInfos(
   pathInfos: IconPathInfo[],
@@ -389,7 +431,10 @@ export function scalePathInfos(
       transformedPath = transformedPath.transform(path.transform)
     }
     if (scaleX !== 1 || scaleY !== 1) transformedPath = transformedPath.scale(scaleX, scaleY)
-    const scaledD = transformedPath.round(2).toString()
+    const pathToRound = roundingCollapsesArc(svgpath(transformedPath.toString()))
+      ? svgpath(transformedPath.toString()).abs().unshort().unarc()
+      : transformedPath
+    const scaledD = pathToRound.round(2).toString()
     const fill = normalizeSVGPaint(path.fill)
     const stroke = normalizeSVGPaint(path.stroke)
     return {
