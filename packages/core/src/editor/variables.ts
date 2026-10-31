@@ -145,7 +145,8 @@ export function createVariableActions(ctx: EditorContext) {
       .map((variable) => ({
         id: variable.id,
         key: variable.key,
-        version: variable.version
+        version: variable.version,
+        isLocal: variable.isLocal
       }))
 
     const apply = (collectionLink: typeof previousCollection | null, variableLinks: typeof previousVariables) => {
