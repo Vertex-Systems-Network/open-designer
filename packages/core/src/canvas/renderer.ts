@@ -61,7 +61,6 @@ import type {
   Canvas,
   Paint,
   Font,
-  FontMgr,
   TypefaceFontProvider,
   SkPicture,
   RuntimeEffect,
@@ -144,7 +143,6 @@ export class SkiaRenderer {
   valueFont: Font | null = null
   sectionTitleFont: Font | null = null
   componentLabelFont: Font | null = null
-  fontMgr: FontMgr | null = null
   fontProvider: TypefaceFontProvider | null = null
   fontsLoaded = false
   fontGeneration = 0

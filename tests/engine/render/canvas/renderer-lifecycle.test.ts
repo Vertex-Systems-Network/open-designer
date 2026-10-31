@@ -47,7 +47,6 @@ function createRenderer() {
     sizeFont: deletable<Font>(),
     sectionTitleFont: deletable<Font>(),
     componentLabelFont: deletable<Font>(),
-    fontMgr: null,
     fontProvider: null,
     fontsLoaded: true,
     rulerBgPaint: deletable<Paint>(),

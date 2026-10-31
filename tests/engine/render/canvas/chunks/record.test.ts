@@ -5,11 +5,7 @@ import { SceneGraph } from '@open-pencil/scene-graph'
 import { initCanvasKit } from '#cli/headless'
 import { SkiaRenderer } from '#core/canvas'
 import type { RenderChunk } from '#core/canvas/renderer/chunks'
-import {
-  deleteRecordedRenderChunks,
-  recordRenderChunk,
-  RenderChunkIndex
-} from '#core/canvas/renderer/chunks'
+import { recordRenderChunk, RenderChunkIndex } from '#core/canvas/renderer/chunks'
 
 import { expectDefined } from '#tests/helpers/assert'
 
@@ -32,7 +28,7 @@ function renderPixels(renderer: SkiaRenderer, graph: SceneGraph, pageId: string,
       const picture = recorded.find((entry) => entry.chunk.id === chunk.id)?.picture
       if (picture) canvas.drawPicture(picture)
     }
-    deleteRecordedRenderChunks(recorded)
+    for (const entry of recorded) entry.picture.delete()
     index.dispose()
   } else {
     renderer.renderSceneToCanvas(canvas, graph, pageId)

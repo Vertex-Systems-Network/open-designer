@@ -98,11 +98,3 @@ export function recordRenderChunk(
   )
   return { chunk, picture }
 }
-
-export function drawRecordedRenderChunks(canvas: Canvas, chunks: RecordedRenderChunk[]): void {
-  for (const recorded of chunks) canvas.drawPicture(recorded.picture)
-}
-
-export function deleteRecordedRenderChunks(chunks: RecordedRenderChunk[]): void {
-  for (const recorded of chunks) recorded.picture.delete()
-}

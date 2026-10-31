@@ -460,10 +460,5 @@ export class RenderChunkIndex {
 }
 
 export { RenderChunkPictureCache } from './cache'
-export {
-  deleteRecordedRenderChunks,
-  drawRecordedRenderChunks,
-  drawRenderChunkDirect,
-  recordRenderChunk
-} from './record'
+export { drawRenderChunkDirect, recordRenderChunk } from './record'
 export type { RecordedRenderChunk } from './record'

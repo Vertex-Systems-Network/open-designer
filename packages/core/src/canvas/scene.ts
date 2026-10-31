@@ -1,27 +1,11 @@
-/* eslint-disable max-lines -- scene dispatch stays together while shape domains live in sibling modules */
-import type { Canvas, Path } from 'canvaskit-wasm'
+import type { Canvas } from 'canvaskit-wasm'
 
 import { type SceneNode, type SceneGraph, type Fill } from '@open-pencil/scene-graph'
-import {
-  arrowCapOverflow,
-  collectArrowEndpoints,
-  hasTrimmedShaft,
-  trimArrowShafts
-} from '@open-pencil/scene-graph/arrow-caps'
 import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
 import Matrix, { type Mat3 } from '@open-pencil/scene-graph/matrix'
-import type { Color } from '@open-pencil/scene-graph/primitives'
 
 import { nodeOrientationMatrix, projectedNode } from '#core/geometry'
-import { shownText } from '#core/text/case'
-import { mayHoldEmoji } from '#core/text/emoji'
 import { fontManager } from '#core/text/fonts'
-import {
-  addStrokeRunToPath,
-  strokeRuns,
-  vectorNetworkToCenterlinePath,
-  vectorNetworkToPath
-} from '#core/vector'
 
 import { figmaBlendModeToSkia, needsIsolatedBlendLayer } from './blend'
 import { renderBooleanOperation } from './boolean'
@@ -30,39 +14,25 @@ import { drawVectorMultiStyleFills, paintFills } from './fills'
 import { drawLayoutGrids } from './layout-grids'
 import { renderMaskedChildIds } from './masks'
 import type { SkiaRenderer, RenderOverlays } from './renderer'
-import {
-  canCacheEffectRaster,
-  effectRasterScale,
-  effectRasterScaleMatches
-} from './renderer/effect-raster-cache'
+import { renderShapeThroughEffectCaches } from './renderer/effect-raster-cache'
 import { mapVisualBounds, subtreeVisualBounds } from './renderer/visual-bounds'
 import { isolatesInnerShadows, renderLayerShadows } from './shadows'
 import { isLayerContainer } from './shadows/silhouette'
 import {
   configureStrokePaint,
-  drawArrowHeads,
   drawDashedRRectWithSolidCorners,
   drawStyledRRectStroke,
-  forVisibleStrokes,
-  getStrokeCapEntity,
-  getStrokeJoinEntity,
-  normalizeDashPattern,
-  withStrokeDash
+  forVisibleStrokes
 } from './strokes'
-import { drawLineStroke } from './strokes/line'
-import { drawOutlinedDashes } from './strokes/outlined-dashes'
-import { drawDashedRectStroke, strokeDashesByOutline, strokeSideWeights } from './strokes/sides'
-import { textVerticalOffset, withTextParagraph } from './text'
-import { drawTextLayout } from './text/decorations'
 import {
-  canDrawSavedText,
-  drawDerivedText,
-  drawReflowedPathTextSilhouettes,
-  drawsSavedText,
-  isReflowedPathText
-} from './text/derived'
-import { drawLaidOutEmoji, drawSavedEmoji } from './text/emoji'
+  drawFigmaDashes,
+  isPathTextWithStrokeGeometry,
+  paintNodeStrokes,
+  vectorStrokePaths
+} from './strokes/dispatch'
+import { drawReflowedPathTextSilhouettes, isReflowedPathText } from './text/derived'
 import { stickyPlaceholderNode } from './text/placeholder'
+import { drawTextEmoji, hasOverflowPathTextPaint, renderText } from './text/render'
 
 function drawVisibleFills(
   r: SkiaRenderer,
@@ -75,14 +45,6 @@ function drawVisibleFills(
 
 function hasNodeTransform(node: SceneNode): boolean {
   return node.rotation !== 0 || node.flipX || node.flipY
-}
-
-function hasOverflowPathTextPaint(node: SceneNode): boolean {
-  return (
-    node.textPathData != null &&
-    ((node.derivedTextGlyphs?.length ?? 0) > 0 ||
-      (Array.isArray(node.strokeGeometry) && node.strokeGeometry.length > 0))
-  )
 }
 
 /**
@@ -524,15 +486,6 @@ function shapeEffects(node: SceneNode): SceneNode['effects'] {
   )
 }
 
-function canRasterCacheEffects(visibleEffects: SceneNode['effects']): boolean {
-  return (
-    visibleEffects.length > 0 &&
-    visibleEffects.every(
-      (effect) => effect.type === 'DROP_SHADOW' || effect.type === 'INNER_SHADOW'
-    )
-  )
-}
-
 export function renderShape(
   r: SkiaRenderer,
   canvas: Canvas,
@@ -545,376 +498,7 @@ export function renderShape(
     return
   }
 
-  const canRasterCache = r.renderingSceneBacking && canRasterCacheEffects(effects)
-  const targetScale = effectRasterScale(r.zoom * r.dpr)
-  const cachedRaster = canRasterCache ? r.effectRasterCache.get(node.id) : null
-  if (
-    cachedRaster &&
-    (cachedRaster.fontGeneration !== r.fontGeneration ||
-      !effectRasterScaleMatches(cachedRaster.scale, targetScale))
-  ) {
-    r.effectRasterCache.delete(node.id)
-  } else if (cachedRaster) {
-    canvas.drawImageRectOptions(
-      cachedRaster.image,
-      r.ck.LTRBRect(0, 0, cachedRaster.image.width(), cachedRaster.image.height()),
-      r.ck.LTRBRect(
-        cachedRaster.left,
-        cachedRaster.top,
-        cachedRaster.left + cachedRaster.width,
-        cachedRaster.top + cachedRaster.height
-      ),
-      r.ck.FilterMode.Linear,
-      r.ck.MipmapMode.None,
-      null
-    )
-    return
-  }
-
-  const margin = Math.max(
-    r.effectOverflow(node),
-    arrowCapOverflow(node.strokes, node.strokeCap, node.vectorNetwork)
-  )
-  const width = node.width + margin * 2
-  const height = node.height + margin * 2
-  const scale = targetScale
-  if (canRasterCache && canCacheEffectRaster(width, height, scale)) {
-    const surface = r.surface.makeSurface({
-      width: Math.ceil(width * scale),
-      height: Math.ceil(height * scale),
-      colorType: r.ck.ColorType.RGBA_8888,
-      alphaType: r.ck.AlphaType.Premul,
-      colorSpace: r.ck.ColorSpace.SRGB
-    })
-    const rasterCanvas = surface.getCanvas()
-    try {
-      rasterCanvas.clear(r.ck.TRANSPARENT)
-      rasterCanvas.scale(scale, scale)
-      rasterCanvas.translate(margin, margin)
-      r.renderShapeUncached(rasterCanvas, node, graph)
-      surface.flush()
-      const image = surface.makeImageSnapshot()
-      const retained = r.effectRasterCache.set(node.id, {
-        image,
-        left: -margin,
-        top: -margin,
-        width,
-        height,
-        scale,
-        pixels: image.width() * image.height(),
-        fontGeneration: r.fontGeneration
-      })
-      try {
-        canvas.drawImageRectOptions(
-          image,
-          r.ck.LTRBRect(0, 0, image.width(), image.height()),
-          r.ck.LTRBRect(-margin, -margin, node.width + margin, node.height + margin),
-          r.ck.FilterMode.Linear,
-          r.ck.MipmapMode.None,
-          null
-        )
-      } finally {
-        if (!retained) image.delete()
-      }
-      return
-    } finally {
-      surface.delete()
-    }
-  }
-
-  const cached = r.nodePictureCache.get(node.id)
-  const cachedGeneration = r.nodePictureCacheGenerations.get(node.id)
-  if (cached && cachedGeneration === r.fontGeneration) {
-    canvas.drawPicture(cached)
-    return
-  }
-  if (cached) cached.delete()
-  r.nodePictureCache.delete(node.id)
-  r.nodePictureCacheGenerations.delete(node.id)
-
-  const bounds = r.ck.LTRBRect(-margin, -margin, node.width + margin, node.height + margin)
-  const recorder = new r.ck.PictureRecorder()
-  try {
-    const recCanvas = recorder.beginRecording(bounds)
-    r.renderShapeUncached(recCanvas, node, graph)
-    const picture = recorder.finishRecordingAsPicture()
-    r.nodePictureCache.set(node.id, picture)
-    r.nodePictureCacheGenerations.set(node.id, r.fontGeneration)
-    canvas.drawPicture(picture)
-  } finally {
-    recorder.delete()
-  }
-}
-
-function drawVectorStrokeGeometry(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  sg: Path[],
-  sc: Color,
-  opacity: number
-): void {
-  r.fillPaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
-  r.fillPaint.setAlphaf(opacity)
-  for (const p of sg) canvas.drawPath(p, r.fillPaint)
-}
-
-function vectorStrokePaths(r: SkiaRenderer, node: SceneNode): Path[] | null {
-  if (!node.vectorNetwork) return null
-  const cached = r.nodePaths.vectorStroke.get(node.id)
-  if (cached) return cached
-
-  // A path per run, so the corners inside a run join and only its open ends take caps.
-  const { segments, vertices } = node.vectorNetwork
-  const paths = strokeRuns(segments).map((run) => {
-    const path = new r.ck.PathBuilder()
-    addStrokeRunToPath(path, run, segments, vertices)
-    return path.detachAndDelete()
-  })
-
-  if (paths.length === 0) return null
-  r.nodePaths.store(r.nodePaths.vectorStroke, node.id, paths)
-  return paths
-}
-
-/** Stroke outlines are cached under `<nodeId>|…`, which `NodePathCaches.invalidate` removes. */
-function strokeOutlineKey(
-  node: SceneNode,
-  stroke: SceneNode['strokes'][0],
-  source: 'runs' | 'regions' | 'trimmed'
-): string {
-  return `${node.id}|${source}|${stroke.weight}|${stroke.cap ?? node.strokeCap}|${stroke.join ?? node.strokeJoin}|${node.strokeMiterLimit}`
-}
-
-function drawVectorPathStrokes(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  vectorPaths: Path[],
-  stroke: SceneNode['strokes'][0],
-  sc: Color,
-  miterLimit: number,
-  outlineCacheKey?: string
-): void {
-  const dash = normalizeDashPattern(stroke.dashPattern)
-  if (dash.length > 0) {
-    r.strokePaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
-    r.strokePaint.setAlphaf(stroke.opacity)
-    r.strokePaint.setStrokeWidth(stroke.weight)
-    r.strokePaint.setStrokeCap(getStrokeCapEntity(r, stroke.cap ?? 'NONE'))
-    r.strokePaint.setStrokeJoin(getStrokeJoinEntity(r, stroke.join ?? 'MITER'))
-    r.strokePaint.setStrokeMiter(miterLimit)
-    const effect = r.ck.PathEffect.MakeDash(dash, 0)
-    r.strokePaint.setPathEffect(effect)
-    for (const vp of vectorPaths) canvas.drawPath(vp, r.strokePaint)
-    r.strokePaint.setPathEffect(null)
-    effect.delete()
-    return
-  }
-  const strokeOpts = {
-    width: stroke.weight,
-    miter_limit: miterLimit,
-    cap: getStrokeCapEntity(r, stroke.cap ?? 'NONE'),
-    join: getStrokeJoinEntity(r, stroke.join ?? 'MITER')
-  }
-  r.fillPaint.setColorComponents(sc.r, sc.g, sc.b, sc.a)
-  r.fillPaint.setAlphaf(stroke.opacity)
-
-  const cached = outlineCacheKey ? r.nodePaths.strokeOutline.get(outlineCacheKey) : undefined
-  if (cached) {
-    for (const outline of cached) canvas.drawPath(outline, r.fillPaint)
-    return
-  }
-  const outlines: Path[] = []
-  for (const vp of vectorPaths) {
-    const outline = vp.makeStroked(strokeOpts)
-    if (outline) outlines.push(outline)
-  }
-  for (const outline of outlines) canvas.drawPath(outline, r.fillPaint)
-  // Drawing copies the outline, so one without a cache key is done with here.
-  if (outlineCacheKey) r.nodePaths.store(r.nodePaths.strokeOutline, outlineCacheKey, outlines)
-  else for (const outline of outlines) outline.delete()
-}
-
-/**
- * Draws a dashed stroke on a rectangle, frame, section, or component set with Figma's dash
- * layout, and returns false when the stroke has no dashes or has round or square dash ends on
- * sides of their own weights, which that layout does not cover.
- */
-function drawFigmaDashes(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  stroke: SceneNode['strokes'][0]
-): boolean {
-  const dash = normalizeDashPattern(stroke.dashPattern)
-  if (dash.length === 0) return false
-  if (strokeDashesByOutline(node, stroke)) {
-    drawDashedRectStroke(r, canvas, node, stroke, strokeSideWeights(node, stroke), dash)
-  } else if (node.independentStrokeWeights) {
-    return false
-  } else {
-    drawOutlinedDashes(r, canvas, node, stroke, dash)
-  }
-  return true
-}
-
-function drawRegularStroke(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  stroke: SceneNode['strokes'][0],
-  sc: Color
-): void {
-  configureStrokePaint(r, node, stroke, sc)
-  withStrokeDash(r, normalizeDashPattern(stroke.dashPattern), 0, () => {
-    if (node.independentStrokeWeights && r.isRectangularType(node.type)) {
-      r.drawIndividualSideStrokes(canvas, node, stroke)
-    } else if (!r.isRectangularType(node.type) || !drawFigmaDashes(r, canvas, node, stroke)) {
-      r.drawStrokeWithAlign(canvas, node, stroke.align)
-    }
-  })
-}
-
-function drawNodeStroke(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  stroke: SceneNode['strokes'][0],
-  sc: Color,
-  sg: Path[] | null,
-  vectorPaths: Path[] | null,
-  vectorStroke: Path[] | null
-): void {
-  const shouldStrokeVectorCenterline =
-    vectorStroke &&
-    stroke.align === 'CENTER' &&
-    node.cornerRadius === 0 &&
-    node.type === 'VECTOR' &&
-    !node.fills.some((fill) => fill.visible)
-  if (shouldStrokeVectorCenterline) {
-    const outlineKey = strokeOutlineKey(node, stroke, 'runs')
-    drawVectorPathStrokes(r, canvas, vectorStroke, stroke, sc, node.strokeMiterLimit, outlineKey)
-    return
-  }
-  if (!sg) {
-    if (vectorPaths) {
-      const outlineKey = strokeOutlineKey(node, stroke, 'regions')
-      drawVectorPathStrokes(r, canvas, vectorPaths, stroke, sc, node.strokeMiterLimit, outlineKey)
-    } else drawRegularStroke(r, canvas, node, stroke, sc)
-    return
-  }
-  if (stroke.align !== 'INSIDE') {
-    if (node.type === 'VECTOR' || node.type === 'TEXT') {
-      drawVectorStrokeGeometry(r, canvas, sg, sc, stroke.opacity)
-    } else drawRegularStroke(r, canvas, node, stroke, sc)
-    return
-  }
-
-  const clipPaths = node.type === 'VECTOR' ? r.getFillGeometry(node) : null
-  if (node.type === 'VECTOR' && !clipPaths) {
-    drawVectorStrokeGeometry(r, canvas, sg, sc, stroke.opacity)
-    return
-  }
-
-  canvas.save()
-  if (clipPaths) {
-    for (const path of clipPaths) canvas.clipPath(path, r.ck.ClipOp.Intersect, true)
-  } else {
-    r.clipNodeShape(canvas, node)
-  }
-  drawVectorStrokeGeometry(r, canvas, sg, sc, stroke.opacity)
-  canvas.restore()
-}
-
-function isPathTextWithStrokeGeometry(node: SceneNode): boolean {
-  return (
-    node.type === 'TEXT' &&
-    node.textPathData !== null &&
-    (node.derivedTextGlyphs?.length ?? 0) > 0 &&
-    node.strokeGeometry.length > 0
-  )
-}
-
-/**
- * Draws arrow-cap heads for a stroke on a vector's open path ends. Runs after the shaft
- * regardless of which branch painted it, so heads survive fills, non-center alignment, corner
- * radii, and dashed shafts.
- */
-function drawNodeArrowHeads(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  stroke: SceneNode['strokes'][0],
-  color: Color
-): void {
-  if (node.type !== 'VECTOR' || !node.vectorNetwork) return
-  const endpoints = collectArrowEndpoints(node.vectorNetwork, stroke.cap ?? node.strokeCap)
-  if (endpoints.length > 0) {
-    drawArrowHeads(r, canvas, endpoints, stroke.weight, color, stroke.opacity)
-  }
-}
-
-function paintNodeStrokes(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  graph: SceneGraph,
-  sg: Path[] | null,
-  vectorPaths: Path[] | null,
-  vectorStroke: Path[] | null
-): void {
-  forVisibleStrokes(r, node, graph, (stroke, color) => {
-    if (node.type === 'LINE') {
-      drawLineStroke(r, canvas, node, stroke, color)
-      return
-    }
-    if (
-      stroke.dashPattern &&
-      stroke.dashPattern.length > 0 &&
-      node.type === 'VECTOR' &&
-      node.vectorNetwork
-    ) {
-      const key = `${node.id}|centerline|${node.cornerRadius}`
-      let centerline = r.nodePaths.strokeOutline.get(key)
-      if (!centerline) {
-        centerline = [vectorNetworkToCenterlinePath(r.ck, node.vectorNetwork, node.cornerRadius)]
-        r.nodePaths.store(r.nodePaths.strokeOutline, key, centerline)
-      }
-      drawVectorPathStrokes(r, canvas, centerline, stroke, color, node.strokeMiterLimit)
-      drawNodeArrowHeads(r, canvas, node, stroke, color)
-      return
-    }
-    const cap = stroke.cap ?? node.strokeCap
-    if (
-      !sg &&
-      stroke.align === 'CENTER' &&
-      node.type === 'VECTOR' &&
-      node.vectorNetwork &&
-      hasTrimmedShaft(node.vectorNetwork, cap)
-    ) {
-      // The line stops short of a triangle or equilateral head, so it is stroked from its own
-      // pulled-back copy rather than the cached paths; saved stroke geometry is already trimmed.
-      const key = `${node.id}|trimmed|${cap}|${stroke.weight}|${node.cornerRadius}`
-      let paths = r.nodePaths.strokeOutline.get(key)
-      if (!paths) {
-        const network = trimArrowShafts(node.vectorNetwork, cap, stroke.weight)
-        paths = vectorNetworkToPath(r.ck, network, node.cornerRadius)
-        r.nodePaths.store(r.nodePaths.strokeOutline, key, paths)
-      }
-      drawVectorPathStrokes(
-        r,
-        canvas,
-        paths,
-        stroke,
-        color,
-        node.strokeMiterLimit,
-        strokeOutlineKey(node, stroke, 'trimmed')
-      )
-      drawNodeArrowHeads(r, canvas, node, stroke, color)
-      return
-    }
-    drawNodeStroke(r, canvas, node, stroke, color, sg, vectorPaths, vectorStroke)
-    drawNodeArrowHeads(r, canvas, node, stroke, color)
-  })
+  renderShapeThroughEffectCaches(r, canvas, node, graph, effects)
 }
 
 /** Draws a shape with its own effects: Figma puts inner shadows over fills and under strokes. */
@@ -966,145 +550,4 @@ export function paintShapeContent(
   }
 }
 
-function hasComplexTextFill(fill?: Fill): boolean {
-  return fill !== undefined && fill.type !== 'SOLID'
-}
-
-function drawPaintedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode): boolean {
-  if (!r.fontsLoaded || !r.fontProvider) return false
-  // Apply the shader directly to native glyphs: coverage layers add another rounding pass.
-  return withTextParagraph(
-    r,
-    node,
-    r.ck.Color4f(0, 0, 0, 1),
-    {
-      halfLeading: true,
-      foregroundPaint: r.fillPaint
-    },
-    (paragraph, prepared) => {
-      const y = textVerticalOffset(node, paragraph.getHeight())
-      drawTextLayout(r.ck, canvas, node, prepared, y, r.fillPaint)
-      return true
-    }
-  )
-}
-
-function shouldClipTextToLayoutBox(node: SceneNode): boolean {
-  return (
-    !hasOverflowPathTextPaint(node) &&
-    (node.textAutoResize === 'NONE' || node.textAutoResize === 'TRUNCATE')
-  )
-}
-
-function drawResolvedPathText(
-  r: SkiaRenderer,
-  canvas: Canvas,
-  node: SceneNode,
-  fontReadiness: ReturnType<SkiaRenderer['nodeFontReadiness']>,
-  fill?: Fill
-): boolean {
-  return (
-    // Resolving the exact face must not replace curved glyph placement with a straight paragraph.
-    fontReadiness !== 'exhausted' &&
-    node.textPathData !== null &&
-    drawDerivedText(r, canvas, node, fill)
-  )
-}
-
-/** Whether the text is drawn from the editor's own layout, which leaves its emoji to be drawn. */
-function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
-  if (!r.fontsLoaded || !r.fontProvider || node.textPathData !== null) return false
-  const readiness = r.nodeFontReadiness(node)
-  return readiness !== 'pending' && readiness !== 'exhausted' && mayHoldEmoji(shownText(node))
-}
-
-/**
- * The emoji of a text, once whatever fills it has, clipped as its glyphs are: over its saved
- * glyphs' placeholder squares, or over the blank squares the editor's layout gives them.
- */
-function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
-  const saved = drawsSavedText(node)
-  if (!saved && !drawsLaidOutText(r, node)) return
-  canvas.save()
-  if (shouldClipTextToLayoutBox(node)) {
-    canvas.clipRect(r.ck.LTRBRect(0, 0, node.width, node.height), r.ck.ClipOp.Intersect, false)
-  }
-  if (saved) drawSavedEmoji(r, canvas, node)
-  else {
-    // The paragraph the fills just drew with: its colour keys the prepared text, and a solid fill
-    // leaves it on the fill paint, so no second paragraph is shaped for the emoji.
-    const lastFill = node.fills.findLast((fill) => fill.visible)
-    const color = hasComplexTextFill(lastFill) ? r.ck.Color4f(0, 0, 0, 1) : r.fillPaint.getColor()
-    withTextParagraph(r, node, color, { halfLeading: true }, (paragraph) =>
-      drawLaidOutEmoji(r, canvas, node, paragraph, textVerticalOffset(node, paragraph.getHeight()))
-    )
-  }
-  canvas.restore()
-}
-
-function drawSavedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): boolean {
-  return canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
-}
-
-export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): void {
-  const text = node.text
-  if (!text) return
-
-  canvas.save()
-  if (shouldClipTextToLayoutBox(node)) {
-    canvas.clipRect(r.ck.LTRBRect(0, 0, node.width, node.height), r.ck.ClipOp.Intersect, false)
-  }
-
-  if (drawSavedText(r, canvas, node, fill)) {
-    canvas.restore()
-    return
-  }
-  const fontReadiness = r.nodeFontReadiness(node)
-  if (fontReadiness === 'pending') {
-    canvas.restore()
-    return
-  }
-  if (drawResolvedPathText(r, canvas, node, fontReadiness, fill)) {
-    canvas.restore()
-    return
-  }
-  if (fontReadiness === 'exhausted') {
-    if (node.textPicture && r.isTextPictureCurrent(node)) {
-      const pic = r.ck.MakePicture(node.textPicture)
-      if (pic) {
-        canvas.drawPicture(pic)
-        pic.delete()
-        canvas.restore()
-        return
-      }
-    }
-    if (drawDerivedText(r, canvas, node, fill)) {
-      canvas.restore()
-      return
-    }
-    canvas.restore()
-    return
-  }
-  if (hasComplexTextFill(fill) && drawPaintedText(r, canvas, node)) {
-    canvas.restore()
-    return
-  }
-  if (r.fontsLoaded && r.fontProvider) {
-    withTextParagraph(
-      r,
-      node,
-      r.fillPaint.getColor(),
-      { halfLeading: true },
-      (paragraph, prepared) => {
-        const paragraphY = textVerticalOffset(node, paragraph.getHeight())
-        drawTextLayout(r.ck, canvas, node, prepared, paragraphY, r.fillPaint)
-      }
-    )
-  } else if (r.textFont) {
-    const fontSize = node.fontSize || r.DEFAULT_FONT_SIZE
-    const paragraphY = textVerticalOffset(node, fontSize)
-    canvas.drawText(shownText(node), 0, paragraphY + fontSize, r.fillPaint, r.textFont)
-  }
-
-  canvas.restore()
-}
+export { renderText }

@@ -53,7 +53,6 @@ export function destroyRenderer(r: SkiaRenderer): void {
   r.valueFont?.delete()
   r.sectionTitleFont?.delete()
   r.componentLabelFont?.delete()
-  r.fontMgr?.delete()
   const fontProvider = r.fontProvider
   r.fontProvider = null
   r.fontsLoaded = false
