@@ -57,16 +57,16 @@ export async function previewDOMCode(
       pageName: 'Code preview'
     })
     const pageId = graph.getPages()[0]?.id ?? graph.rootId
-    session.previewGraph = graph
-    session.previewPageId = pageId
     if (!session.undoHistory) {
       session.undoHistory = store.captureUndoHistory()
       store.clearUndoHistory()
     }
     store.replaceGraph(graph, { preserveHistory: true })
+    session.previewGraph = graph
+    session.previewPageId = pageId
     return { ok: true }
   } catch (error) {
-    if (session.undoHistory) {
+    if (session.undoHistory && !session.previewGraph) {
       store.restoreUndoHistory(session.undoHistory)
       session.undoHistory = null
     }
