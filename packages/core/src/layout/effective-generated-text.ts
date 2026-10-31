@@ -2,6 +2,7 @@ import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import type { Size } from '@open-pencil/scene-graph/primitives'
 
 import { getTextMeasurer } from './text-measurement'
+import { primaryAxisGap, siblingOverlap } from './item-spacing'
 
 type LayoutAxis = 'width' | 'height'
 
@@ -95,10 +96,13 @@ function intrinsicSize(
   if (children.length === 0) return null
 
   const childSizes = children.map((child) => sizes.get(child.id) ?? child)
-  const gap =
-    node.primaryAxisAlign === 'SPACE_BETWEEN'
-      ? 0
-      : node.itemSpacing * Math.max(0, children.length - 1)
+  const primarySize = node.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
+  const overlap = siblingOverlap(node)
+  const effectiveOverlap =
+    node.primaryAxisSizing === 'HUG' && overlap > 0
+      ? Math.min(overlap, ...childSizes.map((child) => child[primarySize]))
+      : overlap
+  const gap = (primaryAxisGap(node) - effectiveOverlap) * Math.max(0, children.length - 1)
   if (node.layoutMode === 'HORIZONTAL') {
     return {
       width:

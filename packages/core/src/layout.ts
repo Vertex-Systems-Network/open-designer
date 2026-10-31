@@ -26,6 +26,7 @@ import {
 import { keepsSavedLayout, usesDetachedDerivedLayout } from './layout/derived'
 import { applyEffectiveGeneratedTextLayout } from './layout/effective-generated-text'
 import { buildGridTree, createGridChildNode } from './layout/grid'
+import { primaryAxisGap, siblingOverlap } from './layout/item-spacing'
 import { sizeAutoResizingText } from './layout/text-auto-resize'
 export { sizeAutoResizingText } from './layout/text-auto-resize'
 export {
@@ -37,7 +38,6 @@ export {
 } from './layout/text-measurement'
 import type { LayoutSizing, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 import { connectorSublayers, layoutConnector } from '@open-pencil/scene-graph/connectors'
-import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
 import { layoutSizing } from '@open-pencil/scene-graph/layout'
 
 import { fitShapeWithTextFrame } from './layout/shape-with-text'
@@ -185,27 +185,69 @@ function buildYogaTree(
   if (heldAxis === 'height') root.setHeight(frame.height)
 
   configureFlexContainer(root, frame, direction)
+  insertFlexChildren(root, frame, graph, direction)
 
-  const children = graph.getChildren(frame.id).map((child) => asLaidOutIn(graph, child, frame))
-  for (const child of children) {
+  return root
+}
+
+function insertFlexChildren(
+  yogaParent: YogaNode,
+  parent: SceneNode,
+  graph: SceneGraph,
+  direction: 'LTR' | 'RTL'
+): void {
+  const overlap = siblingOverlap(parent)
+  const capHugOverlap = overlap > 0 && parent.primaryAxisSizing === 'HUG'
+  const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
+  const primarySize = parent.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
+  const yogaDirection = direction === 'RTL' ? Direction.RTL : Direction.LTR
+  const children = graph.getChildren(parent.id).map((node) => {
+    const child = asLaidOutIn(graph, node, parent)
     const yogaChild = createYogaNode()
-
     if (child.layoutPositioning === 'ABSOLUTE') {
       configureAbsoluteChild(yogaChild, child)
     } else if (!child.visible) {
       yogaChild.setDisplay(Display.None)
-    } else if (child.layoutMode === 'GRID') {
-      configureChildAsGrid(yogaChild, child, frame, graph, direction)
-    } else if (child.layoutMode !== 'NONE') {
-      configureChildAsAutoLayout(yogaChild, child, frame, graph, direction)
     } else {
-      configureChildAsLeaf(yogaChild, child, frame, graph)
+      configureInFlowChild(yogaChild, child, parent, graph, direction)
     }
-
-    root.insertChild(yogaChild, root.getChildCount())
+    yogaParent.insertChild(yogaChild, yogaParent.getChildCount())
+    return { child, yogaChild }
+  })
+  // Resolve children with this frame's cross-axis size, constraints, and aspect ratios before
+  // choosing the overlap cap. A standalone child layout can report zero for a stretched child.
+  if (capHugOverlap) yogaParent.calculateLayout(undefined, undefined, yogaDirection)
+  const inFlowSizes = capHugOverlap
+    ? children
+        .filter(({ child }) => child.visible && child.layoutPositioning !== 'ABSOLUTE')
+        .map(({ yogaChild }) =>
+          primarySize === 'width' ? yogaChild.getComputedWidth() : yogaChild.getComputedHeight()
+        )
+    : []
+  const hugOverlap =
+    capHugOverlap && inFlowSizes.length > 0 ? Math.min(overlap, ...inFlowSizes) : overlap
+  let followsInFlowSibling = false
+  for (const { child, yogaChild } of children) {
+    if (child.layoutPositioning !== 'ABSOLUTE' && child.visible) {
+      if (followsInFlowSibling && hugOverlap > 0) yogaChild.setMargin(leadingEdge, -hugOverlap)
+      followsInFlowSibling = true
+    }
   }
-
-  return root
+}
+function configureInFlowChild(
+  yogaChild: YogaNode,
+  child: SceneNode,
+  parent: SceneNode,
+  graph: SceneGraph,
+  direction: 'LTR' | 'RTL'
+): void {
+  if (child.layoutMode === 'GRID') {
+    configureChildAsGrid(yogaChild, child, parent, graph, direction)
+  } else if (child.layoutMode !== 'NONE') {
+    configureChildAsAutoLayout(yogaChild, child, parent, graph, direction)
+  } else {
+    configureChildAsLeaf(yogaChild, child, parent, graph)
+  }
 }
 
 function configureFlexContainer(
@@ -231,10 +273,7 @@ function configureFlexContainer(
   yogaNode.setPadding(Edge.Bottom, node.paddingBottom)
   yogaNode.setPadding(Edge.Left, node.paddingLeft)
 
-  // Space between takes the place of the gap in Figma's auto layout. A generated frame keeps it
-  // as the least space between its sublayers, as a sticky note keeps its author clear of a long body.
-  const primaryGap =
-    node.primaryAxisAlign === 'SPACE_BETWEEN' && !isGeneratedFrame(node) ? 0 : node.itemSpacing
+  const primaryGap = primaryAxisGap(node)
   yogaNode.setGap(
     Gutter.Column,
     node.layoutMode === 'HORIZONTAL' ? primaryGap : node.counterAxisSpacing
@@ -326,12 +365,15 @@ function sizesFitParent(
     axis === 'width'
       ? parent.paddingLeft + parent.paddingRight
       : parent.paddingTop + parent.paddingBottom
-  const gap =
-    parent.primaryAxisAlign === 'SPACE_BETWEEN'
-      ? 0
-      : parent.itemSpacing * Math.max(0, childCount - 1)
+  const overlap = siblingOverlap(parent)
+  const sizesList = sizes.map((size) => size ?? 0)
+  const effectiveOverlap =
+    parent.primaryAxisSizing === 'HUG' && sizesList.length > 0
+      ? Math.min(overlap, ...sizesList)
+      : overlap
+  const gap = (primaryAxisGap(parent) - effectiveOverlap) * Math.max(0, childCount - 1)
   const available = axis === 'width' ? parent.width : parent.height
-  const total = sizes.reduce<number>((sum, size) => sum + (size ?? 0), padding + gap)
+  const total = sizesList.reduce<number>((sum, size) => sum + size, padding + gap)
   return Math.abs(total - available) < 0.001
 }
 
@@ -414,22 +456,7 @@ function configureChildAsAutoLayout(
   if (heldAxis === 'width' && widthSizing === 'HUG') yogaChild.setWidth(child.width)
   if (heldAxis === 'height' && heightSizing === 'HUG') yogaChild.setHeight(child.height)
 
-  const grandchildren = graph.getChildren(child.id).map((gc) => asLaidOutIn(graph, gc, child))
-  for (const gc of grandchildren) {
-    const yogaGC = createYogaNode()
-    if (gc.layoutPositioning === 'ABSOLUTE') {
-      configureAbsoluteChild(yogaGC, gc)
-    } else if (!gc.visible) {
-      yogaGC.setDisplay(Display.None)
-    } else if (gc.layoutMode === 'GRID') {
-      configureChildAsGrid(yogaGC, gc, child, graph, direction)
-    } else if (gc.layoutMode !== 'NONE') {
-      configureChildAsAutoLayout(yogaGC, gc, child, graph, direction)
-    } else {
-      configureChildAsLeaf(yogaGC, gc, child, graph)
-    }
-    yogaChild.insertChild(yogaGC, yogaChild.getChildCount())
-  }
+  insertFlexChildren(yogaChild, child, graph, direction)
 }
 
 function derivedGrowingLeafFitsParent(
