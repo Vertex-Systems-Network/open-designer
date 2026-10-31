@@ -99,9 +99,9 @@ function intrinsicSize(
   const primarySize = node.layoutMode === 'HORIZONTAL' ? 'width' : 'height'
   const overlap = siblingOverlap(node)
   const effectiveOverlap =
-    node.layoutWrap === 'WRAP' || overlap === 0
-      ? 0
-      : Math.min(overlap, ...childSizes.map((child) => child[primarySize]))
+    node.primaryAxisSizing === 'HUG' && overlap > 0
+      ? Math.min(overlap, ...childSizes.map((child) => child[primarySize]))
+      : overlap
   const gap = (primaryAxisGap(node) - effectiveOverlap) * Math.max(0, children.length - 1)
   if (node.layoutMode === 'HORIZONTAL') {
     return {
