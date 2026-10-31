@@ -30,6 +30,8 @@ function releaseRuntimeEffects(r: SkiaRenderer): void {
   r.diamondGradientEffect = null
   r.pixelGridEffect?.delete()
   r.pixelGridEffect = null
+  r.dotGridEffect?.delete()
+  r.dotGridEffect = null
   r.linearBurnBlender?.delete()
   r.linearBurnBlender = null
   r.linearDodgeBlender?.delete()
