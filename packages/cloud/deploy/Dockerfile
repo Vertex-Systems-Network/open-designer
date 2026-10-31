@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # OpenPencil Cloud: the server and the editor and pages it serves. Build from the repository root:
-#   docker build -f packages/cloud/deploy/Dockerfile -t openpencil-cloud .
+#   docker build --build-arg OPENDESIGNER_PWA_SERVER_PATHS='/sso/,/.auth/' -f packages/cloud/deploy/Dockerfile -t openpencil-cloud .
 # The image also runs the AI relay: `docker run … openpencil-cloud node ai-relay.mjs`.
 
 # The build's output is JavaScript and static files, so it runs on the builder's own platform
@@ -12,6 +12,8 @@ FROM --platform=$BUILDPLATFORM mcr.microsoft.com/playwright:v1.63.0-noble AS bui
 COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 RUN ln -s /usr/local/bin/bun /usr/local/bin/bunx
 WORKDIR /src
+ARG OPENDESIGNER_PWA_SERVER_PATHS=""
+ENV OPENDESIGNER_PWA_SERVER_PATHS=$OPENDESIGNER_PWA_SERVER_PATHS
 COPY . .
 RUN bun install --frozen-lockfile
 RUN bun run build:packages
