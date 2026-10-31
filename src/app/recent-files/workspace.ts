@@ -15,6 +15,15 @@ import { openStorageDocumentInNewTab } from '@/app/tabs'
 import { forgetRecentDocument, recentFiles, type RecentDocument } from './store'
 import { loadRecentFileThumbnail } from './thumbnails'
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    error.name === 'AbortError'
+  )
+}
+
 /** The recent files with their previews, as Home and a New file tab list them. */
 export function useRecentFilesWorkspace() {
   const workspace = useDocumentWorkspace<RecentDocument>({
@@ -84,6 +93,7 @@ export async function openRecentDocument(
       location
     )
   } catch (error) {
+    if (isAbortError(error)) return
     forgetRecentDocument(document.id)
     throw error
   }
