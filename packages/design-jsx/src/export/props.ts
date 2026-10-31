@@ -9,7 +9,8 @@ import { vectorNetworkPaths } from '@open-pencil/scene-graph/vector-network'
 
 import { BLEND_MODE, TEXT_ALIGN, TEXT_ALIGN_VERTICAL, TEXT_CASE, TEXT_DECORATION } from '../enums'
 import { textLengthJSX } from '../overrides/text'
-import { componentReferences, type ComponentReference } from './component-references'
+import { withPropertyBindings } from './components/properties'
+import { componentReferences, type ComponentReference } from './components/references'
 import { collectDecorationProps } from './decoration'
 import { collectFontSettingProps, FONT_SETTING_FIELDS } from './font'
 import {
@@ -20,7 +21,6 @@ import {
   getNodeContext
 } from './helpers'
 import { collectEffectProps, collectFillProps, collectStrokeProps } from './paints'
-import { withPropertyBindings } from './properties'
 import { collectStateProps } from './state'
 import type { JSXProp } from './value'
 import { variableReferences, type VariableExport } from './variables'

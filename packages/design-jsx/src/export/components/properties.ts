@@ -6,8 +6,8 @@ import type {
 } from '@open-pencil/scene-graph'
 import { readBehaviour } from '@open-pencil/scene-graph/behaviours'
 
-import type { ComponentReference } from './component-references'
-import { helperCall, type JSXProp, type JSXValue } from './value'
+import { helperCall, type JSXProp, type JSXValue } from '../value'
+import type { ComponentReference } from './references'
 
 /**
  * The component whose properties a layer's fields bind, as `property()` finds it: the set, for

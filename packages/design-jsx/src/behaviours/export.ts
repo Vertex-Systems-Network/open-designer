@@ -11,7 +11,7 @@ import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
 import { slotPropertyId } from '@open-pencil/scene-graph/slots'
 
 import { REKA_ELEMENTS, rekaRole } from '.'
-import type { ComponentReference } from '../export/component-references'
+import type { ComponentReference } from '../export/components/references'
 import type { JSXProp, JSXValue } from '../export/value'
 
 /** The Reka namespace and element a kind's component is written as. */

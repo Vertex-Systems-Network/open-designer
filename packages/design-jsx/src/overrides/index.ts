@@ -21,7 +21,7 @@ import {
   TEXT_DECORATION,
   TEXT_DIRECTION
 } from '../enums'
-import { isShaderFill } from '../paints'
+import { isShaderFill } from '../helpers/paints'
 import { applyEffectOverrides } from './effects'
 import { fillFromValue, isColor, isFillValue } from './fills'
 import { applyStateOverrides } from './state'

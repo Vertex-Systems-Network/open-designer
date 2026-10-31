@@ -66,7 +66,7 @@ export {
   type BlurEffectOptions,
   type EffectColor,
   type ShadowEffectOptions
-} from './effects'
+} from './helpers/effects'
 
 export {
   angularGradient,
@@ -81,7 +81,7 @@ export {
   type PaintStop,
   type ShaderFill,
   type SolidPaintOptions
-} from './paints'
+} from './helpers/paints'
 
 export {
   defineMode,

@@ -15,10 +15,14 @@ import {
 import { shapeWithTextLabelText, shapeWithTextProps } from '../figjam/shapes-with-text'
 import { stickyBody, stickyProps } from '../figjam/stickies'
 import { refDeclarations } from '../refs'
-import { componentReferences, componentRefs, type ComponentReference } from './component-references'
+import { instanceProps } from './components/instances'
+import { propertyBindingProps, withPropertyBindings } from './components/properties'
+import {
+  componentReferences,
+  componentRefs,
+  type ComponentReference
+} from './components/references'
 import { iconProps } from './icons'
-import { instanceProps } from './instances'
-import { propertyBindingProps, withPropertyBindings } from './properties'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
 import { plainValue, propAttribute, Reference, type JSXProp } from './value'

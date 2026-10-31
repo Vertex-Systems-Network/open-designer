@@ -1,9 +1,9 @@
+import { refName } from '#design-jsx/refs'
 import { countBy } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
 
-import { refName } from '../refs'
-import { Reference, type JSXValue } from './value'
+import { Reference, type JSXValue } from '../value'
 
 /**
  * How an export names a component, as `of` and swap properties take it: by the `ref()` the

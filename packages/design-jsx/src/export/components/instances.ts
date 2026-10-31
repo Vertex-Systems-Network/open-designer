@@ -1,3 +1,4 @@
+import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '#design-jsx/definitions'
 import { countBy, isEqual } from 'es-toolkit'
 
 import { es } from '@open-pencil/emit'
@@ -10,11 +11,10 @@ import type {
 import { componentPropertyDefinitions } from '@open-pencil/scene-graph/components'
 import { INSTANCE_OVERRIDE_FIELDS, instanceMainComponent } from '@open-pencil/scene-graph/instances'
 
-import { DESIGN_JSX_SUPPORTED_PROPERTIES } from '../definitions'
-import type { ComponentReference } from './component-references'
-import { collectProps, positionProps } from './props'
-import { plainValue, type JSXProp, type JSXValue } from './value'
-import type { VariableExport } from './variables'
+import { collectProps, positionProps } from '../props'
+import { plainValue, type JSXProp, type JSXValue } from '../value'
+import type { VariableExport } from '../variables'
+import type { ComponentReference } from './references'
 
 /**
  * The fields `overrides` writes for a layer inside an instance, as it sets them. Bindings and
