@@ -393,9 +393,9 @@ async function renderInstanceNode(
     }
     graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
     applyBindings(graph, instance.id, bindings)
-    applyInstanceOverrides(graph, instance, tree.props.overrides)
     assignNamedProperties(graph, instance, props, componentIdNamed(graph))
     assignComponentProperties(graph, instance, props.properties, componentIdNamed(graph))
+    applyInstanceOverrides(graph, instance, tree.props.overrides)
     if (props.exposed === true) exposeInstance(graph, instance)
     return instance
   } catch (error) {
@@ -436,24 +436,33 @@ function applyInstanceOverrides(
     const target = key.slice(0, sep)
     const prop = key.slice(sep + 1)
     let child: SceneNode | undefined
-    if (target.startsWith('@')) {
+    const pathMatch = /^@path\((\d+(?:\.\d+)*)\)$/.exec(target)
+    if (pathMatch) {
       child = instance
-      for (const part of target.slice(1).split('.')) {
+      for (const part of pathMatch[1].split('.')) {
         const index = Number(part)
         const childId = Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
         child = childId ? graph.getNode(childId) : undefined
         if (!child) break
       }
     } else {
-      let childName: string
-      try {
-        childName = decodeURIComponent(target)
-      } catch {
-        childName = target
+      child = descendants.find((n) => n.name === target)
+      if (!child) {
+        try {
+          const decodedName = decodeURIComponent(target)
+          child = descendants.find((n) => n.name === decodedName)
+        } catch {
+          // Keep the literal name when it is not valid percent-encoding.
+        }
       }
-      child = descendants.find((n) => n.name === childName)
     }
-    if (!child || !(prop in child)) continue
+    if (!child) continue
+    if (prop === 'properties' && child.type === 'INSTANCE') {
+      assignComponentProperties(graph, child, value, componentIdNamed(graph))
+      mutated = true
+      continue
+    }
+    if (!(prop in child)) continue
     graph.updateNode(child.id, { [prop]: value })
     setInstanceOverride(instance.instanceOverrides, instance.id, child.id, prop, value)
     mutated = true
