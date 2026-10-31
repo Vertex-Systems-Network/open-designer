@@ -9,6 +9,7 @@ interface DocumentComponentResult {
   type: string
   page: string
   source: 'document'
+  properties: Record<string, { type: string; defaultValue: string | boolean }>
 }
 
 interface LibraryComponentResult {
@@ -64,7 +65,8 @@ export const getComponents = defineTool({
             name: node.name,
             type: node.type,
             page: page.name,
-            source: 'document'
+            source: 'document',
+            properties: node.componentPropertyDefinitions
           })
           return false
         })

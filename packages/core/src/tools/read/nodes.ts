@@ -117,7 +117,15 @@ export const getNode = defineTool({
   execute: (figma, { id, depth }) => {
     const node = figma.getNodeById(id)
     if (!node) return { error: `Node "${id}" not found` }
-    return nodeToResult(node, depth)
+    const result = nodeToResult(node, depth)
+    const raw = figma.graph.getNode(id)
+    if (!raw) return result
+    return {
+      ...result,
+      componentPropertyDefinitions: raw.componentPropertyDefinitions,
+      componentPropertyReferences: raw.componentPropertyReferences,
+      componentPropertyAssignments: raw.componentPropertyAssignments
+    }
   }
 })
 

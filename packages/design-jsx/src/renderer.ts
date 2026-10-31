@@ -393,9 +393,9 @@ async function renderInstanceNode(
     }
     graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
     applyBindings(graph, instance.id, bindings)
-    applyInstanceOverrides(graph, instance, tree.props.overrides)
     assignNamedProperties(graph, instance, props, componentIdNamed(graph))
     assignComponentProperties(graph, instance, props.properties, componentIdNamed(graph))
+    applyInstanceOverrides(graph, instance, tree.props.overrides)
     if (props.exposed === true) exposeInstance(graph, instance)
     return instance
   } catch (error) {
@@ -420,23 +420,54 @@ function applyInstanceOverrides(
   const entries = Object.entries(overridesProp)
   if (entries.length === 0) return
 
-  const descendants: SceneNode[] = []
-  const walk = (id: string) => {
-    const node = graph.getNode(id)
-    if (!node) return
-    descendants.push(node)
-    for (const cid of node.childIds) walk(cid)
+  const findDescendantByName = (name: string): SceneNode | undefined => {
+    const walk = (id: string): SceneNode | undefined => {
+      const node = graph.getNode(id)
+      if (!node) return undefined
+      if (node.name === name) return node
+      for (const childId of node.childIds) {
+        const match = walk(childId)
+        if (match) return match
+      }
+      return undefined
+    }
+    return walk(instance.id)
   }
-  walk(instance.id)
 
   let mutated = false
   for (const [key, value] of entries) {
     const sep = key.indexOf(':')
     if (sep === -1) continue
-    const childName = key.slice(0, sep)
+    const target = key.slice(0, sep)
     const prop = key.slice(sep + 1)
-    const child = descendants.find((n) => n.name === childName)
-    if (!child || !(prop in child)) continue
+    let child: SceneNode | undefined
+    const pathMatch = /^@path\((\d+(?:\.\d+)*)\)$/.exec(target)
+    if (pathMatch) {
+      child = instance
+      for (const part of pathMatch[1].split('.')) {
+        const index = Number(part)
+        const childId = Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
+        child = childId ? graph.getNode(childId) : undefined
+        if (!child) break
+      }
+    } else {
+      child = findDescendantByName(target)
+      if (!child) {
+        try {
+          const decodedName = decodeURIComponent(target)
+          child = findDescendantByName(decodedName)
+        } catch {
+          // Keep the literal name when it is not valid percent-encoding.
+        }
+      }
+    }
+    if (!child) continue
+    if (prop === 'properties' && child.type === 'INSTANCE') {
+      assignComponentProperties(graph, child, value, componentIdNamed(graph))
+      mutated = true
+      continue
+    }
+    if (!(prop in child)) continue
     graph.updateNode(child.id, { [prop]: value })
     setInstanceOverride(instance.instanceOverrides, instance.id, child.id, prop, value)
     mutated = true

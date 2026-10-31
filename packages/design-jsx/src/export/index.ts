@@ -2,6 +2,9 @@ import { compact } from 'es-toolkit/array'
 
 import { jsx, type SyntaxNode } from '@open-pencil/emit'
 import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-pencil/scene-graph/components'
+import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
+import { ownsSlotContent } from '@open-pencil/scene-graph/slots'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
 
 import {
@@ -18,7 +21,7 @@ import { rekaExport, type RekaExport } from './behaviours'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
-import { plainValue, propAttribute, Reference, type JSXProp } from './value'
+import { helperCall, plainValue, propAttribute, Reference, type JSXProp } from './value'
 import { variableExport, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
@@ -116,6 +119,97 @@ function ownElement(
 }
 
 /** The layers an export writes, by the roots it starts from. */
+function propertyDefinitionsForLayer(graph: SceneGraph, node: SceneNode) {
+  let parent = node.parentId ? graph.getNode(node.parentId) : undefined
+  while (parent) {
+    if (parent.type === 'INSTANCE') return []
+    if (parent.type === 'COMPONENT_SET') return parent.componentPropertyDefinitions
+    if (parent.type === 'COMPONENT') {
+      const set = parent.parentId ? graph.getNode(parent.parentId) : undefined
+      return set?.type === 'COMPONENT_SET'
+        ? [...set.componentPropertyDefinitions, ...parent.componentPropertyDefinitions]
+        : parent.componentPropertyDefinitions
+    }
+    parent = parent.parentId ? graph.getNode(parent.parentId) : undefined
+  }
+  return []
+}
+
+function componentPropertyProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
+  const refs = node.componentPropertyReferences
+  if (refs.length === 0) return []
+  const definitions = propertyDefinitionsForLayer(graph, node)
+  const props: JSXProp[] = []
+  for (const ref of refs) {
+    const definition = definitions.find((candidate) => candidate.id === ref.propertyId)
+    if (!definition) continue
+    if (ref.field === 'TEXT' && node.type === 'TEXT') {
+      props.push(['text', helperCall('property', definition.name, definition.defaultValue)])
+    } else if (ref.field === 'VISIBLE') {
+      props.push([
+        'visible',
+        helperCall('property', definition.name, definition.defaultValue === 'true')
+      ])
+    } else if (ref.field === 'INSTANCE_SWAP' && node.type === 'INSTANCE') {
+      const defaultComponent = resolveComponentPropertyValue(graph, definition.defaultValue)
+      if (defaultComponent) {
+        props.push(['of', helperCall('property', definition.name, defaultComponent.id)])
+      }
+    }
+  }
+  return props
+}
+
+function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
+  const merged = new Map<string, JSXProp[1]>()
+  for (const group of groups) for (const [name, value] of group) merged.set(name, value)
+  return [...merged.entries()]
+}
+
+function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode): Record<string, unknown> {
+  const overrides: Record<string, unknown> = {}
+  const visit = (node: SceneNode, path: number[]) => {
+    for (const [index, child] of graph.getChildren(node.id).entries()) {
+      const childPath = [...path, index]
+      if (child.type === 'INSTANCE') {
+        const definitions = componentPropertyDefinitions(graph, child)
+        const values = Object.fromEntries(
+          Object.entries(child.componentPropertyAssignments).flatMap(([id, value]) => {
+            const definition = definitions.find((candidate) => candidate.id === id)
+            return definition ? [[definition.name, value]] : []
+          })
+        )
+        if (Object.keys(values).length > 0) {
+          overrides[`@path(${childPath.join('.')}):properties`] = values
+        }
+      }
+      visit(child, childPath)
+    }
+  }
+  visit(instance, [])
+  return overrides
+}
+
+function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
+  if (node.type !== 'INSTANCE') return []
+  const component = instanceMainComponent(graph, node)
+  const props: JSXProp[] = []
+  const hasSwapBinding = node.componentPropertyReferences.some((reference) => reference.field === 'INSTANCE_SWAP')
+  if (component && !hasSwapBinding) props.push(['of', component.id])
+  const definitions = componentPropertyDefinitions(graph, node)
+  const values = Object.fromEntries(
+    Object.entries(node.componentPropertyAssignments)
+      .flatMap(([id, value]) => {
+        const definition = definitions.find((candidate) => candidate.id === id)
+        return definition ? [[definition.name, value]] : []
+      })
+  )
+  if (Object.keys(values).length > 0) props.push(['properties', values])
+  const nestedOverrides = nestedInstancePropertyOverrides(graph, node)
+  if (Object.keys(nestedOverrides).length > 0) props.push(['overrides', nestedOverrides])
+  return props
+}
+
 function nodeToJSX(
   node: SceneNode,
   graph: SceneGraph,
@@ -150,11 +244,20 @@ function nodeToJSX(
     const children = own.text ? [jsx.text(own.text)] : []
     return [jsx.element(tag, own.props.map(propAttribute), children, depth, true)]
   }
-  const ownProps = reka.props.get(node.id)
-  // An item names its component; the instance's own layers are the component's to write.
-  if (ownProps?.some(([name]) => name === 'of'))
-    return [jsx.element(tag, withRef(ownProps).map(propAttribute), [], depth)]
-  const attributes = withRef([...collectProps(node, graph, variables), ...(ownProps ?? [])]).map(
+  const ownProps = [
+    ...(reka.props.get(node.id) ?? []),
+    ...componentPropertyProps(graph, node),
+    ...instanceProps(graph, node)
+  ]
+  // Instances are references to components; writing their copied child layers would detach them.
+  if (ownProps.some(([name]) => name === 'of')) {
+    const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
+      propAttribute
+    )
+    const instanceChildren = ownsSlotContent(graph, node) ? children(depth + 1) : []
+    return [jsx.element(tag, attributes, instanceChildren, depth)]
+  }
+  const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
     propAttribute
   )
   if (node.type === 'TEXT') {
@@ -188,8 +291,11 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !elementTag(node.type)) return null
   const own = ownElement(graph, node)
-  const props = own ? own.props : collectProps(node, graph)
-  if (node.type === 'TEXT') props.push(['text', node.text])
+  const props = own
+    ? own.props
+    : [...collectProps(node, graph), ...componentPropertyProps(graph, node), ...instanceProps(graph, node)]
+  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
+  if (node.type === 'TEXT' && !hasTextBinding) props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
     name: prop[0],
@@ -230,9 +336,10 @@ export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXEl
   // children, not as the `text` attribute; the layers they generate are not written at all.
   const own = ownElement(graph, node)
   const hasContent = node.type === 'TEXT' || own !== undefined
+  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
   const attributes = Object.fromEntries(
     printed
-      .filter(({ name }) => !hasContent || name !== 'text')
+      .filter(({ name }) => !hasContent || name !== 'text' || hasTextBinding)
       .map(({ name, source }) => [name, source])
   )
   if (node.type === 'TEXT') {
