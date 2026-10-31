@@ -10,6 +10,27 @@ import {
 } from '@open-pencil/scene-graph'
 
 import { extractPluginData, mergePluginData } from '../plugin-data'
+
+const LOCAL_LIBRARY_PLUGIN_ID = 'open-pencil.internal'
+const LOCAL_LIBRARY_PLUGIN_KEY = 'converted-library-asset'
+const LOCAL_LIBRARY_MARKER: PluginDataEntry = {
+  pluginId: LOCAL_LIBRARY_PLUGIN_ID,
+  key: LOCAL_LIBRARY_PLUGIN_KEY,
+  value: 'true'
+}
+
+function hasLocalLibraryMarker(entries: readonly PluginDataEntry[]): boolean {
+  return entries.some(
+    ({ pluginId, key, value }) =>
+      pluginId === LOCAL_LIBRARY_PLUGIN_ID && key === LOCAL_LIBRARY_PLUGIN_KEY && value === 'true'
+  )
+}
+
+function withoutLocalLibraryMarker(entries: readonly PluginDataEntry[]): PluginDataEntry[] {
+  return entries.filter(
+    ({ pluginId, key }) => pluginId !== LOCAL_LIBRARY_PLUGIN_ID || key !== LOCAL_LIBRARY_PLUGIN_KEY
+  )
+}
 import {
   modeAttributePluginData,
   modeConditionsPluginData,
@@ -46,13 +67,13 @@ function readCodeSyntax(nc: NodeChange): Variable['codeSyntax'] {
 /** Figma keeps the description twice, as `description` and `symbolDescription`. */
 export function readVariableMetadata(nc: NodeChange): VariableMetadata {
   const scopes = nc.variableScopes?.filter(isScope)
-  const pluginData = withoutTokenPluginData(extractPluginData(nc))
+  const sourcePluginData = extractPluginData(nc)\n  const pluginData = withoutTokenPluginData(withoutLocalLibraryMarker(sourcePluginData))
   const metadata: VariableMetadata = {
     description: nc.description ?? nc.symbolDescription ?? '',
     hiddenFromPublishing: nc.isPublishable === false,
     scopes: scopes?.length ? scopes : undefined,
     codeSyntax: readCodeSyntax(nc),
-    pluginData: pluginData.length > 0 ? pluginData : undefined
+    pluginData: pluginData.length > 0 ? pluginData : undefined,\n    isLocal: hasLocalLibraryMarker(sourcePluginData) || undefined
   }
   // A library variable's identity, which records naming it use in place of its GUID.
   if (typeof nc.key === 'string') metadata.key = nc.key
