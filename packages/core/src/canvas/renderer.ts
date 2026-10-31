@@ -105,6 +105,9 @@ export class SkiaRenderer {
   pixelGridEffect: RuntimeEffect | null = null
   linearBurnBlender: Blender | null = null
   linearDodgeBlender: Blender | null = null
+  dotGridEffect: RuntimeEffect | null = null
+  /** The board grid the page's dots follow, in canvas units, or null for a page without dots. */
+  pageDotGrid: number | null = null
   declare strokePaint: Paint
   declare selectionPaint: Paint
   declare parentOutlinePaint: Paint
