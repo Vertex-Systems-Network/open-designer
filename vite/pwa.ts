@@ -1,3 +1,5 @@
+import process from 'node:process'
+
 import { VitePWA } from 'vite-plugin-pwa'
 
 /**
@@ -7,11 +9,30 @@ import { VitePWA } from 'vite-plugin-pwa'
  * path with its query, so a page root may be followed by `?` as well as `/`.
  */
 export const NOT_EDITOR_PAGES = [
-  /^\/oauth\//,
-  /^\/api\//,
-  /^\/\.well-known\//,
-  /^\/(?:welcome|auth|account|admin)(?:[/?]|$)/
+  /^\\/oauth\\//,
+  /^\\/oauth2\\//,
+  /^\\/api\\//,
+  /^\\/\\.well-known\\//,
+  /^\\/(?:welcome|auth|account|admin)(?:[/?]|$)/
 ]
+
+function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
+  const prefixes = (extraPrefixes ?? '')
+    .split(',')
+    .map((prefix) => prefix.trim())
+    .filter((prefix) => prefix !== '')
+  for (const prefix of prefixes) {
+    if (!prefix.startsWith('/')) {
+      throw new Error(`OPENDESIGNER_PWA_SERVER_PATHS entries must start with "/": ${prefix}`)
+    }
+  }
+  return prefixes.map((prefix) => {
+    const escaped = prefix.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')
+    return prefix.endsWith('/')
+      ? new RegExp(`^${escaped}`)
+      : new RegExp(`^${escaped}(?:[/?]|$)`)
+  })
+}
 
 export function openPencilPwaPlugin() {
   return VitePWA({
@@ -21,7 +42,10 @@ export function openPencilPwaPlugin() {
       maximumFileSizeToCacheInBytes: 12 * 1024 * 1024,
       globPatterns: ['**/*.{js,css,html,wasm,png,svg,ico,ttf,webmanifest}'],
       navigateFallback: '/index.html',
-      navigateFallbackDenylist: NOT_EDITOR_PAGES
+      navigateFallbackDenylist: [
+        ...NOT_EDITOR_PAGES,
+        ...serverOwnedPaths(process.env.OPENDESIGNER_PWA_SERVER_PATHS)
+      ]
     },
     manifest: {
       name: 'OpenPencil',
