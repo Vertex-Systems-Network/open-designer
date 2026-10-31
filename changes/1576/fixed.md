@@ -1,0 +1,1 @@
+- Copies of instances now keep their own layer IDs in saved overrides, so duplicating and reopening them preserves the overridden text and properties.
