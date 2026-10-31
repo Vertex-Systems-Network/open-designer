@@ -1,0 +1,1 @@
+PWA navigation requests to `/oauth2/` and configured server-owned paths now reach the deployment server instead of loading the cached editor shell. Set `OPENDESIGNER_PWA_SERVER_PATHS` to a comma-separated list of additional absolute path prefixes at build time.
