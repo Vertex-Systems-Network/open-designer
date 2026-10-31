@@ -11,11 +11,14 @@ const NV_DISABLE_EXPLICIT_SYNC: &str = "__NV_DISABLE_EXPLICIT_SYNC";
 const WEBKIT_DMABUF_RENDERER_FORCE_SHM: &str = "WEBKIT_DMABUF_RENDERER_FORCE_SHM";
 const NVIDIA_VERSION_FILE: &str = "/proc/driver/nvidia/version";
 
-/// Set each workaround only when the proprietary NVIDIA driver is loaded and the
-/// variable is unset. Existing values, including empty values, belong to the user.
+/// Apply workarounds only after explicit opt-in and when the proprietary NVIDIA driver
+/// is loaded. Existing workaround values, including empty values, belong to the user.
 #[cfg(target_os = "linux")]
 pub fn disable_nvidia_explicit_sync() {
-    if !Path::new(NVIDIA_VERSION_FILE).is_file() {
+    if std::env::var_os("OPENDESIGNER_NVIDIA_WAYLAND_WORKAROUND").as_deref()
+        != Some(std::ffi::OsStr::new("1"))
+        || !Path::new(NVIDIA_VERSION_FILE).is_file()
+    {
         return;
     }
 
