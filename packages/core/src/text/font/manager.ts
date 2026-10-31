@@ -383,14 +383,19 @@ export class FontManager {
   ): Promise<ArrayBuffer | null> {
     signal?.throwIfAborted()
     const loaded = this.loadedData(family, style)
-    if (loaded) {
+    const loadedSource = this.loadedFamilySources.get(`${family}|${style}`)
+    if (loaded && loadedSource !== 'stand-in') {
       this.registerFontInCanvasKit(family, loaded)
       return this.withRemoteCoverage(family, style, loaded, characters, signal)
     }
-    // An installed face of the style comes first; otherwise a variable file the family already
-    // loaded draws it.
+    // A stand-in is provisional: an installed face that becomes available later takes precedence.
+    // An installed face of the style otherwise comes first; then a variable file already loaded.
     const installed = await this.loadInstalledFont(family, style)
     if (installed) return installed
+    if (loaded) {
+      this.registerFontInCanvasKit(family, loaded)
+      return loaded
+    }
     const shared = this.sharedVariableFace(family, style)
     if (shared) return this.withRemoteCoverage(family, style, shared, characters, signal)
 
@@ -408,10 +413,15 @@ export class FontManager {
   private async loadStandIn(family: string, style: string): Promise<ArrayBuffer | null> {
     const standIn = fontStandIn(family)
     if (!standIn) return null
-    const file = await this.fetchBundledFont(standIn.file)
-    if (!file) return null
-    const font = standInFont(await sfntFont(file), standIn)
-    return font ? this.registerAndCache(family, style, font, 'stand-in') : null
+    try {
+      const file = await this.fetchBundledFont(standIn.file)
+      if (!file) return null
+      const font = standInFont(await sfntFont(file), standIn)
+      return font ? this.registerAndCache(family, style, font, 'stand-in') : null
+    } catch (error) {
+      console.warn(`Stand-in font load failed for "${family}" ${style}:`, error)
+      return null
+    }
   }
 
   /**
