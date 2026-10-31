@@ -1,0 +1,1 @@
+- Linux desktop startup on Wayland now applies NVIDIA explicit-sync and WebKit shared-memory workarounds when the proprietary driver is detected and the user has not set either variable.
