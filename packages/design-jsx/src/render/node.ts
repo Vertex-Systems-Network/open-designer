@@ -201,6 +201,8 @@ export interface RenderContext {
   order: RenderOrder
   /** What the render skipped, for the author: reported with the results. */
   warnings: string[]
+  /** The layers the render created, which a failed render removes. */
+  created: string[]
 }
 
 /**
@@ -271,7 +273,11 @@ async function renderNodeContent<Artwork>(
   context?: RenderContext
 ): Promise<SceneNode> {
   const own = renderOwnElement(services, graph, tree, parentId, context)
-  if (own) return own
+  if (own) {
+    const node = await own
+    context?.created.push(node.id)
+    return node
+  }
   const reka = await renderRekaNode(graph, tree, parentId, scope, {
     renderChildren: (children, childParentId, childScope) =>
       renderChildren(graph, children, childParentId, context, (child) =>
@@ -280,6 +286,7 @@ async function renderNodeContent<Artwork>(
     create: (nodeType, element, elementParentId) => {
       const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
       const created = graph.createNode(nodeType, elementParentId, overrides)
+      context?.created.push(created.id)
       applyBindings(graph, created.id, bindings)
       placeVectorPaths(graph, created, element.props, (network) => services.vectorBounds(network))
       return created
@@ -297,6 +304,7 @@ async function renderNodeContent<Artwork>(
 
   const { overrides, bindings } = elementOverrides(graph, nodeType, tree, parentId)
   const node = graph.createNode(nodeType, parentId, overrides)
+  context?.created.push(node.id)
   applyBindings(graph, node.id, bindings)
   placeVectorPaths(graph, node, tree.props, (network) => services.vectorBounds(network))
 

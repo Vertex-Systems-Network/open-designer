@@ -40,6 +40,22 @@ describe('component rendering', () => {
     expect(graph.getChildren(page.id).map((node) => node.name)).toEqual(['B'])
   })
 
+  test('keeps a layer added to the parent while a failed render was in flight', async () => {
+    const graph = new SceneGraph()
+    const page = graph.getPages()[0]
+    // An editor adds a layer once the render has drawn its first one.
+    const unsubscribe = graph.onNodeEvents({
+      created: (node) => {
+        if (node.name === 'A') graph.createNode('FRAME', page.id, { name: 'Editor' })
+      }
+    })
+    await expect(
+      renderJSX(graph, '<><Frame name="A" /><Instance of="Missing" /></>')
+    ).rejects.toThrow('component not found')
+    unsubscribe()
+    expect(graph.getChildren(page.id).map((node) => node.name)).toEqual(['Editor'])
+  })
+
   test('undoes a render whose steps after drawing fail, and the variables it defined', async () => {
     const graph = new SceneGraph()
     const page = graph.getPages()[0]
@@ -60,6 +76,7 @@ describe('component rendering', () => {
     ).rejects.toThrow('component not found')
     expect(graph.variableCollections.size).toBe(0)
     expect(graph.variables.size).toBe(0)
+    expect(graph.activeMode.size).toBe(0)
   })
 
   test('rejects an instance that would put its component inside itself', async () => {

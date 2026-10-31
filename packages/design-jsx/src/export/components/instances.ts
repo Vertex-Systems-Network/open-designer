@@ -118,7 +118,7 @@ function assignmentProps(
  * The component an instance names: its set and variant values, `of="Button" State="On"`, or
  * the variant itself where a value's name cannot be a prop.
  */
-function componentProps(
+export function componentProps(
   graph: SceneGraph,
   component: SceneNode,
   reference: ComponentReference

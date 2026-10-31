@@ -35,12 +35,16 @@ function restoreMap<K, V>(map: Map<K, V>, entries: [K, V][]): void {
 }
 
 /**
- * What rendering `tree` into `parentId` can change outside its own layers, recorded so a failed
- * render can put it back: the parent's children, the property definitions `property()` adds
- * to the components around the parent, and the variables the JSX defines.
+ * What rendering `tree` into `parentId` changes, recorded so a failed render can put it back:
+ * the layers it creates, the property definitions `property()` adds to the components around
+ * the parent, and the variables the JSX defines, with their collections' active modes.
  */
-function undoRender(graph: SceneGraph, parentId: string, tree: TreeNode): () => void {
-  const childIds = new Set(graph.getNode(parentId)?.childIds)
+function undoRender(
+  graph: SceneGraph,
+  parentId: string,
+  tree: TreeNode,
+  context: RenderContext
+): () => void {
   const owners = ancestors(graph, parentId).filter(
     (node) => node.type === 'COMPONENT' || node.type === 'COMPONENT_SET'
   )
@@ -48,18 +52,20 @@ function undoRender(graph: SceneGraph, parentId: string, tree: TreeNode): () => 
   const variables = definesVariables(tree)
     ? {
         variables: structuredClone([...graph.variables]),
-        collections: structuredClone([...graph.variableCollections])
+        collections: structuredClone([...graph.variableCollections]),
+        activeMode: [...graph.activeMode]
       }
     : undefined
   return () => {
-    for (const child of graph.getChildren(parentId))
-      if (!childIds.has(child.id)) graph.deleteNode(child.id)
+    // Only its own layers: another hand may add to the parent while it renders.
+    for (const id of context.created) graph.deleteNode(id)
     owners.forEach((owner, index) =>
       graph.updateNode(owner.id, { componentPropertyDefinitions: definitions[index] })
     )
     if (variables) {
       restoreMap(graph.variables, variables.variables)
       restoreMap(graph.variableCollections, variables.collections)
+      restoreMap(graph.activeMode, variables.activeMode)
     }
   }
 }
@@ -94,9 +100,15 @@ async function renderRootsNow<Artwork>(
   const roots = treeRoots(tree)
   if (roots.length === 0) throw new Error('JSX must return a Figma element (Frame, Text, etc)')
   const parentId = options.parentId ?? graph.getPages()[0].id
-  const undo = undoRender(graph, parentId, tree)
+  const context: RenderContext = {
+    refs: new LayerRefs(),
+    order: new RenderOrder(),
+    warnings: [],
+    created: []
+  }
+  const undo = undoRender(graph, parentId, tree, context)
   try {
-    return await renderInto(services, graph, tree, roots, parentId, options)
+    return await renderInto(services, graph, tree, roots, parentId, options, context)
   } catch (error) {
     // A failed render leaves nothing behind, roots rendered before the failing one included.
     undo()
@@ -110,7 +122,8 @@ async function renderInto<Artwork>(
   tree: TreeNode,
   roots: TreeNode[],
   parentId: string,
-  options: RenderOptions
+  options: RenderOptions,
+  context: RenderContext
 ): Promise<RenderResult[]> {
   applyVariableDefinitions(graph, tree)
   const originalChildCount = graph.getChildren(parentId).length
@@ -118,7 +131,6 @@ async function renderInto<Artwork>(
   const nodes: SceneNode[] = []
   const eventsByRoot: Array<Array<[TreeNode, SceneNode]>> = []
   const connectorsByRoot: Array<Array<{ node: SceneNode; tree: TreeNode }>> = []
-  const context: RenderContext = { refs: new LayerRefs(), order: new RenderOrder(), warnings: [] }
   const { refs } = context
   for (const index of context.order.of(roots)) {
     const events: Array<[TreeNode, SceneNode]> = []
