@@ -17,10 +17,7 @@ import { loadRecentFileThumbnail } from './thumbnails'
 
 function isAbortError(error: unknown): boolean {
   return (
-    typeof error === 'object' &&
-    error !== null &&
-    'name' in error &&
-    error.name === 'AbortError'
+    typeof error === 'object' && error !== null && 'name' in error && error.name === 'AbortError'
   )
 }
 
@@ -43,7 +40,9 @@ export function useRecentFilesWorkspace() {
     },
     refreshOnFocus: false,
     refreshOnReconnect: false,
-    previewConcurrency: 2
+    previewConcurrency: 2,
+    onPreviewError: (documentId, error) =>
+      console.warn(`[Recent files] No preview for ${documentId}:`, error)
   })
   watch(recentFiles, () => void workspace.invalidate())
   return workspace
