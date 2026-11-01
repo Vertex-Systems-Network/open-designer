@@ -1,0 +1,1 @@
+- Hiding the desktop editor UI keeps canvas content and split views mounted, and restores the saved panel widths when shown again.
