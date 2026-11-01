@@ -267,9 +267,10 @@ function nodeToJSX(
     )
       defaultComponentProps.add('h')
   }
-  const collectedProps = collectProps(node, graph, variables).filter(
-    ([name]) => !defaultComponentProps.has(name)
-  )
+  const collectedProps = collectProps(node, graph, variables).filter(([name, value]) => {
+    if (!defaultComponentProps.has(name)) return true
+    return (name === 'w' || name === 'h') && typeof value !== 'number'
+  })
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
     const attributes = withRef(mergeProps(collectedProps, ownProps)).map(propAttribute)
