@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCloudMessages, useCommonMessages } from '@open-pencil/vue/i18n'
+import { useCloudMessages, useCommonMessages } from '@open-designer/vue/i18n'
 import { tv } from 'tailwind-variants'
 import { computed, ref } from 'vue'
 
