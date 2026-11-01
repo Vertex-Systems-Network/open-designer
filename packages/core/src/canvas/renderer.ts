@@ -182,6 +182,8 @@ export class SkiaRenderer {
    * null for a canvas that draws only the document, such as an export.
    */
   stickyPlaceholder: string | null = null
+  /** The text being edited, drawn from its live layout rather than saved glyphs. */
+  editingTextId: string | null = null
   /** What an empty connector label shows while it is typed into; null draws nothing. */
   connectorLabelPlaceholder: string | null = null
   tracksSceneSettlement = true

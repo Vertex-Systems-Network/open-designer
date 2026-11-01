@@ -17,7 +17,7 @@ import { invalidateAllPictures, invalidateScenePicture } from './state'
 import { hasTransientPreviews, renderPageWithPreviews } from './transient-previews'
 
 export function renderSceneToCanvas(
-  r: Pick<SkiaRenderer, 'worldViewport' | 'viewportImageRendering' | 'renderNode' | 'nodePaths'>,
+  r: Pick<SkiaRenderer, 'worldViewport' | 'viewportImageRendering' | 'renderNode' | 'nodePaths' | 'editingTextId' | 'invalidateNodePicture'>,
   canvas: Canvas,
   graph: SceneGraph,
   pageId: string
@@ -25,7 +25,10 @@ export function renderSceneToCanvas(
   r.nodePaths.releaseUncached()
   const prevViewport = r.worldViewport
   const previewMode = r.viewportImageRendering
+  const editing = r.editingTextId
   r.viewportImageRendering = false
+  r.editingTextId = null
+  if (editing) r.invalidateNodePicture(editing)
   r.worldViewport = { x: -1e9, y: -1e9, w: 2e9, h: 2e9 }
   try {
     const pageNode = graph.getNode(pageId)
@@ -35,6 +38,8 @@ export function renderSceneToCanvas(
   } finally {
     r.worldViewport = prevViewport
     r.viewportImageRendering = previewMode
+    r.editingTextId = editing
+    if (editing) r.invalidateNodePicture(editing)
   }
 }
 
@@ -232,6 +237,17 @@ export function render(
   layer: RenderLayer = 'full',
   interactive = false
 ): boolean {
+  const nextEditingTextId = overlays.editingTextId ?? null
+  if (r.editingTextId !== nextEditingTextId) {
+    if (r.editingTextId) r.invalidateNodePicture(r.editingTextId)
+    if (nextEditingTextId) r.invalidateNodePicture(nextEditingTextId)
+    r.editingTextId = nextEditingTextId
+    // Saved scene pictures and tile frames may already contain the old glyphs. Re-record them
+    // once when text editing starts or ends so the scene uses the live layout for that node.
+    invalidateScenePicture(r)
+    r.tiledScene.invalidateStructure()
+  }
+
   const guard = r.frameGuard
   if (!guard.shouldDraw()) return false
   let canvas: Canvas | null = null
