@@ -10,6 +10,11 @@ const HYPERLINK_TYPES = new Set(['URL', 'NODE'])
  */
 const LINK_URL = /^(?:https?:\/\/[^\s/?#]+\S*|mailto:\S+|tel:\S+)$/
 
+/** Whether a URL uses a protocol Figma accepts for text hyperlinks. */
+export function isSupportedHyperlinkUrl(url: string): boolean {
+  return LINK_URL.test(url)
+}
+
 /** Layers a link may lead to, which Figma frames in view: containers and pages. */
 const LINK_TARGETS = new Set<NodeType>([
   'CANVAS',

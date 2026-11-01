@@ -17,6 +17,10 @@ import {
 import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
+import { assertTextFontsLoaded } from '#core/figma-api/fonts/loaded'
+import { computeAllLayouts, computeLayout } from '#core/layout'
+import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
+import { markdownText } from '#core/text/markdown'
 
 import { nodeOf, type NodeRef } from './behaviours'
 
@@ -30,6 +34,26 @@ function editNode(graph: SceneGraph, node: SceneNode, changes: Partial<SceneNode
   )
   graph.updateNode(node.id, changes)
   recordInstanceOverride(graph, node.id, changed)
+}
+
+/** Reflow the edited layer and its layout ancestors without traversing the whole page. */
+function layoutTextAncestors(graph: SceneGraph, node: SceneNode): void {
+  if (!node.parentId) return
+
+  const layout = () => {
+    computeAllLayouts(graph, node.id)
+    let parentId = node.parentId
+    while (parentId) {
+      const parent = graph.getNode(parentId)
+      if (!parent || (parent.type === 'INSTANCE' && parent.source.format === 'fig')) break
+      if (parent.layoutMode !== 'NONE') computeLayout(graph, parent.id)
+      parentId = parent.parentId
+    }
+  }
+
+  layout()
+  // Layout gives wrapping text its width, which its height follows.
+  if (sizeAutoResizingText(graph, node.id, true)) layout()
 }
 
 function direction(value: string): LayoutDirection & TextDirection {
@@ -86,4 +110,27 @@ export function readTextDirection(graph: SceneGraph, ref: NodeRef): TextDirectio
 
 export function writeTextDirection(graph: SceneGraph, ref: NodeRef, value: string): void {
   editNode(graph, nodeOf(graph, ref), { textDirection: direction(value) })
+}
+
+/** The text, ranges, and paragraphs Markdown gives a text layer, as FigJam styles it. */
+export function textMarkdownChanges(node: SceneNode, markdown: string): Partial<SceneNode> {
+  if (node.type !== 'TEXT')
+    throw new Error(`Markdown is written into a text layer, not ${node.type}`)
+  return markdownText(markdown, node)
+}
+
+/**
+ * Writes Markdown as a text layer's text: its own style stays, and headings, emphasis, code,
+ * links, lists, and quotes become ranges and paragraphs. The fonts it uses must be loaded.
+ */
+export function writeTextMarkdown(graph: SceneGraph, ref: NodeRef, markdown: string): void {
+  const node = nodeOf(graph, ref)
+  if (node.textPathData)
+    throw new Error(
+      'Markdown cannot be written to text on a path because styled path reflow is unsupported'
+    )
+  const changes = textMarkdownChanges(node, markdown)
+  assertTextFontsLoaded('setTextMarkdown', { ...node, ...changes })
+  editNode(graph, node, { ...changes, ...textAutoResizeChanges(node, changes) })
+  layoutTextAncestors(graph, node)
 }

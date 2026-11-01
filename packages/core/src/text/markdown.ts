@@ -1,0 +1,267 @@
+import { isEmptyObject, isEqual } from 'es-toolkit/predicate'
+import type { Nodes, PhrasingContent, RootContent } from 'mdast'
+import { fromMarkdown } from 'mdast-util-from-markdown'
+import { gfmFromMarkdown } from 'mdast-util-gfm'
+import { toString } from 'mdast-util-to-string'
+import { gfm } from 'micromark-extension-gfm'
+
+import type {
+  CharacterStyleOverride,
+  SceneNode,
+  StyleRun,
+  TextParagraphStyle
+} from '@open-designer/scene-graph'
+import {
+  MAX_LIST_INDENTATION,
+  PLAIN_PARAGRAPH,
+  trimParagraphStyles
+} from '@open-designer/scene-graph/text'
+
+import { isSupportedHyperlinkUrl } from '#core/figma-api/accessors/text/hyperlink'
+
+/** The style of the text Markdown is written into, which headings and code are relative to. */
+export type MarkdownBase = Pick<SceneNode, 'fontSize' | 'fontWeight'>
+
+/** A text's characters, ranges, and paragraphs, as Markdown gives them. */
+export interface MarkdownText {
+  text: string
+  styleRuns: StyleRun[]
+  textParagraphs: TextParagraphStyle[]
+}
+
+/** FigJam's heading sizes, as multiples of the text's own size; deeper levels keep it. */
+const HEADING_SCALE: Readonly<Partial<Record<number, number>>> = { 1: 2.5, 2: 1.5 }
+const HEADING_LINE_HEIGHT = { unit: 'PERCENT', value: 150 } as const
+const BOLD = 700
+/** FigJam sets inline code in Roboto Mono, Medium below SemiBold and Bold from it. */
+const CODE_FAMILY = 'Roboto Mono'
+const CODE_BOLD_FROM = 600
+
+type Style = CharacterStyleOverride
+
+interface Segment {
+  text: string
+  style: Style
+}
+
+interface Paragraph {
+  segments: Segment[]
+  style: TextParagraphStyle
+}
+
+/** What reading one Markdown source shares: the text's style, and its link definitions by label. */
+interface Reading {
+  base: MarkdownBase
+  definitions: ReadonlyMap<string, string>
+}
+
+/** The URL each `[label]: url` definition gives, wherever it sits, by its normalized label. */
+function linkDefinitions(node: Nodes, found = new Map<string, string>()): Map<string, string> {
+  if (node.type === 'definition' && !found.has(node.identifier))
+    found.set(node.identifier, node.url)
+  if ('children' in node) for (const child of node.children) linkDefinitions(child, found)
+  return found
+}
+
+function codeStyle(style: Style, { base }: Reading): Style {
+  const weight = style.fontWeight ?? base.fontWeight
+  return { ...style, fontFamily: CODE_FAMILY, fontWeight: weight >= CODE_BOLD_FROM ? BOLD : 500 }
+}
+
+function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Reading): Segment[] {
+  return nodes.flatMap((node): Segment[] => {
+    switch (node.type) {
+      case 'text':
+        return [{ text: node.value, style }]
+      case 'strong':
+        return phrasing(node.children, { ...style, fontWeight: BOLD }, reading)
+      case 'emphasis':
+        return phrasing(node.children, { ...style, italic: true }, reading)
+      case 'delete':
+        return phrasing(node.children, { ...style, textDecoration: 'STRIKETHROUGH' }, reading)
+      case 'inlineCode':
+        return [{ text: node.value, style: codeStyle(style, reading) }]
+      case 'link':
+        return phrasing(node.children, linked(style, node.url), reading)
+      case 'linkReference': {
+        // `[text][label]` links to the URL its definition gives, wherever that is written.
+        const url = reading.definitions.get(node.identifier)
+        return phrasing(node.children, url ? linked(style, url) : style, reading)
+      }
+      case 'break':
+        return [{ text: '\n', style }]
+      case 'image':
+        return node.alt ? [{ text: node.alt, style }] : []
+      case 'html':
+        // Markdown's explicit line break is supported; other inline HTML is not rendered.
+        return /^<br\s*\/?>\s*$/i.test(node.value) ? [{ text: '\n', style }] : []
+      default:
+        return [{ text: toString(node), style }]
+    }
+  })
+}
+
+function linked(style: Style, url: string): Style {
+  return isSupportedHyperlinkUrl(url) ? { ...style, hyperlink: { type: 'URL', value: url } } : style
+}
+
+/** Paragraphs of segments, a hard break inside one starting another of the same style. */
+function splitBreaks(segments: Segment[], style: TextParagraphStyle): Paragraph[] {
+  const paragraphs: Paragraph[] = [{ segments: [], style }]
+  for (const segment of segments) {
+    const lines = segment.text.split('\n')
+    for (const [index, line] of lines.entries()) {
+      if (index > 0) paragraphs.push({ segments: [], style })
+      if (line) paragraphs.at(-1)?.segments.push({ text: line, style: segment.style })
+    }
+  }
+  return paragraphs
+}
+
+function listStyle(ordered: boolean, depth: number): TextParagraphStyle {
+  return {
+    listType: ordered ? 'ORDERED' : 'UNORDERED',
+    indentation: Math.min(depth, MAX_LIST_INDENTATION)
+  }
+}
+
+function blocks(
+  nodes: readonly RootContent[],
+  style: Style,
+  paragraph: TextParagraphStyle,
+  reading: Reading,
+  depth: number
+): Paragraph[] {
+  return nodes.flatMap((node): Paragraph[] => {
+    switch (node.type) {
+      case 'paragraph':
+        return splitBreaks(phrasing(node.children, style, reading), paragraph)
+      case 'heading': {
+        const scale = HEADING_SCALE[node.depth]
+        const heading: Style = {
+          ...style,
+          fontWeight: BOLD,
+          lineHeight: HEADING_LINE_HEIGHT,
+          ...(scale ? { fontSize: reading.base.fontSize * scale } : {})
+        }
+        return splitBreaks(phrasing(node.children, heading, reading), paragraph)
+      }
+      case 'blockquote':
+        return blocks(node.children, { ...style, italic: true }, paragraph, reading, depth)
+      case 'list':
+        return node.children.flatMap((item) => {
+          const itemParagraphs: Paragraph[] = []
+          let itemText: Paragraph | undefined
+          let hasItemText = false
+          let nestedAfterText = false
+          for (const child of item.children) {
+            // A nested list starts a deeper item group. Keep it separate from this item's text.
+            if (child.type === 'list') {
+              itemParagraphs.push(...blocks([child], style, paragraph, reading, depth + 1))
+              nestedAfterText ||= hasItemText
+              continue
+            }
+            const rendered = blocks(
+              [child],
+              style,
+              hasItemText ? paragraph : listStyle(node.ordered === true, depth + 1),
+              reading,
+              depth
+            )
+            if (!hasItemText) {
+              itemParagraphs.push(...rendered)
+              itemText = rendered.find((entry) => entry.style.listType !== 'NONE')
+              hasItemText = true
+              continue
+            }
+            // TextParagraphStyle has no continuation-list marker, so keep later loose-list
+            // blocks in the same item paragraph. They wrap under the item text without a bullet.
+            // A hard break creates several paragraphs; preserve those boundaries. Once a
+            // nested list has intervened, keep subsequent text in sequence instead of moving it
+            // back into the earlier item paragraph.
+            if (!itemText || nestedAfterText || rendered.length > 1) {
+              itemParagraphs.push(...rendered)
+              continue
+            }
+            for (const continuation of rendered) {
+              if (itemText.segments.length && continuation.segments.length)
+                itemText.segments.push({ text: ' ', style: continuation.segments[0].style })
+              itemText.segments.push(...continuation.segments)
+            }
+          }
+          return itemParagraphs
+        })
+      case 'code':
+        return node.value.split('\n').map((line) => ({
+          segments: line ? [{ text: line, style: codeStyle(style, reading) }] : [],
+          style: paragraph
+        }))
+      case 'table':
+        // A row reads as its cells apart by tabs; the text model has no tables.
+        return node.children.map((row) => ({
+          segments: row.children.flatMap((cell, index) => [
+            ...(index > 0 ? [{ text: '\t', style }] : []),
+            ...phrasing(cell.children, style, reading)
+          ]),
+          style: paragraph
+        }))
+      case 'html':
+        return splitBreaks([{ text: node.value, style }], paragraph)
+      case 'thematicBreak':
+      case 'definition':
+      case 'footnoteDefinition':
+      case 'yaml':
+        return []
+      default:
+        return splitBreaks([{ text: toString(node), style }], paragraph)
+    }
+  })
+}
+
+/** The style a run keeps: what differs from the text's own. */
+function ownStyle(style: Style, base: MarkdownBase): Style {
+  const own = { ...style }
+  if (own.fontWeight === base.fontWeight) delete own.fontWeight
+  if (own.fontSize === base.fontSize) delete own.fontSize
+  return own
+}
+
+/**
+ * Text written in Markdown as a text's characters, ranges, and paragraphs, styled as FigJam
+ * styles Markdown typed into a text: headings bold at 2.5×, 1.5×, or the text's own size with
+ * a 150% line height, bold and italic in the text's family, inline code in Roboto Mono, lists
+ * and quotes as paragraphs. Links keep their URL; content the text model has no place for, such
+ * as images and rules, keeps its words or is left out.
+ */
+export function markdownText(markdown: string, base: MarkdownBase): MarkdownText {
+  const root = fromMarkdown(markdown, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })
+  const reading = { base, definitions: linkDefinitions(root) }
+  const paragraphs = blocks(root.children, {}, PLAIN_PARAGRAPH, reading, 0)
+  if (paragraphs.length === 0) return { text: '', styleRuns: [], textParagraphs: [] }
+
+  const runs: StyleRun[] = []
+  let text = ''
+  for (const [index, paragraph] of paragraphs.entries()) {
+    // A newline takes the style of the character before it, as in Figma.
+    const segments =
+      index < paragraphs.length - 1
+        ? [...paragraph.segments, { text: '\n', style: paragraph.segments.at(-1)?.style ?? {} }]
+        : paragraph.segments
+    for (const segment of segments) {
+      const style = ownStyle(segment.style, base)
+      const previous = runs.at(-1)
+      if (!isEmptyObject(style)) {
+        if (
+          previous &&
+          previous.start + previous.length === text.length &&
+          isEqual(previous.style, style)
+        )
+          previous.length += segment.text.length
+        else runs.push({ start: text.length, length: segment.text.length, style })
+      }
+      text += segment.text
+    }
+  }
+  const styles = paragraphs.map((paragraph) => ({ ...paragraph.style }))
+  return { text, styleRuns: runs, textParagraphs: trimParagraphStyles(styles, styles.length) }
+}
