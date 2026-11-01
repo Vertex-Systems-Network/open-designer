@@ -3,11 +3,13 @@ import { isEqual } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode, VectorNetwork } from '@open-designer/scene-graph'
 import { getNodeLocalMatrix } from '@open-designer/scene-graph/coordinate'
-import { copyFills, copyStrokes } from '@open-designer/scene-graph/copy'
+import { copyFills, copyStrokes, transformGeometryPaths } from '@open-designer/scene-graph/copy'
 import Matrix from '@open-designer/scene-graph/matrix'
 import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
 import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 import { mergeVectorNetworks } from '@open-designer/scene-graph/vector-network'
+
+import { geometryPathsFromNetwork } from '#core/vector/fill-geometry'
 
 import {
   canContainFlattenableChildren,
@@ -29,7 +31,7 @@ type StrokeFields =
 
 export type VectorFlattenProps = Pick<
   SceneNode,
-  'name' | 'x' | 'y' | 'width' | 'height' | 'fills' | 'vectorNetwork' | StrokeFields
+  'name' | 'x' | 'y' | 'width' | 'height' | 'fills' | 'vectorNetwork' | 'fillGeometry' | StrokeFields
 >
 
 /** A shape Flatten takes, and where it sits in the flattened layers' parent. */
@@ -81,43 +83,48 @@ export function flattenNodesToVectorProps(
   nodes: SceneNode[]
 ): VectorFlattenProps | null {
   const leaves = flattenLeaves(graph, inDrawOrder(graph, nodes))
-  const placed: { node: SceneNode; path: Path }[] = []
+  const placed: { node: SceneNode; path: Path; matrix: number[] }[] = []
   try {
     for (const { node, matrix } of leaves) {
       const path = flattenSourcePath(renderer, node, graph)
       if (!path) return null
-      placed.push({ node, path: placedPath(renderer, path, matrix) })
+      placed.push({ node, path: placedPath(renderer, path, matrix), matrix })
       path.delete()
     }
     const drawn = placed.filter(({ path }) => !path.isEmpty())
     const box = boundsOf(drawn.map(({ path }) => path))
     const top = leaves.at(-1)?.node
     if (!box || !top) return null
-    const networks = drawn.map(({ node, path }) => ({
+    const networks = drawn.map(({ node, path, matrix }) => ({
       node,
+      matrix,
       network: networkIn(renderer, path, box)
     }))
     const filled = networks.filter(({ network }) => network.regions.length > 0)
     const alike = filled.every(({ node }) => isEqual(node.fills, filled[0].node.fills))
+    const fillGeometry = networks.flatMap(({ node, matrix, network }) => {
+      if (node.type === 'VECTOR' && node.fillGeometry.length > 0) {
+        const geometry = node.fillGeometry.map((item) => ({
+          ...item,
+          fills: item.fills?.length ? item.fills : copyFills(node.fills)
+        }))
+        return transformGeometryPaths(
+          geometry,
+          matrix[0], matrix[1], matrix[3], matrix[4], matrix[2] - box.x, matrix[5] - box.y
+        )
+      }
+      return geometryPathsFromNetwork(network, node.fills)
+    })
     return {
       name: 'Flatten',
       ...box,
       fills: copyFills((alike ? filled.at(0)?.node : undefined)?.fills ?? top.fills),
-      vectorNetwork: mergeVectorNetworks(
-        networks.map(({ node, network }) => (alike ? network : withRegionFills(network, node)))
-      ),
+      vectorNetwork: mergeVectorNetworks(networks.map(({ network }) => network)),
+      fillGeometry,
       ...topStroke(top)
     }
   } finally {
     for (const { path } of placed) path.delete()
-  }
-}
-
-/** `network` with every region filled with `node`'s fills. */
-function withRegionFills(network: VectorNetwork, node: SceneNode): VectorNetwork {
-  return {
-    ...network,
-    regions: network.regions.map((region) => ({ ...region, fills: copyFills(node.fills) }))
   }
 }
 
