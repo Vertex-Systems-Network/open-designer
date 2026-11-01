@@ -3,7 +3,7 @@ import { COMBINING_KEYCAP } from './keycap'
 import type { FontTables } from './sfnt'
 
 /** The family the metrics font registers under, which the editor's text layout falls back to. */
-export const EMOJI_METRICS_FAMILY = 'OpenDesigner Emoji Metrics'
+export const EMOJI_METRICS_FAMILY = 'OpenPencil Emoji Metrics'
 
 /** Its file among Core's bundled fonts. */
 export const EMOJI_METRICS_ASSET = 'OpenDesignerEmojiMetrics-Regular.ttf'
