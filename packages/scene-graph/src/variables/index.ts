@@ -1,4 +1,4 @@
-import { partition } from 'es-toolkit/array'
+import { compact, partition, uniq } from 'es-toolkit/array'
 import { omit, omitBy } from 'es-toolkit/object'
 
 import { BLACK } from '../constants'
@@ -265,6 +265,7 @@ export function bindVariable(
     }
     // Auto-remove top-level dead binding (e.g. 'fills') when setting indexed binding
     if (paint.list in node.boundVariables) {
+      graph.willChangeNode(node)
       node.boundVariables = omit(node.boundVariables, [paint.list])
     }
   }
@@ -331,6 +332,8 @@ function markBoundVariablesOverrideOnInstance(
   const owner = variableBindingOwner(graph, node)
   if (owner.type !== 'INSTANCE') return
   const nearest = findInstanceAncestor(graph, nodeId)
+  const instances = uniq(compact([nearest, owner])).filter((x) => x.id !== nodeId)
+  for (const instance of instances) graph.willChangeNode(instance)
   if (nearest) setInstanceOverride(nearest.instanceOverrides, nearest.id, nodeId, 'boundVariables')
   setInstanceOverride(owner.instanceOverrides, owner.id, nodeId, 'boundVariables')
   if (field)
@@ -341,6 +344,8 @@ function markBoundVariablesOverrideOnInstance(
       bindingOverrideField(field),
       node.boundVariables[field] ?? null
     )
+  for (const instance of instances)
+    graph.updateNode(instance.id, { instanceOverrides: instance.instanceOverrides })
 }
 
 export * from './bindings'
