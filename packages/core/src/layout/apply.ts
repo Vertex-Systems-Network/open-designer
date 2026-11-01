@@ -82,25 +82,64 @@ type LayoutGeometry = Partial<
   >
 >
 
-function updateVectorLayoutGeometry(id: string, node: SceneNode, changes: LayoutGeometry): void {
+function vectorSourceSize(
+  current: number | undefined,
+  remembered: number | undefined,
+  extent: number | undefined
+): number | undefined {
+  return positiveSize(current) ?? positiveSize(remembered) ?? positiveSize(extent)
+}
+
+function updateVectorPathGeometry(
+  node: Extract<SceneNode, { type: 'VECTOR' }>,
+  changes: LayoutGeometry,
+  sx: number,
+  sy: number
+): void {
+  if (sx === 1 && sy === 1) return
+  if (node.fillGeometry.length > 0) {
+    changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
+  }
+  if (node.strokeGeometry.length === 0) return
+  changes.strokeGeometry =
+    node.vectorNetwork && node.vectorNetwork.segments.length > 0
+      ? []
+      : scaleGeometryPaths(node.strokeGeometry, sx, sy)
+}
+
+function rememberVectorSize(
+  id: string,
+  toWidth: number,
+  toHeight: number,
+  sourceWidth: number | undefined,
+  sourceHeight: number | undefined
+): void {
+  if (toWidth <= 0 || toHeight <= 0) {
+    lastBoxWithSize.set(id, {
+      width: positiveSize(toWidth) ?? sourceWidth,
+      height: positiveSize(toHeight) ?? sourceHeight
+    })
+    return
+  }
+  lastBoxWithSize.delete(id)
+}
+
+function updateVectorLayoutGeometry(
+  id: string,
+  node: SceneNode,
+  changes: LayoutGeometry
+): void {
   if (node.type !== 'VECTOR') return
-  // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
-  // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
-  // which is what an instance smaller than its component turns into.
   const toWidth = changes.width ?? node.width
   const toHeight = changes.height ?? node.height
   const remembered = lastBoxWithSize.get(id)
   const extent = networkExtent(node.vectorNetwork)
-  const sourceWidth =
-    positiveSize(node.width) ?? positiveSize(remembered?.width) ?? positiveSize(extent?.width)
-  const sourceHeight =
-    positiveSize(node.height) ?? positiveSize(remembered?.height) ?? positiveSize(extent?.height)
+  const sourceWidth = vectorSourceSize(node.width, remembered?.width, extent?.width)
+  const sourceHeight = vectorSourceSize(node.height, remembered?.height, extent?.height)
   const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
   const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
   const targetWidth = positiveSize(toWidth) ?? effectiveWidth
   const targetHeight = positiveSize(toHeight) ?? effectiveHeight
-  const sx = targetWidth / effectiveWidth
-  const sy = targetHeight / effectiveHeight
   const network = rescaleVectorNetworkForLayout(
     node.vectorNetwork,
     node.width,
@@ -110,27 +149,8 @@ function updateVectorLayoutGeometry(id: string, node: SceneNode, changes: Layout
     remembered
   )
   if (network) changes.vectorNetwork = network
-  if (sx !== 1 || sy !== 1) {
-    if (node.fillGeometry.length > 0) {
-      changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
-    }
-    // Live paths regenerate their strokes; outline-only vectors keep their saved outline.
-    if (node.strokeGeometry.length > 0) {
-      changes.strokeGeometry =
-        node.vectorNetwork && node.vectorNetwork.segments.length > 0
-          ? []
-          : scaleGeometryPaths(node.strokeGeometry, sx, sy)
-    }
-  }
-
-  if (toWidth <= 0 || toHeight <= 0) {
-    lastBoxWithSize.set(id, {
-      width: positiveSize(toWidth) ?? sourceWidth,
-      height: positiveSize(toHeight) ?? sourceHeight
-    })
-  } else {
-    lastBoxWithSize.delete(id)
-  }
+  updateVectorPathGeometry(node, changes, targetWidth / effectiveWidth, targetHeight / effectiveHeight)
+  rememberVectorSize(id, toWidth, toHeight, sourceWidth, sourceHeight)
 }
 
 /**
