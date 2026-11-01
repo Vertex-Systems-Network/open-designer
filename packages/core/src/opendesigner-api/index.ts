@@ -248,5 +248,4 @@ export class OpenDesignerAPI {
   setTextMarkdown(node: NodeRef, markdown: string): void {
     writeTextMarkdown(this.figma.graph, node, markdown)
   }
-
 }
