@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { applyLegacyMcpEnvironment } from '#mcp/env'
 import { randomUUID } from 'node:crypto'
 
 import { McpServer } from '@modelcontextprotocol/server'
@@ -11,6 +12,8 @@ import type { ToolPolicy } from '#mcp/tool/metadata'
 import { parseDisabledTools } from '#mcp/tool/policy'
 import { narrowestScope, parseToolScope } from '#mcp/tool/scope'
 import { readDiscoveryFile } from '#mcp/transport/discovery'
+
+applyLegacyMcpEnvironment()
 
 if (process.argv.includes('--version')) {
   process.stdout.write(`${MCP_VERSION}\n`)
