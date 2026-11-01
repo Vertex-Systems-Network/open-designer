@@ -23,7 +23,7 @@ function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
     .filter((prefix) => prefix !== '')
   for (const prefix of prefixes) {
     if (!prefix.startsWith('/')) {
-      throw new Error('OPENDESIGNER_PWA_SERVER_PATHS entries must start with "/": ' + prefix)
+      throw new Error(`OPENDESIGNER_PWA_SERVER_PATHS entries must start with "/": ${prefix}`)
     }
   }
   return prefixes.map((prefix) => {
