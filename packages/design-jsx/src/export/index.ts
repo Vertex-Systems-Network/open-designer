@@ -261,15 +261,19 @@ function nodeToJSX(
     ...componentPropertyProps(graph, node),
     ...instanceProps(graph, node, hasRekaComponentRef)
   ]
+  const component = node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
+  const collectedProps = collectProps(node, graph, variables).filter(
+    ([name]) => !(hasRekaComponentRef && name === 'name' && node.name === component?.name)
+  )
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
-    const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
+    const attributes = withRef(mergeProps(collectedProps, ownProps)).map(
       propAttribute
     )
     const instanceChildren = ownsSlotContent(graph, node) ? children(depth + 1) : []
     return [jsx.element(tag, attributes, instanceChildren, depth)]
   }
-  const attributes = withRef(mergeProps(collectProps(node, graph, variables), ownProps)).map(
+  const attributes = withRef(mergeProps(collectedProps, ownProps)).map(
     propAttribute
   )
   if (node.type === 'TEXT') {
