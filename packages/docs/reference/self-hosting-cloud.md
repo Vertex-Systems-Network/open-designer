@@ -21,7 +21,7 @@ docker run -p 8787:8787 \
 
 The image serves its own editor and pages from `/app/site`, so leave `OPENDESIGNER_CLOUD_SITE_DIR` out of the `.env` it is given, or the variable points the server somewhere the container does not have. It listens on port 8787, and reports health from `GET /ready`. `docker run … ghcr.io/open-designer/cloud node ai-relay.mjs` runs the [AI relay](#ai) instead.
 
-To try it on one machine, [`compose.self-hosted.yml`](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/compose.self-hosted.yml) runs the image with PostgreSQL, SeaweedFS for storage, and Mailpit for email, configured by [`self-hosted/opendesigner-cloud.toml`](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/self-hosted/openpencil-cloud.toml):
+To try it on one machine, [`compose.self-hosted.yml`](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/compose.self-hosted.yml) runs the image with PostgreSQL, SeaweedFS for storage, and Mailpit for email, configured by [`self-hosted/opendesigner-cloud.toml`](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/self-hosted/opendesigner-cloud.toml):
 
 ```sh
 cd packages/cloud/deploy
@@ -55,10 +55,10 @@ bun --filter @open-designer/cloud build:standalone # writes packages/cloud/dist-
 
 Settings live in a TOML file; environment variables supply secrets and tell the server where that file and the site build are and where to listen.
 
-1. Copy [`opendesigner-cloud.example.toml`](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/openpencil-cloud.example.toml) and set at least:
+1. Copy [`opendesigner-cloud.example.toml`](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/opendesigner-cloud.example.toml) and set at least:
    - `deployment.public_url`: the address the server answers on, for example `https://cloud.example.com`;
    - `[object_storage]`: the bucket's endpoint, region, and name.
-2. Copy [`.env.example`](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/.env.example) and set:
+2. Copy [`.env.example`](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/.env.example) and set:
    - `OPENDESIGNER_CLOUD_CONFIG`: the path to the TOML file;
    - `OPENDESIGNER_CLOUD_SITE_DIR`: the path to `dist-cloud/`. Without it the server still runs its API, but the editor and the sign-in, account, and administration pages answer 404, and it warns at startup;
    - the secrets the TOML names, by default `DATABASE_URL`, `BETTER_AUTH_SECRET`, `S3_ACCESS_KEY_ID`, and `S3_SECRET_ACCESS_KEY`, plus `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `APPLE_PRIVATE_KEY`, `S3_SESSION_TOKEN`, `OPENDESIGNER_CLOUD_SMTP_USER`, and `OPENDESIGNER_CLOUD_SMTP_PASSWORD` when their sections are enabled.
@@ -84,7 +84,7 @@ Links the server sends point at its own address: `/documents/<id>` for a documen
 
 ## Cloudflare Workers
 
-On Cloudflare a Worker serves the API, the editor, and the server's own pages, a Durable Object for each document runs its collaboration rooms, Hyperdrive connects to PostgreSQL, and a Cron Trigger every five minutes runs cleanup and retries email. [`packages/cloud/deploy/cloudflare`](https://github.com/open-pencil/open-pencil/tree/master/packages/cloud/deploy/cloudflare) is the deployment to copy: a Wrangler configuration and the Worker's entry, which reads `opendesigner-cloud.toml` from the same folder.
+On Cloudflare a Worker serves the API, the editor, and the server's own pages, a Durable Object for each document runs its collaboration rooms, Hyperdrive connects to PostgreSQL, and a Cron Trigger every five minutes runs cleanup and retries email. [`packages/cloud/deploy/cloudflare`](https://github.com/Vertex-Systems-Network/open-designer/tree/main/packages/cloud/deploy/cloudflare) is the deployment to copy: a Wrangler configuration and the Worker's entry, which reads `opendesigner-cloud.toml` from the same folder.
 
 1. Copy the folder beside it, for example to `packages/cloud/deploy/mine`, so the Worker's entry still reaches the runtime.
 2. Create a Hyperdrive configuration for the database with `wrangler hyperdrive create`, and put its ID, your domain, and a Worker name in the copy's `wrangler.jsonc`.
@@ -124,7 +124,7 @@ Cloud does not run models itself. It advertises an AI service and signs short-li
 
 1. Create a P-256 signing key, `openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256`, and pass the PEM in `OPENDESIGNER_CLOUD_AI_SIGNING_KEY`. Cloud refuses to start with a key it cannot sign with.
 2. Add `[ai] endpoint` to the Cloud TOML with the relay's address, and enable `[entitlements.ai]`, optionally with a `monthly_credit_allowance`; without one, the relay does not limit spend. With entitlements from the database, set them per workspace with the `entitlements` command instead.
-3. Copy [`opendesigner-ai-relay.example.toml`](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/openpencil-ai-relay.example.toml), set `relay.cloud_url` to Cloud's `public_url`, `allowed_origins` to the browser editors, and list the models with their credit prices.
+3. Copy [`opendesigner-ai-relay.example.toml`](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/opendesigner-ai-relay.example.toml), set `relay.cloud_url` to Cloud's `public_url`, `allowed_origins` to the browser editors, and list the models with their credit prices.
 4. Start it with `OPENDESIGNER_AI_RELAY_CONFIG`, `OPENDESIGNER_AI_RELAY_UPSTREAM_KEY`, and `DATABASE_URL` set: `node --env-file=.env dist-standalone/ai-relay.mjs`, or `opendesigner-ai-relay` from the npm package. It listens on `PORT` (default `8788`) and can share Cloud's database, keeping its own tables and migration history.
 
 The relay charges a request once the upstream reports its usage, and admits one while the workspace has credits left, so requests already in flight can overdraw the month's allowance by what they cost; `relay.max_concurrent_requests` bounds them. A workspace's allowance renews at the start of each UTC month. The editor's chat shows how many credits are left, and once they run out it says when the allowance renews and asks members to contact you; with no `[billing]` table it offers nothing to buy. It refuses a model request larger than `relay.max_request_bytes` (16 MiB by default) before reading it all. Choose an upstream that reports token usage: a request it reports none for is logged as an error and not charged.
@@ -145,4 +145,4 @@ Back up PostgreSQL and the bucket together. To upgrade, build the new version, s
 
 ## Hardening
 
-Replace every development credential, including the ones in the example Compose files. The [security checklist](https://github.com/open-pencil/open-pencil/blob/master/packages/cloud/deploy/security.md) covers the remaining checks.
+Replace every development credential, including the ones in the example Compose files. The [security checklist](https://github.com/Vertex-Systems-Network/open-designer/blob/main/packages/cloud/deploy/security.md) covers the remaining checks.
