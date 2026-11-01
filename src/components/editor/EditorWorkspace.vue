@@ -54,6 +54,7 @@ const LAYOUT_TOLERANCE = 1e-6
  * this window it would open wider on a wider one.
  */
 function saveResizedLayout(layout: number[]) {
+  if (!showPanels.value || layout.length !== 3) return
   if (layout.every((size, index) => Math.abs(size - editorLayout[index]) < LAYOUT_TOLERANCE)) return
   editorLayout = layout
   saveEditorLayout(layout)
@@ -66,6 +67,7 @@ const horizontalSplitterStyles = tv(splitterTheme)({ direction: 'horizontal' })
 const canvasAlone = computed(
   () => !resolveEditorProfile(store.state).panels && store.visiblePaneCount.value <= 1
 )
+const showPanels = computed(() => store.state.showUI && !canvasAlone.value)
 const { editor } = useI18n()
 // Until a room's document arrives there is nothing to edit, so its screen replaces the editor.
 const { pending: roomPending } = useRoomActions()
@@ -77,14 +79,16 @@ const { pending: roomPending } = useRoomActions()
   </div>
 
   <SplitterGroup
-    v-else-if="!isMobile && showChrome && store.state.showUI && !canvasAlone"
+    v-else-if="!isMobile && showChrome"
     :key="tab.id"
     direction="horizontal"
     class="flex-1 overflow-hidden"
     @layout="saveResizedLayout"
   >
     <SplitterPanel
+      v-if="showPanels"
       id="layers"
+      :order="0"
       :default-size="editorLayout[0]"
       :min-size="10"
       :max-size="30"
@@ -93,26 +97,45 @@ const { pending: roomPending } = useRoomActions()
       <LayersPanel />
     </SplitterPanel>
     <SplitterResizeHandle
+      v-if="showPanels"
       data-test-id="left-splitter-handle"
       :class="horizontalSplitterStyles.handle()"
     >
       <div :class="horizontalSplitterStyles.divider()" />
     </SplitterResizeHandle>
-    <SplitterPanel id="canvas" :default-size="editorLayout[1]" :min-size="30" class="flex">
+    <SplitterPanel id="canvas" :order="1" :min-size="30" class="flex">
       <div class="relative flex min-w-0 flex-1">
         <CanvasSplitRoot />
         <ActiveRoomOverlay />
-        <EditorToolbar />
+        <EditorToolbar v-if="showPanels" />
+        <WorkspacePill
+          v-else-if="canvasAlone"
+          mode="preview"
+          :document-name="store.state.documentName"
+          :shortcut="formatShortcut(appMenuShortcut('toggle-preview')) ?? ''"
+          @reset="store.resetPlay()"
+          @leave="store.stopPlay()"
+        />
+        <WorkspacePill
+          v-else
+          mode="collapsed"
+          :document-name="store.state.documentName"
+          :shortcut="formatShortcut(appMenuShortcut('toggle-ui')) ?? ''"
+          @show-ui="store.state.showUI = true"
+        />
       </div>
     </SplitterPanel>
     <SplitterResizeHandle
+      v-if="showPanels"
       data-test-id="right-splitter-handle"
       :class="horizontalSplitterStyles.handle()"
     >
       <div :class="horizontalSplitterStyles.divider()" />
     </SplitterResizeHandle>
     <SplitterPanel
+      v-if="showPanels"
       id="properties"
+      :order="2"
       :default-size="editorLayout[2]"
       :min-size="10"
       :max-size="30"
