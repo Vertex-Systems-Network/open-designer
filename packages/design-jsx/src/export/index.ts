@@ -131,7 +131,7 @@ function ownElement(
 
 /** The layers an export writes, by the roots it starts from. */
 function propertyDefinitionsForLayer(graph: SceneGraph, node: SceneNode) {
-  return componentPropertyScope(graph, node.id) ?? []
+  return node.parentId ? (componentPropertyScope(graph, node.parentId) ?? []) : []
 }
 
 function componentPropertyProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
