@@ -31,7 +31,8 @@ function findModeId(collection: VariableCollection, ref: string): string | { err
   if (byId) return byId.modeId
 
   const named = collection.modes.filter((candidate) => candidate.name === ref)
-  if (named.length === 1) return named[0].modeId
+  const [onlyMatch] = named
+  if (named.length === 1 && onlyMatch) return onlyMatch.modeId
   if (named.length > 1) {
     const modeIds = named.map((mode) => mode.modeId).join(', ')
     return {
