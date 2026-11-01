@@ -97,8 +97,9 @@ export function cloneVectorNetwork(vn: VectorNetwork): VectorNetwork {
       tangentEnd: { ...s.tangentEnd }
     })),
     regions: vn.regions.map((r) => ({
-      windingRule: r.windingRule,
-      loops: r.loops.map((l) => [...l])
+      ...r,
+      loops: r.loops.map((l) => [...l]),
+      fills: r.fills?.map((fill) => ({ ...fill }))
     }))
   }
 }
