@@ -27,10 +27,16 @@ function ids(collections: VariableCollection[]): string {
 
 /** The mode of `collection` named by ID or by name. */
 function findModeId(collection: VariableCollection, ref: string): string | { error: string } {
-  const mode =
-    collection.modes.find((candidate) => candidate.modeId === ref) ??
-    collection.modes.find((candidate) => candidate.name === ref)
-  if (mode) return mode.modeId
+  const byId = collection.modes.find((candidate) => candidate.modeId === ref)
+  if (byId) return byId.modeId
+
+  const named = collection.modes.filter((candidate) => candidate.name === ref)
+  if (named.length === 1) return named[0].modeId
+  if (named.length > 1) {
+    const modeIds = named.map((mode) => mode.modeId).join(', ')
+    return { error: `Several modes are named "${ref}" in collection "${collection.name}"; name one by ID: ${modeIds}` }
+  }
+
   const names = collection.modes.map((candidate) => `"${candidate.name}"`).join(', ')
   return { error: `Collection "${collection.name}" has no mode "${ref}"; its modes: ${names}` }
 }
