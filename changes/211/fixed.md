@@ -1,0 +1,1 @@
+- The desktop app can read and write its own Linux cache, and recent-file preview failures now report the affected document.
