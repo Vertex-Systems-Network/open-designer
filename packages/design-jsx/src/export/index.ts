@@ -263,8 +263,14 @@ function nodeToJSX(
     ...instanceProps(graph, node, hasRekaComponentRef)
   ]
   const component = node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
+  const defaultComponentProps = new Set<string>()
+  if (hasRekaComponentRef && component) {
+    if (node.name === component.name) defaultComponentProps.add('name')
+    if (node.width === component.width) defaultComponentProps.add('w')
+    if (node.height === component.height) defaultComponentProps.add('h')
+  }
   const collectedProps = collectProps(node, graph, variables).filter(
-    ([name]) => !(hasRekaComponentRef && name === 'name' && node.name === component?.name)
+    ([name]) => !defaultComponentProps.has(name)
   )
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
