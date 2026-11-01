@@ -16,6 +16,17 @@
     "rootDir": "src",
     "paths": {
       "#core/*": ["./src/*"],
+      "@open-designer/core": ["./src/index.ts"],
+      "@open-designer/core/*": ["./src/*"],
+      "@open-pencil/scene-graph": ["../scene-graph/src/index.ts"],
+      "@open-pencil/scene-graph/*": ["../scene-graph/src/*"],
+      "@open-pencil/fig": ["../fig/src/index.ts"],
+      "@open-pencil/fig/*": ["../fig/src/*"],
+      "@open-pencil/design-jsx": ["../design-jsx/src/index.ts"],
+      "@open-pencil/design-jsx/*": ["../design-jsx/src/*"],
+      "@open-pencil/kiwi/*": ["../kiwi/src/*"],
+      "@open-pencil/pen": ["../pen/src/index.ts"],
+      "@open-pencil/pen/*": ["../pen/src/*"],
       "@open-pencil/core": ["./src/index.ts"],
       "@open-pencil/core/*": ["./src/*"]
     }
