@@ -89,6 +89,8 @@ export interface VectorSegment {
 export interface VectorRegion {
   windingRule: WindingRule
   loops: number[][]
+  fills?: Fill[]
+  fillStyleId?: string
 }
 
 export interface VectorNetwork {
