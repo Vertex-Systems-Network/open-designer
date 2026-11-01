@@ -59,6 +59,7 @@ const emit = defineEmits<{
   update: [fill: Fill]
   updateShader: [preset: ShaderPreset]
   openChange: [open: boolean]
+  commit: []
   cancel: []
 }>()
 const { open: popupOpen, portalActive } = useRetainedPopup(undefined, () => {
@@ -188,6 +189,7 @@ function cancelFromEscape(event: KeyboardEvent) {
             :fill="root.fill"
             :layer-size="layerSize"
             @update="emit('update', $event)"
+            @commit="emit('commit')"
           />
         </PopoverContent>
       </PopoverPortal>
