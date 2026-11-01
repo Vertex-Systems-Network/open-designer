@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AIProviderID } from '@open-pencil/core/constants'
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useI18n } from '@open-designer/vue/i18n'
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 
 import { useCodingAgentSetup, usePiSetup } from '@/app/ai/agents/setup/use'
