@@ -50,7 +50,7 @@ const isWindows = platform() === 'win32'
 async function getPlatformDir(): Promise<string> {
   applyLegacyMcpEnvironment()
   let dir: string
-  let legacyDir: string
+  let legacyDir = ''
 
   if (isMacOS) {
     dir = join(homedir(), 'Library', 'Application Support', DIR_NAME_MACOS)
@@ -69,10 +69,10 @@ async function getPlatformDir(): Promise<string> {
     const xdgRuntime = process.env.XDG_RUNTIME_DIR?.trim()
     if (xdgRuntime) {
       dir = join(xdgRuntime, DIR_NAME_UNIX)
-      legacyDir = join(homedir(), `.${LEGACY_DIR_NAME_UNIX}`)
+      legacyDir = join(xdgRuntime, LEGACY_DIR_NAME_UNIX)
     } else {
       dir = join(homedir(), `.${DIR_NAME_UNIX}`)
-      legacyDir = join(homedir(), '.open-pencil')
+      legacyDir = join(homedir(), `.${LEGACY_DIR_NAME_UNIX}`)
     }
   }
 
