@@ -165,6 +165,9 @@
           "path": "$HOME/.opendesigner/mcp.json"
         },
         {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
           "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
         },
         {
@@ -195,6 +198,9 @@
         },
         {
           "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
         },
         {
           "path": "$RUNTIME/openpencil/mcp.json"
@@ -231,6 +237,9 @@
           "path": "$HOME/.opendesigner/mcp.json"
         },
         {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
           "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
         },
         {
@@ -258,6 +267,9 @@
         },
         {
           "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
         },
         {
           "path": "$RUNTIME/openpencil/mcp.json"
@@ -303,6 +315,9 @@
         },
         {
           "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
         },
         {
           "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
