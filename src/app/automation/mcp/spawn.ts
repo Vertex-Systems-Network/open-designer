@@ -564,23 +564,23 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
   })
   const command = Command.create(resolved.command, resolved.args, { env: environment })
 
-function withLegacyMCPEnvironment(
-  executable: string,
-  environment: Record<string, string>
-): Record<string, string> {
-  if (executable !== 'openpencil-mcp-http') return environment
-  return {
-    ...environment,
-    OPENPENCIL_MCP_AUTH_TOKEN: environment.OPENDESIGNER_MCP_AUTH_TOKEN,
-    OPENPENCIL_MCP_CORS_ORIGIN: environment.OPENDESIGNER_MCP_CORS_ORIGIN,
-    OPENPENCIL_MCP_TCP: environment.OPENDESIGNER_MCP_TCP,
-    OPENPENCIL_MCP_ROOT: environment.OPENDESIGNER_MCP_ROOT,
-    OPENPENCIL_MCP_APP_TIMEOUT_MS: environment.OPENDESIGNER_MCP_APP_TIMEOUT_MS,
-    OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: environment.OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE,
-    OPENPENCIL_MCP_DISABLED_TOOLS: environment.OPENDESIGNER_MCP_DISABLED_TOOLS,
-    OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE
+  function withLegacyMCPEnvironment(
+    executable: string,
+    environment: Record<string, string>
+  ): Record<string, string> {
+    if (executable !== 'openpencil-mcp-http') return environment
+    return {
+      ...environment,
+      OPENPENCIL_MCP_AUTH_TOKEN: environment.OPENDESIGNER_MCP_AUTH_TOKEN,
+      OPENPENCIL_MCP_CORS_ORIGIN: environment.OPENDESIGNER_MCP_CORS_ORIGIN,
+      OPENPENCIL_MCP_TCP: environment.OPENDESIGNER_MCP_TCP,
+      OPENPENCIL_MCP_ROOT: environment.OPENDESIGNER_MCP_ROOT,
+      OPENPENCIL_MCP_APP_TIMEOUT_MS: environment.OPENDESIGNER_MCP_APP_TIMEOUT_MS,
+      OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: environment.OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE,
+      OPENPENCIL_MCP_DISABLED_TOOLS: environment.OPENDESIGNER_MCP_DISABLED_TOOLS,
+      OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE
+    }
   }
-}
 
   let startupStderr = ''
   command.stderr.on('data', (raw: Uint8Array | number[] | string) => {
