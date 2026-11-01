@@ -52,7 +52,7 @@ export function isSkillsFolderTrusted(path: string, preferences: SkillPreference
  * share hold their own workflows, such as releases or email, so they start off until picked.
  */
 const SOURCES_ON_BY_DEFAULT: Record<SkillSourceID, boolean> = {
-  openpencil: true,
+  opendesigner: true,
   project: true,
   agents: false,
   claude: false
