@@ -3,7 +3,7 @@ import { basename, dirname, join, normalize } from 'pathe'
 import * as v from 'valibot'
 
 import { pathName } from './paths'
-import { OPENDESIGNER_EXTENSION } from './types'
+import { OPENPENCIL_EXTENSION, OPENDESIGNER_EXTENSION } from './types'
 
 /** A file the user picked: its path within the folder or archive, and its text. */
 export interface DesignTokenSourceFile {
@@ -98,11 +98,11 @@ function extensionsOf(node: Record<string, unknown>): Record<string, unknown> {
 
 /** The collection and mode a file says it holds, which OpenDesigner writes into each mode file. */
 function modeInfo(parsed: Record<string, unknown> | undefined) {
-  const own = v.safeParse(
-    modeExtensionSchema,
-    parsed && extensionsOf(parsed)[OPENDESIGNER_EXTENSION]
-  )
-  return own.success ? own.output : {}
+  const extensions = parsed ? extensionsOf(parsed) : {}
+  const own = v.safeParse(modeExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
+  if (own.success) return own.output
+  const legacy = v.safeParse(modeExtensionSchema, extensions[OPENPENCIL_EXTENSION])
+  return legacy.success ? legacy.output : {}
 }
 
 /** Tokens in a document, groups flattened, each with the type it declares or inherits. */
@@ -119,9 +119,10 @@ export function documentTokens(parsed: Record<string, unknown>): ReadToken[] {
       }
       const extensions = extensionsOf(child)
       const own = v.safeParse(nameExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
+      const legacy = v.safeParse(nameExtensionSchema, extensions[OPENPENCIL_EXTENSION])
       tokens.push({
         path: at,
-        name: (own.success ? own.output.name : undefined) ?? pathName(at),
+        name: (own.success ? own.output.name : undefined) ?? (legacy.success ? legacy.output.name : undefined) ?? pathName(at),
         type: typeof child.$type === 'string' ? child.$type : type,
         value: child.$value,
         description: typeof child.$description === 'string' ? child.$description : undefined,
