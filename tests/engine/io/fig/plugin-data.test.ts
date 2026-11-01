@@ -98,7 +98,7 @@ describe('plugin data', () => {
     expect(parsedFrame).toBeDefined()
     // Private plugin data roundtrips directly in pluginData array
     expect(parsedFrame?.pluginData).toContainEqual({
-      pluginId: 'open-designer',
+      pluginId: 'open-pencil',
       key: 'okhcl',
       value: '{"l":0.7,"c":0.12,"h":240}'
     })
