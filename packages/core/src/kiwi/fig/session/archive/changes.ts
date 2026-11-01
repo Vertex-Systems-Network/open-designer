@@ -145,6 +145,8 @@ export function archiveChanges(graph: SceneGraph): ArchiveChangeSummary | undefi
 
 /** The document as the archive holds it, for the layers that have loaded. */
 export interface ArchiveBaseline {
+  /** Variable, collection and mode IDs the archive holds. */
+  resourceIds: ReadonlySet<string>
   /** Layers edits changed, as they were before. */
   before: ReadonlyMap<string, SceneNode>
   /** Layers added since, which the archive does not hold. */
@@ -160,6 +162,7 @@ export function archiveBaseline(graph: SceneGraph): ArchiveBaseline | undefined 
   const entry = changes.get(graph)
   if (!entry) return undefined
   return {
+    resourceIds: entry.resourceIds,
     before: entry.before,
     created: entry.created,
     loadedAfterEdits: entry.loadedAfterEdits,
