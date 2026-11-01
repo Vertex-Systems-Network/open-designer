@@ -83,5 +83,5 @@ export function cloudDesktopLinkURL(
   secret: string
 ): string {
   const link = serverLink(serverURL, `/${kind}/${encodeParam(id)}`)
-  return withFragment(withQuery('openpencil://cloud', { url: link }), secret)
+  return withFragment(withQuery('opendesigner://cloud', { url: link }), secret)
 }
