@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useViewportKind } from '@open-pencil/vue/editor/viewport-kind'
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useViewportKind } from '@open-designer/vue/editor/viewport-kind'
+import { useI18n } from '@open-designer/vue/i18n'
 import { tryOnScopeDispose } from '@vueuse/core'
 import { AlertDialogCancel, DialogClose } from 'reka-ui'
 import { computed, type Component } from 'vue'
