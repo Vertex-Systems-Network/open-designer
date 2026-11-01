@@ -17,7 +17,7 @@ import { invalidateAllPictures, invalidateScenePicture } from './state'
 import { hasTransientPreviews, renderPageWithPreviews } from './transient-previews'
 
 export function renderSceneToCanvas(
-  r: Pick<SkiaRenderer, 'worldViewport' | 'viewportImageRendering' | 'renderNode' | 'nodePaths'>,
+  r: Pick<SkiaRenderer, 'worldViewport' | 'viewportImageRendering' | 'renderNode' | 'nodePaths' | 'editingTextId' | 'invalidateNodePicture'>,
   canvas: Canvas,
   graph: SceneGraph,
   pageId: string
