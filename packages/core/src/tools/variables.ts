@@ -7,4 +7,5 @@ export {
   listCollections
 } from './variables/collections'
 export { findVariables, getVariable, listVariables } from './variables/read'
+export { getVariableModes, setVariableMode } from './variables/modes'
 export { createVariable, deleteVariable, setVariable } from './variables/values'
