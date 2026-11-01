@@ -11,7 +11,7 @@ import * as v from 'valibot'
 
 let service: TestService
 
-const REPO = 'https://api.github.com/repos/open-designer/open-designer'
+const REPO = 'https://api.github.com/repos/Vertex-Systems-Network/open-designer'
 const GRAPHQL = 'https://api.cloudflare.com/client/v4/graphql'
 // The cron fires just after midnight, so the day that just ended is Oct 19.
 const RUN_AT = new Date('2026-10-20T00:05:00.000Z')
