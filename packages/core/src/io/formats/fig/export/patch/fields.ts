@@ -183,7 +183,8 @@ function changedFields(saved: NodeChange, record: NodeChange): FigRecordFieldPat
     Object.keys(set).length > 0 ||
     unset.length > 0 ||
     patch.symbolOverrides ||
-    patch.derivedSymbolData
+    patch.derivedSymbolData ||
+    patch.variableSetModes
   return changed ? patch : null
 }
 
