@@ -1,7 +1,10 @@
 import type { SceneNode } from '@open-designer/scene-graph'
 import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
 import { canCreateInstance } from '@open-designer/scene-graph/instances'
-import { cloneInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
+import {
+  cloneInstanceOverrideState,
+  type InstanceOverrideState
+} from '@open-designer/scene-graph/instances/overrides'
 import Matrix from '@open-designer/scene-graph/matrix'
 import type { Vector } from '@open-designer/scene-graph/primitives'
 
@@ -22,10 +25,10 @@ function createInstanceSnapshot(instance: SceneNode): InstanceCreateSnapshot {
 function nestedInstanceOverrides(
   ctx: EditorContext,
   instanceId: string
-): Map<string, import('@open-designer/scene-graph/instances/overrides').InstanceOverrideState> {
+): Map<string, InstanceOverrideState> {
   const states = new Map<
     string,
-    import('@open-designer/scene-graph/instances/overrides').InstanceOverrideState
+    InstanceOverrideState
   >()
   const visit = (parentId: string): void => {
     for (const child of ctx.graph.getChildren(parentId)) {
