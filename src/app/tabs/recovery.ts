@@ -29,22 +29,37 @@ export function recoverableSnapshots(
   open: ReadonlySet<string>
 ): RecoverableSnapshot[] {
   return snapshots
-    .filter((snapshot) => !sessions.live.has(snapshot.sessionId) && !open.has(snapshot.id))
-    .map((snapshot) => ({ ...snapshot, crashed: sessions.crashed.has(snapshot.sessionId) }))
+    .filter(
+      (snapshot) =>
+        (!snapshot.sessionId || !sessions.live.has(snapshot.sessionId)) && !open.has(snapshot.id)
+    )
+    .map((snapshot) => ({
+      ...snapshot,
+      crashed: Boolean(snapshot.sessionId && sessions.crashed.has(snapshot.sessionId))
+    }))
 }
 
 const listed = shallowRef<readonly RecoverableSnapshot[]>([])
+let refreshGeneration = 0
 
-/** The copies Home lists, as of the last `refreshRecoverableSnapshots`. */
+/** The copies Home lists, as of the last successful refresh. */
 export const recoverable = shallowReadonly(listed)
 
+export function matchingRecoverableSnapshots(query: string, locale: string) {
+  if (!recoveryEnabled.value) return []
+  return listed.value.filter((snapshot) =>
+    snapshot.documentName.toLocaleLowerCase(locale).includes(query)
+  )
+}
+
 /**
- * Lists the copies left to recover. `reportCrash` reports the crashed sessions found, so later
+ * Lists the copies left to recover. reportCrash reports the crashed sessions found, so later
  * lists mark their copies as kept ones and the next start does not ask about them again.
  */
 export async function refreshRecoverableSnapshots({
   reportCrash = false
 }: { reportCrash?: boolean } = {}): Promise<readonly RecoverableSnapshot[]> {
+  const generation = ++refreshGeneration
   if (!recoveryEnabled.value) {
     listed.value = []
     return listed.value
@@ -53,6 +68,8 @@ export async function refreshRecoverableSnapshots({
     listRecoverySnapshots(),
     recoverySessionStates()
   ])
+  if (generation !== refreshGeneration || !recoveryEnabled.value) return listed.value
+
   const found = recoverableSnapshots(snapshots, sessions, openRecoveryIds())
   if (reportCrash) forgetCrashedSessions(sessions.crashed)
   listed.value = found
@@ -60,6 +77,7 @@ export async function refreshRecoverableSnapshots({
 }
 
 function drop(id: string): void {
+  refreshGeneration++
   listed.value = listed.value.filter((snapshot) => snapshot.id !== id)
 }
 
