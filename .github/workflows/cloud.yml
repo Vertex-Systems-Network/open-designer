@@ -1,7 +1,7 @@
 name: Deploy Cloud
 
-# Deploys an official OpenDesigner Cloud deployment: packages/cloud/deploy/opendesigner/<target>, with
-# the secrets and reviewers of the cloud-<target> GitHub environment.
+# Manually deploy the official OpenDesigner Cloud Worker from main.
+# The cloudflare-deploy GitHub environment supplies its deployment secrets and URL.
 on:
   workflow_dispatch:
     inputs:
@@ -16,10 +16,11 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
-      name: cloud-${{ inputs.target }}
+      name: cloudflare-deploy
       url: ${{ vars.CLOUD_URL }}
     permissions:
       contents: read
@@ -36,16 +37,14 @@ jobs:
       # The editor's demo document draws its shader fills at build time in a headless Chromium.
       - uses: ./.github/actions/setup-playwright
 
-      # The Worker serves the editor and the portal as static assets. The editor names this
-      # deployment as the official server and, like app.openpencil.dev, sends the daily ping.
+      # The Worker serves the editor and the portal as static assets.
       - name: Build the Cloud site
         env:
           VITE_OPENDESIGNER_OFFICIAL_CLOUD_URL: ${{ vars.CLOUD_URL }}
           VITE_OPENDESIGNER_FEEDBACK: "on"
         run: bun run build:packages && bun run build:cloud
 
-      # Migrations run before the new code, over the direct connection rather than Hyperdrive. The
-      # config reads every secret it names, so only this step and the next one see them.
+      # Migrations run before the new code, over the direct connection rather than Hyperdrive.
       - name: Migrate the database
         env:
           OPENDESIGNER_CLOUD_CONFIG: ${{ github.workspace }}/${{ env.DEPLOYMENT }}/opendesigner-cloud.toml
@@ -72,7 +71,7 @@ jobs:
 
       - uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDEFLARE_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ${{ env.DEPLOYMENT }}
           packageManager: bun
@@ -84,8 +83,6 @@ jobs:
         env:
           CLOUD_URL: ${{ vars.CLOUD_URL }}
         # Only a 200 counts: a redirect to a sign-in or access page would mean the Worker isn't there.
-        # Pages are asked for as a browser does; the API is not, so a missing route can't turn into
-        # the editor's page.
         run: |
           for path in /health /ready /.well-known/opendesigner / /welcome /auth/sign-in; do
             accept='application/json'
