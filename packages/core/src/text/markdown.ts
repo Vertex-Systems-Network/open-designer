@@ -153,10 +153,12 @@ function blocks(
           const itemParagraphs: Paragraph[] = []
           let itemText: Paragraph | undefined
           let hasItemText = false
+          let nestedAfterText = false
           for (const child of item.children) {
             // A nested list starts a deeper item group. Keep it separate from this item's text.
             if (child.type === 'list') {
               itemParagraphs.push(...blocks([child], style, paragraph, reading, depth + 1))
+              nestedAfterText ||= hasItemText
               continue
             }
             const rendered = blocks(
@@ -174,7 +176,10 @@ function blocks(
             }
             // TextParagraphStyle has no continuation-list marker, so keep later loose-list
             // blocks in the same item paragraph. They wrap under the item text without a bullet.
-            if (!itemText) {
+            // A hard break creates several paragraphs; preserve those boundaries. Once a
+            // nested list has intervened, keep subsequent text in sequence instead of moving it
+            // back into the earlier item paragraph.
+            if (!itemText || nestedAfterText || rendered.length > 1) {
               itemParagraphs.push(...rendered)
               continue
             }
