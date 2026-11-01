@@ -1,0 +1,1 @@
+- Inline SVG artwork now subtracts its `viewBox` min-x and min-y before scaling, so positive and negative viewport origins render at the expected position.
