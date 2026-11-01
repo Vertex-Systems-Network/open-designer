@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { applyLegacyMcpEnvironment } from '#mcp/env'
 import { randomUUID } from 'node:crypto'
 
 import { McpServer } from '@modelcontextprotocol/server'
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 
+import { applyLegacyMcpEnvironment } from '#mcp/env'
 import { resolveMCPRoot } from '#mcp/root'
 import { MCP_VERSION, registerTools } from '#mcp/server'
 import { createStdioRPCBridge } from '#mcp/stdio/bridge'
