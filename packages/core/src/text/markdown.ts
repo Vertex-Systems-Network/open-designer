@@ -94,7 +94,7 @@ function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Read
         return node.alt ? [{ text: node.alt, style }] : []
       case 'html':
         // Markdown's explicit line break is supported; other inline HTML is not rendered.
-        return /^<br\\s*\\/?>(?:\\s*)$/i.test(node.value) ? [{ text: '\n', style }] : []
+        return /^<br\s*\/?>\s*$/i.test(node.value) ? [{ text: '\n', style }] : []
       default:
         return [{ text: toString(node), style }]
     }
