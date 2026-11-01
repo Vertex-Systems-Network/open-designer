@@ -11,6 +11,10 @@ import { previewEdge } from './images/previews'
 import type { SkiaRenderer } from './renderer'
 import { drawOutline, withNodeOutline } from './shapes'
 
+export function clearFillShader(r: SkiaRenderer): void {
+  r.fillPaint.setShader(null)
+}
+
 interface PaintFillsOptions {
   readonly bindToNodeFills?: boolean
   readonly patternStack?: Set<string>
