@@ -106,7 +106,11 @@ const profileSchema = v.object({
 })
 
 function parseConnection(value: unknown): AIModelConnection | null {
-  const parsed = v.safeParse(connectionSchema, value)
+  const normalized =
+    typeof value === 'object' && value !== null && 'providerID' in value && value.providerID === 'openpencil'
+      ? { ...value, providerID: 'opendesigner' }
+      : value
+  const parsed = v.safeParse(connectionSchema, normalized)
   return parsed.success ? parsed.output : null
 }
 
