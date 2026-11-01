@@ -1,8 +1,8 @@
 import { access, chmod, mkdir } from 'node:fs/promises'
-
-import { applyLegacyMcpEnvironment } from '../env'
 import { homedir, platform } from 'node:os'
 import { dirname, join } from 'node:path'
+
+import { applyLegacyMcpEnvironment } from '../env'
 
 /**
  * Platform-specific paths for the MCP server's Unix domain socket
