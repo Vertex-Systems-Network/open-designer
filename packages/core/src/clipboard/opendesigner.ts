@@ -97,7 +97,7 @@ const openPencilClipboardSchema = v.pipe(
   v.string(),
   v.parseJson(),
   v.object({
-    format: v.literal('opendesigner/v1'),
+    format: v.picklist(['opendesigner/v1', 'openpencil/v1']),
     nodes: v.array(serializedClipboardNodeSchema),
     images: v.optional(v.record(v.string(), v.unknown()))
   })
