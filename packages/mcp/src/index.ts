@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-import { applyLegacyMcpEnvironment } from '#mcp/env'
+import { applyLegacyMCPEnvironment } from '#mcp/env'
 import { resolveMCPRoot } from '#mcp/root'
 import { MCP_VERSION, startServer } from '#mcp/server'
 import { readToolPolicyFromEnv } from '#mcp/tool/policy'
 import { resolveCORSOrigins } from '#mcp/transport/origins'
 
-applyLegacyMcpEnvironment()
+applyLegacyMCPEnvironment()
 
 if (process.argv.includes('--version')) {
   process.stdout.write(`${MCP_VERSION}\n`)
