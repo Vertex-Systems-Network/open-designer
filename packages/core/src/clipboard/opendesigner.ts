@@ -108,7 +108,7 @@ type ClipboardNode = SceneNode & { children?: ClipboardNode[] }
 export type OpenDesignerClipboardData = Pick<ClipboardSnapshot, 'nodes' | 'images'>
 
 export function parseOpenDesignerClipboard(html: string): OpenDesignerClipboardData | null {
-  const match = html.match(/<!--\(opendesigner\)(.*?)\(\/opendesigner\)-->/s)
+  const match = html.match(/<!--\((?:opendesigner|openpencil)\)(.*?)\(\/(?:opendesigner|openpencil)\)-->/s)
   if (!match) return null
 
   try {
