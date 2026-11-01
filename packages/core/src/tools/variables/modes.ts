@@ -90,13 +90,16 @@ function layerModes(figma: FigmaAPI, id: string) {
   if (!node) return null
   return [...figma.graph.variableCollections.values()].map((collection) => {
     const own = node.variableModes[collection.id]
-    const modeId = figma.graph.getNodeVariableModeId(id, collection.id)
+    const resolved = figma.graph.getNodeVariableModeId(id, collection.id)
+    const validMode = collection.modes.some((candidate) => candidate.modeId === resolved)
+    const modeId = validMode ? resolved : collection.defaultModeId
+    const validOwn = collection.modes.some((candidate) => candidate.modeId === own)
     return {
       collection_id: collection.id,
       collection: collection.name,
       mode_id: modeId,
       mode: modeName(collection, modeId),
-      inherited: !own,
+      inherited: !validOwn,
       modes: collection.modes.map((mode) => ({ id: mode.modeId, name: mode.name }))
     }
   })
