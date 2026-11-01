@@ -130,13 +130,13 @@ export function flattenNodesToVectorProps(
 
 function topStroke(node: SceneNode): Pick<SceneNode, StrokeFields> {
   return {
-    strokes: copyStrokes(node.strokes),
+    strokes: node.type === 'LINE' ? copyStrokes(node.strokes).map((stroke) => ({ ...stroke, dashPattern: [] })) : copyStrokes(node.strokes),
     strokeWeight: node.strokeWeight,
     strokeAlign: node.strokeAlign,
     strokeCap: node.strokeCap,
     strokeJoin: node.strokeJoin,
     strokeMiterLimit: node.strokeMiterLimit,
-    dashPattern: [...node.dashPattern]
+    dashPattern: node.type === 'LINE' ? [] : [...node.dashPattern]
   }
 }
 
