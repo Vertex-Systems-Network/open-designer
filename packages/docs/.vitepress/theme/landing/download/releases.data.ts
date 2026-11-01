@@ -6,7 +6,8 @@ import { classifyAsset, latestReleases, type Release, type Releases } from './re
 declare const data: Releases
 export { data }
 
-const RELEASES_URL = 'https://api.github.com/repos/Vertex-Systems-Network/open-designer/releases?per_page=30'
+const RELEASES_URL =
+  'https://api.github.com/repos/Vertex-Systems-Network/open-designer/releases?per_page=30'
 
 const ReleaseSchema = v.object({
   tag_name: v.string(),
