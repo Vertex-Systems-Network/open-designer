@@ -128,6 +128,7 @@ describe('shell scope', () => {
   const spawns: [string, string[]][] = [
     ...ACP_AGENTS.map((agent): [string, string[]] => [agent.command, agent.args]),
     ['opendesigner-mcp-http', []],
+    ['openpencil-mcp-http', []],
     ['opendesigner-harness', []],
     ...installs.map((target): [string, string[]] => ['npm', npmInstallArgs(target)]),
     // Bun updates the companions it installed; agent adapters always come from npm.
