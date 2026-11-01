@@ -9,6 +9,25 @@ const batchOpsSchema = v.array(
 )
 type BatchOp = v.InferOutput<typeof batchOpsSchema>[number]
 
+const BATCH_PROPERTY_FIELDS = [
+  'itemSpacing',
+  'paddingTop',
+  'paddingRight',
+  'paddingBottom',
+  'paddingLeft',
+  'counterAxisAlignItems',
+  'primaryAxisAlignItems',
+  'layoutSizingHorizontal',
+  'layoutSizingVertical',
+  'layoutGrow',
+  'name',
+  'visible',
+  'cornerRadius',
+  'opacity',
+  'textAutoResize',
+  'layoutMode'
+] as const
+
 /** The operations a call names, or why they cannot be read. */
 function parseOperations(operations: string): BatchOp[] | { error: string } {
   const json = v.safeParse(v.pipe(v.string(), v.parseJson()), operations)
@@ -130,11 +149,31 @@ export const batchUpdate = defineTool({
       return { op, node }
     })
 
+    const previous = targets.map(({ node }) => ({
+      node,
+      properties: Object.fromEntries(
+        BATCH_PROPERTY_FIELDS.map((field) => [field, Reflect.get(node, field)])
+      )
+    }))
     const results: Array<{ id: string; updated: string[] }> = []
 
-    for (const { op, node } of targets) {
-      const updated = applyBatchProps(node, op.props)
-      if (updated.length > 0) results.push({ id: op.id, updated })
+    try {
+      for (const { op, node } of targets) {
+        const updated = applyBatchProps(node, op.props)
+        if (updated.length > 0) results.push({ id: op.id, updated })
+      }
+    } catch (error) {
+      // Restore every writable target if any property setter rejects the batch.
+      for (const { node, properties } of previous.toReversed()) {
+        for (const [field, value] of Object.entries(properties)) {
+          try {
+            Reflect.set(node, field, value)
+          } catch {
+            // Read-only targets reject the original write too; they have nothing to restore.
+          }
+        }
+      }
+      throw error
     }
 
     const out: Record<string, unknown> = { updated: results.length }
