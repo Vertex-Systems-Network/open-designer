@@ -112,7 +112,7 @@ pub fn queue_deep_links<R: tauri::Runtime>(app: &tauri::AppHandle<R>, urls: Vec<
     let mut files = Vec::new();
     let mut rooms = Vec::new();
     let mut cloud_links = Vec::new();
-    for url in urls.iter().filter(|url| url.scheme() == "opendesigner") {
+    for url in urls.iter().filter(|url| url.scheme() == "opendesigner" || url.scheme() == "openpencil") {
         match links::parse_deep_link(url) {
             Ok(links::DeepLink::Open(open)) => files.push(PendingOpenFile {
                 path: open.file,
