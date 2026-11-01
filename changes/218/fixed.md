@@ -1,0 +1,1 @@
+- Imported `.fig` documents save and load pages after component layers are deleted, including resumed sessions and nested component frames (#23, #27).
