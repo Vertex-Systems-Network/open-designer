@@ -5,8 +5,6 @@ import { gfmFromMarkdown } from 'mdast-util-gfm'
 import { toString } from 'mdast-util-to-string'
 import { gfm } from 'micromark-extension-gfm'
 
-import { isSupportedHyperlinkUrl } from '#core/figma-api/accessors/text/hyperlink'
-
 import type {
   CharacterStyleOverride,
   SceneNode,
@@ -18,6 +16,8 @@ import {
   PLAIN_PARAGRAPH,
   trimParagraphStyles
 } from '@open-designer/scene-graph/text'
+
+import { isSupportedHyperlinkUrl } from '#core/figma-api/accessors/text/hyperlink'
 
 /** The style of the text Markdown is written into, which headings and code are relative to. */
 export type MarkdownBase = Pick<SceneNode, 'fontSize' | 'fontWeight'>
@@ -102,9 +102,7 @@ function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Read
 }
 
 function linked(style: Style, url: string): Style {
-  return isSupportedHyperlinkUrl(url)
-    ? { ...style, hyperlink: { type: 'URL', value: url } }
-    : style
+  return isSupportedHyperlinkUrl(url) ? { ...style, hyperlink: { type: 'URL', value: url } } : style
 }
 
 /** Paragraphs of segments, a hard break inside one starting another of the same style. */
@@ -153,6 +151,7 @@ function blocks(
       case 'list':
         return node.children.flatMap((item) => {
           const itemParagraphs: Paragraph[] = []
+          let itemText: Paragraph | undefined
           let hasItemText = false
           for (const child of item.children) {
             // A nested list starts a deeper item group. Keep it separate from this item's text.
@@ -169,20 +168,20 @@ function blocks(
             )
             if (!hasItemText) {
               itemParagraphs.push(...rendered)
+              itemText = rendered.find((entry) => entry.style.listType !== 'NONE')
               hasItemText = true
               continue
             }
             // TextParagraphStyle has no continuation-list marker, so keep later loose-list
             // blocks in the same item paragraph. They wrap under the item text without a bullet.
-            const target = [...itemParagraphs].reverse().find((entry) => entry.style.listType !== 'NONE')
-            if (!target) {
+            if (!itemText) {
               itemParagraphs.push(...rendered)
               continue
             }
             for (const continuation of rendered) {
-              if (target.segments.length && continuation.segments.length)
-                target.segments.push({ text: ' ', style: continuation.segments[0].style })
-              target.segments.push(...continuation.segments)
+              if (itemText.segments.length && continuation.segments.length)
+                itemText.segments.push({ text: ' ', style: continuation.segments[0].style })
+              itemText.segments.push(...continuation.segments)
             }
           }
           return itemParagraphs
