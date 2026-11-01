@@ -7,7 +7,7 @@ import type { Color, Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import { setPaintBlendMode } from './blend'
 import { makeDiamondGradient } from './gradients/diamond'
-import { previewEdge } from './images/previews'
+import { viewportPreviewEdge } from './images/previews'
 import type { SkiaRenderer } from './renderer'
 import { drawOutline, withNodeOutline } from './shapes'
 
@@ -441,7 +441,7 @@ export function applyImageFill(
   if (live?.surface === r.surface) return setImageShader(r, fill, node, live.image, paint)
   const preview = r.viewportImageRendering
     ? // oxlint-ignore-next-line -- This chooses preview resolution; it does not size cached scene drawing.
-      r.imagePreviews.get(graph, hash, previewEdge(node, r, r.dpr))
+      r.imagePreviews.get(graph, hash, viewportPreviewEdge(node, r, r.dpr))
     : undefined
   if (r.viewportImageRendering && !preview) return false
   const key = preview?.key ?? hash
