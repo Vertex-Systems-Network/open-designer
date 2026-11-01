@@ -18,7 +18,7 @@ import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import { assertTextFontsLoaded } from '#core/figma-api/fonts/loaded'
-import { computeLayout } from '#core/layout'
+import { layoutAuthoredNodes } from '#core/layout'
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { markdownText } from '#core/text/markdown'
 
@@ -36,16 +36,9 @@ function editNode(graph: SceneGraph, node: SceneNode, changes: Partial<SceneNode
   recordInstanceOverride(graph, node.id, changed)
 }
 
-/** Reflow the outermost auto-layout ancestor after a text edit changes its measured size. */
+/** Reflow the edited layer's layouts through the established imported-geometry safeguards. */
 function layoutTextAncestors(graph: SceneGraph, node: SceneNode): void {
-  let root: SceneNode | null = null
-  for (let parentId = node.parentId; parentId;) {
-    const parent = graph.getNode(parentId)
-    if (!parent) break
-    if (parent.layoutMode !== 'NONE') root = parent
-    parentId = parent.parentId
-  }
-  if (root) computeLayout(graph, root.id)
+  if (node.parentId) layoutAuthoredNodes(graph, [node.id])
 }
 
 function direction(value: string): LayoutDirection & TextDirection {
