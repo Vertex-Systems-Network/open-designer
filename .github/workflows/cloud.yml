@@ -1,7 +1,7 @@
 name: Deploy Cloud
 
 # Manually deploy the official OpenDesigner Cloud Worker from main.
-# The cloudflare-deploy GitHub environment supplies its deployment secrets and URL.
+# The cloudflare-deploy GitHub environment supplies deployment secrets.
 on:
   workflow_dispatch:
     inputs:
@@ -21,7 +21,6 @@ jobs:
     timeout-minutes: 20
     environment:
       name: cloudflare-deploy
-      url: ${{ vars.CLOUD_URL }}
     permissions:
       contents: read
       deployments: write
@@ -34,13 +33,67 @@ jobs:
 
       - uses: ./.github/actions/setup-bun
 
+      # Resolve or create the account's workers.dev subdomain before building the editor.
+      - name: Create the Cloud URL
+        id: cloud_url
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDEFLARE_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          response_file=$(mktemp)
+          status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api")
+
+          if [ "$status" = "200" ] && jq -e '.success == true and (.result.subdomain | type == "string" and length > 0)' "$response_file" >/dev/null; then
+            subdomain=$(jq -r '.result.subdomain' "$response_file")
+          elif [ "$status" = "404" ]; then
+            payload=$(jq -n --arg subdomain "opendesigner-vsn" '{subdomain: $subdomain}')
+            status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+              --request PUT --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              --header 'Content-Type: application/json' --data "$payload" "$api")
+            if [ "$status" != "200" ] || ! jq -e '.success == true and (.result.subdomain | type == "string" and length > 0)' "$response_file" >/dev/null; then
+              echo "::error::Could not create the Cloudflare workers.dev subdomain. The token needs Workers Scripts: Edit permission."
+              jq -c '{errors: .errors}' "$response_file" >&2 || true
+              exit 1
+            fi
+            subdomain=$(jq -r '.result.subdomain' "$response_file")
+          else
+            echo "::error::Could not read the Cloudflare workers.dev subdomain (HTTP $status)."
+            jq -c '{errors: .errors}' "$response_file" >&2 || true
+            exit 1
+          fi
+
+          worker_name=$(sed -n 's/^[[:space:]]*"name":[[:space:]]*"\([^"]*\)".*/\1/p' "$DEPLOYMENT/wrangler.jsonc" | head -n 1)
+          if [ -z "$worker_name" ]; then
+            echo "::error::Could not read the Worker name from wrangler.jsonc."
+            exit 1
+          fi
+          cloud_url="https://$worker_name.$subdomain.workers.dev"
+          echo "cloud_url=$cloud_url" >> "$GITHUB_OUTPUT"
+          echo "CLOUD_URL=$cloud_url" >> "$GITHUB_ENV"
+
+          python3 - "$DEPLOYMENT/opendesigner-cloud.toml" "$cloud_url" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path(sys.argv[1])
+          url = sys.argv[2]
+          text = path.read_text()
+          updated, count = re.subn(r'(?m)^public_url\s*=\s*".*"$',
+                                   f'public_url = "{url}"', text, count=1)
+          if count != 1:
+              raise SystemExit("Could not update public_url in the deployment config.")
+          path.write_text(updated)
+          PY
+
       # The editor's demo document draws its shader fills at build time in a headless Chromium.
       - uses: ./.github/actions/setup-playwright
 
-      # The Worker serves the editor and the portal as static assets.
       - name: Build the Cloud site
         env:
-          VITE_OPENDESIGNER_OFFICIAL_CLOUD_URL: ${{ vars.CLOUD_URL }}
+          VITE_OPENDESIGNER_OFFICIAL_CLOUD_URL: ${{ steps.cloud_url.outputs.cloud_url }}
           VITE_OPENDESIGNER_FEEDBACK: "on"
         run: bun run build:packages && bun run build:cloud
 
@@ -81,8 +134,7 @@ jobs:
 
       - name: Check the deployment
         env:
-          CLOUD_URL: ${{ vars.CLOUD_URL }}
-        # Only a 200 counts: a redirect to a sign-in or access page would mean the Worker isn't there.
+          CLOUD_URL: ${{ steps.cloud_url.outputs.cloud_url }}
         run: |
           for path in /health /ready /.well-known/opendesigner / /welcome /auth/sign-in; do
             accept='application/json'
@@ -95,3 +147,4 @@ jobs:
               exit 1
             fi
           done
+          echo "Cloud URL: $CLOUD_URL" >> "$GITHUB_STEP_SUMMARY"
