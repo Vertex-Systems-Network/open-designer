@@ -195,6 +195,15 @@
         },
         {
           "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
         }
       ]
     },
@@ -249,6 +258,15 @@
         },
         {
           "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
         }
       ]
     },
@@ -366,6 +384,11 @@
           "args": false
         },
         {
+          "name": "openpencil-mcp-http",
+          "cmd": "openpencil-mcp-http",
+          "args": false
+        },
+        {
           "name": "opendesigner-harness",
           "cmd": "opendesigner-harness",
           "args": false
@@ -396,6 +419,14 @@
           "args": [
             "/c",
             "codex-acp"
+          ]
+        },
+        {
+          "name": "cmd-openpencil-mcp-http",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "openpencil-mcp-http"
           ]
         },
         {
