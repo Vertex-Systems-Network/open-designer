@@ -19,6 +19,25 @@ export type SkillPreferences = v.InferOutput<typeof skillPreferencesSchema>
 
 const storedPreferencesSchema = v.pipe(v.string(), v.parseJson(), skillPreferencesSchema)
 
+function migrateLegacySourceKeys(preferences: SkillPreferences): SkillPreferences {
+  const migrate = (record: Record<string, boolean>) => {
+    const next = { ...record }
+    for (const [key, value] of Object.entries(record)) {
+      if (key !== 'openpencil' && !key.startsWith('openpencil/')) continue
+      const currentKey = `opendesigner${key.slice('openpencil'.length)}`
+      if (!(currentKey in next)) next[currentKey] = value
+      delete next[key]
+    }
+    return next
+  }
+  return {
+    ...preferences,
+    sources: migrate(preferences.sources),
+    skills: migrate(preferences.skills),
+    pickedSources: migrate(preferences.pickedSources)
+  }
+}
+
 export const skillPreferences = useLocalStorage<SkillPreferences>(
   'open-pencil:ai:skills',
   { sources: {}, skills: {}, trustedFolders: {}, pickedSources: {} },
@@ -27,7 +46,7 @@ export const skillPreferences = useLocalStorage<SkillPreferences>(
       read: (raw) => {
         const result = v.safeParse(storedPreferencesSchema, raw)
         return result.success
-          ? result.output
+          ? migrateLegacySourceKeys(result.output)
           : { sources: {}, skills: {}, trustedFolders: {}, pickedSources: {} }
       },
       write: JSON.stringify
