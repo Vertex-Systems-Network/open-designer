@@ -9,18 +9,16 @@ import { computeAccurateBounds } from '#core/vector/curve-math'
 function parseViewBox(
   viewBox: string | undefined
 ): { x: number; y: number; w: number; h: number } {
-  if (!viewBox) return { x: 0, y: 0, w: 0, h: 0 }
+  const neutral = { x: 0, y: 0, w: 0, h: 0 }
+  if (!viewBox) return neutral
   const parts = viewBox
     .trim()
-    .split(/[\s,]+/)
+    .split(/[\\s,]+/)
     .map(Number)
-  const [x = 0, y = 0, w = 0, h = 0] = parts
-  return {
-    x: Number.isFinite(x) ? x : 0,
-    y: Number.isFinite(y) ? y : 0,
-    w: Number.isFinite(w) ? w : 0,
-    h: Number.isFinite(h) ? h : 0
-  }
+  if (parts.length !== 4 || !parts.every(Number.isFinite)) return neutral
+  const [x, y, w, h] = parts
+  if (w <= 0 || h <= 0) return neutral
+  return { x, y, w, h }
 }
 
 /** The set inline SVG artwork is reported in, which no icon provider has. */
