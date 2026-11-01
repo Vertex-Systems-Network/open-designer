@@ -26,7 +26,8 @@ loadTypeScriptDependencies()
 
 const stateRoot =
   process.env.OPENDESIGNER_HARNESS_STATE_DIR ??
-  join(homedir(), '.open-designer', 'harness-sessions')
+  process.env.OPENPENCIL_HARNESS_STATE_DIR ??
+  join(homedir(), '.open-pencil', 'harness-sessions')
 const agentDir = process.env.OPENDESIGNER_HARNESS_AGENT_DIR
 const apiKey = process.env.OPENDESIGNER_HARNESS_API_KEY
 const backendOptions: PiHarnessBackendOptions = {}
