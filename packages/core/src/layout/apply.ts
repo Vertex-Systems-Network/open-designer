@@ -290,7 +290,8 @@ function savedStretchedCrossSize(
       (child) =>
         child.visible &&
         child.layoutPositioning !== 'ABSOLUTE' &&
-        child.layoutAlignSelf === 'STRETCH'
+        (child.layoutAlignSelf === 'STRETCH' ||
+          (child.layoutAlignSelf === 'AUTO' && frame.counterAxisAlign === 'STRETCH'))
     )
     .map((child) => child.derivedLayout?.[axis] ?? child[axis])
   return sizes.length > 0 ? Math.max(...sizes) + padding : undefined
