@@ -102,6 +102,7 @@ export {
   type CommitImageUploadsInput,
   type CommitUploadInput,
   type CommitUploadRequest,
+  type CreateDocumentRequest,
   type CreateDocumentInput,
   type CreateUploadInput,
   type DocumentAccess,
