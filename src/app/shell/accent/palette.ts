@@ -1,16 +1,16 @@
 import { maxBy } from 'es-toolkit'
 
-import type { SelectionTheme } from '@open-pencil/core/canvas'
-import { SELECTION_COLOR } from '@open-pencil/core/constants'
+import type { SelectionTheme } from '@open-designer/core/canvas'
+import { SELECTION_COLOR } from '@open-designer/core/constants'
 import {
   colorToHex,
   contrastRatio,
   okhclToRGBA,
   parseColor,
   rgbaToOkHCL
-} from '@open-pencil/scene-graph/color'
-import { WHITE } from '@open-pencil/scene-graph/constants'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/color'
+import { WHITE } from '@open-designer/scene-graph/constants'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import type { AccentPreference, AccentPreset } from './schema'
 

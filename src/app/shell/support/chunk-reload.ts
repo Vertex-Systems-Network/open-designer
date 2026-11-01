@@ -1,4 +1,4 @@
-import { IS_TAURI } from '@open-pencil/core/constants'
+import { IS_TAURI } from '@open-designer/core/constants'
 
 import { sessionStore, type ReloadStorage } from './chunk-reload-storage'
 

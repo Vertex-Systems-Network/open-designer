@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { VectorNetwork } from '@open-pencil/scene-graph'
-import { parseSVGPath } from '@open-pencil/scene-graph/parse-path'
+import type { VectorNetwork } from '@open-designer/scene-graph'
+import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
 import {
   mergeVectorNetworks,
   vectorNetworkPaths,
   vectorNetworkToSVGPaths
-} from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/vector-network'
 
 import { expectDefined } from './helpers/assert'
 

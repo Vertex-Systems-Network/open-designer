@@ -311,6 +311,7 @@ export function createCloudApp(services: CloudServices) {
 
   return new Hono<CloudEnvironment>()
     .use(CLOUD_DISCOVERY_PATH, cloudCORS)
+    .use('/.well-known/openpencil', cloudCORS)
     .use('/api/*', cloudCORS)
     .use('*', async (context, next) => {
       await next()
@@ -354,6 +355,7 @@ export function createCloudApp(services: CloudServices) {
       }
     })
     .get(CLOUD_DISCOVERY_PATH, (context) => context.json(discovery))
+    .get('/.well-known/openpencil', (context) => context.json(discovery))
     .get(CLOUD_AI_JWKS_PATH, async (context) =>
       aiTokens ? context.json(aiTokens.jwks()) : context.notFound()
     )

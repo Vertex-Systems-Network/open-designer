@@ -1,10 +1,10 @@
 import { toRaw } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { STICKY_SIZE, stickySublayers } from '@open-pencil/scene-graph/generated'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
-import { scaleNodeChanges } from '@open-pencil/scene-graph/scaling'
+import type { Editor } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { STICKY_SIZE, stickySublayers } from '@open-designer/scene-graph/generated'
+import type { Vector } from '@open-designer/scene-graph/primitives'
+import { scaleNodeChanges } from '@open-designer/scene-graph/scaling'
 
 import { parentSpace } from '#vue/shared/input/draw'
 import { findDrawParent } from '#vue/shared/input/drop-target'

@@ -20,7 +20,7 @@ function workspace(
 ): SaveDestination {
   return {
     key: `${server.id}/${id}`,
-    location: { providerId: 'openpencil-cloud', profileId: server.id, containerId: id },
+    location: { providerId: 'opendesigner-cloud', profileId: server.id, containerId: id },
     label,
     kind: 'workspace',
     place: server,

@@ -188,7 +188,7 @@ export function accountActivity(
 ): BetterAuthPlugin {
   const methods = signInEndpoints(plugins)
   return {
-    id: 'openpencil-account-activity',
+    id: 'opendesigner-account-activity',
     hooks: {
       after: [
         {

@@ -2,8 +2,8 @@ import { expect, test } from 'bun:test'
 
 import { range } from 'es-toolkit'
 
-import { createEditor } from '@open-pencil/core'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { createEditor } from '@open-designer/core'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { createRecentPages } from '@/app/editor/pages/recent'
 

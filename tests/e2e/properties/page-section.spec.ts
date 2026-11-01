@@ -6,7 +6,7 @@ const editor = useEditorSetup()
 function pageColor() {
   return editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     return store.state.pageColor
   })
 }

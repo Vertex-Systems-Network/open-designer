@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { useEventListener } from '@vueuse/core'
 import { ref } from 'vue'
 
-import { ReadOnlyDocumentError } from '@open-pencil/core'
+import { ReadOnlyDocumentError } from '@open-designer/core'
 
 import { recordRuntimeError } from '@/app/diagnostics'
 import { isTauri } from '@/app/tauri/env'

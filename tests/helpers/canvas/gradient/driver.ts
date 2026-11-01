@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type * as Geometry from '@open-pencil/core/geometry'
+import type * as Geometry from '@open-designer/core/geometry'
 
 import type * as GradientScene from '#tests/helpers/canvas/gradient/scene'
 
@@ -13,7 +13,7 @@ export function gradientDriver(page: () => Page) {
     async show(type: GradientType) {
       return page().evaluate(async (type) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const fixtureURL = '/tests/helpers/canvas/gradient/scene.ts'
         const scene: typeof GradientScene = await import(fixtureURL)
         const { nodeId } = scene.createGradientScene(store.graph, store.state.currentPageId, type)
@@ -69,7 +69,7 @@ export function gradientDriver(page: () => Page) {
     edit(nodeId: string) {
       return page().evaluate((nodeId) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.state.gradientEdit = { nodeId, paint: 'fills', index: 0, stop: 1 }
         store.requestRender()
       }, nodeId)

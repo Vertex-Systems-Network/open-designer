@@ -1,6 +1,6 @@
 import { describe, expect, spyOn, test } from 'bun:test'
 
-import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
+import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
 
 import { initCanvasKit } from '#cli/headless'
 import { makeBooleanOperationPath } from '#core/canvas/boolean'

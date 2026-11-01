@@ -2,8 +2,8 @@ import type { CanvasKit } from 'canvaskit-wasm'
 import { createNanoEvents } from 'nanoevents'
 import type { Emitter } from 'nanoevents'
 
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { UndoManager, type UndoHistorySnapshot } from '@open-pencil/scene-graph/undo'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { UndoManager, type UndoHistorySnapshot } from '@open-designer/scene-graph/undo'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { prefetchFigmaSchema } from '#core/clipboard'

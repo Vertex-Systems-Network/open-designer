@@ -1,5 +1,5 @@
-import { prepareGraphFonts, type DocumentFontStatus } from '@open-pencil/core/text'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import { prepareGraphFonts, type DocumentFontStatus } from '@open-designer/core/text'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { fail, printError } from '#cli/format'
 

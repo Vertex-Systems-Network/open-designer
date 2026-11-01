@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/core",
+  "name": "@open-designer/core",
   "version": "0.16.0",
   "license": "MIT",
   "repository": {
@@ -48,10 +48,10 @@
       "import": "./dist/vector/index.js",
       "default": "./dist/vector/index.js"
     },
-    "./openpencil-api": {
-      "types": "./dist/openpencil-api/index.d.ts",
-      "import": "./dist/openpencil-api/index.js",
-      "default": "./dist/openpencil-api/index.js"
+    "./opendesigner-api": {
+      "types": "./dist/opendesigner-api/index.d.ts",
+      "import": "./dist/opendesigner-api/index.js",
+      "default": "./dist/opendesigner-api/index.js"
     },
     "./figma-api": {
       "types": "./dist/figma-api/index.d.ts",
@@ -184,14 +184,14 @@
   "dependencies": {
     "@chenglou/pretext": "^0.0.7",
     "@iconify/utils": "^3.1.4",
-    "@open-pencil/design-jsx": "workspace:*",
-    "@open-pencil/dom-css": "workspace:*",
-    "@open-pencil/drawio": "workspace:*",
-    "@open-pencil/fig": "workspace:*",
-    "@open-pencil/kiwi": "workspace:*",
-    "@open-pencil/mermaid": "workspace:*",
-    "@open-pencil/pen": "workspace:*",
-    "@open-pencil/scene-graph": "workspace:*",
+    "@open-designer/design-jsx": "workspace:*",
+    "@open-designer/dom-css": "workspace:*",
+    "@open-designer/drawio": "workspace:*",
+    "@open-designer/fig": "workspace:*",
+    "@open-designer/kiwi": "workspace:*",
+    "@open-designer/mermaid": "workspace:*",
+    "@open-designer/pen": "workspace:*",
+    "@open-designer/scene-graph": "workspace:*",
     "@tauri-apps/api": "^2.12.1",
     "@valibot/to-json-schema": "^1.8.0",
     "@xmldom/xmldom": "^0.9.12",

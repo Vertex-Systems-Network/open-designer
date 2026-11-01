@@ -1,7 +1,7 @@
 import { mapValues } from 'es-toolkit'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { remapInstanceOverrideState } from '@open-pencil/scene-graph/instances/overrides'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { remapInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
 
 function remappedReferences(
   node: SceneNode,

@@ -3,8 +3,8 @@ import {
   htmlToDesignDocument,
   tailwindHTMLToDesignDocument,
   type DesignDocument
-} from '@open-pencil/dom-css'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/dom-css'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import type { IOFormatAdapter } from '#core/io/types'
 

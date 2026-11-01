@@ -1,16 +1,16 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString, stringToGuid } from '@open-pencil/kiwi/fig/guid'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString, stringToGuid } from '@open-designer/kiwi/fig/guid'
 import type {
   ComponentPropertyDefinition,
   PluginDataEntry,
   SceneGraph,
   SceneNode
-} from '@open-pencil/scene-graph'
-import { DEFAULT_STROKE_WEIGHT } from '@open-pencil/scene-graph/constants'
-import { normalizeFontFamily } from '@open-pencil/scene-graph/font-style'
-import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
-import { OPEN_PENCIL_PLUGIN_DATA, withPluginData } from '@open-pencil/scene-graph/plugin-data'
-import type { GUID, JSONObject } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph'
+import { DEFAULT_STROKE_WEIGHT } from '@open-designer/scene-graph/constants'
+import { normalizeFontFamily } from '@open-designer/scene-graph/font-style'
+import { fractionalPosition } from '@open-designer/scene-graph/order-keys'
+import { OPEN_DESIGNER_PLUGIN_DATA, withPluginData } from '@open-designer/scene-graph/plugin-data'
+import type { GUID, JSONObject } from '@open-designer/scene-graph/primitives'
 
 import { effectiveFigmaRawNodeFields } from '../source-metadata'
 import { computeExportTransform, mapToFigmaType } from './basics'
@@ -88,7 +88,7 @@ function serializeTextProps(
 ): void {
   node.pluginData = withPluginData(
     node.pluginData,
-    OPEN_PENCIL_PLUGIN_DATA.textDirection,
+    OPEN_DESIGNER_PLUGIN_DATA.textDirection,
     node.textDirection
   )
   nc.fontSize = node.fontSize
@@ -281,7 +281,7 @@ function applyEditedLayoutFields(node: SceneNode, nc: KiwiNodeChange): void {
 function writeLayoutDirection(node: SceneNode): void {
   node.pluginData = withPluginData(
     node.pluginData,
-    OPEN_PENCIL_PLUGIN_DATA.layoutDirection,
+    OPEN_DESIGNER_PLUGIN_DATA.layoutDirection,
     node.layoutDirection
   )
 }
@@ -430,7 +430,7 @@ function serializeVariableBindings(
   // empty map, and writing one leaves the record in every file the node is exported to.
   node.pluginData = withPluginData(
     node.pluginData,
-    OPEN_PENCIL_PLUGIN_DATA.boundVariables,
+    OPEN_DESIGNER_PLUGIN_DATA.boundVariables,
     Object.keys(roundtripBindings).length > 0 ? roundtripBindings : undefined
   )
   if (entries.length > 0) {

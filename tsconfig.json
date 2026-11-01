@@ -43,13 +43,13 @@
       "#mcp/*": [
         "./packages/mcp/src/*"
       ],
-      "@open-pencil/harness": [
+      "@open-designer/harness": [
         "./packages/harness/src/index.ts"
       ],
       "#feedback/*": [
         "./packages/feedback/src/*"
       ],
-      "@open-pencil/cloud/*": [
+      "@open-designer/cloud/*": [
         "./packages/cloud/src/*"
       ],
       "#cloud/*": [
@@ -70,73 +70,73 @@
       "tinykeys": [
         "./node_modules/tinykeys/dist/tinykeys.d.ts"
       ],
-      "@open-pencil/cli/library": [
+      "@open-designer/cli/library": [
         "./packages/cli/src/library/index.ts"
       ],
-      "@open-pencil/vue": [
+      "@open-designer/vue": [
         "./packages/vue/src/index.ts"
       ],
-      "@open-pencil/vue/*": [
+      "@open-designer/vue/*": [
         "./packages/vue/src/*"
       ],
-      "@open-pencil/core": [
+      "@open-designer/core": [
         "./packages/core/src/index.ts"
       ],
-      "@open-pencil/core/*": [
+      "@open-designer/core/*": [
         "./packages/core/src/*"
       ],
-      "@open-pencil/dom-css": [
+      "@open-designer/dom-css": [
         "./packages/dom-css/src/index.ts"
       ],
-      "@open-pencil/dom-css/scene-graph": [
+      "@open-designer/dom-css/scene-graph": [
         "./packages/dom-css/src/import/scene-graph.ts"
       ],
-      "@open-pencil/dom-css/export": [
+      "@open-designer/dom-css/export": [
         "./packages/dom-css/src/export/index.ts"
       ],
-      "@open-pencil/dom-css/*": [
+      "@open-designer/dom-css/*": [
         "./packages/dom-css/src/*"
       ],
       "#scene-graph/*": [
         "./packages/scene-graph/src/*"
       ],
-      "@open-pencil/scene-graph": [
+      "@open-designer/scene-graph": [
         "./packages/scene-graph/src/index.ts"
       ],
-      "@open-pencil/scene-graph/*": [
+      "@open-designer/scene-graph/*": [
         "./packages/scene-graph/src/*"
       ],
       "#drawio/*": [
         "./packages/drawio/src/*"
       ],
-      "@open-pencil/drawio": [
+      "@open-designer/drawio": [
         "./packages/drawio/src/index.ts"
       ],
       "#mermaid/*": [
         "./packages/mermaid/src/*"
       ],
-      "@open-pencil/mermaid": [
+      "@open-designer/mermaid": [
         "./packages/mermaid/src/index.ts"
       ],
       "#emit/*": [
         "./packages/emit/src/*"
       ],
-      "@open-pencil/emit": [
+      "@open-designer/emit": [
         "./packages/emit/src/index.ts"
       ],
       "#design-jsx/*": [
         "./packages/design-jsx/src/*"
       ],
-      "@open-pencil/design-jsx": [
+      "@open-designer/design-jsx": [
         "./packages/design-jsx/src/index.ts"
       ],
       "#pen/*": [
         "./packages/pen/src/*"
       ],
-      "@open-pencil/pen": [
+      "@open-designer/pen": [
         "./packages/pen/src/index.ts"
       ],
-      "@open-pencil/pen/*": [
+      "@open-designer/pen/*": [
         "./packages/pen/src/*"
       ]
     }

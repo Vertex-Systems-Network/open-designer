@@ -1,8 +1,8 @@
 import { defineCommand } from 'citty'
 import { mean, sumBy } from 'es-toolkit'
 
-import type { AnalyzeClustersResult } from '@open-pencil/core/rpc'
-import { calcClusterConfidence } from '@open-pencil/core/tools'
+import type { AnalyzeClustersResult } from '@open-designer/core/rpc'
+import { calcClusterConfidence } from '@open-designer/core/tools'
 
 import { appTargetOptions } from '#cli/app/target'
 import { bold, fmtList, fmtSummary } from '#cli/format'

@@ -11,7 +11,7 @@ import {
 } from './sidebars.ts'
 
 export const rootThemeConfig = (): DefaultTheme.Config => ({
-  logo: { light: '/brand/mark.svg', dark: '/brand/mark-dark.svg', alt: 'OpenPencil' },
+  logo: { light: '/brand/mark.svg', dark: '/brand/mark-dark.svg', alt: 'OpenDesigner' },
   search: { provider: 'local' },
 
   nav: [

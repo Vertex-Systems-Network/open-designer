@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test'
 
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigBuffer } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { GUID } from '@open-pencil/scene-graph/primitives'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigBuffer } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { GUID } from '@open-designer/scene-graph/primitives'
 
 function positionsByParent(nodeChanges: readonly { parentIndex?: unknown }[]) {
   const byParent = new Map<string, string[]>()

@@ -1,11 +1,11 @@
 import { mean } from 'es-toolkit'
 
-import { encodePathCommandsBlob } from '@open-pencil/fig/node-change'
-import type { DerivedTextGlyph, SceneNode, TextPathData } from '@open-pencil/scene-graph'
-import { faceStyleKey } from '@open-pencil/scene-graph/font-style'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
-import { rangeFontStyle } from '@open-pencil/scene-graph/shared-styles'
-import { textLengthPixels } from '@open-pencil/scene-graph/text'
+import { encodePathCommandsBlob } from '@open-designer/fig/node-change'
+import type { DerivedTextGlyph, SceneNode, TextPathData } from '@open-designer/scene-graph'
+import { faceStyleKey } from '@open-designer/scene-graph/font-style'
+import type { Rect } from '@open-designer/scene-graph/primitives'
+import { rangeFontStyle } from '@open-designer/scene-graph/shared-styles'
+import { textLengthPixels } from '@open-designer/scene-graph/text'
 
 import { getGlyphOutlineMetricsSync } from '#core/text/font/glyphs'
 import {

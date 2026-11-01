@@ -8,9 +8,9 @@ import {
 } from 'reka-ui'
 import { toRef } from 'vue'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { useRetainedPopup } from '@open-pencil/vue/lifecycle/retention'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { useI18n } from '@open-designer/vue/i18n'
+import { useRetainedPopup } from '@open-designer/vue/lifecycle/retention'
 
 import type { EditorStore } from '@/app/editor/session'
 import type { LibraryService } from '@/app/libraries'

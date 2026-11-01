@@ -1,9 +1,9 @@
 import { uniq, uniqBy } from 'es-toolkit'
 import { computed, onScopeDispose, ref, watch, type ComputedRef } from 'vue'
 
-import { fontManager, standardFace, textStyleName } from '@open-pencil/core/text'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { styleSpelling } from '@open-pencil/scene-graph/font-style'
+import { fontManager, standardFace, textStyleName } from '@open-designer/core/text'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { styleSpelling } from '@open-designer/scene-graph/font-style'
 
 import { TYPOGRAPHY_WEIGHTS } from '#vue/controls/typography/weights'
 

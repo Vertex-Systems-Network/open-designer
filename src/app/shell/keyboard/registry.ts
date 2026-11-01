@@ -3,9 +3,9 @@ import { uniq } from 'es-toolkit'
 import { createKeybindingsHandler } from 'tinykeys'
 import type { KeyBindingMap } from 'tinykeys'
 
-import { BOARD_TOOL_SHORTCUTS, resolveEditorProfile } from '@open-pencil/core'
-import { isCanvasTextInput } from '@open-pencil/vue/canvas/text-edit'
-import { editorCommandMetadata, type EditorCommandId } from '@open-pencil/vue/editor/commands'
+import { BOARD_TOOL_SHORTCUTS, resolveEditorProfile } from '@open-designer/core'
+import { isCanvasTextInput } from '@open-designer/vue/canvas/text-edit'
+import { editorCommandMetadata, type EditorCommandId } from '@open-designer/vue/editor/commands'
 
 import { isCloudBinding, openVersionDialog } from '@/app/cloud/integration'
 import { useComments } from '@/app/comments/use'

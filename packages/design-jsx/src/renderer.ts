@@ -1,8 +1,8 @@
 import { omitBy } from 'es-toolkit/object'
 
-import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
+import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import { setInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
 
 import type { RekaScope } from './behaviours'
 import { renderRekaNode } from './behaviours/render'

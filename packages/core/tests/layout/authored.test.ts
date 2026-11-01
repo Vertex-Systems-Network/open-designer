@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import { layoutAuthoredNodes, setTextMeasurer } from '@open-pencil/core/layout'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { layoutAuthoredNodes, setTextMeasurer } from '@open-designer/core/layout'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 afterEach(() => setTextMeasurer(null))
 

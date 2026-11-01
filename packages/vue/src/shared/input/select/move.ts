@@ -1,5 +1,5 @@
-import type { Editor, MovePlace } from '@open-pencil/core'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { Editor, MovePlace } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import { duplicateAndDrag } from '#vue/shared/input/duplicate-drag'
 import { collectFlowDrags } from '#vue/shared/input/flow-reorder'

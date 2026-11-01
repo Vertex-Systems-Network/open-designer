@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'bun:test'
 
-import { compileTailwindCSS, createHeadlessCSSRuntime } from '@open-pencil/dom-css'
+import { compileTailwindCSS, createHeadlessCSSRuntime } from '@open-designer/dom-css'
 
 import { tailwindCardClasses } from '#tests/helpers/dom-css'
 
-describe('@open-pencil/dom-css Tailwind', () => {
+describe('@open-designer/dom-css Tailwind', () => {
   it('compiles utility candidates through Tailwind', async () => {
     const css = await compileTailwindCSS(tailwindCardClasses)
 

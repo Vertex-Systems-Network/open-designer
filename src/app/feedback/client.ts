@@ -1,4 +1,4 @@
-import { createFeedbackClient } from '@open-pencil/feedback/client'
+import { createFeedbackClient } from '@open-designer/feedback/client'
 
 /**
  * The app's one client for the feedback service: pings, usage stats, and Cloud waitlist sign-ups.

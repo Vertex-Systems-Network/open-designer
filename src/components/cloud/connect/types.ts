@@ -1,4 +1,4 @@
-import type { CloudAuthFailure } from '@open-pencil/cloud/client'
+import type { CloudAuthFailure } from '@open-designer/cloud/client'
 
 export type CloudServerKind = 'official' | 'self-hosted'
 

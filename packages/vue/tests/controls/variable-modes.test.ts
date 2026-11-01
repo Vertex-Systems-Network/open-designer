@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { collectionsBoundIn } from '@open-pencil/scene-graph/variables'
-import { MIXED } from '@open-pencil/vue/controls/node-props'
-import { setVariableMode, variableModeChoices } from '@open-pencil/vue/controls/variable-modes'
+import { createEditor } from '@open-designer/core'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { collectionsBoundIn } from '@open-designer/scene-graph/variables'
+import { MIXED } from '@open-designer/vue/controls/node-props'
+import { setVariableMode, variableModeChoices } from '@open-designer/vue/controls/variable-modes'
 
 const RED = { r: 1, g: 0, b: 0, a: 1 }
 

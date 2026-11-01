@@ -1,6 +1,6 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { clipPolygon } from '@open-pencil/scene-graph/clipping'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { clipPolygon } from '@open-designer/scene-graph/clipping'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
 import {
   effectOverflow,
   geometryBlobBounds,
@@ -8,9 +8,9 @@ import {
   strokeOverflow,
   unionVisualBounds,
   type VisualBounds
-} from '@open-pencil/scene-graph/geometry'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/geometry'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import type {
   AnalyzeOverlapsArgs,

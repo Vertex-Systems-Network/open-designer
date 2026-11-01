@@ -4,8 +4,8 @@ import {
   createLibraryRevision,
   createSelectiveLibraryRevision,
   discoverPublishableLibraryChanges
-} from '@open-pencil/core/library'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+} from '@open-designer/core/library'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 
 function source(buttonWidth: number, includeCard = true) {
   const graph = new SceneGraph()

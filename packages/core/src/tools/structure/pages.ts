@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
+import { fractionalPosition } from '@open-designer/scene-graph/order-keys'
 
 import { defineTool } from '#core/tools/schema'
 
@@ -10,7 +10,12 @@ export const movePage = defineTool({
   execution: { kind: 'sync', mutation: 'document' },
   input: v.strictObject({
     page: v.pipe(v.string(), v.description('Page name or ID')),
-    index: v.pipe(v.number(), v.integer(), v.minValue(0), v.description('Zero-based destination index'))
+    index: v.pipe(
+      v.number(),
+      v.integer(),
+      v.minValue(0),
+      v.description('Zero-based destination index')
+    )
   }),
   execute: (figma, { page, index }) => {
     const pages = figma.root.children

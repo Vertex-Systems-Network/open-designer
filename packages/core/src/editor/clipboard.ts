@@ -1,13 +1,13 @@
 import { uniq } from 'es-toolkit'
 
-import { parseFigmaClipboard } from '@open-pencil/fig/clipboard'
-import { CommittedGraphEventError, type SceneNode } from '@open-pencil/scene-graph'
-import { attachedConnectors } from '@open-pencil/scene-graph/connectors'
-import { getAxisAlignedBoundsInParent } from '@open-pencil/scene-graph/coordinate'
-import { cycleSafeParent } from '@open-pencil/scene-graph/instances'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+import { parseFigmaClipboard } from '@open-designer/fig/clipboard'
+import { CommittedGraphEventError, type SceneNode } from '@open-designer/scene-graph'
+import { attachedConnectors } from '@open-designer/scene-graph/connectors'
+import { getAxisAlignedBoundsInParent } from '@open-designer/scene-graph/coordinate'
+import { cycleSafeParent } from '@open-designer/scene-graph/instances'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 
-import { parseOpenPencilClipboard } from '#core/clipboard'
+import { parseOpenDesignerClipboard } from '#core/clipboard'
 import { prepareClipboardImport } from '#core/clipboard/fig-import'
 import { computeAllLayouts } from '#core/layout'
 
@@ -164,7 +164,7 @@ export function createClipboardActions(ctx: EditorContext) {
     let created: string[] = []
     ctx.undo.runBatch('Paste', () => {
       const dependencies = importClipboardDependenciesWithUndo(ctx, snapshot)
-      created = pasteOpenPencilNodes(
+      created = pasteOpenDesignerNodes(
         dependencies.nodes,
         snapshot.placement,
         snapshot.images,
@@ -177,11 +177,11 @@ export function createClipboardActions(ctx: EditorContext) {
   }
 
   async function pasteFromHTML(html: string, cursorPos?: Vector, options: PasteOptions = {}) {
-    const openPencil = parseOpenPencilClipboard(html)
+    const openPencil = parseOpenDesignerClipboard(html)
     if (openPencil) {
       // One undo step for the paste and any slot it claims.
       const created = ctx.undo.runBatch('Paste', () =>
-        pasteOpenPencilNodes(
+        pasteOpenDesignerNodes(
           openPencil.nodes,
           clipboardPlacement(ctx.graph, openPencil.nodes),
           openPencil.images,
@@ -236,7 +236,7 @@ export function createClipboardActions(ctx: EditorContext) {
     }
   }
 
-  function pasteOpenPencilNodes(
+  function pasteOpenDesignerNodes(
     nodes: Array<SceneNode & { children?: SceneNode[] }>,
     placement: ClipboardPlacement,
     images: Map<string, Uint8Array>,

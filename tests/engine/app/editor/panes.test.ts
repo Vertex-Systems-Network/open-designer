@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { createDefaultEditorState } from '@open-pencil/core'
+import { createDefaultEditorState } from '@open-designer/core'
 
 import { createCanvasPaneRegistry } from '@/app/editor/panes/registry'
 import {

@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 /**
  * Pages that are not the editor's: OAuth callbacks, which relay a redirect, and, where a Cloud
  * server serves the editor, its API and its own pages, `CLOUD_PORTAL_PAGE_ROOTS` in
- * `@open-pencil/cloud/contract`, which loads only once packages are built. Workbox matches the
+ * `@open-designer/cloud/contract`, which loads only once packages are built. Workbox matches the
  * path with its query, so a page root may be followed by `?` as well as `/`.
  */
 export const NOT_EDITOR_PAGES = [
@@ -51,8 +51,8 @@ export function openPencilPwaPlugin() {
       ]
     },
     manifest: {
-      name: 'OpenPencil',
-      short_name: 'OpenPencil',
+      name: 'OpenDesigner',
+      short_name: 'OpenDesigner',
       description: 'Open-source design editor',
       display: 'standalone',
       orientation: 'any',

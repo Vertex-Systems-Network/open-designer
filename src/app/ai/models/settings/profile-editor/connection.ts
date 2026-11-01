@@ -13,8 +13,8 @@ import {
   type ProviderConnectionTestFailureReason,
   type ProviderConnectionTestResult
 } from '@/app/ai/models/connection-test'
-import { cloudModelConfig } from '@/app/ai/providers/openpencil/model'
-import { OPENPENCIL_AI_PROVIDER } from '@/app/ai/providers/openpencil/provider'
+import { cloudModelConfig } from '@/app/ai/providers/opendesigner/model'
+import { OPENDESIGNER_AI_PROVIDER } from '@/app/ai/providers/opendesigner/provider'
 import { cloudAIClient } from '@/app/cloud/integration'
 import type { CredentialStatus } from '@/app/settings/credentials/types'
 
@@ -109,7 +109,7 @@ export function useProfileConnection({ draft, keyInput }: ConnectionOptions) {
     connectionTestReason.value = null
     try {
       const result =
-        target.providerID === OPENPENCIL_AI_PROVIDER
+        target.providerID === OPENDESIGNER_AI_PROVIDER
           ? await testCloudConnection(target)
           : await testKeyConnection(target, replacement, request)
       if (!result || !current(request)) return

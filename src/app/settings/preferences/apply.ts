@@ -1,4 +1,4 @@
-import type { SnappingPreferences } from '@open-pencil/core'
+import type { SnappingPreferences } from '@open-designer/core'
 
 import { getTabsSnapshot } from '@/app/tabs'
 

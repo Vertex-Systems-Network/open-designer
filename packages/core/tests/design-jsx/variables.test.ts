@@ -4,7 +4,7 @@ import { pick } from 'es-toolkit'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { renderJSX, renderTree } from '@open-pencil/core/design-jsx'
+import { renderJSX, renderTree } from '@open-designer/core/design-jsx'
 import {
   defineMode,
   defineVars,
@@ -12,8 +12,8 @@ import {
   Rectangle,
   sceneNodeToJSX,
   selectionToJSXWithLayers
-} from '@open-pencil/design-jsx'
-import { SceneGraph, type VariableCollection } from '@open-pencil/scene-graph'
+} from '@open-designer/design-jsx'
+import { SceneGraph, type VariableCollection } from '@open-designer/scene-graph'
 
 const THEME = `
 const palette = defineVars('Palette', { 'Gray/900': '#111111', 'Gray/50': '#FAFAFA' })

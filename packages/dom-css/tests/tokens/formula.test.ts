@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
 
-import { tokenStylesheet } from '@open-pencil/dom-css/export'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { parseVariableFormula } from '@open-pencil/scene-graph/variables'
+import { tokenStylesheet } from '@open-designer/dom-css/export'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { parseVariableFormula } from '@open-designer/scene-graph/variables'
 
 function spacing() {
   const graph = new SceneGraph()

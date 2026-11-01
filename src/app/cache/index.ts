@@ -2,7 +2,7 @@ import { BaseDirectory, readFile, mkdir, writeFile, remove } from '@tauri-apps/p
 import { dirname } from 'pathe'
 import * as v from 'valibot'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
+import { IS_TAURI } from '@open-designer/core/constants'
 
 const APP_CACHE_DIR = 'cache/v1'
 const STORAGE_PREFIX = 'open-pencil:cache:v1:'

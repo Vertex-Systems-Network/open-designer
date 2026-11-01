@@ -1,8 +1,8 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   removeComponentProperty,
   createComponentPropertyId
-} from '@open-pencil/scene-graph/components'
+} from '@open-designer/scene-graph/components'
 import {
   canCreateSlot,
   createSlotProperty,
@@ -10,7 +10,7 @@ import {
   slotPropertyId,
   updateSlotProperty,
   type SlotPropertyPatch
-} from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/slots'
 
 import { wrapInAutoLayout } from '#core/editor/structure/auto-layout-wrap'
 import type { EditorContext } from '#core/editor/types'

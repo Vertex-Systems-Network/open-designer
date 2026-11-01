@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { getNodeLocalMatrix, getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { getNodeLocalMatrix, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
 import {
   effectOverflow,
   geometryBlobBounds,
@@ -7,9 +7,9 @@ import {
   textDecorationOverflow,
   unionVisualBounds,
   type VisualBounds
-} from '@open-pencil/scene-graph/geometry'
-import Matrix, { type Mat3 } from '@open-pencil/scene-graph/matrix'
-import { textLinesOverflow } from '@open-pencil/scene-graph/text'
+} from '@open-designer/scene-graph/geometry'
+import Matrix, { type Mat3 } from '@open-designer/scene-graph/matrix'
+import { textLinesOverflow } from '@open-designer/scene-graph/text'
 
 import { projectedNode, type RotationPreview } from '#core/geometry'
 

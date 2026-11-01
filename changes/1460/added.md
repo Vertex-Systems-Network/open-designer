@@ -1,1 +1,1 @@
-- `useCanvas` in `@open-pencil/vue` takes an `onFailed` callback for a canvas that cannot start, as when CanvasKit fails to load.
+- `useCanvas` in `@open-designer/vue` takes an `onFailed` callback for a canvas that cannot start, as when CanvasKit fails to load.

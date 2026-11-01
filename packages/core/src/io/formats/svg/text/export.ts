@@ -1,7 +1,7 @@
-import type { CharacterStyleOverride, SceneNode } from '@open-pencil/scene-graph'
-import { parseFontStyle } from '@open-pencil/scene-graph/font-style'
-import { textLengthPixels } from '@open-pencil/scene-graph/text'
-import { resolveNodeTextDirection } from '@open-pencil/scene-graph/text/direction'
+import type { CharacterStyleOverride, SceneNode } from '@open-designer/scene-graph'
+import { parseFontStyle } from '@open-designer/scene-graph/font-style'
+import { textLengthPixels } from '@open-designer/scene-graph/text'
+import { resolveNodeTextDirection } from '@open-designer/scene-graph/text/direction'
 
 import { drawnFontVariations } from '#core/canvas/text/font-families'
 import {

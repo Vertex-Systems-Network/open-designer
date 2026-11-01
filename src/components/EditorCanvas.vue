@@ -15,8 +15,8 @@ import IconLucidePanelLeft from '~icons/lucide/panel-left'
 import IconLucidePanelRight from '~icons/lucide/panel-right'
 import IconLucidePanelTop from '~icons/lucide/panel-top'
 
-import { resolveEditorProfile } from '@open-pencil/core'
-import type { PlacedStatusLabel } from '@open-pencil/core/canvas'
+import { resolveEditorProfile } from '@open-designer/core'
+import type { PlacedStatusLabel } from '@open-designer/core/canvas'
 import {
   AUTO_LAYOUT_PADDING_EDITOR_OFFSET_X,
   AUTO_LAYOUT_PADDING_EDITOR_OFFSET_Y,
@@ -24,17 +24,17 @@ import {
   COMPONENT_LABEL_ICON_SIZE,
   SECTION_TITLE_GAP,
   SECTION_TITLE_HEIGHT
-} from '@open-pencil/core/constants'
-import type { ViewportTransform } from '@open-pencil/core/geometry'
-import { PlayIslands, useCanvasInput } from '@open-pencil/vue/canvas'
-import { useCanvasDrop } from '@open-pencil/vue/canvas/drop'
-import { useCanvasIssueMarkers } from '@open-pencil/vue/canvas/issues'
-import { useCanvasVirtualReference } from '@open-pencil/vue/canvas/overlays'
-import { useCanvasStatusLabels } from '@open-pencil/vue/canvas/statuses'
-import { useCanvas } from '@open-pencil/vue/canvas/surface'
-import { useTextEdit } from '@open-pencil/vue/canvas/text-edit'
-import { toolCursor } from '@open-pencil/vue/editor/tool-cursor'
-import { autoLayoutValueAnchor, type AutoLayoutValueField } from '@open-pencil/vue/shared/input'
+} from '@open-designer/core/constants'
+import type { ViewportTransform } from '@open-designer/core/geometry'
+import { PlayIslands, useCanvasInput } from '@open-designer/vue/canvas'
+import { useCanvasDrop } from '@open-designer/vue/canvas/drop'
+import { useCanvasIssueMarkers } from '@open-designer/vue/canvas/issues'
+import { useCanvasVirtualReference } from '@open-designer/vue/canvas/overlays'
+import { useCanvasStatusLabels } from '@open-designer/vue/canvas/statuses'
+import { useCanvas } from '@open-designer/vue/canvas/surface'
+import { useTextEdit } from '@open-designer/vue/canvas/text-edit'
+import { toolCursor } from '@open-designer/vue/editor/tool-cursor'
+import { autoLayoutValueAnchor, type AutoLayoutValueField } from '@open-designer/vue/shared/input'
 
 import { useAIChat } from '@/app/ai/chat/use'
 import { useEditorStore } from '@/app/editor/active-store'
@@ -328,7 +328,10 @@ const cursor = computed(() =>
             <p v-if="renderHealth.error" class="break-words text-xs text-muted-foreground">
               {{ renderHealth.error }}
             </p>
-            <button class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground" @click="restartEditor">
+            <button
+              class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground"
+              @click="restartEditor"
+            >
               Reload editor
             </button>
           </div>

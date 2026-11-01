@@ -28,7 +28,7 @@ It exposes:
 ## Usage
 
 ```ts
-import { useTypography } from '@open-pencil/vue/controls/typography'
+import { useTypography } from '@open-designer/vue/controls/typography'
 
 const typography = useTypography()
 ```

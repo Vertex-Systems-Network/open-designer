@@ -1,12 +1,12 @@
 import * as v from 'valibot'
 
-import type { SceneGraph, SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
-import { parsePluginVectorPath, parseSVGPathData } from '@open-pencil/scene-graph/parse-path'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode, VectorNetwork } from '@open-designer/scene-graph'
+import { parsePluginVectorPath, parseSVGPathData } from '@open-designer/scene-graph/parse-path'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 import {
   mergeVectorNetworks,
   transformVectorNetwork
-} from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/vector-network'
 
 import { designJSXProp } from '../definitions'
 import { normalizeStyleProps } from '../props-overrides'

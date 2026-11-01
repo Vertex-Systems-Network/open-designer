@@ -1,1 +1,1 @@
-- `lineArrowEndpoints` is removed from `@open-pencil/scene-graph/arrow-caps`; `lineStrokeEnds` gives the path a line's stroke runs along. `StrokeCorners` from `@open-pencil/scene-graph/geometry` is renamed `StrokeShape` and takes the layer's `type`.
+- `lineArrowEndpoints` is removed from `@open-designer/scene-graph/arrow-caps`; `lineStrokeEnds` gives the path a line's stroke runs along. `StrokeCorners` from `@open-designer/scene-graph/geometry` is renamed `StrokeShape` and takes the layer's `type`.

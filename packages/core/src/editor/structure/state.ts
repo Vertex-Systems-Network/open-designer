@@ -1,8 +1,8 @@
-import { findInstanceAncestor } from '@open-pencil/scene-graph/instances'
+import { findInstanceAncestor } from '@open-designer/scene-graph/instances'
 import {
   cloneInstanceOverrideState,
   setInstanceOverride
-} from '@open-pencil/scene-graph/instances/overrides'
+} from '@open-designer/scene-graph/instances/overrides'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import {

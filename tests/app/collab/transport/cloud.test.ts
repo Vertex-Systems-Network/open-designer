@@ -8,7 +8,7 @@ import {
   relayServerMessages,
   type RelayClientFrame,
   type RelayServerFrame
-} from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/contract'
 
 import { createCloudRelayJoin } from '@/app/collab/transport/cloud'
 

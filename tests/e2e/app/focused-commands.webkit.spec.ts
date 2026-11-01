@@ -1,4 +1,4 @@
-import type { EditorCommandId } from '@open-pencil/vue/editor/commands'
+import type { EditorCommandId } from '@open-designer/vue/editor/commands'
 
 import type { runFocusedCommand } from '@/app/shell/commands/focused'
 
@@ -14,7 +14,7 @@ function runAsNativeMenu(id: EditorCommandId): Promise<string[]> {
     const modulePath = '/src/app/shell/commands/focused.ts'
     const commands: FocusedCommands = await import(modulePath)
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const ran: string[] = []
     commands.runFocusedCommand(store, (command) => ran.push(command), id)
     return ran

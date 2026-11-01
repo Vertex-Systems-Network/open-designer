@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, shallowRef, useTemplateRef, watch } from 'vue'
 
-import { resolvePlayState } from '@open-pencil/core'
-import { vectorElement } from '@open-pencil/core/io'
+import { resolvePlayState } from '@open-designer/core'
+import { vectorElement } from '@open-designer/core/io'
 import {
   behaviourControls,
   controlRoles,
   sceneNodeToDesignDocument
-} from '@open-pencil/dom-css/export'
+} from '@open-designer/dom-css/export'
 
 import { useEditor } from '#vue/editor/context'
 

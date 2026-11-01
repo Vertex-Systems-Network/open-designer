@@ -17,7 +17,7 @@ const exportInputs = {
     v.pipe(
       v.string(),
       v.description(
-        'Write exported data to this path instead of returning it (requires OPENPENCIL_MCP_ROOT)'
+        'Write exported data to this path instead of returning it (requires OPENDESIGNER_MCP_ROOT)'
       )
     )
   )
@@ -74,7 +74,9 @@ export const exportSVG = defineTool({
     skip_unsupported_effects: v.optional(
       v.pipe(
         v.boolean(),
-        v.description('Omit unsupported SVG effects such as background blur instead of returning a warning.')
+        v.description(
+          'Omit unsupported SVG effects such as background blur instead of returning a warning.'
+        )
       ),
       false
     )

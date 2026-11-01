@@ -23,7 +23,7 @@ test.describe('browser support gate', () => {
 
     const report = notice.getByRole('link', { name: 'Report a problem' })
     const href = new URL((await report.getAttribute('href')) ?? '')
-    expect(href.pathname).toBe('/open-pencil/open-pencil/issues/new')
+    expect(href.pathname).toBe('/open-designer/open-designer/issues/new')
     expect(href.searchParams.get('template')).toBe('bug_report.yml')
     expect(href.searchParams.get('platform')).toBe('Web (app.openpencil.dev)')
     expect(href.searchParams.get('logs')).toContain('Missing: String.prototype.isWellFormed')
@@ -49,7 +49,9 @@ test.describe('browser support gate', () => {
     await page.goto('/')
 
     const notice = page.getByRole('alert')
-    await expect(notice.getByRole('heading', { level: 1 })).toHaveText("OpenPencil couldn't start")
+    await expect(notice.getByRole('heading', { level: 1 })).toHaveText(
+      "OpenDesigner couldn't start"
+    )
     await expect(notice).toContainText('Chrome 111')
     await notice.getByText('Details', { exact: true }).click()
     await expect(notice.locator('pre')).toContainText('history is unavailable')
@@ -69,7 +71,9 @@ test.describe('browser support gate', () => {
     await page.goto('/')
 
     const notice = page.getByRole('alert')
-    await expect(notice.getByRole('heading', { level: 1 })).toHaveText("OpenPencil couldn't start")
+    await expect(notice.getByRole('heading', { level: 1 })).toHaveText(
+      "OpenDesigner couldn't start"
+    )
     await notice.getByText('Details', { exact: true }).click()
     await expect(notice.locator('pre')).toContainText('getRandomValues is unavailable')
   })

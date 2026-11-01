@@ -1,12 +1,12 @@
 ---
 layout: doc
 title: Guía de usuario
-description: Navegar, dibujar, editar texto, usar componentes y configurar la disposición automática en OpenPencil.
+description: Navegar, dibujar, editar texto, usar componentes y configurar la disposición automática en OpenDesigner.
 ---
 
 # Guía de usuario
 
-OpenPencil es un editor de diseño local y de código abierto, compatible con Figma, con AI integrada y APIs de automatización.
+OpenDesigner es un editor de diseño local y de código abierto, compatible con Figma, con AI integrada y APIs de automatización.
 
 ## Primeros pasos
 

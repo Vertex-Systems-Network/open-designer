@@ -6,7 +6,7 @@ description: AI, MCP, CLI, JSX y API de plugins de Figma para automatizar diseñ
 
 # Automatización y API
 
-OpenPencil trata los archivos de diseño como datos estructurados. Las operaciones del editor —crear formas, modificar rellenos, configurar la disposición automática o exportar recursos— también están disponibles mediante CLI, agentes de AI y API.
+OpenDesigner trata los archivos de diseño como datos estructurados. Las operaciones del editor —crear formas, modificar rellenos, configurar la disposición automática o exportar recursos— también están disponibles mediante CLI, agentes de AI y API.
 
 ## Chat con AI
 
@@ -32,7 +32,7 @@ La CLI también se conecta a la aplicación de escritorio en ejecución mediante
 
 Una interfaz puede describirse de forma declarativa con JSX. Una llamada crea un árbol completo con marcos, texto, disposición automática, rellenos y contornos.
 
-En sentido inverso, OpenPencil exporta una selección como JSX o HTML con clases Tailwind, útil como base para implementar, revisar código o continuar el trabajo con AI.
+En sentido inverso, OpenDesigner exporta una selección como JSX o HTML con clases Tailwind, útil como base para implementar, revisar código o continuar el trabajo con AI.
 
 [Renderizador JSX →](./jsx-renderer)
 
@@ -59,7 +59,7 @@ Con un nombre de nodo, la aplicación selecciona todas las capas que llevan exac
 La versión web acepta el mismo enlace desde su propia barra de direcciones:
 
 ```
-https://app.openpencil.dev/?file=https://raw.githubusercontent.com/open-pencil/open-pencil/master/tests/fixtures/pencil_button.pen&node=Button/Large/Default
+https://app.openpencil.dev/?file=https://raw.githubusercontent.com/open-designer/open-designer/master/tests/fixtures/pencil_button.pen&node=Button/Large/Default
 ```
 
 Aquí `file` es una URL `https:` absoluta que termina en `.pen` o `.fig`: la versión web no tiene sistema de archivos, así que una ruta relativa, una URL `http:` o cualquier otra extensión se rechaza con una advertencia en la consola y nada más. La extensión se lee de la ruta de la URL, por lo que una cadena de consulta en el archivo enlazado no cambia nada. El fragmento se descarta antes de la descarga: nunca llega al servidor, así que `…/hikyo.pen#a` y `…/hikyo.pen#b` abren una pestaña, no dos. `node` se comporta exactamente igual que arriba: la misma selección por nombre exacto y el mismo zoom, y el mismo aviso cuando ninguna capa lleva ese nombre. Ambos valores van codificados como URL, un `+` literal debe enviarse como `%2B` y una clave repetida toma su último valor, igual que en el escritorio. El enlace se procesa en cualquier ruta, de modo que `/share/<room>?file=…` y `/demo?file=…` funcionan como `/?file=…`.
@@ -68,4 +68,4 @@ El navegador descarga el archivo entre orígenes distintos, así que el servidor
 
 En macOS el esquema pertenece al paquete de la aplicación instalada, por lo que los enlaces llegan a una versión instalada y no a un proceso de `tauri dev`. En Windows y Linux el enlace llega mediante el plugin de deep links, incluso cuando la aplicación aún no está en ejecución: el enlace se pone en cola al arrancar y se procesa cuando el editor está listo; en Linux, la entrada de escritorio incluida pasa el enlace mediante `%U`.
 
-OpenPencil tiene licencia MIT y guarda los documentos localmente. Los archivos `.fig` se pueden examinar, transformar, procesar en CI o proporcionar como contexto a un modelo sin depender de un proveedor de alojamiento concreto.
+OpenDesigner tiene licencia MIT y guarda los documentos localmente. Los archivos `.fig` se pueden examinar, transformar, procesar en CI o proporcionar como contexto a un modelo sin depender de un proveedor de alojamiento concreto.

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { VisualBoundsNode } from '@open-pencil/scene-graph/geometry'
-import { nodeVisualBounds } from '@open-pencil/scene-graph/geometry'
+import type { VisualBoundsNode } from '@open-designer/scene-graph/geometry'
+import { nodeVisualBounds } from '@open-designer/scene-graph/geometry'
 
 describe('text visual bounds', () => {
   test('includes decoration overflow below text nodes', () => {

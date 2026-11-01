@@ -1,6 +1,6 @@
 import type { Canvas, Path } from 'canvaskit-wasm'
 
-import type { BlendMode, Effect, SceneNode, Stroke } from '@open-pencil/scene-graph'
+import type { BlendMode, Effect, SceneNode, Stroke } from '@open-designer/scene-graph'
 
 import { setPaintBlendMode } from '#core/canvas/blend'
 import { blurSigma } from '#core/canvas/effects'

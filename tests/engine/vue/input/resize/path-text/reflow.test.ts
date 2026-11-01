@@ -1,16 +1,16 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { Editor } from '@open-pencil/core'
-import { parseFigBuffer } from '@open-pencil/fig'
+import type { Editor } from '@open-designer/core'
+import { parseFigBuffer } from '@open-designer/fig'
 import {
   SceneGraph,
   type Fill,
   type SceneNode,
   type Stroke,
   type VectorNetwork
-} from '@open-pencil/scene-graph'
-import { copyGeometryPaths, copyStrokes } from '@open-pencil/scene-graph/copy'
-import type { ResizeSnapshot } from '@open-pencil/scene-graph/resize'
+} from '@open-designer/scene-graph'
+import { copyGeometryPaths, copyStrokes } from '@open-designer/scene-graph/copy'
+import type { ResizeSnapshot } from '@open-designer/scene-graph/resize'
 
 import { exportFigFile } from '#core/io/formats/fig/export'
 import { getTextPathData, layoutPathTextFromAdvances } from '#core/text/path'

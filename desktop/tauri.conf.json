@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "OpenPencil",
+  "productName": "OpenDesigner",
   "version": "0.16.0",
   "identifier": "net.dannote.open-pencil",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "OpenPencil",
+        "title": "OpenDesigner",
         "width": 1280,
         "height": 800,
         "dragDropEnabled": false,
@@ -93,12 +93,12 @@
   "plugins": {
     "fs": { "requireLiteralLeadingDot": true },
     "deep-link": {
-      "desktop": { "schemes": ["openpencil"] }
+      "desktop": { "schemes": ["opendesigner", "openpencil"] }
     },
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU4QzBCRjBFNzhFNEVEMDEKUldRQjdlUjREci9BV0hLaEJPeG5tRXdsWkhQWFdEa0VxcEtNR1o1S2VJeGlKU1VDTldQTi9wYncK",
       "requireSignedVersion": true,
-      "endpoints": ["https://github.com/open-pencil/open-pencil/releases/latest/download/latest.json"],
+      "endpoints": ["https://github.com/Vertex-Systems-Network/open-designer/releases/latest/download/latest.json"],
       "windows": {
         "installMode": "passive"
       }

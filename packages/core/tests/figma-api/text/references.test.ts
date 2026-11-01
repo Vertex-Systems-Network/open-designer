@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { registerTestFont } from '#core-tests/helpers/figma-api'
 
@@ -65,13 +65,13 @@ describe('text case ranges', () => {
     expect(text.getRangeTextCase(0, 5)).toBe('LOWER')
   })
 
-  test('reject what Figma rejects, and small caps OpenPencil cannot draw', () => {
+  test('reject what Figma rejects, and small caps OpenDesigner cannot draw', () => {
     const { text } = styledText()
     expect(() => text.setRangeTextCase(0, 5, 'SHOUT' as 'UPPER')).toThrow(
       `in setRangeTextCase: Property "value" failed validation: Invalid enum value. Expected 'ORIGINAL' | 'UPPER' | 'LOWER' | 'TITLE' | 'SMALL_CAPS' | 'SMALL_CAPS_FORCED', received 'SHOUT'`
     )
     expect(() => text.setRangeTextCase(0, 5, 'SMALL_CAPS' as 'UPPER')).toThrow(
-      'in setRangeTextCase: OpenPencil does not support the SMALL_CAPS text case'
+      'in setRangeTextCase: OpenDesigner does not support the SMALL_CAPS text case'
     )
     expect(() => text.setRangeTextCase(3, 3, 'UPPER')).toThrow(
       "in setRangeTextCase: Empty range selected. 'end' must be greater than 'start'"

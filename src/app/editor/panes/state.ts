@@ -5,7 +5,7 @@ import {
   type EditorViewState,
   copyEditorViewState,
   pickEditorViewState
-} from '@open-pencil/core'
+} from '@open-designer/core'
 
 export interface CanvasPaneState extends EditorViewState {
   id: string

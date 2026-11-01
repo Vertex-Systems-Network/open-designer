@@ -11,10 +11,10 @@ export interface SkillDefinition {
 }
 
 /**
- * Where skills come from: uploaded to OpenPencil, the folders around the open document, the
+ * Where skills come from: uploaded to OpenDesigner, the folders around the open document, the
  * shared Agent Skills folder, Claude Code's.
  */
-export type SkillSourceID = 'openpencil' | 'project' | 'agents' | 'claude'
+export type SkillSourceID = 'opendesigner' | 'project' | 'agents' | 'claude'
 
 /** Departures from the Agent Skills specification that do not stop a skill loading. */
 export type SkillWarning =

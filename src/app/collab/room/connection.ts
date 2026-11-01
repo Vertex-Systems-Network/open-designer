@@ -8,7 +8,7 @@ import {
   decodeRoomUpdate,
   MAX_COLLAB_MESSAGE_BYTES,
   RELAY_SERVER_PEER
-} from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/contract'
 
 import { joinCollabRoom, type JoinCollabRoom } from '@/app/collab/transport'
 import type { CollabAction } from '@/app/collab/transport/types'

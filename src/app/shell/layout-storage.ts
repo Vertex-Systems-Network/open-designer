@@ -1,7 +1,7 @@
 import { clamp } from 'es-toolkit'
 import * as v from 'valibot'
 
-import { IS_BROWSER } from '@open-pencil/core/constants'
+import { IS_BROWSER } from '@open-designer/core/constants'
 
 const EDITOR_LAYOUT_KEY = 'open-pencil:editor-layout'
 /** The left panel's share of the window, in percent, when the editor first opens. */

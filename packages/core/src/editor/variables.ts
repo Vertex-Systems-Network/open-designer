@@ -8,8 +8,8 @@ import {
   type VariableCollection,
   type VariableType,
   type VariableValue
-} from '@open-pencil/scene-graph'
-import { tokenExpressionForValue, type BindingScope } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import { tokenExpressionForValue, type BindingScope } from '@open-designer/scene-graph/variables'
 
 import { reconcileVariableLayouts } from '#core/layout/variables'
 
@@ -139,7 +139,11 @@ export function createVariableActions(ctx: EditorContext) {
     const collection = graph.variableCollections.get(id)
     if (!collection?.key) return false
 
-    const previousCollection = { key: collection.key, version: collection.version, isLocal: collection.isLocal }
+    const previousCollection = {
+      key: collection.key,
+      version: collection.version,
+      isLocal: collection.isLocal
+    }
     const previousVariables = [...graph.variables.values()]
       .filter((variable) => variable.collectionId === id)
       .map((variable) => ({
@@ -149,7 +153,10 @@ export function createVariableActions(ctx: EditorContext) {
         isLocal: variable.isLocal
       }))
 
-    const apply = (collectionLink: typeof previousCollection | null, variableLinks: typeof previousVariables) => {
+    const apply = (
+      collectionLink: typeof previousCollection | null,
+      variableLinks: typeof previousVariables
+    ) => {
       if (ctx.graph !== graph) return
       const current = graph.variableCollections.get(id)
       if (!current) return
@@ -173,10 +180,17 @@ export function createVariableActions(ctx: EditorContext) {
       ctx.requestRefresh()
     }
 
-    apply(null, previousVariables.map(({ id }) => ({ id })))
+    apply(
+      null,
+      previousVariables.map(({ id }) => ({ id }))
+    )
     ctx.undo.push({
       label: 'Make collection local',
-      forward: () => apply(null, previousVariables.map(({ id }) => ({ id }))),
+      forward: () =>
+        apply(
+          null,
+          previousVariables.map(({ id }) => ({ id }))
+        ),
       inverse: () => apply(previousCollection, previousVariables)
     })
     return true

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 
 import { computed } from 'vue'
 
-import { createEditor } from '@open-pencil/core'
+import { createEditor } from '@open-designer/core'
 
 import { createTypographyActions } from '#vue/controls/typography/actions'
 

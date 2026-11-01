@@ -1,11 +1,11 @@
 ---
 title: Komponenty
-description: Komponenty pakietu @open-pencil/vue bez narzuconego wyglądu.
+description: Komponenty pakietu @open-designer/vue bez narzuconego wyglądu.
 ---
 
 # Komponenty
 
-`@open-pencil/vue` udostępnia komponenty bez narzuconego wyglądu dla obszaru roboczego, nawigacji, paneli właściwości i wyspecjalizowanych pól.
+`@open-designer/vue` udostępnia komponenty bez narzuconego wyglądu dla obszaru roboczego, nawigacji, paneli właściwości i wyspecjalizowanych pól.
 
 ## Edytor
 

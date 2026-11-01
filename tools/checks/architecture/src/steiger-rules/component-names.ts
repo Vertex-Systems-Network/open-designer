@@ -39,7 +39,7 @@ function componentRelativePaths(root: Parameters<Rule['check']>[0]) {
 }
 
 export const uniqueComponentNames: Rule = {
-  name: 'open-pencil/unique-component-names',
+  name: 'open-designer/unique-component-names',
   check(root) {
     const diagnostics: Diagnostic[] = []
     for (const [name, duplicates] of duplicateComponentNames(componentRelativePaths(root))) {
@@ -55,7 +55,7 @@ export const uniqueComponentNames: Rule = {
 }
 
 export const multiWordComponentNames: Rule = {
-  name: 'open-pencil/multi-word-component-names',
+  name: 'open-designer/multi-word-component-names',
   check(root) {
     return {
       diagnostics: singleWordComponentNames(componentRelativePaths(root)).map((sourceRel) => ({

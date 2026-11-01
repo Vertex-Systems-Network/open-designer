@@ -1,9 +1,9 @@
 import * as v from 'valibot'
 
-import type { Fill, GradientTransform } from '@open-pencil/scene-graph'
-import { colorToFill } from '@open-pencil/scene-graph/color'
-import { paintTransformSchema } from '@open-pencil/scene-graph/paints'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { Fill, GradientTransform } from '@open-designer/scene-graph'
+import { colorToFill } from '@open-designer/scene-graph/color'
+import { paintTransformSchema } from '@open-designer/scene-graph/paints'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 export function isColor(value: unknown): value is Color {
   return (

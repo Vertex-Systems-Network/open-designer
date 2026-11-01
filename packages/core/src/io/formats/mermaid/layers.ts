@@ -5,16 +5,16 @@ import type {
   FlowNode,
   FlowSubgraph,
   Flowchart
-} from '@open-pencil/mermaid'
-import type { Fill, SceneGraph, SceneNode, Stroke, StrokeCap } from '@open-pencil/scene-graph'
+} from '@open-designer/mermaid'
+import type { Fill, SceneGraph, SceneNode, Stroke, StrokeCap } from '@open-designer/scene-graph'
 import {
   connectorSublayers,
   createConnector,
   freeEndpoint
-} from '@open-pencil/scene-graph/connectors'
-import { BLACK } from '@open-pencil/scene-graph/constants'
-import { createShapeWithText } from '@open-pencil/scene-graph/generated'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/connectors'
+import { BLACK } from '@open-designer/scene-graph/constants'
+import { createShapeWithText } from '@open-designer/scene-graph/generated'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { newLayerDefaults } from '#core/editor/shapes/defaults'
 import { layoutAuthoredNodes } from '#core/layout'

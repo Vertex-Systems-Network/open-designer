@@ -1,7 +1,7 @@
 import { clamp } from 'es-toolkit'
 
-import { CLOUD_PICTURE_SIZE } from '@open-pencil/cloud/contract'
-import type { Size } from '@open-pencil/scene-graph/primitives'
+import { CLOUD_PICTURE_SIZE } from '@open-designer/cloud/contract'
+import type { Size } from '@open-designer/scene-graph/primitives'
 
 /** How far past filling the frame a picture can be zoomed. */
 export const PICTURE_MAX_ZOOM = 4

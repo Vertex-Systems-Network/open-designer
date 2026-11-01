@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { renderNodesToSVG } from '#core/io/formats/svg'
 

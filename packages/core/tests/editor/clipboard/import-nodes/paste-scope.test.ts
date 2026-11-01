@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 
-import { importClipboardNodes } from '@open-pencil/core/clipboard'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { importClipboardNodes } from '@open-designer/core/clipboard'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 describe('importClipboardNodes: paste linkage scoping', () => {
   // This suite proves scoped paste linkage is load-bearing. Test 1 locks the

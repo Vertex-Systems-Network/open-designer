@@ -2,9 +2,9 @@
 
 ## Webversion
 
-OpenPencil läuft direkt im Browser und muss nicht installiert werden. Öffnen Sie [app.openpencil.dev](https://app.openpencil.dev), um mit der Gestaltung zu beginnen.
+OpenDesigner läuft direkt im Browser und muss nicht installiert werden. Öffnen Sie [app.openpencil.dev](https://app.openpencil.dev), um mit der Gestaltung zu beginnen.
 
-Wenn Sie ein eigenes Produkt auf OpenPencil aufbauen möchten, lesen Sie den Bereich [Automatisierung](/programmable/) und die Dokumentation zum [Vue SDK](/programmable/sdk/).
+Wenn Sie ein eigenes Produkt auf OpenDesigner aufbauen möchten, lesen Sie den Bereich [Automatisierung](/programmable/) und die Dokumentation zum [Vue SDK](/programmable/sdk/).
 
 ## Desktop-Anwendung
 
@@ -20,7 +20,7 @@ Fertige Versionen für macOS, Windows und Linux finden Sie auf der [Download-Sei
 
 ## Systemvoraussetzungen {#system-requirements}
 
-OpenPencil rendert mit CanvasKit über WebGL und nutzt aktuelle Webplattform-Funktionen, daher ist eine neuere Browser-Engine erforderlich. Die Webversion unterstützt Chrome 111, Edge 111, Firefox 128 und Safari 16.4 oder neuer; Chromium-basierte Browser wie Brave und Opera richten sich nach ihrer Chrome-Version. Die Desktop-Anwendung rendert im WebView des Systems, daher bestimmt die Engine des Betriebssystems die Untergrenze:
+OpenDesigner rendert mit CanvasKit über WebGL und nutzt aktuelle Webplattform-Funktionen, daher ist eine neuere Browser-Engine erforderlich. Die Webversion unterstützt Chrome 111, Edge 111, Firefox 128 und Safari 16.4 oder neuer; Chromium-basierte Browser wie Brave und Opera richten sich nach ihrer Chrome-Version. Die Desktop-Anwendung rendert im WebView des Systems, daher bestimmt die Engine des Betriebssystems die Untergrenze:
 
 | Plattform | Voraussetzung |
 | --------- | ------------- |
@@ -28,21 +28,21 @@ OpenPencil rendert mit CanvasKit über WebGL und nutzt aktuelle Webplattform-Fun
 | Windows | Windows 10 oder neuer mit der Laufzeitumgebung Microsoft Edge WebView2 Evergreen, die sich selbst aktualisiert. |
 | Linux | WebKitGTK 2.40 oder neuer (`webkit2gtk-4.1`). |
 
-Ist die Engine zu alt, zeigt OpenPencil an, was aktualisiert werden muss, statt ein leeres Fenster darzustellen. Erscheint dieser Hinweis auf einem System, das die Voraussetzungen erfüllt, verwenden Sie den Link „Report a problem“, der die Angaben zu Browser und Engine vorausfüllt.
+Ist die Engine zu alt, zeigt OpenDesigner an, was aktualisiert werden muss, statt ein leeres Fenster darzustellen. Erscheint dieser Hinweis auf einem System, das die Voraussetzungen erfüllt, verwenden Sie den Link „Report a problem“, der die Angaben zu Browser und Engine vorausfüllt.
 
 ## Installation unter macOS mit Homebrew
 
 ```sh
-brew install --cask openpencil
+brew install --cask opendesigner
 ```
 
-Der Befehl installiert die signierte App für Macs mit Apple Silicon oder Intel-Prozessor aus dem [offiziellen Homebrew-Katalog](https://formulae.brew.sh/cask/openpencil). Updates werden von Homebrew geprüft und können später als GitHub-Releases erscheinen. Bis dahin steht der [direkte Download](https://github.com/open-pencil/open-pencil/releases/latest) bereit. Die CLI wird separat installiert: `npm install -g @open-pencil/cli`.
+Der Befehl installiert die signierte App für Macs mit Apple Silicon oder Intel-Prozessor aus dem [offiziellen Homebrew-Katalog](https://formulae.brew.sh/cask/opendesigner). Updates werden von Homebrew geprüft und können später als GitHub-Releases erscheinen. Bis dahin steht der [direkte Download](https://github.com/open-pencil/open-pencil/releases/latest) bereit. Die CLI wird separat installiert: `npm install -g @open-designer/cli`.
 
 Wenn du den archivierten eigenen Tap verwendet hast, wechsle so:
 
 ```sh
-brew uninstall open-pencil/tap/open-pencil
-brew install --cask openpencil
+brew uninstall open-designer/tap/open-designer
+brew install --cask opendesigner
 ```
 
 ## Aus dem Quellcode erstellen {#building-from-source}
@@ -56,7 +56,7 @@ brew install --cask openpencil
 
 ```sh
 git clone https://github.com/open-pencil/open-pencil.git
-cd open-pencil
+cd open-designer
 bun install
 ```
 

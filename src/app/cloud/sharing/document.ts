@@ -1,10 +1,10 @@
-import type { CloudAPIClient } from '@open-pencil/cloud/client'
+import type { CloudAPIClient } from '@open-designer/cloud/client'
 import {
   cloudShareURL,
   type CloudDiscovery,
   type DocumentPermission,
   type DocumentShare
-} from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/contract'
 
 import type { StorageDocumentBinding } from '@/app/integrations/storage/types'
 

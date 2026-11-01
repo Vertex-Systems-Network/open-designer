@@ -1,6 +1,6 @@
 import { difference } from 'es-toolkit/array'
 
-import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { NodeType, SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { REKA_ELEMENTS, rekaRole } from './behaviours'
 import { connectorBindingTarget, renderConnectorNode } from './connectors'

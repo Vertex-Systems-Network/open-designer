@@ -1,4 +1,4 @@
-import { colorToHex } from '@open-pencil/scene-graph/color'
+import { colorToHex } from '@open-designer/scene-graph/color'
 
 import { defineRule } from '#core/lint/rule'
 

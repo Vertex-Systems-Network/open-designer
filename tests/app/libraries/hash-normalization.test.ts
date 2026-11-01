@@ -1,9 +1,12 @@
 import { describe, expect, test } from 'bun:test'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { createLibraryRevision, discoverPublishableLibraryChanges } from '@open-pencil/core/library'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import {
+  createLibraryRevision,
+  discoverPublishableLibraryChanges
+} from '@open-designer/core/library'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 function source() {
   const graph = new SceneGraph()

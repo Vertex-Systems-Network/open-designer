@@ -1,9 +1,9 @@
-import type { Editor } from '@open-pencil/core'
-import type { VariableCollection } from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { randomHex } from '@open-pencil/scene-graph/random'
+import type { Editor } from '@open-designer/core'
+import type { VariableCollection } from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { randomHex } from '@open-designer/scene-graph/random'
 
-import { useOpenPencilBindingProvider } from '#vue/controls/binding-provider/open-pencil'
+import { useOpenDesignerBindingProvider } from '#vue/controls/binding-provider/open-designer'
 import type { BindingTarget } from '#vue/controls/binding-provider/types'
 
 import { prepareModeEdit } from './mode-edit'
@@ -60,7 +60,7 @@ function resolveColor(editor: Editor, id: string, target?: BindingTarget) {
 }
 
 export function useColorBindingProvider() {
-  return useOpenPencilBindingProvider<Color>({
+  return useOpenDesignerBindingProvider<Color>({
     types: ['COLOR'],
     resolve: resolveColor,
     prepareEdit: (editor, id, target) =>

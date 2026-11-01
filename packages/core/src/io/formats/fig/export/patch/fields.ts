@@ -6,13 +6,13 @@ import {
   type FigArchiveRecordInfo,
   type FigEntryListPatch,
   type FigRecordFieldPatch
-} from '@open-pencil/fig'
-import { derivedSymbolDataOf, symbolDataOf } from '@open-pencil/fig/instance-overrides'
-import type { FigNodeChangeExportRuntime } from '@open-pencil/fig/node-change'
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString } from '@open-pencil/kiwi/fig/guid'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/fig'
+import { derivedSymbolDataOf, symbolDataOf } from '@open-designer/fig/instance-overrides'
+import type { FigNodeChangeExportRuntime } from '@open-designer/fig/node-change'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString } from '@open-designer/kiwi/fig/guid'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { prepareFigExport, type FigExportSetup } from '#core/io/formats/fig/export/setup'
 import { cloneSceneGraphForFigExport } from '#core/kiwi/fig/parse/transfer'
@@ -178,7 +178,7 @@ function changedFields(saved: NodeChange, record: NodeChange): FigRecordFieldPat
 /**
  * Narrow written records the archive holds to the fields the edits changed in them. Each is
  * compared with the record the document as the archive holds it writes, so a field differs only
- * where the document does, and the rest of the record, fields OpenPencil does not model among
+ * where the document does, and the rest of the record, fields OpenDesigner does not model among
  * them, stays as the archive saved it. A record whose untouched copy is unavailable is written
  * whole, as before.
  */

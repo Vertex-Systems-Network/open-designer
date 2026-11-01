@@ -1,5 +1,5 @@
-import type { ArcData, VectorNetwork } from '@open-pencil/scene-graph'
-import { parseSVGPath } from '@open-pencil/scene-graph/parse-path'
+import type { ArcData, VectorNetwork } from '@open-designer/scene-graph'
+import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
 
 import type { PenNode } from './schema'
 import { resolveNumber, type VarContext } from './variables'

@@ -3,9 +3,9 @@ import { afterAll, describe, expect, test } from 'bun:test'
 import { expectDefined } from '#core-tests/helpers/assert'
 import type { Canvas } from 'canvaskit-wasm'
 
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { initCanvasKit } from '@open-designer/core/io/formats/raster'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 
 const SIZE = 300
 

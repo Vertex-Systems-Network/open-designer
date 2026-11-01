@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
+import { createEditor } from '@open-designer/core'
 import {
   createSceneGeometry,
   rotationHandleLayout,
   selectionHandleRect
-} from '@open-pencil/core/geometry'
+} from '@open-designer/core/geometry'
 
 import {
   canvasToLocalPoint,

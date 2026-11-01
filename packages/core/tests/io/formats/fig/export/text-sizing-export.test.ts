@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigBuffer } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigBuffer } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 for (const mode of ['NONE', 'HEIGHT', 'WIDTH_AND_HEIGHT'] as const) {
   test(`exports actual text sizing ${mode} inside auto-layout without importer metadata`, async () => {

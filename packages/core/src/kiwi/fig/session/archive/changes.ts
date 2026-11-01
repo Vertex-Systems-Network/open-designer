@@ -8,7 +8,7 @@ import type {
   SceneNode,
   Variable,
   VariableCollection
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 
 /**
  * How a document opened from a `.fig` archive has diverged from it, for writing only what

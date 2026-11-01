@@ -7,8 +7,8 @@ import Yoga, {
   type Node as YogaNode
 } from 'yoga-layout'
 
-import type { GridTrack, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { enforcedAspectRatio, layoutSizingInParent } from '@open-pencil/scene-graph/layout'
+import type { GridTrack, SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { enforcedAspectRatio, layoutSizingInParent } from '@open-designer/scene-graph/layout'
 
 const yogaConfig = Yoga.Config.create()
 yogaConfig.setPointScaleFactor(0)

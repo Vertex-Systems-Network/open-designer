@@ -30,9 +30,9 @@ These are the expression operators the first prototype evaluator plans to suppor
 
 Each step is its own module with its own tests.
 
-1. **Interactions** (`@open-pencil/scene-graph`). Typed triggers and actions read from and written back to `prototypeInteractions`, starting with Set variable, Set variable mode, and Conditional. Actions the model doesn't cover stay raw and keep their place in the list.
-2. **Expressions** (`@open-pencil/scene-graph`). A typed expression tree over aliases and constants, an evaluator with Figma's coercions, and `variableText` for the text a value shows. A JavaScript emitter for the same tree lives in `@open-pencil/emit`.
-3. **State** (`@open-pencil/scene-graph`). The state variables and collections of a page, their initial values in the page's modes, and the variables their expressions read.
+1. **Interactions** (`@open-designer/scene-graph`). Typed triggers and actions read from and written back to `prototypeInteractions`, starting with Set variable, Set variable mode, and Conditional. Actions the model doesn't cover stay raw and keep their place in the list.
+2. **Expressions** (`@open-designer/scene-graph`). A typed expression tree over aliases and constants, an evaluator with Figma's coercions, and `variableText` for the text a value shows. A JavaScript emitter for the same tree lives in `@open-designer/emit`.
+3. **State** (`@open-designer/scene-graph`). The state variables and collections of a page, their initial values in the page's modes, and the variables their expressions read.
 
 ## Preview
 
@@ -53,7 +53,7 @@ An event on a layer runs supported actions through the evaluator and updates tha
 | Set variable, Conditional          | assignments and `if` / `else` in the handler                                              | the same                                               |
 | A behaviour's value bound to state | `v-model` on the Reka component                                                           | `checked` and `onCheckedChange` on the Radix component |
 
-Stylesheets stay as they are: a bound number or colour stays `var(--name)`, and only the custom property on the root becomes reactive. Expressions are emitted as JavaScript through `@open-pencil/emit`, and `variableText` as a small generated helper, so exported text reads as it does in Figma.
+Stylesheets stay as they are: a bound number or colour stays `var(--name)`, and only the custom property on the root becomes reactive. Expressions are emitted as JavaScript through `@open-designer/emit`, and `variableText` as a small generated helper, so exported text reads as it does in Figma.
 
 ## Capabilities
 

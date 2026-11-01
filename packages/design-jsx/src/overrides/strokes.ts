@@ -1,9 +1,9 @@
 import { designJSXProp } from '#design-jsx/definitions'
 import { STROKE_ALIGN, STROKE_CAP, STROKE_JOIN } from '#design-jsx/enums'
 
-import type { SceneNode, Stroke } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode, Stroke } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 /** One entry of the `strokes` prop; enums are lowercase, as `blendMode` is. */
 export interface StrokeValue {

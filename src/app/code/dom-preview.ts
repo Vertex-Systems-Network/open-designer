@@ -1,11 +1,11 @@
-import { sceneGraphFromStyledHTML } from '@open-pencil/core/io/formats/html/layers'
+import { sceneGraphFromStyledHTML } from '@open-designer/core/io/formats/html/layers'
 import {
   browserHTMLToDesignDocument,
   browserTailwindHTMLToDesignDocument
-} from '@open-pencil/dom-css/browser'
-import type { ComponentStyling } from '@open-pencil/dom-css/export'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import type { UndoHistorySnapshot } from '@open-pencil/scene-graph/undo'
+} from '@open-designer/dom-css/browser'
+import type { ComponentStyling } from '@open-designer/dom-css/export'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import type { UndoHistorySnapshot } from '@open-designer/scene-graph/undo'
 
 import type { EditorStore } from '@/app/editor/active-store'
 

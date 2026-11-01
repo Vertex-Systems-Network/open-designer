@@ -1,7 +1,7 @@
 import { icons as lucide } from '@iconify-json/lucide'
 
-import { designJSXRenderer } from '@open-pencil/core/design-jsx'
-import { createIconifyProvider } from '@open-pencil/core/icons'
+import { designJSXRenderer } from '@open-designer/core/design-jsx'
+import { createIconifyProvider } from '@open-designer/core/icons'
 
 type IconifyClient = NonNullable<Parameters<typeof createIconifyProvider>[0]>
 

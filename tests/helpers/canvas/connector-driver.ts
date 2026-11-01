@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import type { ConnectorEndpoint } from '@open-pencil/scene-graph'
+import type { ConnectorEndpoint } from '@open-designer/scene-graph'
 
 import { toolbarToolTestId } from '#tests/helpers/test-ids'
 
@@ -21,7 +21,7 @@ export function connectorDriver(page: () => Page) {
     showOrigin() {
       return page().evaluate((origin) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.state.zoom = 1
         store.state.panX = origin
         store.state.panY = origin
@@ -33,7 +33,7 @@ export function connectorDriver(page: () => Page) {
     addBoxes(boxes: { name: string; x: number; y: number; width: number; height: number }[]) {
       return page().evaluate((specs) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const ids: Record<string, string> = {}
         for (const spec of specs) {
           const node = store.graph.createNode('RECTANGLE', store.state.currentPageId, {
@@ -59,7 +59,7 @@ export function connectorDriver(page: () => Page) {
     connectors(): Promise<ConnectorState[]> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         return store.graph
           .getChildren(store.state.currentPageId)
           .filter((node) => node.type === 'CONNECTOR')
@@ -76,7 +76,7 @@ export function connectorDriver(page: () => Page) {
     focus() {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         return {
           tool: store.state.activeTool,
           selected: [...store.state.selectedIds],
@@ -90,7 +90,7 @@ export function connectorDriver(page: () => Page) {
     linePoint(id: string) {
       return page().evaluate((connectorId) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const connector = store.graph.getNode(connectorId)
         const line = connector && store.graph.getChildren(connector.id)[0]
         const [a, b] = line?.vectorNetwork?.vertices ?? []
@@ -109,7 +109,7 @@ export function connectorDriver(page: () => Page) {
     showCapsAndHandles() {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const page = store.state.currentPageId
         const box = (x: number, y: number) =>
           store.graph.createNode('RECTANGLE', page, {
@@ -165,7 +165,7 @@ export function connectorDriver(page: () => Page) {
     showLineStyles() {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const page = store.state.currentPageId
         const box = (x: number, y: number) =>
           store.graph.createNode('RECTANGLE', page, {
@@ -217,7 +217,7 @@ export function connectorDriver(page: () => Page) {
     showPinnedEnds() {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const page = store.state.currentPageId
         const fills = [
           {
@@ -252,7 +252,7 @@ export function connectorDriver(page: () => Page) {
     select(id: string) {
       return page().evaluate((connectorId) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.select([connectorId])
       }, id)
     },
@@ -261,7 +261,7 @@ export function connectorDriver(page: () => Page) {
     style(id: string) {
       return page().evaluate((connectorId) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const node = store.graph.getNode(connectorId)
         if (!node) throw new Error(`No connector ${connectorId}`)
         return {
@@ -276,7 +276,7 @@ export function connectorDriver(page: () => Page) {
     lineStroke(id: string) {
       return page().evaluate((connectorId) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const [line] = store.graph.getChildren(connectorId)
         const stroke = line?.strokes[0]
         if (!stroke) throw new Error(`No line stroke on ${connectorId}`)

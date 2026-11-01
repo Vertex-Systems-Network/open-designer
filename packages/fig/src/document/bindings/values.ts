@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { resolvedValueBindings, variableText } from '@open-pencil/scene-graph/variables'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { resolvedValueBindings, variableText } from '@open-designer/scene-graph/variables'
 
 /**
  * Resolve values once occurrence hierarchy and modes exist. Visibility uses the

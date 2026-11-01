@@ -2,11 +2,11 @@
 import { tv } from 'tailwind-variants'
 import { computed, nextTick, ref, useId, useTemplateRef, watch } from 'vue'
 
-import { tokenNumberToCSS, variableUnit } from '@open-pencil/dom-css/export'
-import type { Variable, VariableLiteral, VariableValue } from '@open-pencil/scene-graph'
-import { colorToHex8 } from '@open-pencil/scene-graph/color'
-import { formulaSymbol } from '@open-pencil/scene-graph/variables'
-import { useI18n } from '@open-pencil/vue/i18n'
+import { tokenNumberToCSS, variableUnit } from '@open-designer/dom-css/export'
+import type { Variable, VariableLiteral, VariableValue } from '@open-designer/scene-graph'
+import { colorToHex8 } from '@open-designer/scene-graph/color'
+import { formulaSymbol } from '@open-designer/scene-graph/variables'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import {
   referencePillName,

@@ -1,15 +1,15 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
 import {
   geometryBlobBounds,
   intersectVisualBounds,
   strokeOverflow,
   unionVisualBounds,
   type VisualBounds
-} from '@open-pencil/scene-graph/geometry'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
-import { textLinesOverflow } from '@open-pencil/scene-graph/text'
+} from '@open-designer/scene-graph/geometry'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
+import { textLinesOverflow } from '@open-designer/scene-graph/text'
 
 const INTRINSIC_CONTAINER_TYPES = new Set([
   'FRAME',

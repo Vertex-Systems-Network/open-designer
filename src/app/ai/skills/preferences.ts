@@ -19,6 +19,30 @@ export type SkillPreferences = v.InferOutput<typeof skillPreferencesSchema>
 
 const storedPreferencesSchema = v.pipe(v.string(), v.parseJson(), skillPreferencesSchema)
 
+function migrateLegacySourceKeys(preferences: SkillPreferences): SkillPreferences {
+  const migrate = (record: Record<string, boolean>) => {
+    const legacy = Object.entries(record).filter(
+      ([key]) => key === 'openpencil' || key.startsWith('openpencil/')
+    )
+    const next = Object.fromEntries(
+      Object.entries(record).filter(
+        ([key]) => key !== 'openpencil' && !key.startsWith('openpencil/')
+      )
+    )
+    for (const [key, value] of legacy) {
+      const currentKey = `opendesigner${key.slice('openpencil'.length)}`
+      if (!(currentKey in next)) next[currentKey] = value
+    }
+    return next
+  }
+  return {
+    ...preferences,
+    sources: migrate(preferences.sources),
+    skills: migrate(preferences.skills),
+    pickedSources: migrate(preferences.pickedSources)
+  }
+}
+
 export const skillPreferences = useLocalStorage<SkillPreferences>(
   'open-pencil:ai:skills',
   { sources: {}, skills: {}, trustedFolders: {}, pickedSources: {} },
@@ -27,7 +51,7 @@ export const skillPreferences = useLocalStorage<SkillPreferences>(
       read: (raw) => {
         const result = v.safeParse(storedPreferencesSchema, raw)
         return result.success
-          ? result.output
+          ? migrateLegacySourceKeys(result.output)
           : { sources: {}, skills: {}, trustedFolders: {}, pickedSources: {} }
       },
       write: JSON.stringify
@@ -52,7 +76,7 @@ export function isSkillsFolderTrusted(path: string, preferences: SkillPreference
  * share hold their own workflows, such as releases or email, so they start off until picked.
  */
 const SOURCES_ON_BY_DEFAULT: Record<SkillSourceID, boolean> = {
-  openpencil: true,
+  opendesigner: true,
   project: true,
   agents: false,
   claude: false

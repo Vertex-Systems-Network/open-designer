@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 
-import { GPUTimer } from '@open-pencil/core/profiler'
+import { GPUTimer } from '@open-designer/core/profiler'
 
 describe('GPUTimer', () => {
   it('handles null GL context', () => {

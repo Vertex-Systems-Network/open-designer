@@ -5,7 +5,7 @@ import {
   parseCSSAlignSelf,
   parseCSSFlexDirection,
   parseCSSJustifyContent
-} from '@open-pencil/scene-graph/css'
+} from '@open-designer/scene-graph/css'
 
 describe('CSS layout values', () => {
   test('flex directions that auto layout stacks along', () => {

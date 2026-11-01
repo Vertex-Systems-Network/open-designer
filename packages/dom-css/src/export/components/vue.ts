@@ -5,8 +5,8 @@ import { compact } from 'es-toolkit/array'
 import { omit } from 'es-toolkit/object'
 import { camelCase, kebabCase, upperFirst } from 'es-toolkit/string'
 
-import { es, vue } from '@open-pencil/emit'
-import type { ShaderComponent } from '@open-pencil/scene-graph/shaders'
+import { es, vue } from '@open-designer/emit'
+import type { ShaderComponent } from '@open-designer/scene-graph/shaders'
 
 import { claimName } from '../storybook/names'
 import { progressWidth } from './fields'

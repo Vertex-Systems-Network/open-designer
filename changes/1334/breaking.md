@@ -1,1 +1,1 @@
-- `OpenPencilBindingProviderOptions` in `@open-pencil/vue` takes `types`, a list of variable types, instead of `type`.
+- `OpenDesignerBindingProviderOptions` in `@open-designer/vue` takes `types`, a list of variable types, instead of `type`.

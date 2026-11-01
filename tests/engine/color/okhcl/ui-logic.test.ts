@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { SceneGraph } from '@open-designer/scene-graph'
 import {
   clearNodeFillOkHCL,
   clearNodeStrokeOkHCL,
@@ -8,7 +8,7 @@ import {
   getStrokeOkHCL,
   setNodeFillOkHCL,
   setNodeStrokeOkHCL
-} from '@open-pencil/scene-graph/color'
+} from '@open-designer/scene-graph/color'
 
 import { getNodeOrThrow } from '#tests/helpers/assert'
 

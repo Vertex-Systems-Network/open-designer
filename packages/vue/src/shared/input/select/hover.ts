@@ -1,5 +1,5 @@
-import { resolveEditorProfile, type Editor } from '@open-pencil/core'
-import { layerResizes, layerRotates } from '@open-pencil/scene-graph/generated'
+import { resolveEditorProfile, type Editor } from '@open-designer/core'
+import { layerResizes, layerRotates } from '@open-designer/scene-graph/generated'
 
 import { connectorLineCursor } from '#vue/shared/input/connector/line'
 import {

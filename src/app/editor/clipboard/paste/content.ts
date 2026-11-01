@@ -1,8 +1,8 @@
-import type { Editor } from '@open-pencil/core'
-import { isSVGMarkup } from '@open-pencil/core/io/formats/svg'
-import { detectMermaidDiagram } from '@open-pencil/mermaid'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
-import { filesMessages } from '@open-pencil/vue/i18n'
+import type { Editor } from '@open-designer/core'
+import { isSVGMarkup } from '@open-designer/core/io/formats/svg'
+import { detectMermaidDiagram } from '@open-designer/mermaid'
+import type { Vector } from '@open-designer/scene-graph/primitives'
+import { filesMessages } from '@open-designer/vue/i18n'
 
 import { toast } from '@/app/shell/ui'
 

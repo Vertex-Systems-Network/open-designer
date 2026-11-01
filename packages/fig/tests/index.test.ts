@@ -19,7 +19,7 @@ import {
   encodeMessage,
   getSchemaBytes,
   initCodec
-} from '@open-pencil/kiwi/fig/codec'
+} from '@open-designer/kiwi/fig/codec'
 
 const PNG_SIGNATURE = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 /** A 3 × 2 PNG, as a `.fig` thumbnail chunk holds one. */
@@ -34,7 +34,7 @@ function appendChunk(container: Uint8Array, chunk: Uint8Array): Uint8Array {
   return bytes
 }
 
-describe('@open-pencil/fig package API', () => {
+describe('@open-designer/fig package API', () => {
   beforeAll(async () => {
     await initCodec()
   })
@@ -104,7 +104,7 @@ describe('@open-pencil/fig package API', () => {
       })
     ).toBe(figmaMetaJSON)
     expect(readFigArchiveMeta(figmaMetaJSON).success).toBe(true)
-    expect(readFigArchiveMeta('{"version":1,"app":"OpenPencil"}').success).toBe(false)
+    expect(readFigArchiveMeta('{"version":1,"app":"OpenDesigner"}').success).toBe(false)
   })
 
   it('renames an archive in its meta.json and keeps keys it does not know', () => {
@@ -130,7 +130,7 @@ describe('@open-pencil/fig package API', () => {
     )
     expect(renamed.images).toEqual([['hash', new Uint8Array([9, 8, 7])]])
     expect(renameFigArchive(bytes, 'Old')).toBe(bytes)
-    expect(renameFigArchive(archive('{"version":1,"app":"OpenPencil"}'), 'New')).toBeNull()
+    expect(renameFigArchive(archive('{"version":1,"app":"OpenDesigner"}'), 'New')).toBeNull()
   })
 
   it('parses legacy raw fig-kiwi files and preserves their thumbnail chunk', () => {

@@ -1,9 +1,9 @@
 import { pick } from 'es-toolkit/object'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { findInstanceAncestor, recordInstanceOverride } from '@open-pencil/scene-graph/instances'
-import { cloneInstanceOverrideState } from '@open-pencil/scene-graph/instances/overrides'
-import { styleDetachmentChanges } from '@open-pencil/scene-graph/shared-styles'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { findInstanceAncestor, recordInstanceOverride } from '@open-designer/scene-graph/instances'
+import { cloneInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
+import { styleDetachmentChanges } from '@open-designer/scene-graph/shared-styles'
 
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { reconcileVariableLayouts } from '#core/layout/variables'

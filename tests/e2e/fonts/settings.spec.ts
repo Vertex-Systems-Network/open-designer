@@ -11,7 +11,7 @@ test('the font settings gear opens Settings › Fonts without desktop-only cache
 
   await page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const id = store.createShape('TEXT', 120, 120, 240, 40)
     store.updateNode(id, {
       text: 'Font settings smoke',

@@ -12,12 +12,24 @@ import {
 
 export type CloudEnvironment = Readonly<Record<string, string | undefined>>
 
+const LEGACY_SECRET_NAMES: Readonly<Record<string, string>> = {
+  OPENDESIGNER_CLOUD_SMTP_USER: 'OPENPENCIL_CLOUD_SMTP_USER',
+  OPENDESIGNER_CLOUD_SMTP_PASSWORD: 'OPENPENCIL_CLOUD_SMTP_PASSWORD',
+  OPENDESIGNER_CLOUD_AI_SIGNING_KEY: 'OPENPENCIL_CLOUD_AI_SIGNING_KEY',
+  OPENDESIGNER_CLOUD_SERVICE_TOKEN: 'OPENPENCIL_CLOUD_SERVICE_TOKEN'
+}
+
+function secretValue(environment: CloudEnvironment, name: string): string | undefined {
+  const legacyName = LEGACY_SECRET_NAMES[name]
+  return environment[name] || (legacyName ? environment[legacyName] : undefined)
+}
+
 export function parseCloudDeploymentSource(source: string): CloudDeploymentConfig {
   return v.parse(cloudDeploymentConfigSchema, parseTOML(source))
 }
 
 function requiredSecret(environment: CloudEnvironment, reference: CloudSecretReference): string {
-  const value = environment[reference.from_env]
+  const value = secretValue(environment, reference.from_env)
   if (!value) throw new Error(`Required secret binding is unavailable: ${reference.from_env}`)
   return value
 }
@@ -33,7 +45,7 @@ function optionalSecret(
   environment: CloudEnvironment,
   reference?: CloudSecretReference
 ): string | undefined {
-  return reference ? environment[reference.from_env] : undefined
+  return reference ? secretValue(environment, reference.from_env) : undefined
 }
 
 function staticEntitlements(config: CloudDeploymentConfig) {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { WEB_FONT_PROVIDER_IDS } from '@open-pencil/core/text'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { FontPickerRoot, type FontPickerUI } from '@open-pencil/vue/primitives/FontPicker'
+import { WEB_FONT_PROVIDER_IDS } from '@open-designer/core/text'
+import { useI18n } from '@open-designer/vue/i18n'
+import { FontPickerRoot, type FontPickerUI } from '@open-designer/vue/primitives/FontPicker'
 
 import {
   listFamilies,

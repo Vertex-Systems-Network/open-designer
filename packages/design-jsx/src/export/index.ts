@@ -1,11 +1,14 @@
 import { compact } from 'es-toolkit/array'
 
-import { jsx, type SyntaxNode } from '@open-pencil/emit'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-pencil/scene-graph/components'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
-import { ownsSlotContent } from '@open-pencil/scene-graph/slots'
-import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
+import { jsx, type SyntaxNode } from '@open-designer/emit'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import {
+  componentPropertyDefinitions,
+  resolveComponentPropertyValue
+} from '@open-designer/scene-graph/components'
+import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
+import { instanceMainComponent } from '@open-designer/scene-graph/instances'
+import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 
 import {
   connectorExportScope,
@@ -166,7 +169,10 @@ function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
   return [...merged.entries()]
 }
 
-function nestedInstancePropertyOverrides(graph: SceneGraph, instance: SceneNode): Record<string, unknown> {
+function nestedInstancePropertyOverrides(
+  graph: SceneGraph,
+  instance: SceneNode
+): Record<string, unknown> {
   const overrides: Record<string, unknown> = {}
   const visit = (node: SceneNode, path: number[]) => {
     for (const [index, child] of graph.getChildren(node.id).entries()) {
@@ -194,15 +200,16 @@ function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
   const props: JSXProp[] = []
-  const hasSwapBinding = node.componentPropertyReferences.some((reference) => reference.field === 'INSTANCE_SWAP')
+  const hasSwapBinding = node.componentPropertyReferences.some(
+    (reference) => reference.field === 'INSTANCE_SWAP'
+  )
   if (component && !hasSwapBinding) props.push(['of', component.id])
   const definitions = componentPropertyDefinitions(graph, node)
   const values = Object.fromEntries(
-    Object.entries(node.componentPropertyAssignments)
-      .flatMap(([id, value]) => {
-        const definition = definitions.find((candidate) => candidate.id === id)
-        return definition ? [[definition.name, value]] : []
-      })
+    Object.entries(node.componentPropertyAssignments).flatMap(([id, value]) => {
+      const definition = definitions.find((candidate) => candidate.id === id)
+      return definition ? [[definition.name, value]] : []
+    })
   )
   if (Object.keys(values).length > 0) props.push(['properties', values])
   const nestedOverrides = nestedInstancePropertyOverrides(graph, node)
@@ -293,8 +300,14 @@ export function sceneNodeAttributes(
   const own = ownElement(graph, node)
   const props = own
     ? own.props
-    : [...collectProps(node, graph), ...componentPropertyProps(graph, node), ...instanceProps(graph, node)]
-  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
+    : [
+        ...collectProps(node, graph),
+        ...componentPropertyProps(graph, node),
+        ...instanceProps(graph, node)
+      ]
+  const hasTextBinding = node.componentPropertyReferences.some(
+    (reference) => reference.field === 'TEXT'
+  )
   if (node.type === 'TEXT' && !hasTextBinding) props.push(['text', node.text])
   if (own?.text) props.push(['text', own.text])
   return props.map((prop) => ({
@@ -336,7 +349,9 @@ export function designJSXElement(nodeId: string, graph: SceneGraph): DesignJSXEl
   // children, not as the `text` attribute; the layers they generate are not written at all.
   const own = ownElement(graph, node)
   const hasContent = node.type === 'TEXT' || own !== undefined
-  const hasTextBinding = node.componentPropertyReferences.some((reference) => reference.field === 'TEXT')
+  const hasTextBinding = node.componentPropertyReferences.some(
+    (reference) => reference.field === 'TEXT'
+  )
   const attributes = Object.fromEntries(
     printed
       .filter(({ name }) => !hasContent || name !== 'text' || hasTextBinding)

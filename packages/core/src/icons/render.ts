@@ -1,6 +1,6 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import { BLACK } from '@open-pencil/scene-graph/constants'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import { BLACK } from '@open-designer/scene-graph/constants'
 import {
   iconGlyph,
   iconLayerName,
@@ -11,15 +11,15 @@ import {
   withIconTint,
   type IconOptions,
   type IconPaint
-} from '@open-pencil/scene-graph/icons'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/icons'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Color } from '@open-designer/scene-graph/primitives'
 import {
   createResizeSnapshot,
   scaledChildRect,
   scaledGeometryChanges
-} from '@open-pencil/scene-graph/resize'
-import { transformVectorNetwork } from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/resize'
+import { transformVectorNetwork } from '@open-designer/scene-graph/vector-network'
 
 import { createPathStroke, pathStrokeLineStyle } from '#core/icons/path-style'
 

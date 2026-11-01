@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { useTextContentBindingProvider } from '@open-pencil/vue/controls/binding-provider'
-import { BindableValueRoot } from '@open-pencil/vue/primitives/BindableValue'
+import { useTextContentBindingProvider } from '@open-designer/vue/controls/binding-provider'
+import { BindableValueRoot } from '@open-designer/vue/primitives/BindableValue'
 
 import FieldBindingPicker from '@/components/properties/binding/FieldBindingPicker.vue'
 

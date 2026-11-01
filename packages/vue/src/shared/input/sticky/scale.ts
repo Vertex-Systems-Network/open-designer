@@ -1,14 +1,14 @@
 import { toRaw } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { Editor } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   isWideSticky,
   stickyScale,
   stickySublayers,
   stickyWidth
-} from '@open-pencil/scene-graph/generated'
-import { scaleNodeChanges } from '@open-pencil/scene-graph/scaling'
+} from '@open-designer/scene-graph/generated'
+import { scaleNodeChanges } from '@open-designer/scene-graph/scaling'
 
 import { getHitHandleByMatrix } from '#vue/shared/input/geometry'
 import { calculateResizeRect } from '#vue/shared/input/resize/rect'

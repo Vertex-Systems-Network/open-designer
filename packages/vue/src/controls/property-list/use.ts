@@ -1,6 +1,6 @@
 import { computed } from 'vue'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import { isNodeArrayMixed } from '#vue/controls/node-props/helpers'
 import { useNodeProps } from '#vue/controls/node-props/use'

@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'bun:test'
 
-import { parseFigBuffer } from '@open-pencil/fig'
+import { parseFigBuffer } from '@open-designer/fig'
 import {
   convertFigmaDerivedTextGlyphs,
   nodeChangeToProps,
   encodeVectorNetworkBlob
-} from '@open-pencil/fig/node-change'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/fig/node-change'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { importClipboardNodes } from '#core/clipboard'
 import { exportFigFile } from '#core/io/formats/fig/export'

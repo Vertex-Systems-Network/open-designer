@@ -110,6 +110,7 @@ jobs:
       - name: Verify formatting
         run: bun run format:check
 
+
       - name: Lint TypeScript and Vue
         run: bun run lint
 
@@ -222,15 +223,15 @@ jobs:
     if: needs.changes.outputs.scope == 'code' || needs.changes.outputs.scope == 'cloud'
     timeout-minutes: 8
     runs-on: ubuntu-24.04
-    container:
-      image: ghcr.io/open-pencil/native-contracts-ci@sha256:64e6b1b50a988c1cefe2b69ac9d58076fd743b18391fa2dbd1d153eba2be9521
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libappindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev pkg-config
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -272,7 +273,7 @@ jobs:
           lfs-include: tests/fixtures/gold-preview.fig,tests/fixtures/circle-text.fig,tests/fixtures/slots.fig,tests/fixtures/variable-override-precedence.fig,tests/fixtures/fonts/*
 
       - name: Build shared Core test dependency
-        run: bun --filter @open-pencil/core build
+        run: bun --filter @open-designer/core build
 
       - name: Run ${{ matrix.group }} unit tests
         run: bun tools/dev/unit-tests/src/run.ts "${{ matrix.group }}"
@@ -354,14 +355,14 @@ jobs:
         if: matrix.worker
         run: |
           bun run build:cloud
-          for deployment in packages/cloud/deploy/openpencil/*/; do
+          for deployment in packages/cloud/deploy/opendesigner/*/; do
             (cd "$deployment" && bunx wrangler deploy --dry-run --assets "$GITHUB_WORKSPACE/dist-cloud")
           done
 
       - name: Run Cloud end-to-end tests against ${{ matrix.store }}
         env:
           CLOUD_E2E_SCRIPT: ${{ matrix.script }}
-        run: bun --filter @open-pencil/cloud "$CLOUD_E2E_SCRIPT"
+        run: bun --filter @open-designer/cloud "$CLOUD_E2E_SCRIPT"
 
   result:
     name: CI result
