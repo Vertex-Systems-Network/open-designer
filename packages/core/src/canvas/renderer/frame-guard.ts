@@ -39,6 +39,8 @@ function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
       ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()
     ]
   if (error instanceof Error) return [error.message, ...errorMessages(error.cause, seen)]
+  if (typeof error === 'string') return [error]
+  if (typeof error === 'object') return [Object.prototype.toString.call(error)]
   return [String(error)]
 }
 
