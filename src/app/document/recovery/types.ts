@@ -1,7 +1,7 @@
 export interface RecoverySnapshotMeta {
   id: string
   /** The app session that wrote the copy; a copy no running session holds is left to recover. */
-  sessionId: string
+  sessionId?: string
   documentName: string
   updatedAt: string
   byteLength: number
