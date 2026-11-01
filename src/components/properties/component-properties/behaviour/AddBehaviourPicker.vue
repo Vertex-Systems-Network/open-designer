@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BEHAVIOUR_KINDS, type BehaviourKind } from '@open-pencil/scene-graph/behaviours'
+import { BEHAVIOUR_KINDS, type BehaviourKind } from '@open-designer/scene-graph/behaviours'
 import { useI18n } from '@open-designer/vue/i18n'
 import { computed } from 'vue'
 
