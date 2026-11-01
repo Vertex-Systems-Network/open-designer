@@ -42,7 +42,9 @@ describe('variable mode choices', () => {
     expect(variableModeChoices(editor, [node(outer.id)]).map((c) => c.collectionId)).toEqual([
       theme.id
     ])
-    expect(variableModeChoices(editor, [node(plain.id)])).toEqual([])
+    expect(variableModeChoices(editor, [node(plain.id)]).map((c) => c.collectionId)).toEqual([
+      theme.id
+    ])
   })
 
   test('offer every collection with more than one mode for a page', () => {
