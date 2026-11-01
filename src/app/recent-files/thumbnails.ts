@@ -1,12 +1,17 @@
 import { stat, open, SeekMode } from '@tauri-apps/plugin-fs'
 
+import type { Editor } from '@open-pencil/core'
+import { figThumbnailPageId } from '@open-pencil/core/io/formats/fig'
+import { renderThumbnail } from '@open-pencil/core/io/formats/raster'
 import { extractFigThumbnailFromReader } from '@open-pencil/fig'
+import type { SceneGraph } from '@open-pencil/scene-graph'
 
 import { readCacheBytes, removeCachePrefix, writeCacheBytes } from '@/app/cache'
 import { isFigArchiveName } from '@/app/document/io/names'
 import { isTauri } from '@/app/tauri/env'
 
-const RECENT_FILE_THUMBNAIL_CACHE_DIR = 'recent-file-thumbnails/v2'
+// v3 holds 1280×720 covers; the 512 px ones of v2 are drawn again when a file next opens.
+const RECENT_FILE_THUMBNAIL_CACHE_DIR = 'recent-file-thumbnails/v3'
 
 async function recentFileThumbnailCacheKey(path: string): Promise<string> {
   let fingerprint = path
@@ -30,13 +35,71 @@ export async function loadCachedRecentFileThumbnail(path: string): Promise<Uint8
   return bytes ? new Uint8Array(bytes) : null
 }
 
-export async function cacheRecentFileThumbnail(path: string, bytes: Uint8Array): Promise<void> {
+async function writeRecentFileThumbnail(cacheKey: string, bytes: Uint8Array): Promise<void> {
   if (!isTauri()) return
-  await writeCacheBytes(await recentFileThumbnailCacheKey(path), Uint8Array.from(bytes).buffer)
+  await writeCacheBytes(cacheKey, Uint8Array.from(bytes).buffer)
+}
+
+export async function cacheRecentFileThumbnail(path: string, bytes: Uint8Array): Promise<void> {
+  await writeRecentFileThumbnail(await recentFileThumbnailCacheKey(path), bytes)
+}
+
+/**
+ * A Home card's preview, framed as the card shows it (16:9 from the content's top left) and sharp
+ * at twice the widest card, unlike the 512 px cover a `.fig` carries, which fits its whole page.
+ */
+const RECENT_FILE_COVER = { width: 1280, height: 720 }
+
+/** Cover writes still running, by file, so each file's covers are cached in the order drawn. */
+const coverWrites = new Map<string, Promise<void>>()
+let coverWriteGeneration = 0
+
+/**
+ * Draws the cover page of the document at `path` for its Home card and caches it under the
+ * file's current size and time, so call it once the file is written. The drawing happens at
+ * once; caching waits for the file's earlier covers, so a cover never lands under the key of a
+ * later write. False when there is no page to draw.
+ */
+export async function cacheRecentFileCover(
+  path: string,
+  graph: SceneGraph,
+  renderer: NonNullable<Editor['renderer']>,
+  isCurrent: () => boolean = () => true
+): Promise<boolean> {
+  const generation = coverWriteGeneration
+  const pageId = figThumbnailPageId(graph.getPages())
+  if (!pageId) return false
+  // Capture the file version's key before waiting behind an earlier cover write.
+  const cacheKey = await recentFileThumbnailCacheKey(path)
+  if (!isCurrent()) return false
+  const { width, height } = RECENT_FILE_COVER
+  const bytes = renderThumbnail(renderer.ck, renderer, graph, pageId, width, height, 'cover')
+  if (!bytes) return false
+  const previous = coverWrites.get(path) ?? Promise.resolve()
+  const write = previous
+    .catch(() => undefined)
+    .then(async () => {
+      if (generation !== coverWriteGeneration || !isCurrent()) return false
+      await writeRecentFileThumbnail(cacheKey, bytes)
+      return true
+    })
+  const queued = write.then(
+    () => undefined,
+    () => undefined
+  )
+  coverWrites.set(path, queued)
+  try {
+    return await write
+  } finally {
+    if (coverWrites.get(path) === queued) coverWrites.delete(path)
+  }
 }
 
 export function clearRecentFileThumbnails(): Promise<void> {
-  return removeCachePrefix(RECENT_FILE_THUMBNAIL_CACHE_DIR)
+  coverWriteGeneration += 1
+  return Promise.all([...coverWrites.values()]).then(() =>
+    removeCachePrefix(RECENT_FILE_THUMBNAIL_CACHE_DIR)
+  )
 }
 
 export async function loadRecentFileThumbnail(path: string): Promise<Uint8Array | null> {

@@ -1,0 +1,1 @@
+- Recent-file cards use sharp covers framed from the top of the design and stay current after the file is saved.

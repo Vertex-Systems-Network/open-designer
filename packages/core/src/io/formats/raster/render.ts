@@ -334,12 +334,20 @@ export interface ThumbnailFrame {
   height: number
 }
 
-/** The page region a thumbnail fitted into `width` by `height` pixels shows, and its size. */
+/**
+ * How a thumbnail frames its page: `contain` shows all the content at the size it fits in,
+ * `cover` fills `width` by `height` from the content's top left corner and crops the rest, so a
+ * tall kit shows its top and a row of screens its first ones, where the content starts.
+ */
+export type ThumbnailFit = 'contain' | 'cover'
+
+/** The page region a thumbnail of `width` by `height` pixels shows, and its size. */
 export function thumbnailFrame(
   graph: SceneGraph,
   pageId: string,
   width: number,
-  height: number
+  height: number,
+  fit: ThumbnailFit = 'contain'
 ): ThumbnailFrame | null {
   const page = graph.getNode(pageId)
   if (!page || page.childIds.length === 0) return null
@@ -350,6 +358,21 @@ export function thumbnailFrame(
   const contentW = bounds.maxX - bounds.minX
   const contentH = bounds.maxY - bounds.minY
   if (contentW <= 0 || contentH <= 0) return null
+
+  if (fit === 'cover') {
+    const scale = Math.max(width / contentW, height / contentH)
+    return {
+      bounds: {
+        minX: bounds.minX,
+        minY: bounds.minY,
+        maxX: bounds.minX + width / scale,
+        maxY: bounds.minY + height / scale
+      },
+      scale,
+      width,
+      height
+    }
+  }
 
   const scale = Math.min(width / contentW, height / contentH)
   return {
@@ -366,9 +389,10 @@ export function renderThumbnail(
   graph: SceneGraph,
   pageId: string,
   width: number,
-  height: number
+  height: number,
+  fit: ThumbnailFit = 'contain'
 ): Uint8Array<ArrayBuffer> | null {
-  const frame = thumbnailFrame(graph, pageId, width, height)
+  const frame = thumbnailFrame(graph, pageId, width, height, fit)
   if (!frame) return null
   const { bounds, scale, width: pixelW, height: pixelH } = frame
   // The page's own background, which the editor's page colour matches only while it is open.
