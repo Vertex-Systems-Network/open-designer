@@ -2,10 +2,7 @@ import { compact } from 'es-toolkit/array'
 
 import { jsx, type SyntaxNode } from '@open-designer/emit'
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
-import {
-  componentPropertyDefinitions,
-  resolveComponentPropertyValue
-} from '@open-designer/scene-graph/components'
+import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-designer/scene-graph/components'
 import { instanceMainComponent } from '@open-designer/scene-graph/instances'
 import { layoutSizing } from '@open-designer/scene-graph/layout'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
