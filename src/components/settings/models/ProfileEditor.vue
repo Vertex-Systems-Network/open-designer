@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AIProviderID } from '@open-pencil/core/constants'
+import type { AIProviderID } from '@open-designer/core/constants'
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 
 import { useI18n } from '@open-designer/vue/i18n'
