@@ -23,14 +23,7 @@ import { rekaExport, type RekaExport } from './behaviours'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
-import {
-  helperCall,
-  plainValue,
-  propAttribute,
-  Reference,
-  type JSXProp,
-  type JSXValue
-} from './value'
+import { helperCall, plainValue, propAttribute, Reference, type JSXProp, type JSXValue } from './value'
 import { variableExport, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
