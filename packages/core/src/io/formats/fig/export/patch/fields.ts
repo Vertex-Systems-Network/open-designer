@@ -70,7 +70,8 @@ async function baselineRecords(
     nextLocalId: info.nextLocalId,
     blobs: Array.from({ length: info.blobCount }, () => new Uint8Array(0)),
     recordOwners,
-    archiveRecordIds: info.recordIds
+    archiveRecordIds: info.recordIds,
+    archiveResourceIds: baseline.resourceIds
   })
   // A layer loaded after an edit has no state before it to compare with, so it is written whole.
   const ids = new Set(
