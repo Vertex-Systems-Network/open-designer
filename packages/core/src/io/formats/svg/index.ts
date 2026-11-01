@@ -7,6 +7,8 @@ export {
   nodeOutlinePath,
   type OutlineNode
 } from './export'
+export { SVGUnsupportedEffectError } from './defs'
+export type { SVGExportWarning } from './defs'
 export {
   createSVGNodes,
   createSVGNodesFromImport,
