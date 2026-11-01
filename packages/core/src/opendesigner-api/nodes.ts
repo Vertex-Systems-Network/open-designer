@@ -39,7 +39,7 @@ function editNode(graph: SceneGraph, node: SceneNode, changes: Partial<SceneNode
 /** Reflow the outermost auto-layout ancestor after a text edit changes its measured size. */
 function layoutTextAncestors(graph: SceneGraph, node: SceneNode): void {
   let root: SceneNode | null = null
-  for (let parentId = node.parentId; parentId; ) {
+  for (let parentId = node.parentId; parentId;) {
     const parent = graph.getNode(parentId)
     if (!parent) break
     if (parent.layoutMode !== 'NONE') root = parent
@@ -118,7 +118,9 @@ export function textMarkdownChanges(node: SceneNode, markdown: string): Partial<
 export function writeTextMarkdown(graph: SceneGraph, ref: NodeRef, markdown: string): void {
   const node = nodeOf(graph, ref)
   if (node.textPathData)
-    throw new Error('Markdown cannot be written to text on a path because styled path reflow is unsupported')
+    throw new Error(
+      'Markdown cannot be written to text on a path because styled path reflow is unsupported'
+    )
   const changes = textMarkdownChanges(node, markdown)
   assertTextFontsLoaded('setTextMarkdown', { ...node, ...changes })
   editNode(graph, node, { ...changes, ...textAutoResizeChanges(node, changes) })
