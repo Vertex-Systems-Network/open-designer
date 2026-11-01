@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useWindowFocus, watchImmediate } from '@vueuse/core'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { useI18n } from '@open-designer/vue/i18n'
 
+import { recoveryEnabled } from '@/app/document/recovery/preferences'
 import { useDateFormat } from '@/app/i18n/date'
 import { useNotificationMessages } from '@/app/i18n/notifications'
 import { toast } from '@/app/shell/ui'
@@ -11,7 +12,7 @@ import { formatStorageBytes } from '@/app/storage/format-bytes'
 import { allTabs } from '@/app/tabs'
 import {
   discardRecoverable,
-  recoverable,
+  matchingRecoverableSnapshots,
   refreshRecoverableSnapshots,
   restoreRecoverable,
   type RecoverableSnapshot
@@ -25,14 +26,18 @@ const notifications = useNotificationMessages()
 const dates = useDateFormat()
 const focused = useWindowFocus()
 
-const snapshots = computed(() =>
-  recoverable.value.filter((snapshot) =>
-    snapshot.documentName.toLocaleLowerCase(locale.value).includes(query)
-  )
-)
+const snapshots = computed(() => matchingRecoverableSnapshots(query, locale.value))
+const busy = ref(new Set<string>())
+
+function setBusy(id: string, value: boolean): void {
+  const next = new Set(busy.value)
+  if (value) next.add(id)
+  else next.delete(id)
+  busy.value = next
+}
 
 // A closed tab or another window that went away can leave a copy behind.
-watchImmediate([() => allTabs.value.length, focused], () => {
+watchImmediate([() => allTabs.value.length, focused, recoveryEnabled], () => {
   void refreshRecoverableSnapshots().catch((error: unknown) => {
     console.warn('[Recovery] Failed to list snapshots:', error)
   })
@@ -50,6 +55,8 @@ function menu(snapshot: RecoverableSnapshot) {
 }
 
 async function restore(snapshot: RecoverableSnapshot): Promise<void> {
+  if (busy.value.has(snapshot.id)) return
+  setBusy(snapshot.id, true)
   try {
     await restoreRecoverable(snapshot.id)
   } catch (error) {
@@ -58,13 +65,19 @@ async function restore(snapshot: RecoverableSnapshot): Promise<void> {
         error: error instanceof Error ? error.message : recovery.value.restoreFailed
       })
     )
+  } finally {
+    setBusy(snapshot.id, false)
   }
 }
 
 function discard(snapshot: RecoverableSnapshot): void {
-  void discardRecoverable(snapshot.id).catch((error: unknown) => {
-    console.warn('[Recovery] Failed to discard a snapshot:', error)
-  })
+  if (busy.value.has(snapshot.id)) return
+  setBusy(snapshot.id, true)
+  void discardRecoverable(snapshot.id)
+    .catch((error: unknown) => {
+      console.warn('[Recovery] Failed to discard a snapshot:', error)
+    })
+    .finally(() => setBusy(snapshot.id, false))
 }
 </script>
 
@@ -88,6 +101,7 @@ function discard(snapshot: RecoverableSnapshot): void {
         :name="snapshot.documentName"
         :metadata="metadata(snapshot)"
         :menu="menu(snapshot)"
+        :disabled="busy.has(snapshot.id)"
         @open="restore(snapshot)"
         @delete="discard(snapshot)"
       />
