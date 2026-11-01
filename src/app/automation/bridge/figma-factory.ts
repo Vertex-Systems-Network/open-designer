@@ -41,7 +41,7 @@ export function makeFigmaFromStore(
       if (pageId !== store.state.currentPageId || api.currentPageId !== store.state.currentPageId) {
         return false
       }
-      if (nodes.length === 0) return
+      if (nodes.length === 0) return false
       let minX = Number.POSITIVE_INFINITY
       let minY = Number.POSITIVE_INFINITY
       let maxX = Number.NEGATIVE_INFINITY
