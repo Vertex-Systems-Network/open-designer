@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { fractionalPosition } from '@open-designer/scene-graph/order-keys'
+import { movePageInGraph } from '#core/editor/pages/move'
 
 import { defineTool } from '#core/tools/schema'
 
@@ -18,21 +18,13 @@ export const movePage = defineTool({
     )
   }),
   execute: (figma, { page, index }) => {
-    const pages = figma.root.children
-    const target = pages.find((candidate) => candidate.id === page || candidate.name === page)
+    const target = figma.graph.getPages(true).find(
+      (candidate) => candidate.id === page || candidate.name === page
+    )
     if (!target) return { error: `Page "${page}" not found` }
 
-    const destination = Math.min(index, pages.length - 1)
-    figma.graph.insertChildAt(target.id, figma.graph.rootId, destination)
-    for (const [position, pageId] of figma.graph.getNode(figma.graph.rootId)!.childIds.entries()) {
-      const movedPage = figma.graph.getNode(pageId)
-      if (!movedPage) continue
-      const orderKey = fractionalPosition(position)
-      if (movedPage.source.orderKey === orderKey) continue
-      figma.graph.updateNode(movedPage.id, {
-        source: { ...movedPage.source, orderKey }
-      })
-    }
+    const destination = movePageInGraph(figma.graph, target.id, index, { includeInternal: true })
+    if (destination === null) return { error: `Page "${page}" not found` }
     return { page: target.name, id: target.id, index: destination }
   }
 })
