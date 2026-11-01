@@ -2,11 +2,14 @@ import { compact } from 'es-toolkit/array'
 
 import { jsx, type SyntaxNode } from '@open-designer/emit'
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
-import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-designer/scene-graph/components'
+import {
+  componentPropertyDefinitions,
+  resolveComponentPropertyValue
+} from '@open-designer/scene-graph/components'
+import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
 import { instanceMainComponent } from '@open-designer/scene-graph/instances'
 import { layoutSizing } from '@open-designer/scene-graph/layout'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
-import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
 
 import { componentPropertyScope } from '../component-properties'
 import {
@@ -23,7 +26,14 @@ import { rekaExport, type RekaExport } from './behaviours'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
-import { helperCall, plainValue, propAttribute, Reference, type JSXProp, type JSXValue } from './value'
+import {
+  helperCall,
+  plainValue,
+  propAttribute,
+  Reference,
+  type JSXProp,
+  type JSXValue
+} from './value'
 import { variableExport, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
