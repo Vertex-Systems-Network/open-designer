@@ -13,7 +13,7 @@ function parseViewBox(
   if (!viewBox) return neutral
   const parts = viewBox
     .trim()
-    .split(/[\\s,]+/)
+    .split(/[\s,]+/)
     .map(Number)
   if (parts.length !== 4 || !parts.every(Number.isFinite)) return neutral
   const [x, y, w, h] = parts
