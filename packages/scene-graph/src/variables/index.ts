@@ -179,11 +179,6 @@ export function removeMode(graph: SceneGraph, collectionId: string, modeId: stri
   const collection = graph.variableCollections.get(collectionId)
   if (!collection || collection.modes.length <= 1) return
   collection.modes = collection.modes.filter((m) => m.modeId !== modeId)
-  for (const node of graph.nodes.values()) {
-    if (node.variableModes[collectionId] === modeId) {
-      graph.updateNode(node.id, { variableModes: omit(node.variableModes, [collectionId]) })
-    }
-  }
   if (collection.defaultModeId === modeId) {
     collection.defaultModeId = collection.modes[0].modeId
   }
