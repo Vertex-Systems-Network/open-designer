@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { McpServer } from '@modelcontextprotocol/server'
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio'
 
-import { applyLegacyMcpEnvironment } from '#mcp/env'
+import { applyLegacyMCPEnvironment } from '#mcp/env'
 import { resolveMCPRoot } from '#mcp/root'
 import { MCP_VERSION, registerTools } from '#mcp/server'
 import { createStdioRPCBridge } from '#mcp/stdio/bridge'
@@ -13,7 +13,7 @@ import { parseDisabledTools } from '#mcp/tool/policy'
 import { narrowestScope, parseToolScope } from '#mcp/tool/scope'
 import { readDiscoveryFile } from '#mcp/transport/discovery'
 
-applyLegacyMcpEnvironment()
+applyLegacyMCPEnvironment()
 
 if (process.argv.includes('--version')) {
   process.stdout.write(`${MCP_VERSION}\n`)
