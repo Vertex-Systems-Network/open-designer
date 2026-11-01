@@ -10,6 +10,8 @@ import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-
 import { instanceMainComponent } from '@open-designer/scene-graph/instances'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 
+import { componentPropertyScope } from '../component-properties'
+
 import {
   connectorExportScope,
   connectorLabel,
@@ -24,7 +26,14 @@ import { rekaExport, type RekaExport } from './behaviours'
 import { iconProps } from './icons'
 import { collectProps, positionProps, presenceProps } from './props'
 import { textChildren } from './text'
-import { helperCall, plainValue, propAttribute, Reference, type JSXProp } from './value'
+import {
+  helperCall,
+  plainValue,
+  propAttribute,
+  Reference,
+  type JSXProp,
+  type JSXValue
+} from './value'
 import { variableExport, type VariableExport } from './variables'
 
 /** Design JSX with the layer behind each element, in the order elements open. */
@@ -123,19 +132,7 @@ function ownElement(
 
 /** The layers an export writes, by the roots it starts from. */
 function propertyDefinitionsForLayer(graph: SceneGraph, node: SceneNode) {
-  let parent = node.parentId ? graph.getNode(node.parentId) : undefined
-  while (parent) {
-    if (parent.type === 'INSTANCE') return []
-    if (parent.type === 'COMPONENT_SET') return parent.componentPropertyDefinitions
-    if (parent.type === 'COMPONENT') {
-      const set = parent.parentId ? graph.getNode(parent.parentId) : undefined
-      return set?.type === 'COMPONENT_SET'
-        ? [...set.componentPropertyDefinitions, ...parent.componentPropertyDefinitions]
-        : parent.componentPropertyDefinitions
-    }
-    parent = parent.parentId ? graph.getNode(parent.parentId) : undefined
-  }
-  return []
+  return componentPropertyScope(graph, node.id) ?? []
 }
 
 function componentPropertyProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
@@ -169,6 +166,19 @@ function mergeProps(...groups: readonly JSXProp[][]): JSXProp[] {
   return [...merged.entries()]
 }
 
+function assignedPropertyValues(
+  definitions: ReturnType<typeof componentPropertyDefinitions>,
+  assignments: Readonly<Record<string, unknown>>
+): Record<string, JSXValue> {
+  const values: Record<string, JSXValue> = {}
+  for (const [id, value] of Object.entries(assignments)) {
+    const definition = definitions.find((candidate) => candidate.id === id)
+    if (!definition || (typeof value !== 'string' && typeof value !== 'boolean')) continue
+    values[definition.name] = value
+  }
+  return values
+}
+
 function nestedInstancePropertyOverrides(
   graph: SceneGraph,
   instance: SceneNode
@@ -179,12 +189,7 @@ function nestedInstancePropertyOverrides(
       const childPath = [...path, index]
       if (child.type === 'INSTANCE') {
         const definitions = componentPropertyDefinitions(graph, child)
-        const values = Object.fromEntries(
-          Object.entries(child.componentPropertyAssignments).flatMap(([id, value]) => {
-            const definition = definitions.find((candidate) => candidate.id === id)
-            return definition ? [[definition.name, value]] : []
-          })
-        )
+        const values = assignedPropertyValues(definitions, child.componentPropertyAssignments)
         if (Object.keys(values).length > 0) {
           overrides[`@path(${childPath.join('.')}):properties`] = values
         }
@@ -205,12 +210,7 @@ function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
   )
   if (component && !hasSwapBinding) props.push(['of', component.id])
   const definitions = componentPropertyDefinitions(graph, node)
-  const values = Object.fromEntries(
-    Object.entries(node.componentPropertyAssignments).flatMap(([id, value]) => {
-      const definition = definitions.find((candidate) => candidate.id === id)
-      return definition ? [[definition.name, value]] : []
-    })
-  )
+  const values = assignedPropertyValues(definitions, node.componentPropertyAssignments)
   if (Object.keys(values).length > 0) props.push(['properties', values])
   const nestedOverrides = nestedInstancePropertyOverrides(graph, node)
   if (Object.keys(nestedOverrides).length > 0) props.push(['overrides', nestedOverrides])
