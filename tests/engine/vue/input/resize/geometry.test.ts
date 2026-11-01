@@ -1,7 +1,13 @@
 import { describe, expect, test } from 'bun:test'
 
 import { createEditor } from '@open-designer/core'
-import type { Fill, GeometryPath, SceneNode, Stroke, VectorNetwork } from '@open-designer/scene-graph'
+import type {
+  Fill,
+  GeometryPath,
+  SceneNode,
+  Stroke,
+  VectorNetwork
+} from '@open-designer/scene-graph'
 import { copyGeometryPaths, copyStrokes } from '@open-designer/scene-graph/copy'
 import { collectResizeDescendants } from '@open-designer/scene-graph/resize'
 import { cloneVectorNetwork } from '@open-designer/scene-graph/vector-network'

@@ -1,6 +1,10 @@
 import { isEqual } from 'es-toolkit'
 
-import { SceneGraph, type DocumentKind, type EnabledLibraryBinding } from '@open-designer/scene-graph'
+import {
+  SceneGraph,
+  type DocumentKind,
+  type EnabledLibraryBinding
+} from '@open-designer/scene-graph'
 
 import { BOARD_PAGE_BACKGROUND, type InterfaceTheme } from '#core/constants'
 import { offeredTool } from '#core/editor/views'
@@ -9,7 +13,10 @@ import { setDefaultPageBackground, setPageBackgrounds } from '#core/figma-api/pa
 import type { EditorContext } from './types'
 
 /** A design starts on its interface theme's page; a board keeps FigJam's light page. */
-export function createDocumentGraph(kind: DocumentKind, theme: InterfaceTheme = 'light'): SceneGraph {
+export function createDocumentGraph(
+  kind: DocumentKind,
+  theme: InterfaceTheme = 'light'
+): SceneGraph {
   const graph = new SceneGraph()
   graph.documentKind = kind
   const [page] = graph.getPages()

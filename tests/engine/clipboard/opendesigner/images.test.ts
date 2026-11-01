@@ -3,7 +3,10 @@ import { describe, expect, test } from 'bun:test'
 import { deflateSync } from 'fflate'
 import { fromUint8Array } from 'js-base64'
 
-import { buildOpenDesignerClipboardHTML, parseOpenDesignerClipboard } from '@open-designer/core/clipboard'
+import {
+  buildOpenDesignerClipboardHTML,
+  parseOpenDesignerClipboard
+} from '@open-designer/core/clipboard'
 import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 import {
   getInstanceOverride,

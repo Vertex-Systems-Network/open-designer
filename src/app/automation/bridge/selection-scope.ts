@@ -33,7 +33,9 @@ export function limitToSelection(
   const fields = SELECTION_SCOPE_TOOLS[toolName]
   const selected = [...store.state.selectedIds]
   if (selected.length === 0) {
-    throw new Error('Nothing is selected in OpenDesigner. Ask the user to select the layers to use.')
+    throw new Error(
+      'Nothing is selected in OpenDesigner. Ask the user to select the layers to use.'
+    )
   }
 
   const ids = fields.flatMap((field) => namedIds(toolArgs[field]))

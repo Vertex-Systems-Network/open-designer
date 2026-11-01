@@ -10,7 +10,10 @@ import type {
   TextBindableField,
   TextBoundVariables
 } from '@open-designer/scene-graph'
-import { boundNumberValue, isNumericVariableBindingField } from '@open-designer/scene-graph/variables'
+import {
+  boundNumberValue,
+  isNumericVariableBindingField
+} from '@open-designer/scene-graph/variables'
 
 import { cloneRecord } from '../clone'
 import { linearVariableExpression } from './expression'

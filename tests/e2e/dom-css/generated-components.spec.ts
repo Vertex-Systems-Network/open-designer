@@ -7,7 +7,11 @@ import { createServer, type PluginOption, type ViteDevServer } from 'vite'
 
 import { exportStorybook } from '@open-designer/dom-css'
 import { SceneGraph, type ComponentPropertyReference } from '@open-designer/scene-graph'
-import { emptyBehaviour, withBehaviour, type Behaviour } from '@open-designer/scene-graph/behaviours'
+import {
+  emptyBehaviour,
+  withBehaviour,
+  type Behaviour
+} from '@open-designer/scene-graph/behaviours'
 
 import { expect, test } from '../fixtures'
 

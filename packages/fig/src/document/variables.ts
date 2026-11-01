@@ -17,7 +17,11 @@ import {
 
 import { extractPluginData } from '../node-change/plugin-data'
 import { formulaOperatorOfFigmaFunction } from '../node-change/variable/formula'
-import { hasLocalLibraryMarker, readVariableMetadata, withoutLocalLibraryMarker } from '../node-change/variable/metadata'
+import {
+  hasLocalLibraryMarker,
+  readVariableMetadata,
+  withoutLocalLibraryMarker
+} from '../node-change/variable/metadata'
 import {
   readModeAttribute,
   readModeConditions,

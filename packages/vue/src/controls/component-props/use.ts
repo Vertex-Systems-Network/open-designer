@@ -1,7 +1,10 @@
 import { computed, watch } from 'vue'
 
 import type { ComponentPropertyDefinition, SceneNode } from '@open-designer/scene-graph'
-import { exposedInstances, findComponentPropertyTargets } from '@open-designer/scene-graph/components'
+import {
+  exposedInstances,
+  findComponentPropertyTargets
+} from '@open-designer/scene-graph/components'
 
 import {
   compatibleComponentPropertyDefinitions,

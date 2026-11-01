@@ -1,7 +1,11 @@
 import { groupBy } from 'es-toolkit/array'
 
 import type { NodeChange } from '@open-designer/kiwi/fig/codec'
-import type { CharacterStyleOverride, DerivedTextGlyph, SceneNode } from '@open-designer/scene-graph'
+import type {
+  CharacterStyleOverride,
+  DerivedTextGlyph,
+  SceneNode
+} from '@open-designer/scene-graph'
 import { faceStyleKey, normalizeFontFamily } from '@open-designer/scene-graph/font-style'
 import { rangeFontStyle } from '@open-designer/scene-graph/shared-styles'
 import {

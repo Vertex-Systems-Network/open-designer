@@ -98,7 +98,10 @@ function extensionsOf(node: Record<string, unknown>): Record<string, unknown> {
 
 /** The collection and mode a file says it holds, which OpenDesigner writes into each mode file. */
 function modeInfo(parsed: Record<string, unknown> | undefined) {
-  const own = v.safeParse(modeExtensionSchema, parsed && extensionsOf(parsed)[OPENDESIGNER_EXTENSION])
+  const own = v.safeParse(
+    modeExtensionSchema,
+    parsed && extensionsOf(parsed)[OPENDESIGNER_EXTENSION]
+  )
   return own.success ? own.output : {}
 }
 

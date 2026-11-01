@@ -42,7 +42,8 @@ function sharedPluginDataKey(entry: PluginDataEntry, namespace: string): string 
 
 export function getPluginData(node: SceneNode, key: string): string {
   return (
-    node.pluginData.find((entry) => isOpenDesignerPluginData(entry) && entry.key === key)?.value ?? ''
+    node.pluginData.find((entry) => isOpenDesignerPluginData(entry) && entry.key === key)?.value ??
+    ''
   )
 }
 

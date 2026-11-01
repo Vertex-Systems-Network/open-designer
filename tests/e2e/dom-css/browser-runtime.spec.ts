@@ -1,4 +1,8 @@
-import { compileTailwindCSS, jsxToDesignDocument, type DesignDocument } from '@open-designer/dom-css'
+import {
+  compileTailwindCSS,
+  jsxToDesignDocument,
+  type DesignDocument
+} from '@open-designer/dom-css'
 import { jsx } from '@open-designer/dom-css/browser'
 import { designDocumentToSceneGraph } from '@open-designer/dom-css/scene-graph'
 

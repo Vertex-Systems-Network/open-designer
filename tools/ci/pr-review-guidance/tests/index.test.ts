@@ -109,7 +109,9 @@ describe('monitorPRReviewGuidance', () => {
       log: (message) => messages.push(message)
     })
 
-    expect(requests).toEqual(['GET https://example.test/repos/open-designer/open-designer/pulls/294'])
+    expect(requests).toEqual([
+      'GET https://example.test/repos/open-designer/open-designer/pulls/294'
+    ])
     expect(messages.join('\n')).toContain('No automatic label, comment, or close was applied')
   })
 

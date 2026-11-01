@@ -125,7 +125,8 @@ try {
     )
     await page.evaluate(() => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenDesigner store not available after opening benchmark document')
+      if (!store)
+        throw new Error('OpenDesigner store not available after opening benchmark document')
       store.zoomToFit()
     })
   } else {

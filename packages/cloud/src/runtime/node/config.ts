@@ -11,6 +11,7 @@ export async function loadNodeCloudServerConfig(
   environment: CloudEnvironment
 ): Promise<CloudServerConfig> {
   const path = environment.OPENDESIGNER_CLOUD_CONFIG
-  if (!path) throw new CloudConfigError('OPENDESIGNER_CLOUD_CONFIG must name a deployment TOML file')
+  if (!path)
+    throw new CloudConfigError('OPENDESIGNER_CLOUD_CONFIG must name a deployment TOML file')
   return parseCloudDeploymentTOML(await readFile(path, 'utf8'), environment)
 }

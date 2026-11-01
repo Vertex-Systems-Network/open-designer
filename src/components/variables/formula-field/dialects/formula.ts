@@ -6,7 +6,6 @@ import {
 import { StreamLanguage } from '@codemirror/language'
 import type { EditorState } from '@codemirror/state'
 import { tags } from '@lezer/highlight'
-
 import {
   formulaTokens,
   readFormulaToken,

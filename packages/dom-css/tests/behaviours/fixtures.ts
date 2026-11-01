@@ -1,5 +1,9 @@
 import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
-import { emptyBehaviour, withBehaviour, type Behaviour } from '@open-designer/scene-graph/behaviours'
+import {
+  emptyBehaviour,
+  withBehaviour,
+  type Behaviour
+} from '@open-designer/scene-graph/behaviours'
 import { withIcon } from '@open-designer/scene-graph/icons'
 
 const solid = (r: number, g: number, b: number) => [

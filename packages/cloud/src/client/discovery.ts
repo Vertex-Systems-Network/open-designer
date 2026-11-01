@@ -58,7 +58,11 @@ function discoveryURL(serverURL: string): URL {
 function parseDiscoveryBody(text: string): CloudDiscovery {
   const body = v.safeParse(discoveryBodySchema, text)
   if (!body.success) {
-    throw new CloudClientError('OpenDesigner server discovery is not JSON', body.issues, 'not-cloud')
+    throw new CloudClientError(
+      'OpenDesigner server discovery is not JSON',
+      body.issues,
+      'not-cloud'
+    )
   }
   const discovery = v.safeParse(cloudDiscoverySchema, body.output)
   if (discovery.success) return discovery.output

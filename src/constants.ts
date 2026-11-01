@@ -87,7 +87,8 @@ export const CLOUD_WAITLIST_URL = 'https://openpencil.dev/#cloud'
  * editor build names that deployment, such as staging.
  */
 export const OFFICIAL_CLOUD_URL =
-  (typeof __OPENDESIGNER_OFFICIAL_CLOUD_URL__ === 'string' && __OPENDESIGNER_OFFICIAL_CLOUD_URL__) ||
+  (typeof __OPENDESIGNER_OFFICIAL_CLOUD_URL__ === 'string' &&
+    __OPENDESIGNER_OFFICIAL_CLOUD_URL__) ||
   'https://cloud.openpencil.dev'
 /** Whether this is the editor a Cloud server serves on its own address (`bun run build:cloud`). */
 export const IS_CLOUD_SITE =

@@ -408,8 +408,11 @@ function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
     const endX = values.at(-2)
     const endY = values.at(-1)
     if (endX === undefined || endY === undefined) return
-    if (command === 'A' && roundPathCoordinate(x) === roundPathCoordinate(endX) &&
-        roundPathCoordinate(y) === roundPathCoordinate(endY)) {
+    if (
+      command === 'A' &&
+      roundPathCoordinate(x) === roundPathCoordinate(endX) &&
+      roundPathCoordinate(y) === roundPathCoordinate(endY)
+    ) {
       collapsed = true
     }
     x = endX

@@ -1,7 +1,10 @@
 import type { Page, Route } from '@playwright/test'
 
 /** Route-owned counts live in the runner, not on window or in a patched fetch. */
-export async function mockGoogleFonts(page: Page, families = ['Inter', 'OpenDesigner Google Font']) {
+export async function mockGoogleFonts(
+  page: Page,
+  families = ['Inter', 'OpenDesigner Google Font']
+) {
   const counts = { metadata: 0, previews: 0 }
   const pattern =
     /^https:\/\/(fonts\.opendesigner\.test\/|fonts\.google\.com\/metadata\/fonts|fonts\.googleapis\.com\/css2)/

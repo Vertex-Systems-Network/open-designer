@@ -1,7 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
 import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
-import { createLibraryRevision, discoverPublishableLibraryChanges } from '@open-designer/core/library'
+import {
+  createLibraryRevision,
+  discoverPublishableLibraryChanges
+} from '@open-designer/core/library'
 import { initCodec } from '@open-designer/kiwi/fig/codec'
 import { SceneGraph } from '@open-designer/scene-graph'
 

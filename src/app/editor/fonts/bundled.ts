@@ -1,7 +1,6 @@
 import harfBuzzSubset from 'harfbuzzjs/dist/harfbuzz-subset.wasm?url'
 
 import caveatVariable from '@open-designer/core/assets/CaveatVariable.woff2?url'
-
 import interSemiBold from '@open-designer/core/assets/Inter-SemiBold.ttf?url'
 import interVariableItalic from '@open-designer/core/assets/InterVariable-Italic.ttf?url'
 import interVariable from '@open-designer/core/assets/InterVariable.ttf?url'

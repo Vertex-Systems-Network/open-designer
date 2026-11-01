@@ -12,7 +12,11 @@ function enabledLibraries(value: string) {
   const graph = new SceneGraph()
   applyDocumentMetadata(graph, {
     pluginData: [
-      { pluginID: OPEN_DESIGNER_PLUGIN_ID, key: OPEN_DESIGNER_PLUGIN_DATA.enabledLibraries.key, value }
+      {
+        pluginID: OPEN_DESIGNER_PLUGIN_ID,
+        key: OPEN_DESIGNER_PLUGIN_DATA.enabledLibraries.key,
+        value
+      }
     ]
   })
   return [...graph.enabledLibraries.values()]

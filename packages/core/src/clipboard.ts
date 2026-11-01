@@ -70,7 +70,9 @@ export function importClipboardNodes(
 function clipboardGraph(graph: SceneGraph): SceneGraph {
   const unkeyed =
     [...graph.variables.values()].some((variable) => !variable.key && !variable.isLocal) ||
-    [...graph.variableCollections.values()].some((collection) => !collection.key && !collection.isLocal)
+    [...graph.variableCollections.values()].some(
+      (collection) => !collection.key && !collection.isLocal
+    )
   if (!unkeyed) return graph
   const copy = cloneSceneGraphForFigExport(graph)
   copy.variableCollections = new Map(

@@ -4,7 +4,14 @@
  * It is a component with text properties, so its instances are the first thing a visitor who
  * clicks one sees in the panel.
  */
-import { Component, Frame, Instance, Text, property, type TreeNode } from '@open-designer/design-jsx'
+import {
+  Component,
+  Frame,
+  Instance,
+  Text,
+  property,
+  type TreeNode
+} from '@open-designer/design-jsx'
 import type { SceneGraph } from '@open-designer/scene-graph'
 import { createComponentPropertyId } from '@open-designer/scene-graph/components'
 import { createSlotProperty, updateSlotProperty } from '@open-designer/scene-graph/slots'

@@ -38,8 +38,8 @@ import {
   type FontAxis,
   type NamedInstance
 } from '#core/text/font/variation'
-import { collectGraphFontKeys } from '#core/text/requirements/collect'
 import { sfntFont } from '#core/text/font/woff2'
+import { collectGraphFontKeys } from '#core/text/requirements/collect'
 import { normalizedCoverageText, WebFontResolver } from '#core/text/web-font/resolver'
 import type { WebFontFetch, WebFontProviderId } from '#core/text/web-font/resolver'
 

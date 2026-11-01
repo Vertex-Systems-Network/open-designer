@@ -1,8 +1,7 @@
 <script setup lang="ts">
+import { useI18n } from '@open-pencil/vue/i18n'
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
-
-import { useI18n } from '@open-pencil/vue/i18n'
 
 import type { OnboardingConnectionState } from '@/app/ai/models/settings/onboarding/connections'
 import type {

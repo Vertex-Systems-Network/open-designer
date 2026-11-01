@@ -34,7 +34,10 @@ function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
   if (error == null || seen.has(error)) return []
   seen.add(error)
   if (error instanceof AggregateError)
-    return [...errorMessages(error.message, seen), ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()]
+    return [
+      ...errorMessages(error.message, seen),
+      ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()
+    ]
   if (error instanceof Error) return [error.message, ...errorMessages(error.cause, seen)]
   return [String(error)]
 }

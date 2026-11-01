@@ -82,7 +82,11 @@ export function withBehaviour(
   owner: SceneNode,
   behaviour: Behaviour | null
 ): SceneNode['pluginData'] {
-  return withPluginData(owner.pluginData, OPEN_DESIGNER_PLUGIN_DATA.behaviour, behaviour ?? undefined)
+  return withPluginData(
+    owner.pluginData,
+    OPEN_DESIGNER_PLUGIN_DATA.behaviour,
+    behaviour ?? undefined
+  )
 }
 
 /** Component properties the behaviour can bind to: the owner's, and a set's variants' own. */

@@ -74,7 +74,9 @@ export const exportSVG = defineTool({
     skip_unsupported_effects: v.optional(
       v.pipe(
         v.boolean(),
-        v.description('Omit unsupported SVG effects such as background blur instead of returning a warning.')
+        v.description(
+          'Omit unsupported SVG effects such as background blur instead of returning a warning.'
+        )
       ),
       false
     )

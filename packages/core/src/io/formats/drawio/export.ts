@@ -9,7 +9,12 @@ import type {
   DrawIOPoint,
   DrawIOStyle
 } from '@open-designer/drawio'
-import type { ConnectorEndpoint, SceneGraph, SceneNode, StrokeCap } from '@open-designer/scene-graph'
+import type {
+  ConnectorEndpoint,
+  SceneGraph,
+  SceneNode,
+  StrokeCap
+} from '@open-designer/scene-graph'
 import { colorToHex } from '@open-designer/scene-graph/color'
 import {
   connectorRoute,

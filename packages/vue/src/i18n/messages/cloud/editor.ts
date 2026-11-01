@@ -50,7 +50,8 @@ export const cloudMessageDefaults = {
   errorNotCloudDescription:
     'The address answered, but not as OpenDesigner Cloud. Ask your team for the right one.',
   errorOutdatedHeading: 'This server needs an update',
-  errorOutdatedDescription: 'It runs an older version of OpenDesigner Cloud than this app supports.',
+  errorOutdatedDescription:
+    'It runs an older version of OpenDesigner Cloud than this app supports.',
   errorDeniedHeading: 'Sign-in was denied',
   errorDeniedDescription: 'The request was turned down in the browser. Start again to sign in.',
   errorExpiredHeading: 'The code expired',

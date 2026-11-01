@@ -1,6 +1,6 @@
 import { createHead } from '@unhead/vue/client'
-import { createApp, nextTick } from 'vue'
 import { registerSW } from 'virtual:pwa-register'
+import { createApp, nextTick } from 'vue'
 
 import { ReadOnlyDocumentError } from '@open-designer/core'
 import { createRetainedScopePlugin } from '@open-designer/vue/lifecycle/retention'

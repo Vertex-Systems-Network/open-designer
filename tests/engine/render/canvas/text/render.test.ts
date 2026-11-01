@@ -6,7 +6,10 @@ import { SkiaRenderer as SkiaRendererClass } from '@open-designer/core/canvas'
 import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
 import { pixelLength } from '@open-designer/scene-graph/text'
-import { detectTextDirection, resolveTextDirection } from '@open-designer/scene-graph/text/direction'
+import {
+  detectTextDirection,
+  resolveTextDirection
+} from '@open-designer/scene-graph/text/direction'
 
 import { initCanvasKit } from '#cli/headless'
 import type { SkiaRenderer } from '#core/canvas/renderer'

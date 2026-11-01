@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
-
 import { useVariantAuthoring } from '@open-pencil/vue/controls/variants'
 import { useI18n } from '@open-pencil/vue/i18n'
+import { computed, reactive, ref, watch } from 'vue'
 
 import AppInput from '@/components/ui/input/AppInput.vue'
 import PanelFieldGroup from '@/components/ui/panel/PanelFieldGroup.vue'

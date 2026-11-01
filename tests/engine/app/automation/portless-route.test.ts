@@ -31,7 +31,9 @@ describe('Portless MCP routing', () => {
   })
 
   test('preserves the worktree prefix for the MCP service', () => {
-    expect(devAutomationRoute('https://portless-mcp-routing.open-designer.localhost', 7600)).toEqual({
+    expect(
+      devAutomationRoute('https://portless-mcp-routing.open-designer.localhost', 7600)
+    ).toEqual({
       browserURL: 'wss://portless-mcp-routing.mcp.open-designer.localhost',
       corsOrigin: 'https://portless-mcp-routing.open-designer.localhost',
       portlessServiceName: 'mcp.open-designer',

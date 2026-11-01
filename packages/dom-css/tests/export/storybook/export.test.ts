@@ -164,7 +164,9 @@ describe('exportStorybook', () => {
     const badge = graph.createNode('COMPONENT', page.id, { name: 'Badge' })
     card(graph, badge.id, BLUE_500)
     const files = await exportStorybook(graph, { framework: 'html', document: 'Kit' })
-    const tokens = String(files.find((file) => file.path === 'opendesigner/kit/tokens.css')?.content)
+    const tokens = String(
+      files.find((file) => file.path === 'opendesigner/kit/tokens.css')?.content
+    )
     // The story refers to the variable; the tokens define it.
     const story = String(files.find((file) => file.path === 'Badge.stories.ts')?.content)
     expect(story).toContain('var(--color-primary)')

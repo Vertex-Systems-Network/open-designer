@@ -3,7 +3,11 @@ import { RadioGroupItem, RadioGroupRoot } from 'reka-ui'
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import { useCloudMessages, useCloudPortalMessages, useCommonMessages } from '@open-designer/vue/i18n'
+import {
+  useCloudMessages,
+  useCloudPortalMessages,
+  useCommonMessages
+} from '@open-designer/vue/i18n'
 
 import {
   cloudAuthFailureMessage,

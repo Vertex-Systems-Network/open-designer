@@ -1,4 +1,9 @@
-import type { SceneGraph, SceneNode, Variable, VariableCollection } from '@open-designer/scene-graph'
+import type {
+  SceneGraph,
+  SceneNode,
+  Variable,
+  VariableCollection
+} from '@open-designer/scene-graph'
 import { remapStyleRunReferences, styleRunReferences } from '@open-designer/scene-graph/text'
 import {
   isUnsupportedVariableValue,

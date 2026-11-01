@@ -11,7 +11,6 @@ import { resolveEditorProfile } from '#core/editor/views/profile'
 import { emitNavigationTrace } from '#core/profiler'
 
 import { disposePathCaches } from './lifecycle'
-
 import { drawChromePass, drawLabelPass, drawOverlayPass } from './overlay-pass'
 import { renderSceneBacking, updateSceneBackingPreviewState } from './retained-backing'
 import { invalidateAllPictures, invalidateScenePicture } from './state'
@@ -247,7 +246,15 @@ export function render(
     }
     canvas = r.surface.getCanvas()
     saveCount = canvas.getSaveCount()
-    drawFrame(r, graph, selectedIds, overlays, sceneVersion, layer, interactive || guard.health === 'degraded')
+    drawFrame(
+      r,
+      graph,
+      selectedIds,
+      overlays,
+      sceneVersion,
+      layer,
+      interactive || guard.health === 'degraded'
+    )
   } catch (error) {
     recoverFromFailedFrame(r, canvas, saveCount, error)
     return false

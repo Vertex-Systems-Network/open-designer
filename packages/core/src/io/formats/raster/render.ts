@@ -3,7 +3,10 @@ import type { CanvasKit, Canvas } from 'canvaskit-wasm'
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import type { RenderColorSpace } from '@open-designer/scene-graph/color'
 import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
-import { computeDescendantVisualBounds, type VisualBounds } from '@open-designer/scene-graph/geometry'
+import {
+  computeDescendantVisualBounds,
+  type VisualBounds
+} from '@open-designer/scene-graph/geometry'
 import type { Mat3 } from '@open-designer/scene-graph/matrix'
 
 import type { SkiaRenderer } from '#core/canvas'

@@ -13,9 +13,7 @@ import { keepsSavedLayout, usesDetachedDerivedLayout } from './derived'
 export type ComputeLayoutFn = (graph: SceneGraph, frameId: string) => void
 
 /** The per-axis extent of a network, including Bézier control points. */
-function networkExtent(
-  network: VectorNetwork | null
-): { width: number; height: number } | null {
+function networkExtent(network: VectorNetwork | null): { width: number; height: number } | null {
   if (!network || network.vertices.length === 0) return null
   let minX = Number.POSITIVE_INFINITY
   let maxX = Number.NEGATIVE_INFINITY
@@ -77,7 +75,12 @@ export function rescaleVectorNetworkForLayout(
   )
 }
 
-type LayoutGeometry = Partial<Pick<SceneNode, 'x' | 'y' | 'width' | 'height' | 'vectorNetwork' | 'fillGeometry' | 'strokeGeometry'>>
+type LayoutGeometry = Partial<
+  Pick<
+    SceneNode,
+    'x' | 'y' | 'width' | 'height' | 'vectorNetwork' | 'fillGeometry' | 'strokeGeometry'
+  >
+>
 
 /**
  * Writes only the geometry layout changed. Laying out a large page leaves most layers where they
@@ -110,13 +113,9 @@ function writeLayoutGeometry(
     const remembered = lastBoxWithSize.get(id)
     const extent = networkExtent(node.vectorNetwork)
     const sourceWidth =
-      positiveSize(node.width) ??
-      positiveSize(remembered?.width) ??
-      positiveSize(extent?.width)
+      positiveSize(node.width) ?? positiveSize(remembered?.width) ?? positiveSize(extent?.width)
     const sourceHeight =
-      positiveSize(node.height) ??
-      positiveSize(remembered?.height) ??
-      positiveSize(extent?.height)
+      positiveSize(node.height) ?? positiveSize(remembered?.height) ?? positiveSize(extent?.height)
     const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
     const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
     const targetWidth = positiveSize(toWidth) ?? effectiveWidth

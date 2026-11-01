@@ -1,5 +1,10 @@
 import type { Editor } from '@open-designer/core'
-import { isLineLike, lineWorldEnds, TRANSFORM_ZONE, type LineEnd } from '@open-designer/core/geometry'
+import {
+  isLineLike,
+  lineWorldEnds,
+  TRANSFORM_ZONE,
+  type LineEnd
+} from '@open-designer/core/geometry'
 import { layerRotates } from '@open-designer/scene-graph/generated'
 
 import type { DragState } from '#vue/shared/input/types'

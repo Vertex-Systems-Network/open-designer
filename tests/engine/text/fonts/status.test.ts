@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
-import { FontManager, documentFontStatus, UnsupportedFontFormatError } from '@open-designer/core/text'
+import {
+  FontManager,
+  documentFontStatus,
+  UnsupportedFontFormatError
+} from '@open-designer/core/text'
 import { SceneGraph } from '@open-designer/scene-graph'
 
 function pageId(graph: SceneGraph): string {

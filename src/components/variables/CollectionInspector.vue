@@ -221,7 +221,6 @@ function attributeDone(event: KeyboardEvent) {
           <DropdownMenuPortal>
             <DropdownMenuContent side="bottom" :side-offset="4" align="end" :class="menu.content">
               <MenuScrollArea>
-
                 <DropdownMenuItem
                   v-if="isLibraryCollection(collection)"
                   :class="menu.item"

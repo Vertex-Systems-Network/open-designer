@@ -1,8 +1,8 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import type { Size } from '@open-designer/scene-graph/primitives'
 
-import { getTextMeasurer } from './text-measurement'
 import { primaryAxisGap, siblingOverlap } from './item-spacing'
+import { getTextMeasurer } from './text-measurement'
 
 type LayoutAxis = 'width' | 'height'
 

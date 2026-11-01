@@ -1,4 +1,8 @@
-import type { DesignElement, DesignNode, VectorElementRenderer } from '@open-designer/dom-css/export'
+import type {
+  DesignElement,
+  DesignNode,
+  VectorElementRenderer
+} from '@open-designer/dom-css/export'
 import { colorToHex } from '@open-designer/scene-graph/color'
 import { isIconModified, readIcon, readIconTint } from '@open-designer/scene-graph/icons'
 

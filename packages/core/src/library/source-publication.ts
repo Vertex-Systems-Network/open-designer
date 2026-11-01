@@ -7,7 +7,9 @@ import {
 
 export function readSourceLibraryPublication(graph: SceneGraph): SourceLibraryPublication | null {
   const root = graph.getNode(graph.rootId)
-  return readPluginData(root?.pluginData, OPEN_DESIGNER_PLUGIN_DATA.sourceLibraryPublication) ?? null
+  return (
+    readPluginData(root?.pluginData, OPEN_DESIGNER_PLUGIN_DATA.sourceLibraryPublication) ?? null
+  )
 }
 
 export function writeSourceLibraryPublication(

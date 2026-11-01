@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useViewportKind } from '@open-pencil/vue/editor/viewport-kind'
+import { useI18n } from '@open-pencil/vue/i18n'
 import { tryOnScopeDispose } from '@vueuse/core'
 import { AlertDialogCancel, DialogClose } from 'reka-ui'
 import { computed, type Component } from 'vue'
@@ -16,9 +18,6 @@ import IconShield from '~icons/lucide/shield'
 import IconSlidersHorizontal from '~icons/lucide/sliders-horizontal'
 import IconSparkles from '~icons/lucide/sparkles'
 import IconType from '~icons/lucide/type'
-
-import { useViewportKind } from '@open-pencil/vue/editor/viewport-kind'
-import { useI18n } from '@open-pencil/vue/i18n'
 
 import { CLOUD_INCLUDED } from '@/app/cloud/integration'
 import {

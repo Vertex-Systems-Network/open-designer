@@ -63,7 +63,10 @@ export function createOpenDesignerAliases(rootDir: string, options: { cloud?: bo
       find: /^@open-designer\/scene-graph$/,
       replacement: resolve(rootDir, 'packages/scene-graph/src/index.ts')
     },
-    { find: '@open-designer/scene-graph', replacement: resolve(rootDir, 'packages/scene-graph/src') },
+    {
+      find: '@open-designer/scene-graph',
+      replacement: resolve(rootDir, 'packages/scene-graph/src')
+    },
     { find: '#cloud', replacement: resolve(rootDir, 'packages/cloud/src') },
     {
       find: /^@open-designer\/cloud\/(contract|client)$/,

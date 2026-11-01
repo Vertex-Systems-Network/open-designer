@@ -2,7 +2,10 @@
 import { computed } from 'vue'
 
 import { MIXED } from '@open-designer/vue/controls/node-props'
-import { useSelectionLayout, type TextResizeMode } from '@open-designer/vue/controls/selection-layout'
+import {
+  useSelectionLayout,
+  type TextResizeMode
+} from '@open-designer/vue/controls/selection-layout'
 import { useI18n } from '@open-designer/vue/i18n'
 
 import Tip from '@/components/ui/overlay/Tip.vue'

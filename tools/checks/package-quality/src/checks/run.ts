@@ -1,6 +1,10 @@
 import { compact, mapAsync } from 'es-toolkit'
 
-import { CommandError, runCommand, type CommandRequest } from '@open-designer/package-artifacts-tools'
+import {
+  CommandError,
+  runCommand,
+  type CommandRequest
+} from '@open-designer/package-artifacts-tools'
 
 /** Drain every check before reporting failures, so callers can safely remove shared fixtures. */
 export async function runPackageChecks(

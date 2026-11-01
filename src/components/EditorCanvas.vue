@@ -328,7 +328,10 @@ const cursor = computed(() =>
             <p v-if="renderHealth.error" class="break-words text-xs text-muted-foreground">
               {{ renderHealth.error }}
             </p>
-            <button class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground" @click="restartEditor">
+            <button
+              class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground"
+              @click="restartEditor"
+            >
               Reload editor
             </button>
           </div>
