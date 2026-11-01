@@ -86,12 +86,19 @@ function lineStroke(node: SceneNode): { weight: number; cap: StrokeCap } {
  * caps, so the stroke it keeps lies where it did (live-verified).
  */
 export function makeLineSegmentPath(r: SkiaRenderer, node: SceneNode): Path {
+  const stroke = node.strokes.find((item) => item.visible)
   const { weight, cap } = lineStroke(node)
-  const [start, end] = lineStrokePath(node, weight, cap).network.vertices
-  const segment = new r.ck.PathBuilder()
-  segment.moveTo(start.x, start.y)
-  segment.lineTo(end.x, end.y)
-  return segment.detachAndDelete()
+  const { from, to } = lineStrokePath(node, weight, cap)
+  const length = Math.hypot(to.x - from.x, to.y - from.y)
+  const pattern = normalizeDashPattern(stroke?.dashPattern)
+  const spans = pattern.length > 0 ? sideDashSpans(length, pattern) : [[0, length]]
+  const path = new r.ck.PathBuilder()
+  for (const [start, end] of spans) {
+    const at = (distance: number) => (length > 0 ? distance / length : 0)
+    path.moveTo(from.x + (to.x - from.x) * at(start), from.y + (to.y - from.y) * at(start))
+    path.lineTo(from.x + (to.x - from.x) * at(end), to.y + (to.y - from.y) * at(end))
+  }
+  return path.detachAndDelete()
 }
 
 export function makeLineStrokeOutline(r: SkiaRenderer, node: SceneNode): Path | null {
