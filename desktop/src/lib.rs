@@ -27,8 +27,55 @@ use std::sync::Mutex;
 use system::window::show_main_window;
 use tauri::{Emitter, Manager};
 
+/// The arguments to relaunch with when `--detach` is among them, without the flag.
+#[cfg(unix)]
+fn detach_args(
+    args: impl IntoIterator<Item = std::ffi::OsString>,
+) -> Option<Vec<std::ffi::OsString>> {
+    let mut args: Vec<_> = args.into_iter().collect();
+    let index = args.iter().position(|arg| arg == "--detach")?;
+    args.remove(index);
+    Some(args)
+}
+
+/// Relaunch in a new session so closing the terminal does not close the editor.
+#[cfg(unix)]
+fn detach_if_requested() {
+    use std::os::unix::process::CommandExt;
+    use std::process::{Command, Stdio};
+
+    let Some(args) = detach_args(std::env::args_os().skip(1)) else {
+        return;
+    };
+    let executable = std::env::current_exe().unwrap_or_else(|error| {
+        eprintln!("--detach: cannot locate the executable: {error}");
+        std::process::exit(1);
+    });
+    let mut command = Command::new(executable);
+    command.args(args).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null());
+    // SAFETY: setsid is async-signal-safe and touches no state of the parent.
+    unsafe {
+        command.pre_exec(|| {
+            if libc::setsid() == -1 {
+                return Err(std::io::Error::last_os_error());
+            }
+            Ok(())
+        });
+    }
+    match command.spawn() {
+        Ok(_) => std::process::exit(0),
+        Err(error) => {
+            eprintln!("--detach: cannot start the editor: {error}");
+            std::process::exit(1);
+        }
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(unix)]
+    detach_if_requested();
+
     #[cfg(target_os = "linux")]
     explicit_sync::disable_nvidia_explicit_sync();
 
