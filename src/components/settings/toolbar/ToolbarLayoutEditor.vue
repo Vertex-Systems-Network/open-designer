@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useFlatReorderDrag } from '@open-pencil/vue/shared/drag'
+import { useFlatReorderDrag } from '@open-designer/vue/shared/drag'
 import { computed, ref, type ComponentPublicInstance } from 'vue'
 
 import {
