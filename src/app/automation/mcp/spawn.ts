@@ -561,7 +561,19 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
       // of the pipe closes with it, and the server exits on that.
       OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE: '1',
       OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
-      OPENDESIGNER_MCP_SCOPE: mcpScope()
+      OPENDESIGNER_MCP_SCOPE: mcpScope(),
+      ...(executable === 'openpencil-mcp-http'
+        ? {
+            OPENPENCIL_MCP_AUTH_TOKEN: authToken ?? '',
+            OPENPENCIL_MCP_CORS_ORIGIN: window.location.origin,
+            OPENPENCIL_MCP_TCP: '1',
+            OPENPENCIL_MCP_ROOT: mcpRoot,
+            OPENPENCIL_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
+            OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: '1',
+            OPENPENCIL_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
+            OPENPENCIL_MCP_SCOPE: mcpScope()
+          }
+        : {})
     }
   })
 
