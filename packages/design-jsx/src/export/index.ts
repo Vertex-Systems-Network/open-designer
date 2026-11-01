@@ -182,8 +182,8 @@ function assignedPropertyValues(
 function nestedInstancePropertyOverrides(
   graph: SceneGraph,
   instance: SceneNode
-): Record<string, unknown> {
-  const overrides: Record<string, unknown> = {}
+): Record<string, JSXValue> {
+  const overrides: Record<string, JSXValue> = {}
   const visit = (node: SceneNode, path: number[]) => {
     for (const [index, child] of graph.getChildren(node.id).entries()) {
       const childPath = [...path, index]
