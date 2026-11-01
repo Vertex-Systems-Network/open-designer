@@ -27,10 +27,16 @@ function networkExtent(network: VectorNetwork | null): { width: number; height: 
   }
   for (const vertex of network.vertices) include(vertex.x, vertex.y)
   for (const segment of network.segments) {
-    const start = network.vertices[segment.start]
-    const end = network.vertices[segment.end]
-    if (start) include(start.x + segment.tangentStart.x, start.y + segment.tangentStart.y)
-    if (end) include(end.x + segment.tangentEnd.x, end.y + segment.tangentEnd.y)
+    const startIndex = segment.start
+    const endIndex = segment.end
+    if (startIndex >= 0 && startIndex < network.vertices.length) {
+      const start = network.vertices[startIndex]
+      include(start.x + segment.tangentStart.x, start.y + segment.tangentStart.y)
+    }
+    if (endIndex >= 0 && endIndex < network.vertices.length) {
+      const end = network.vertices[endIndex]
+      include(end.x + segment.tangentEnd.x, end.y + segment.tangentEnd.y)
+    }
   }
   const width = maxX - minX
   const height = maxY - minY
