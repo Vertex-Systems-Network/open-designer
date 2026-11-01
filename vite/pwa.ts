@@ -27,22 +27,7 @@ function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
     }
   }
   return prefixes.map((prefix) => {
-    const special = new Set([
-      '.',
-      '*',
-      '+',
-      '?',
-      '^',
-      '$',
-      '{',
-      '}',
-      '(',
-      ')',
-      '|',
-      '[',
-      ']',
-      '\\'
-    ])
+    const special = new Set(['.', '*', '+', '?', '^', '$', '{', '}', '(', ')', '|', '[', ']', '\\'])
     const escaped = Array.from(prefix, (character) =>
       special.has(character) ? `\\\\${character}` : character
     ).join('')
