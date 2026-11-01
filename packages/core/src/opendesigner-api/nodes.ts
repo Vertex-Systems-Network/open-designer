@@ -18,7 +18,7 @@ import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import { assertTextFontsLoaded } from '#core/figma-api/fonts/loaded'
-import { layoutAuthoredNodes } from '#core/layout'
+import { computeAllLayouts, computeLayout } from '#core/layout'
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { markdownText } from '#core/text/markdown'
 
@@ -36,9 +36,24 @@ function editNode(graph: SceneGraph, node: SceneNode, changes: Partial<SceneNode
   recordInstanceOverride(graph, node.id, changed)
 }
 
-/** Reflow the edited layer's layouts through the established imported-geometry safeguards. */
+/** Reflow the edited layer and its layout ancestors without traversing the whole page. */
 function layoutTextAncestors(graph: SceneGraph, node: SceneNode): void {
-  if (node.parentId) layoutAuthoredNodes(graph, [node.id])
+  if (!node.parentId) return
+
+  const layout = () => {
+    computeAllLayouts(graph, node.id)
+    let parentId = node.parentId
+    while (parentId) {
+      const parent = graph.getNode(parentId)
+      if (!parent || (parent.type === 'INSTANCE' && parent.source.format === 'fig')) break
+      if (parent.layoutMode !== 'NONE') computeLayout(graph, parent.id)
+      parentId = parent.parentId
+    }
+  }
+
+  layout()
+  // Layout gives wrapping text its width, which its height follows.
+  if (sizeAutoResizingText(graph, node.id, true)) layout()
 }
 
 function direction(value: string): LayoutDirection & TextDirection {
