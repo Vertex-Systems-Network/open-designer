@@ -1,1 +1,1 @@
-`SkiaRenderer.drawEnteredContainer` and `RenderOverlays.enteredContainerId` are removed from `@open-designer/core/canvas`. The canvas no longer draws a dashed box around a group or frame you have drilled into, as in Figma.
+- `SkiaRenderer.drawEnteredContainer` and `RenderOverlays.enteredContainerId` are removed from `@open-designer/core/canvas`. The canvas no longer draws a dashed box around a group or frame you have drilled into, as in Figma.
