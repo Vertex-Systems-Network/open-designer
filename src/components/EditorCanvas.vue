@@ -318,18 +318,18 @@ const cursor = computed(() =>
         <div
           v-if="renderHealth?.health === 'disabled'"
           role="alert"
-          class="absolute inset-0 z-40 flex items-center justify-center bg-background/90 p-6 text-center"
+          class="absolute inset-0 z-40 flex items-center justify-center bg-canvas/90 p-6 text-center"
         >
-          <div class="max-w-md space-y-3 rounded-lg border bg-background p-5 shadow-lg">
+          <div class="max-w-md space-y-3 rounded-lg border bg-panel p-5 shadow-lg">
             <h2 class="text-base font-semibold">Canvas stopped after a rendering error</h2>
-            <p class="text-sm text-muted-foreground">
+            <p class="text-sm text-muted">
               Reload the editor to restart the renderer. Your latest changes may not be saved.
             </p>
-            <p v-if="renderHealth.error" class="break-words text-xs text-muted-foreground">
+            <p v-if="renderHealth.error" class="break-words text-xs text-muted">
               {{ renderHealth.error }}
             </p>
             <button
-              class="rounded bg-primary px-3 py-2 text-sm text-primary-foreground"
+              class="rounded bg-accent px-3 py-2 text-sm text-on-accent"
               @click="restartEditor"
             >
               Reload editor
