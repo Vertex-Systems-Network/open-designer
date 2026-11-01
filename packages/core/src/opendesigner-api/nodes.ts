@@ -18,6 +18,7 @@ import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import { assertTextFontsLoaded } from '#core/figma-api/fonts/loaded'
+import { computeLayout } from '#core/layout'
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { markdownText } from '#core/text/markdown'
 
@@ -33,6 +34,18 @@ function editNode(graph: SceneGraph, node: SceneNode, changes: Partial<SceneNode
   )
   graph.updateNode(node.id, changes)
   recordInstanceOverride(graph, node.id, changed)
+}
+
+/** Reflow the outermost auto-layout ancestor after a text edit changes its measured size. */
+function layoutTextAncestors(graph: SceneGraph, node: SceneNode): void {
+  let root: SceneNode | null = null
+  for (let parentId = node.parentId; parentId; ) {
+    const parent = graph.getNode(parentId)
+    if (!parent) break
+    if (parent.layoutMode !== 'NONE') root = parent
+    parentId = parent.parentId
+  }
+  if (root) computeLayout(graph, root.id)
 }
 
 function direction(value: string): LayoutDirection & TextDirection {
@@ -104,7 +117,10 @@ export function textMarkdownChanges(node: SceneNode, markdown: string): Partial<
  */
 export function writeTextMarkdown(graph: SceneGraph, ref: NodeRef, markdown: string): void {
   const node = nodeOf(graph, ref)
+  if (node.textPathData)
+    throw new Error('Markdown cannot be written to text on a path because styled path reflow is unsupported')
   const changes = textMarkdownChanges(node, markdown)
   assertTextFontsLoaded('setTextMarkdown', { ...node, ...changes })
   editNode(graph, node, { ...changes, ...textAutoResizeChanges(node, changes) })
+  layoutTextAncestors(graph, node)
 }
