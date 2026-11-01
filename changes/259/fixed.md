@@ -1,0 +1,1 @@
+- Figma API view-to-fit uses the editor's measured canvas viewport instead of the full browser window, so fitted content remains in view beside open panels.
