@@ -40,7 +40,7 @@ addresses = []
 [object_storage]
 endpoint = "http://localhost:8333"
 region = "us-east-1"
-bucket = "opendesigner"
+bucket = "openpencil"
 force_path_style = true
 checksum_verification = "metadata"
 maximum_upload_bytes = 1073741824
