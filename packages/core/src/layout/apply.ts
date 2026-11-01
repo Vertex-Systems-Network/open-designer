@@ -241,6 +241,18 @@ function hugStart(frame: SceneNode): { width: number; height: number } | null {
   }
 }
 
+function preservesImportedHugCrossSize(
+  graph: SceneGraph,
+  frame: SceneNode,
+  axis: 'width' | 'height'
+): boolean {
+  return (
+    graph.isApplyingDerivedLayout &&
+    frame.source.format === 'fig' &&
+    frame.derivedLayout?.[axis] !== undefined
+  )
+}
+
 function applyFrameSize(
   graph: SceneGraph,
   frame: SceneNode,
