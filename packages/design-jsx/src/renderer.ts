@@ -454,7 +454,8 @@ function applyInstanceOverrides(
       child = instance
       for (const part of pathMatch[1].split('.')) {
         const index = Number(part)
-        const childId = Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
+        const childId: string | undefined =
+          Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
         child = childId ? graph.getNode(childId) : undefined
         if (!child) break
       }
