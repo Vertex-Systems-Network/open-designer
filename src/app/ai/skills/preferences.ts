@@ -21,12 +21,17 @@ const storedPreferencesSchema = v.pipe(v.string(), v.parseJson(), skillPreferenc
 
 function migrateLegacySourceKeys(preferences: SkillPreferences): SkillPreferences {
   const migrate = (record: Record<string, boolean>) => {
-    const next = { ...record }
-    for (const [key, value] of Object.entries(record)) {
-      if (key !== 'openpencil' && !key.startsWith('openpencil/')) continue
+    const legacy = Object.entries(record).filter(
+      ([key]) => key === 'openpencil' || key.startsWith('openpencil/')
+    )
+    const next = Object.fromEntries(
+      Object.entries(record).filter(
+        ([key]) => key !== 'openpencil' && !key.startsWith('openpencil/')
+      )
+    )
+    for (const [key, value] of legacy) {
       const currentKey = `opendesigner${key.slice('openpencil'.length)}`
       if (!(currentKey in next)) next[currentKey] = value
-      delete next[key]
     }
     return next
   }
