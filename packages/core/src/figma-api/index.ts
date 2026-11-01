@@ -494,14 +494,14 @@ export class FigmaAPI implements NodeProxyHost {
   private _viewportFitHandler:
     | ((
         nodes: readonly { absoluteBoundingBox: Rect }[]
-      ) => { center: Vector; zoom: number } | false | void)
+      ) => { center: Vector; zoom: number } | false | undefined)
     | null = null
 
   /** Lets an app-backed host fit nodes using its live canvas viewport and navigation state. */
-  setViewportFitHandler(
+  _setViewportFitHandler(
     handler: (
       nodes: readonly { absoluteBoundingBox: Rect }[]
-    ) => { center: Vector; zoom: number } | false | void
+    ) => { center: Vector; zoom: number } | false | undefined
   ): void {
     this._viewportFitHandler = handler
   }
