@@ -55,6 +55,7 @@ export function designTokenIssueMessage(issue: DesignTokenIssue): string {
 
 /** The key OpenDesigner's own token data is kept under in `$extensions`. */
 export const OPENDESIGNER_EXTENSION = 'dev.opendesigner'
+export const OPENPENCIL_EXTENSION = 'dev.openpencil'
 
 /** The resolver document version DTCG 2025.10 requires. */
 export const RESOLVER_VERSION = '2025-11-01'
