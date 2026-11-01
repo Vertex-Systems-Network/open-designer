@@ -1,4 +1,5 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { remapCopiedReferences } from '@open-designer/scene-graph/transfer'
 
 /**
  * Fields a layer keeps when its code is rendered again: its place in the tree and the identity
@@ -130,24 +131,6 @@ export function reconcileRenderedLayers(
     return [rendered.id]
   })
   for (const id of existingRootIds.slice(renderedRootIds.length)) graph.deleteNode(id)
-  remapReferences(graph, reconciler.ids)
+  remapCopiedReferences(graph, reconciler.ids)
   return { rootIds, ids: reconciler.ids }
-}
-
-/** Retarget references from temporary render IDs to the layers kept by reconciliation. */
-function remapReferences(graph: SceneGraph, ids: ReadonlyMap<string, string>): void {
-  const mapped = (id: string) => ids.get(id) ?? id
-  for (const id of new Set(ids.values())) {
-    const node = graph.getNode(id)
-    if (!node) continue
-    const changes: Partial<SceneNode> = {}
-    if (node.componentId && mapped(node.componentId) !== node.componentId)
-      changes.componentId = mapped(node.componentId)
-    for (const field of ['connectorStart', 'connectorEnd'] as const) {
-      const endpoint = node[field]
-      if (endpoint?.nodeId && mapped(endpoint.nodeId) !== endpoint.nodeId)
-        changes[field] = { ...endpoint, nodeId: mapped(endpoint.nodeId) }
-    }
-    if (Object.keys(changes).length > 0) graph.updateNode(id, changes)
-  }
 }
