@@ -157,7 +157,7 @@ async function start(project: string): Promise<void> {
           HOST: '127.0.0.1',
           OPENDESIGNER_CLOUD_CONFIG: generatedConfig,
           OPENDESIGNER_CLOUD_DEV_SITE_URL: siteURL,
-          DATABASE_URL: `postgresql://openpencil:${POSTGRES_PASSWORD}@127.0.0.1:${postgresPort}/opendesigner`,
+          DATABASE_URL: `postgresql://opendesigner:${POSTGRES_PASSWORD}@127.0.0.1:${postgresPort}/opendesigner`,
           BETTER_AUTH_SECRET: betterAuthSecret,
           S3_ACCESS_KEY_ID,
           S3_SECRET_ACCESS_KEY
