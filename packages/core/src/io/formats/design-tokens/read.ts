@@ -100,9 +100,9 @@ function extensionsOf(node: Record<string, unknown>): Record<string, unknown> {
 function modeInfo(parsed: Record<string, unknown> | undefined) {
   const extensions = parsed ? extensionsOf(parsed) : {}
   const own = v.safeParse(modeExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
-  if (own.success) return own.output
   const legacy = v.safeParse(modeExtensionSchema, extensions[OPENPENCIL_EXTENSION])
-  return legacy.success ? legacy.output : {}
+  if (own.success && legacy.success) return { ...legacy.output, ...own.output }
+  return own.success ? own.output : legacy.success ? legacy.output : {}
 }
 
 /** Tokens in a document, groups flattened, each with the type it declares or inherits. */
