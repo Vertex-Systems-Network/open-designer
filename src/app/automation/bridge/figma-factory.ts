@@ -37,7 +37,7 @@ export function makeFigmaFromStore(
     zoom: store.state.zoom
   }
   if (pageId === store.state.currentPageId) {
-    api.setViewportFitHandler((nodes) => {
+    api._setViewportFitHandler((nodes) => {
       if (pageId !== store.state.currentPageId || api.currentPageId !== store.state.currentPageId) {
         return false
       }
