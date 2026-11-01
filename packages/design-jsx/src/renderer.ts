@@ -50,6 +50,32 @@ function treeRoots(tree: TreeNode): TreeNode[] {
   return tree.type === FRAGMENT ? tree.children.filter(isTreeNode) : [tree]
 }
 
+/** Stable dependency order for sibling component definitions and instances that name them. */
+function rootRenderOrder(graph: SceneGraph, roots: readonly TreeNode[]): number[] {
+  const definitions = new Map<unknown, number[]>()
+  roots.forEach((root, index) => {
+    if (root.type !== 'component' && root.type !== 'component-set') return
+    const keys = [root.props.name, root.props.ref].filter((key) => key !== undefined)
+    for (const key of keys) definitions.set(key, [...(definitions.get(key) ?? []), index])
+  })
+  const dependencies = roots.map((root, index) => {
+    if (root.type !== 'instance') return []
+    const reference = root.props.component ?? root.props.componentId ?? root.props.of
+    const existing = typeof reference === 'string' ? graph.getNode(reference) : undefined
+    if (existing?.type === 'COMPONENT' || existing?.type === 'COMPONENT_SET') return []
+    return (definitions.get(reference) ?? []).filter((owner) => owner !== index)
+  })
+  const pending = roots.map((_, index) => index)
+  const order: number[] = []
+  while (pending.length > 0) {
+    const next = pending.find((index) => dependencies[index].every((owner) => order.includes(owner)))
+      ?? pending[0]
+    order.push(next)
+    pending.splice(pending.indexOf(next), 1)
+  }
+  return order
+}
+
 /** Render every root of `tree` into the parent and lay out once. */
 export async function renderRoots<Artwork>(
   services: DesignJSXServices<Artwork>,
@@ -65,16 +91,19 @@ export async function renderRoots<Artwork>(
   const nodes: SceneNode[] = []
   const connectors: Array<{ node: SceneNode; tree: TreeNode }> = []
   const refs = new LayerRefs()
+  const order = rootRenderOrder(graph, roots)
   const onNode = (element: TreeNode, node: SceneNode) => {
     if (element.type === CONNECTOR_ELEMENT) connectors.push({ node, tree: element })
     else refs.mark(element.props.ref, node)
     options.onNode?.(element, node)
   }
-  for (const root of roots) {
+  for (const index of order) {
+    const root = roots[index]
     const node = await renderNode(services, graph, root, parentId, onNode)
-    if (options.x !== undefined) graph.updateNode(node.id, { x: options.x })
-    if (options.y !== undefined) graph.updateNode(node.id, { y: options.y })
-    nodes.push(node)
+    const position = options.positions?.[index] ?? options
+    if (position.x !== undefined) graph.updateNode(node.id, { x: position.x })
+    if (position.y !== undefined) graph.updateNode(node.id, { y: position.y })
+    nodes[index] = node
   }
 
   const rootIds = nodes.map((node) => node.id)

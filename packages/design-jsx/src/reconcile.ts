@@ -1,4 +1,5 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { remapCopiedReferences } from '@open-designer/scene-graph/transfer'
 
 /**
  * Fields a layer keeps when its code is rendered again: its place in the tree and the identity
@@ -130,5 +131,6 @@ export function reconcileRenderedLayers(
     return [rendered.id]
   })
   for (const id of existingRootIds.slice(renderedRootIds.length)) graph.deleteNode(id)
+  remapCopiedReferences(graph, reconciler.ids)
   return { rootIds, ids: reconciler.ids }
 }
