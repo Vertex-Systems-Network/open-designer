@@ -43,15 +43,13 @@ export function createInvitationContinuationService(
         if (!row || row.consumedAt || new Date(row.expiresAt).getTime() <= Date.now()) {
           throw new DocumentShareInvalidError()
         }
+        const token = await decryptContinuationToken(secret, row.tokenEncrypted)
         await transaction
           .updateTable('invitationContinuation')
           .set({ consumedAt: new Date() })
           .where('id', '=', id)
           .execute()
-        return {
-          invitationId: row.invitationId,
-          token: await decryptContinuationToken(secret, row.tokenEncrypted)
-        }
+        return { invitationId: row.invitationId, token }
       })
     }
   }

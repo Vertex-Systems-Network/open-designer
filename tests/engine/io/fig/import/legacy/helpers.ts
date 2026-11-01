@@ -1,4 +1,4 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 export function doc(): NodeChange {
   return {

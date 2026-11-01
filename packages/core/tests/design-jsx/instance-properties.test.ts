@@ -1,10 +1,10 @@
 import { expect, test } from 'bun:test'
 
-import { renderJSX, renderTree } from '@open-pencil/core/design-jsx'
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { Component, Instance, Text, property } from '@open-pencil/design-jsx'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph, type ComponentPropertyDefinition } from '@open-pencil/scene-graph'
+import { renderJSX, renderTree } from '@open-designer/core/design-jsx'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { Component, Instance, Text, property } from '@open-designer/design-jsx'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph, type ComponentPropertyDefinition } from '@open-designer/scene-graph'
 
 const CARD = `
 const title = property("Title", "Default title")

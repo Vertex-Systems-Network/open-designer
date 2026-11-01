@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { sceneNodeToKiwi } from '@open-pencil/fig/node-change'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { lineHeightPixels, pixelLength } from '@open-pencil/scene-graph/text'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { sceneNodeToKiwi } from '@open-designer/fig/node-change'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { lineHeightPixels, pixelLength } from '@open-designer/scene-graph/text'
 
 import { expectDefined, getNodeOrThrow } from '#tests/helpers/assert'
 

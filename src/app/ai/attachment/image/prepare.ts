@@ -1,6 +1,6 @@
 import { filename } from 'pathe/utils'
 
-import { isSVGFile } from '@open-pencil/scene-graph/images'
+import { isSVGFile } from '@open-designer/scene-graph/images'
 
 import type {
   ImageAttachmentMediaType,

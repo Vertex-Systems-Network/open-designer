@@ -40,7 +40,7 @@ describe('discoverCloud', () => {
       }
     })
 
-    expect(requestedURL).toBe('https://cloud.openpencil.dev/.well-known/openpencil')
+    expect(requestedURL).toBe('https://cloud.openpencil.dev/.well-known/opendesigner')
     expect(result).toEqual(discovery)
   })
 
@@ -53,7 +53,7 @@ describe('discoverCloud', () => {
   })
 
   test('rejects non-HTTP server URLs before fetching', async () => {
-    const request = discoverCloud('file:///tmp/openpencil', {
+    const request = discoverCloud('file:///tmp/opendesigner', {
       fetch: async () => Response.json(discovery)
     })
 

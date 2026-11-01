@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { TEXT_METRIC_FIELDS } from '@open-pencil/scene-graph/fields'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { TEXT_METRIC_FIELDS } from '@open-designer/scene-graph/fields'
 
 import { autoWidthWrapWidth, measureTextForLayout } from './text-measurement'
 

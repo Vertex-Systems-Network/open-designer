@@ -4,7 +4,7 @@ import type { DesignDocument, DesignNode, DesignStyleDeclaration } from '#dom-cs
 import { compact } from 'es-toolkit/array'
 import { omit } from 'es-toolkit/object'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import {
   designFontRequests,
@@ -71,7 +71,7 @@ export interface ExportStorybookOptions {
   fonts?: WebFontFaceResolver
   /**
    * The folder a document's shared files go in, its fonts and design tokens, which must differ
-   * for each document exported into the same place; `openpencil/<document>` by default.
+   * for each document exported into the same place; `opendesigner/<document>` by default.
    */
   folder?: string
 }
@@ -315,7 +315,7 @@ function documentFolder(graph: SceneGraph, options: ExportStorybookOptions): str
   if (options.folder) return options.folder
   const page = options.pageId ? graph.getNode(options.pageId)?.name : undefined
   const named = compact([options.document ?? 'document', page]).map((name) => storyId(name))
-  return `openpencil/${named.join('-')}`
+  return `opendesigner/${named.join('-')}`
 }
 
 /**
@@ -399,7 +399,7 @@ export async function exportStorybook(
           // A gallery lays out static variants; a generated component's stories are its states.
           single: mode === 'single',
           design: design.flatMap((entry) =>
-            entry.type === 'link' ? [{ name: 'OpenPencil', type: 'link', url: entry.url }] : []
+            entry.type === 'link' ? [{ name: 'OpenDesigner', type: 'link', url: entry.url }] : []
           )
         })
       )

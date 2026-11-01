@@ -2,9 +2,9 @@ import { compact, countBy } from 'es-toolkit/array'
 import { camelCase } from 'es-toolkit/string'
 import type * as v from 'valibot'
 
-import { es } from '@open-pencil/emit'
-import type { ConnectorEndpoint, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { colorToHex } from '@open-pencil/scene-graph/color'
+import { es } from '@open-designer/emit'
+import type { ConnectorEndpoint, SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { colorToHex } from '@open-designer/scene-graph/color'
 import {
   boundEndpoint,
   CONNECTOR_COLOR,
@@ -15,9 +15,9 @@ import {
   connectorSublayers,
   createConnector,
   freeEndpoint
-} from '@open-pencil/scene-graph/connectors'
-import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/connectors'
+import { isGeneratedFrame } from '@open-designer/scene-graph/generated'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { CONNECTOR_LINE, CONNECTOR_SIDE, STROKE_CAP } from './enums'
 import { Reference } from './export/value'

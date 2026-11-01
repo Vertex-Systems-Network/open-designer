@@ -1,12 +1,12 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   behaviourToSpec,
   readBehaviour,
   textBinding,
   type BehaviourKind
-} from '@open-pencil/scene-graph/behaviours'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
-import { slotPropertyId } from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/behaviours'
+import { instanceMainComponent } from '@open-designer/scene-graph/instances'
+import { slotPropertyId } from '@open-designer/scene-graph/slots'
 
 import { REKA_ELEMENTS, rekaRole } from '../behaviours'
 import type { JSXProp, JSXValue } from './value'
@@ -91,7 +91,7 @@ function exportPart(
     if (repeated) result.tags.set(child.id, repeated)
     const item = child.type === 'INSTANCE' ? instanceMainComponent(graph, child) : undefined
     if (partId !== 'items' || !item) continue
-    // A group's items are written as the group's Item, naming their component.
+    // A group's items use the set when the referenced component belongs to one.
     const set = item.parentId ? graph.getNode(item.parentId) : undefined
     result.tags.set(child.id, `${namespace}.Item`)
     result.props.set(child.id, [['of', (set?.type === 'COMPONENT_SET' ? set : item).id]])

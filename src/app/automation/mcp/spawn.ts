@@ -6,14 +6,14 @@ import { promiseTimeout } from '@vueuse/core'
 import { compact } from 'es-toolkit/array'
 import * as v from 'valibot'
 
-import { AUTOMATION_HTTP_PORT } from '@open-pencil/core/constants'
-import type { DiscoveryInfo } from '@open-pencil/mcp/discovery'
+import { AUTOMATION_HTTP_PORT } from '@open-designer/core/constants'
+import type { DiscoveryInfo } from '@open-designer/mcp/discovery'
 import {
   parseToolDescriptor,
   serializeDisabledTools,
   type ToolDescriptor
-} from '@open-pencil/mcp/tools'
-import { randomHex } from '@open-pencil/scene-graph/random'
+} from '@open-designer/mcp/tools'
+import { randomHex } from '@open-designer/scene-graph/random'
 
 import { APP_VERSION } from '@/app/runtime/version'
 import { decodeTauriStderr } from '@/app/shell/ui'
@@ -55,15 +55,15 @@ export interface AutomationServerHandle {
 }
 
 const DEV_AUTOMATION_HTTP_URL = import.meta.env.DEV
-  ? __OPENPENCIL_LOCAL_AUTOMATION_HTTP_URL__
+  ? __OPENDESIGNER_LOCAL_AUTOMATION_HTTP_URL__
   : `http://127.0.0.1:${AUTOMATION_HTTP_PORT}`
 export function getMCPServerURL(): string {
   return `${DEV_AUTOMATION_HTTP_URL}/mcp`
 }
 
 const DEV_AUTOMATION_AUTH_TOKEN =
-  import.meta.env.DEV && typeof __OPENPENCIL_LOCAL_AUTOMATION_TOKEN__ === 'string'
-    ? __OPENPENCIL_LOCAL_AUTOMATION_TOKEN__
+  import.meta.env.DEV && typeof __OPENDESIGNER_LOCAL_AUTOMATION_TOKEN__ === 'string'
+    ? __OPENDESIGNER_LOCAL_AUTOMATION_TOKEN__
     : null
 const noop = () => undefined
 const MAX_STARTUP_STDERR_LENGTH = 8_192
@@ -123,7 +123,7 @@ function toError(error: unknown): Error {
 
 function missingMCPError(searched: string[] = []): Error {
   return new MCPStartupError(
-    `MCP automation is not installed. Install ${MCP_INSTALL_TARGET} globally with your package manager, then restart OpenPencil.`,
+    `MCP automation is not installed. Install ${MCP_INSTALL_TARGET} globally with your package manager, then restart OpenDesigner.`,
     searched.length > 0
       ? mcpFailure('not-installed', searched.join(', '))
       : mcpFailure('not-installed')
@@ -184,15 +184,27 @@ async function computeExpectedDiscoveryPath(): Promise<string> {
   // matches the server's path in the common case. When it doesn't (custom
   // LOCALAPPDATA), resolveDiscoveryPath() falls back to the /health endpoint.
   if (isMac) {
-    return join(home, 'Library', 'Application Support', 'OpenPencil', 'mcp.json')
+    return join(home, 'Library', 'Application Support', 'OpenDesigner', 'mcp.json')
   }
   if (isWindows) {
-    return join(home, 'AppData', 'Local', 'OpenPencil', 'mcp.json')
+    return join(home, 'AppData', 'Local', 'OpenDesigner', 'mcp.json')
   }
-  // Linux: $XDG_RUNTIME_DIR/openpencil/mcp.json or ~/.openpencil/mcp.json.
+  // Linux: $XDG_RUNTIME_DIR/opendesigner/mcp.json or ~/.opendesigner/mcp.json.
   // In Tauri we don't have direct env access, so we use the home-directory
   // fallback. The server may use XDG_RUNTIME_DIR if set — when the paths
   // differ, resolveDiscoveryPath() falls back to the /health endpoint.
+  return join(home, '.opendesigner', 'mcp.json')
+}
+
+/** Legacy location used by OpenPencil before the OpenDesigner rebrand. */
+async function computeLegacyDiscoveryPath(): Promise<string> {
+  const home = await homeDir()
+  if (!home) throw new Error('homeDir() returned an empty string')
+
+  const isMac = navigator.platform.includes('Mac')
+  const isWindows = navigator.platform.includes('Win')
+  if (isMac) return join(home, 'Library', 'Application Support', 'OpenPencil', 'mcp.json')
+  if (isWindows) return join(home, 'AppData', 'Local', 'OpenPencil', 'mcp.json')
   return join(home, '.openpencil', 'mcp.json')
 }
 
@@ -208,8 +220,8 @@ async function computeExpectedDiscoveryPath(): Promise<string> {
  * compromised server could redirect us to a malicious path. This is mitigated
  * by the fact that the server is on localhost and was spawned by us. The
  * fallback exists because local computation can be wrong (e.g., XDG_RUNTIME_DIR
- * mismatches on Linux where the server uses `$XDG_RUNTIME_DIR/openpencil` but
- * the local computation falls back to `~/.openpencil`).
+ * mismatches on Linux where the server uses `$XDG_RUNTIME_DIR/opendesigner` but
+ * the local computation falls back to `~/.opendesigner`).
  */
 async function resolveDiscoveryPath(healthDiscoveryPath?: string): Promise<string> {
   const expected = await computeExpectedDiscoveryPath()
@@ -349,7 +361,7 @@ function assertCompatibleMCPVersion(health: AutomationHealth): void {
   // The running server's own install command names its own version, so the fix always
   // comes from this app's version.
   throw new MCPStartupError(
-    `OpenPencil desktop v${APP_VERSION} requires ${MCP_PACKAGE_NAME} v${oursMajorMinor}.x ` +
+    `OpenDesigner desktop v${APP_VERSION} requires ${MCP_PACKAGE_NAME} v${oursMajorMinor}.x ` +
       `(major.minor compatibility), but the running MCP server is ${runningVersion}. ` +
       `Run: ${MCP_INSTALL_COMMAND}, then restart the MCP server.`,
     mcpFailure('outdated', health.version)
@@ -437,7 +449,12 @@ export async function getAutomationAuthToken(): Promise<string | null> {
 
 async function readExistingServerHandle(): Promise<AutomationServerHandle | null> {
   const expectedDiscoveryPath = await computeExpectedDiscoveryPath()
-  if (!(await discoveryFileExists(expectedDiscoveryPath))) return null
+  const legacyDiscoveryPath = await computeLegacyDiscoveryPath()
+  if (
+    !(await discoveryFileExists(expectedDiscoveryPath)) &&
+    !(await discoveryFileExists(legacyDiscoveryPath))
+  )
+    return null
 
   const health = await readAutomationHealth()
   if (!health) return null
@@ -525,22 +542,45 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
   // The app bundle directory (Tauri executableDir) is read-only and cannot be
   // used as a safe fallback for open_file, save_file, or export tools.
   const mcpRoot = mcpRootDirectory.value.trim() || (await resolveTauriHomeDir())
-  const resolved = resolvePlatformCommand(MCP_EXECUTABLE)
-  const command = Command.create(resolved.command, resolved.args, {
-    env: {
-      PORT: String(AUTOMATION_HTTP_PORT),
-      OPENPENCIL_MCP_AUTH_TOKEN: authToken ?? '',
-      OPENPENCIL_MCP_CORS_ORIGIN: window.location.origin,
-      OPENPENCIL_MCP_TCP: '1',
-      OPENPENCIL_MCP_ROOT: mcpRoot,
-      OPENPENCIL_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
-      // Killing the shell wrapper on Windows leaves the server it started running; the app's end
-      // of the pipe closes with it, and the server exits on that.
-      OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: '1',
-      OPENPENCIL_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
-      OPENPENCIL_MCP_SCOPE: mcpScope()
-    }
+  const installedExecutable = lookup.path
+    ?.split(/[\\/]/)
+    .pop()
+    ?.replace(/\.cmd$/i, '')
+  const executable =
+    installedExecutable === 'openpencil-mcp-http' ? installedExecutable : MCP_EXECUTABLE
+  const resolved = resolvePlatformCommand(executable)
+  const environment = withLegacyMCPEnvironment(executable, {
+    PORT: String(AUTOMATION_HTTP_PORT),
+    OPENDESIGNER_MCP_AUTH_TOKEN: authToken ?? '',
+    OPENDESIGNER_MCP_CORS_ORIGIN: window.location.origin,
+    OPENDESIGNER_MCP_TCP: '1',
+    OPENDESIGNER_MCP_ROOT: mcpRoot,
+    OPENDESIGNER_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
+    // Killing the shell wrapper on Windows leaves the server it started running; the app's end
+    // of the pipe closes with it, and the server exits on that.
+    OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE: '1',
+    OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
+    OPENDESIGNER_MCP_SCOPE: mcpScope()
   })
+  const command = Command.create(resolved.command, resolved.args, { env: environment })
+
+  function withLegacyMCPEnvironment(
+    executable: string,
+    environment: Record<string, string>
+  ): Record<string, string> {
+    if (executable !== 'openpencil-mcp-http') return environment
+    return {
+      ...environment,
+      OPENPENCIL_MCP_AUTH_TOKEN: environment.OPENDESIGNER_MCP_AUTH_TOKEN,
+      OPENPENCIL_MCP_CORS_ORIGIN: environment.OPENDESIGNER_MCP_CORS_ORIGIN,
+      OPENPENCIL_MCP_TCP: environment.OPENDESIGNER_MCP_TCP,
+      OPENPENCIL_MCP_ROOT: environment.OPENDESIGNER_MCP_ROOT,
+      OPENPENCIL_MCP_APP_TIMEOUT_MS: environment.OPENDESIGNER_MCP_APP_TIMEOUT_MS,
+      OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: environment.OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE,
+      OPENPENCIL_MCP_DISABLED_TOOLS: environment.OPENDESIGNER_MCP_DISABLED_TOOLS,
+      OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE
+    }
+  }
 
   let startupStderr = ''
   command.stderr.on('data', (raw: Uint8Array | number[] | string) => {
@@ -643,7 +683,7 @@ export async function spawnMCPIfNeeded(
 }
 
 /**
- * Returns the user's home directory. Used as the default OPENPENCIL_MCP_ROOT
+ * Returns the user's home directory. Used as the default OPENDESIGNER_MCP_ROOT
  * so file-scoped tools operate on paths inside ~, which is writable and
  * matches user expectations. Throws if the Tauri path plugin is unavailable
  * — this function is only invoked under !import.meta.env.DEV && isTauri(),

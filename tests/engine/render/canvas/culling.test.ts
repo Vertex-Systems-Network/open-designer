@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import Matrix, { type Mat3 } from '@open-pencil/scene-graph/matrix'
+import { SceneGraph } from '@open-designer/scene-graph'
+import Matrix, { type Mat3 } from '@open-designer/scene-graph/matrix'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { renderNode } from '#core/canvas/scene'

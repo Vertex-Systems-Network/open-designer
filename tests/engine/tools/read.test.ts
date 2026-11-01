@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, test } from 'bun:test'
 
-import { DEFAULT_FONT_FAMILY } from '@open-pencil/core/constants'
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { fontManager } from '@open-pencil/core/text'
+import { DEFAULT_FONT_FAMILY } from '@open-designer/core/constants'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { fontManager } from '@open-designer/core/text'
 
 import { expectDefined } from '#tests/helpers/assert'
 import { registerTestFont } from '#tests/helpers/fonts/bundled'

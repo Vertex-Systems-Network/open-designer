@@ -2,24 +2,24 @@ import type { DerivedSymbolOverride } from '#fig/instance-overrides/types'
 import { effectiveFigmaRawNodeFields, effectiveFigmaSourcePayload } from '#fig/source-metadata'
 import { compact } from 'es-toolkit/array'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { stringToGuid } from '@open-pencil/kiwi/fig/guid'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { stringToGuid } from '@open-designer/kiwi/fig/guid'
 import type {
   ComponentPropertyDefinition,
   ComponentPropertyReferenceField,
   LayoutGrid,
   SceneGraph,
   SceneNode
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 import {
   DEFAULT_STROKE_MITER_LIMIT,
   DEFAULT_STROKE_WEIGHT
-} from '@open-pencil/scene-graph/constants'
-import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
-import { layoutGridCount } from '@open-pencil/scene-graph/layout'
-import { siblingOrderKeys } from '@open-pencil/scene-graph/order-keys'
-import { OPEN_PENCIL_PLUGIN_DATA, withPluginData } from '@open-pencil/scene-graph/plugin-data'
-import type { GUID, Matrix, Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/constants'
+import { isGeneratedFrame } from '@open-designer/scene-graph/generated'
+import { layoutGridCount } from '@open-designer/scene-graph/layout'
+import { siblingOrderKeys } from '@open-designer/scene-graph/order-keys'
+import { OPEN_DESIGNER_PLUGIN_DATA, withPluginData } from '@open-designer/scene-graph/plugin-data'
+import type { GUID, Matrix, Vector } from '@open-designer/scene-graph/primitives'
 
 /* eslint-disable max-lines */
 import { bytesToHex } from '../bytes'
@@ -990,7 +990,7 @@ export function sceneNodeToKiwiWithContext(
   applyComponentMetadata(context, node, nc, localIdCounter)
   applyInstancePayload(context, node, nc, localIdCounter)
   if (node.type === 'COMPONENT_SET')
-    node.pluginData = withPluginData(node.pluginData, OPEN_PENCIL_PLUGIN_DATA.nodeType, node.type)
+    node.pluginData = withPluginData(node.pluginData, OPEN_DESIGNER_PLUGIN_DATA.nodeType, node.type)
   if (nc.type === 'CANVAS') nc.pageType = 'DESIGN'
   if (node.type === 'BOOLEAN_OPERATION')
     nc.booleanOperation = toKiwiBooleanOperation(node.booleanOperation)

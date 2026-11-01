@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises'
 
-import { TRANSFORM_ZONE } from '@open-pencil/core/geometry'
+import { TRANSFORM_ZONE } from '@open-designer/core/geometry'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 import { expectDefined } from '#tests/helpers/assert'
@@ -16,7 +16,7 @@ async function expectCanvas(name: string) {
 async function createOverlayDemo(rotation: number) {
   await editor.page.evaluate((frameRotation) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const pageId = store.state.currentPageId
 
     const frame = store.graph.createNode('FRAME', pageId, {
@@ -102,7 +102,7 @@ test('rotation preview updates frame labels before mouse up', async () => {
 
   await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const frameId = [...store.state.selectedIds][0]
     store.setRotationPreview({ nodeId: frameId, angle: 28 })
   })
@@ -245,7 +245,7 @@ for (const [name, size] of [
   test(`a selected ${size} px layer ${size < 10 ? 'has no handles or size label' : 'has handles and its size'}`, async () => {
     await editor.page.evaluate((side) => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenPencil store not initialized')
+      if (!store) throw new Error('OpenDesigner store not initialized')
       const dot = store.graph.createNode('RECTANGLE', store.state.currentPageId, {
         x: 200,
         y: 200,

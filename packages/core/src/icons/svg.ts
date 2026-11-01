@@ -2,8 +2,8 @@ import { iconToSVG } from '@iconify/utils'
 import { DOMImplementation, type Document as XMLDocument, type Element } from '@xmldom/xmldom'
 import svgpath from 'svgpath'
 
-import { parseSVGPath } from '@open-pencil/scene-graph/parse-path'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { parseSVGFragment } from '#core/io/formats/svg/document'
 
@@ -408,8 +408,11 @@ function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
     const endX = values.at(-2)
     const endY = values.at(-1)
     if (endX === undefined || endY === undefined) return
-    if (command === 'A' && roundPathCoordinate(x) === roundPathCoordinate(endX) &&
-        roundPathCoordinate(y) === roundPathCoordinate(endY)) {
+    if (
+      command === 'A' &&
+      roundPathCoordinate(x) === roundPathCoordinate(endX) &&
+      roundPathCoordinate(y) === roundPathCoordinate(endY)
+    ) {
       collapsed = true
     }
     x = endX

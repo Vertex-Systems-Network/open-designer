@@ -1,7 +1,7 @@
 name: Deploy Cloud
 
-# Deploys an official OpenPencil Cloud deployment: packages/cloud/deploy/openpencil/<target>, with
-# the secrets and reviewers of the cloud-<target> GitHub environment.
+# Manually deploy the official OpenDesigner Cloud Worker from main.
+# The cloudflare-deploy GitHub environment supplies deployment secrets.
 on:
   workflow_dispatch:
     inputs:
@@ -16,16 +16,16 @@ concurrency:
 
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
-      name: cloud-${{ inputs.target }}
-      url: ${{ vars.CLOUD_URL }}
+      name: cloudflare-deploy
     permissions:
       contents: read
       deployments: write
     env:
-      DEPLOYMENT: packages/cloud/deploy/openpencil/${{ inputs.target }}
+      DEPLOYMENT: packages/cloud/deploy/opendesigner/${{ inputs.target }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -33,32 +33,87 @@ jobs:
 
       - uses: ./.github/actions/setup-bun
 
+      # Resolve or create the account's workers.dev subdomain before building the editor.
+      - name: Create the Cloud URL
+        id: cloud_url
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDEFLARE_TOKEN || secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          response_file=$(mktemp)
+          status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$api")
+
+          if [ "$status" = "200" ] && jq -e '.success == true and (.result.subdomain | type == "string" and length > 0)' "$response_file" >/dev/null; then
+            subdomain=$(jq -r '.result.subdomain' "$response_file")
+          elif [ "$status" = "404" ]; then
+            payload=$(jq -n --arg subdomain "opendesigner-vsn" '{subdomain: $subdomain}')
+            status=$(curl --silent --show-error --output "$response_file" --write-out '%{http_code}' \
+              --request PUT --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              --header 'Content-Type: application/json' --data "$payload" "$api")
+            if [ "$status" != "200" ] || ! jq -e '.success == true and (.result.subdomain | type == "string" and length > 0)' "$response_file" >/dev/null; then
+              echo "::error::Could not create the Cloudflare workers.dev subdomain. The token needs Workers Scripts: Edit permission."
+              jq -c '{errors: .errors}' "$response_file" >&2 || true
+              exit 1
+            fi
+            subdomain=$(jq -r '.result.subdomain' "$response_file")
+          else
+            echo "::error::Could not read the Cloudflare workers.dev subdomain (HTTP $status)."
+            jq -c '{errors: .errors}' "$response_file" >&2 || true
+            exit 1
+          fi
+
+          worker_name=$(sed -n 's/^[[:space:]]*"name":[[:space:]]*"\([^"]*\)".*/\1/p' "$DEPLOYMENT/wrangler.jsonc" | head -n 1)
+          if [ -z "$worker_name" ]; then
+            echo "::error::Could not read the Worker name from wrangler.jsonc."
+            exit 1
+          fi
+          cloud_url="https://$worker_name.$subdomain.workers.dev"
+          echo "cloud_url=$cloud_url" >> "$GITHUB_OUTPUT"
+          echo "CLOUD_URL=$cloud_url" >> "$GITHUB_ENV"
+
+          python3 - "$DEPLOYMENT/opendesigner-cloud.toml" "$cloud_url" <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path(sys.argv[1])
+          url = sys.argv[2]
+          text = path.read_text()
+          updated, count = re.subn(r'(?m)^public_url\s*=\s*".*"$',
+                                   f'public_url = "{url}"', text, count=1)
+          if count != 1:
+              raise SystemExit("Could not update public_url in the deployment config.")
+          path.write_text(updated)
+          PY
+
       # The editor's demo document draws its shader fills at build time in a headless Chromium.
       - uses: ./.github/actions/setup-playwright
 
-      # The Worker serves the editor and the portal as static assets. The editor names this
-      # deployment as the official server and, like app.openpencil.dev, sends the daily ping.
       - name: Build the Cloud site
         env:
-          VITE_OPENPENCIL_OFFICIAL_CLOUD_URL: ${{ vars.CLOUD_URL }}
-          VITE_OPENPENCIL_FEEDBACK: "on"
+          VITE_OPENDESIGNER_OFFICIAL_CLOUD_URL: ${{ steps.cloud_url.outputs.cloud_url }}
+          VITE_OPENDESIGNER_FEEDBACK: "on"
         run: bun run build:packages && bun run build:cloud
 
-      # Migrations run before the new code, over the direct connection rather than Hyperdrive. The
-      # config reads every secret it names, so only this step and the next one see them.
+      # Migrations run before the new code, directly against the database.
       - name: Migrate the database
         env:
-          OPENPENCIL_CLOUD_CONFIG: ${{ github.workspace }}/${{ env.DEPLOYMENT }}/openpencil-cloud.toml
-          DATABASE_URL: ${{ secrets.NEON_MIGRATOR_DATABASE_URL }}
+          OPENDESIGNER_CLOUD_CONFIG: ${{ github.workspace }}/${{ env.DEPLOYMENT }}/opendesigner-cloud.toml
+          TURSO_URL: ${{ secrets.TURSO_URL || vars.TURSO_URL || secrets.DATABASE_URL || vars.DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           S3_ACCESS_KEY_ID: ${{ secrets.S3_ACCESS_KEY_ID }}
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
-        run: bun --filter @open-pencil/cloud migrate
+        run: bun --filter @open-designer/cloud migrate:turso
 
       - name: Collect the Worker's secrets
         env:
+          TURSO_URL: ${{ secrets.TURSO_URL || vars.TURSO_URL || secrets.DATABASE_URL || vars.DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
@@ -66,13 +121,14 @@ jobs:
           S3_SECRET_ACCESS_KEY: ${{ secrets.S3_SECRET_ACCESS_KEY }}
         run: |
           umask 077
-          jq -n '{BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
+          jq -n '{TURSO_URL: env.TURSO_URL, TURSO_AUTH_TOKEN: env.TURSO_AUTH_TOKEN,
+            BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
             GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET, S3_ACCESS_KEY_ID: env.S3_ACCESS_KEY_ID,
             S3_SECRET_ACCESS_KEY: env.S3_SECRET_ACCESS_KEY}' > "$RUNNER_TEMP/cloud-secrets.json"
 
       - uses: cloudflare/wrangler-action@v4
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CLOUDEFLARE_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ${{ env.DEPLOYMENT }}
           packageManager: bun
@@ -82,12 +138,9 @@ jobs:
 
       - name: Check the deployment
         env:
-          CLOUD_URL: ${{ vars.CLOUD_URL }}
-        # Only a 200 counts: a redirect to a sign-in or access page would mean the Worker isn't there.
-        # Pages are asked for as a browser does; the API is not, so a missing route can't turn into
-        # the editor's page.
+          CLOUD_URL: ${{ steps.cloud_url.outputs.cloud_url }}
         run: |
-          for path in /health /ready /.well-known/openpencil / /welcome /auth/sign-in; do
+          for path in /health /ready /.well-known/opendesigner / /welcome /auth/sign-in; do
             accept='application/json'
             case "$path" in /|/welcome|/auth/*) accept='text/html' ;; esac
             status=$(curl --silent --show-error --retry 10 --retry-all-errors --retry-delay 3 \
@@ -98,3 +151,4 @@ jobs:
               exit 1
             fi
           done
+          echo "Cloud URL: $CLOUD_URL" >> "$GITHUB_STEP_SUMMARY"

@@ -1,9 +1,9 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
 
-import { BUILTIN_IO_FORMATS, IORegistry } from '@open-pencil/core/io'
-import { parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { BUILTIN_IO_FORMATS, IORegistry } from '@open-designer/core/io'
+import { parseFigFile } from '@open-designer/core/io/formats/fig'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { makeFigmaFromStore } from '@/app/automation/bridge/figma-factory'
 import { createAutomationCommandHandlers } from '@/app/automation/bridge/handlers'

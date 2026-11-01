@@ -1,5 +1,5 @@
-import type { CharacterStyleOverride, SceneNode } from '@open-pencil/scene-graph'
-import { lineHeightPixels } from '@open-pencil/scene-graph/text'
+import type { CharacterStyleOverride, SceneNode } from '@open-designer/scene-graph'
+import { lineHeightPixels } from '@open-designer/scene-graph/text'
 
 import { svg, type SVGNode } from '#core/io/formats/svg/node'
 import { round } from '#core/io/formats/svg/paths'

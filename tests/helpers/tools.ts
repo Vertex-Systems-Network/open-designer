@@ -1,6 +1,6 @@
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { ALL_TOOLS, toolFailure } from '@open-pencil/core/tools'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { ALL_TOOLS, toolFailure } from '@open-designer/core/tools'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 export { ALL_TOOLS }
 

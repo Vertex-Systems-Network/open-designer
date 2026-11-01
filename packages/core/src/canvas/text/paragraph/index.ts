@@ -9,12 +9,12 @@ import type {
   TextHeightBehavior
 } from 'canvaskit-wasm'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { resolveRGBAForPreview } from '@open-pencil/scene-graph/color'
-import { faceStyleKey, type NamedFace } from '@open-pencil/scene-graph/font-style'
-import { rangeFontStyle } from '@open-pencil/scene-graph/shared-styles'
-import { lineHeightPixels, textLengthPixels } from '@open-pencil/scene-graph/text'
-import { resolveNodeTextDirection } from '@open-pencil/scene-graph/text/direction'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { resolveRGBAForPreview } from '@open-designer/scene-graph/color'
+import { faceStyleKey, type NamedFace } from '@open-designer/scene-graph/font-style'
+import { rangeFontStyle } from '@open-designer/scene-graph/shared-styles'
+import { lineHeightPixels, textLengthPixels } from '@open-designer/scene-graph/text'
+import { resolveNodeTextDirection } from '@open-designer/scene-graph/text/direction'
 
 import {
   drawnFontVariations,
@@ -29,9 +29,9 @@ import {
 } from '#core/canvas/text/paint'
 import type { TextRenderer } from '#core/canvas/text/renderer'
 import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SIZE } from '#core/constants'
+import { autoWidthWrapWidth } from '#core/layout/text-measurement'
 import { shownTextSlice } from '#core/text/case'
 import { ELLIPSIS } from '#core/text/ellipsis'
-import { autoWidthWrapWidth } from '#core/layout/text-measurement'
 import { fontManager } from '#core/text/font/manager'
 
 import type { ParagraphNode } from './inputs'

@@ -5,13 +5,13 @@ import { readFixtureArrayBuffer } from '#core-tests/helpers/fig/fixtures'
 import { uniq } from 'es-toolkit/array'
 import { isEqual } from 'es-toolkit/predicate'
 
-import { createEditor } from '@open-pencil/core'
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigBuffer } from '@open-pencil/fig'
-import { symbolOverridesOf } from '@open-pencil/fig/instance-overrides'
-import { initCodec, type NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString } from '@open-pencil/kiwi/fig/guid'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import { createEditor } from '@open-designer/core'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigBuffer } from '@open-designer/fig'
+import { symbolOverridesOf } from '@open-designer/fig/instance-overrides'
+import { initCodec, type NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString } from '@open-designer/kiwi/fig/guid'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 setDefaultTimeout(120_000)
 
@@ -45,7 +45,7 @@ async function openGoldPreview(): Promise<{ bytes: ArrayBuffer; graph: SceneGrap
   return { bytes, graph: await parseFigFile(bytes.slice(0), { populate: 'first-page' }) }
 }
 
-test('an edit rewrites only the fields it changed, keeping those OpenPencil does not model', async () => {
+test('an edit rewrites only the fields it changed, keeping those OpenDesigner does not model', async () => {
   const { bytes, graph } = await openGoldPreview()
   const list = expectDefined([...graph.nodes.values()].find((node) => node.name === 'Checked List'))
   const [instance] = graph.getChildren(list.id)

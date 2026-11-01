@@ -2,7 +2,7 @@
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import type { LayerDragInstruction } from '@open-pencil/vue/primitives/LayerTree'
+import type { LayerDragInstruction } from '@open-designer/vue/primitives/LayerTree'
 
 import layerTreeTheme from '@/theme/layer-tree'
 

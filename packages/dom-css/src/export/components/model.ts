@@ -7,7 +7,7 @@ import type { StateElement, StateStyles } from '#dom-css/behaviours/states/types
 import { uniq } from 'es-toolkit/array'
 import { camelCase } from 'es-toolkit/string'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   behaviourContract,
   behaviourProperties,
@@ -15,9 +15,9 @@ import {
   readBehaviour,
   textBinding,
   type Behaviour
-} from '@open-pencil/scene-graph/behaviours'
-import { variantDefaultValue } from '@open-pencil/scene-graph/components'
-import { slotPropertyId } from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/behaviours'
+import { variantDefaultValue } from '@open-designer/scene-graph/components'
+import { slotPropertyId } from '@open-designer/scene-graph/slots'
 
 import type { SceneGraphToDesignOptions } from '../projection'
 import { claimName, identifierName } from '../storybook/names'

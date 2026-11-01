@@ -22,7 +22,7 @@ const { version } = v.parse(
 const SOFTWARE_APPLICATION = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'OpenPencil',
+  name: 'OpenDesigner',
   applicationCategory: 'DesignApplication',
   operatingSystem: 'Windows, macOS, Linux, Web',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
@@ -67,13 +67,13 @@ export const siteHead: [string, Record<string, string>][] = [
     { rel: 'alternate', type: 'text/plain', title: 'llms-full.txt', href: '/llms-full.txt' }
   ],
   ['meta', { property: 'og:type', content: 'website' }],
-  ['meta', { property: 'og:site_name', content: 'OpenPencil' }],
+  ['meta', { property: 'og:site_name', content: 'OpenDesigner' }],
   ['meta', { property: 'og:image', content: `${BASE}/social.png` }],
   ['meta', { property: 'og:image:width', content: '2400' }],
   ['meta', { property: 'og:image:height', content: '1260' }],
-  ['meta', { property: 'og:image:alt', content: 'OpenPencil — Open-Source Design Editor' }],
+  ['meta', { property: 'og:image:alt', content: 'OpenDesigner — Open-Source Design Editor' }],
   ['meta', { name: 'twitter:card', content: 'summary_large_image' }],
-  ['meta', { name: 'twitter:site', content: '@openpencildev' }],
+  ['meta', { name: 'twitter:site', content: '@opendesignerdev' }],
   ['meta', { name: 'twitter:image', content: `${BASE}/social.png` }]
 ]
 
@@ -174,7 +174,7 @@ export function applyPageSeo(pageData: PageDataLike): void {
   head.push(['link', { rel: 'alternate', hreflang: 'x-default', href: enSlug }])
 
   if (pageData.title) {
-    const ogTitle = `${pageData.title} — OpenPencil`
+    const ogTitle = `${pageData.title} — OpenDesigner`
     head.push(['meta', { property: 'og:title', content: ogTitle }])
     head.push(['meta', { name: 'twitter:title', content: ogTitle }])
   }

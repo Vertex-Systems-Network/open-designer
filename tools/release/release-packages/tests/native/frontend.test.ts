@@ -20,7 +20,7 @@ test.each(['valid', 'beta', 'source', 'version', 'digest'])(
       await writeFile(
         join(root, 'package.json'),
         JSON.stringify({
-          name: 'open-pencil',
+          name: 'open-designer',
           version: scenario === 'version' ? '0.14.0' : version
         })
       )
@@ -36,7 +36,7 @@ test.each(['valid', 'beta', 'source', 'version', 'digest'])(
       }
       const context = {
         identity,
-        repository: 'open-pencil/open-pencil',
+        repository: 'open-designer/open-designer',
         version,
         paths: desktopReleasePaths(root)
       }

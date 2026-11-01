@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 
-import { materializeDocument } from '@open-pencil/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import { materializeDocument } from '@open-designer/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import { expectDefined } from '#tests/helpers/assert'
 

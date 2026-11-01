@@ -7,8 +7,8 @@ import {
   type ShapedText,
   type ShapedTextGlyph,
   type TextDecorationRecord
-} from '@open-pencil/fig/node-change'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+} from '@open-designer/fig/node-change'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { buildParagraph, textVerticalOffset } from '#core/canvas/text'
 import { textDecorationRects, type DecoratedGlyph } from '#core/canvas/text/decorations'
@@ -103,7 +103,7 @@ function savedOutline(
  * the glyph ID CanvasKit chose, so ligatures and contextual forms keep their shapes. An emoji the
  * layout gives the emoji metrics font is saved as Figma saves one: a placeholder square with its
  * code points. When a run's font cannot be told, no glyph gets an outline: the layout still
- * stands and OpenPencil lays the text out again on reading, but Figma draws it blank.
+ * stands and OpenDesigner lays the text out again on reading, but Figma draws it blank.
  * Returns `null` for text saved glyphs cannot represent at all.
  */
 export function shapeText(

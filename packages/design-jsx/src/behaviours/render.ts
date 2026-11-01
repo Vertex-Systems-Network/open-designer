@@ -1,4 +1,4 @@
-import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { NodeType, SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { designJSXProp } from '../definitions'
 import type { TreeNode } from '../tree'

@@ -1,4 +1,4 @@
-import type { Fill, SceneGraph } from '@open-pencil/scene-graph'
+import type { Fill, SceneGraph } from '@open-designer/scene-graph'
 
 /** Scenes for click-depth specs, built in the browser on the editor's graph. */
 

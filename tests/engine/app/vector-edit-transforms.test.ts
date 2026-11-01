@@ -1,11 +1,11 @@
 import { describe, test, expect } from 'bun:test'
 
-import { createEditor, type Editor } from '@open-pencil/core'
-import { computeHandleVisibleVertices } from '@open-pencil/core/canvas/overlays'
-import { regenerateFillGeometry } from '@open-pencil/core/vector'
-import { SceneGraph, type SceneNode, type VectorNetwork } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import { createEditor, type Editor } from '@open-designer/core'
+import { computeHandleVisibleVertices } from '@open-designer/core/canvas/overlays'
+import { regenerateFillGeometry } from '@open-designer/core/vector'
+import { SceneGraph, type SceneNode, type VectorNetwork } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
 
 import { createVectorEditHistoryActions } from '@/app/editor/vector/history'
 import { createVectorEditLifecycle } from '@/app/editor/vector/lifecycle'

@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test'
 
 import { tool } from 'ai'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { ALL_TOOLS, toolsToAI } from '@open-pencil/core/tools'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { ALL_TOOLS, toolsToAI } from '@open-designer/core/tools'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { expectDefined, expectFills } from '#tests/helpers/assert'
 

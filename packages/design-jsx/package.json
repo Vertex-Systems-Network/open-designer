@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/design-jsx",
+  "name": "@open-designer/design-jsx",
   "version": "0.16.0",
   "license": "MIT",
   "type": "module",
@@ -54,12 +54,12 @@
     "provenance": true
   },
   "peerDependencies": {
-    "@open-pencil/scene-graph": "workspace:*"
+    "@open-designer/scene-graph": "workspace:*"
   },
   "dependencies": {
     "@lezer/common": "^1.5.2",
     "@lezer/javascript": "^1.5.4",
-    "@open-pencil/emit": "workspace:*",
+    "@open-designer/emit": "workspace:*",
     "acorn": "^8.18.0",
     "dedent": "^1.7.2",
     "entities": "^8.0.0",

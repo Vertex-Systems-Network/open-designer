@@ -2,7 +2,7 @@ import {
   AI_ERROR_STATUS,
   aiTokenClaimsSchema,
   CLOUD_AI_API_PATHS,
-  CLOUD_AI_TOKEN_AUDIENCE,
+  CLOUD_AI_TOKEN_AUDIENCES,
   parseAIUsageQuery,
   type AIError,
   type AIErrorCode,
@@ -128,7 +128,7 @@ export function createAIRelayApp(services: AIRelayServices) {
     try {
       const { payload } = await jwtVerify(token, services.keys, {
         issuer: config.cloudURL,
-        audience: CLOUD_AI_TOKEN_AUDIENCE,
+        audience: [...CLOUD_AI_TOKEN_AUDIENCES],
         algorithms: ['ES256']
       })
       context.set('claims', v.parse(aiTokenClaimsSchema, payload))

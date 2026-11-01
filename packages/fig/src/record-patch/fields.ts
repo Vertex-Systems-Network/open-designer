@@ -1,6 +1,6 @@
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString } from '@open-pencil/kiwi/fig/guid'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString } from '@open-designer/kiwi/fig/guid'
 
 import { derivedSymbolDataOf, symbolDataOf, type SymbolData } from '../instance-overrides/types'
 
@@ -21,7 +21,7 @@ export interface FigEntryListPatch {
 
 /**
  * Fields an edit changed in a record the archive holds. The rest of the record stays as the
- * archive saved it, fields OpenPencil does not model included.
+ * archive saved it, fields OpenDesigner does not model included.
  */
 export interface FigRecordFieldPatch {
   guid: GUID
@@ -35,6 +35,8 @@ export interface FigRecordFieldPatch {
    */
   symbolOverrides?: FigEntryListPatch
   derivedSymbolData?: FigEntryListPatch
+  /** Variable collection modes merge by their GUID so untouched archive entries stay intact. */
+  variableSetModes?: FigEntryListPatch
 }
 
 /** A layer path as a key, matching entries across lists. */
@@ -85,5 +87,18 @@ export function patchedRecord(record: NodeChange, patch: FigRecordFieldPatch): N
   }
   if (patch.derivedSymbolData)
     merged.derivedSymbolData = patchedEntries(derivedSymbolDataOf(merged), patch.derivedSymbolData)
+  if (patch.variableSetModes && merged.variableSetModes) {
+    const entries = merged.variableSetModes.map(({ id, ...fields }) => ({
+      guidPath: { guids: [id] },
+      ...fields
+    }))
+    merged.variableSetModes = patchedEntries(entries, patch.variableSetModes).map(
+      ({ guidPath, ...fields }) => {
+        const id = guidPath.guids[0]
+        if (id === undefined) throw new Error('Variable mode patch is missing its GUID')
+        return { id, ...fields }
+      }
+    ) as NodeChange['variableSetModes']
+  }
   return merged
 }

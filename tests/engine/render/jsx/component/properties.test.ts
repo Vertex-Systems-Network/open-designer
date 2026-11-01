@@ -1,6 +1,6 @@
 import { expect, expectTypeOf, test } from 'bun:test'
 
-import { renderTree } from '@open-pencil/core/design-jsx'
+import { renderTree } from '@open-designer/core/design-jsx'
 import {
   Component,
   ComponentSet,
@@ -10,7 +10,7 @@ import {
   node,
   property,
   type ComponentProperty
-} from '@open-pencil/design-jsx'
+} from '@open-designer/design-jsx'
 
 import { getNodeOrThrow } from '#tests/helpers/assert'
 import { makeSceneGraph } from '#tests/helpers/scene'

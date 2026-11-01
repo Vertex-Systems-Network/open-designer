@@ -1,5 +1,5 @@
-import { Frame, Instance, shader } from '@open-pencil/design-jsx'
-import type { ShaderPreset } from '@open-pencil/scene-graph/shaders'
+import { Frame, Instance, shader } from '@open-designer/design-jsx'
+import type { ShaderPreset } from '@open-designer/scene-graph/shaders'
 
 import { previewButton } from '../chrome'
 import { layoutChapter, type Chapter, type ChapterContext } from './chapter'

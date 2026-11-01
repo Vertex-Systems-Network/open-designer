@@ -1,5 +1,4 @@
 import { RELAY_DOCUMENT_PARAM } from '#cloud/contract'
-import { createPostgresCloudDatabase } from '#cloud/runtime/postgres/database'
 import {
   createCollaborationRelay,
   createCollaborationStateStore,
@@ -12,6 +11,7 @@ import { DurableObject } from 'cloudflare:workers'
 import type { Context } from 'hono'
 import * as v from 'valibot'
 
+import { createCloudflareDatabase } from './database'
 import type { CloudflareCloudEnvironment, PreparedCloudflareCloud } from './environment'
 
 /** What the Worker calls on a document's relay object. */
@@ -96,8 +96,8 @@ export function createCloudflareRelayObject(
     #opened: CollaborationRelay | null = null
 
     #open(documentId: string) {
-      this.#relay ??= prepare(this.env).then(({ config }) => {
-        const database = createPostgresCloudDatabase({ connectionString: config.databaseURL })
+      this.#relay ??= prepare(this.env).then(async ({ config }) => {
+        const database = await createCloudflareDatabase(this.env, config.databaseURL)
         this.#opened = createCollaborationRelay({
           authSecret: config.authSecret,
           documentId,

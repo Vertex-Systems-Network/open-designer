@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test'
 
-import { UndoManager } from '@open-pencil/scene-graph/undo'
+import { UndoManager } from '@open-designer/scene-graph/undo'
 
 test('an open edit records until it is ended, once', () => {
   const undo = new UndoManager()

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
-# OpenPencil Cloud: the server and the editor and pages it serves. Build from the repository root:
-#   docker build --build-arg OPENDESIGNER_PWA_SERVER_PATHS='/sso/,/.auth/' -f packages/cloud/deploy/Dockerfile -t ghcr.io/open-pencil/cloud .
-# The image also runs the AI relay: `docker run … ghcr.io/open-pencil/cloud node ai-relay.mjs`.
+# OpenDesigner Cloud: the server and the editor and pages it serves. Build from the repository root:
+#   docker build --build-arg OPENDESIGNER_PWA_SERVER_PATHS='/sso/,/.auth/' -f packages/cloud/deploy/Dockerfile -t ghcr.io/open-designer/cloud .
+# The image also runs the AI relay: `docker run … ghcr.io/open-designer/cloud node ai-relay.mjs`.
 
 # The build's output is JavaScript and static files, so it runs on the builder's own platform
 # once, whichever platforms the image is for, with Bun for that platform too. Playwright's
@@ -18,11 +18,11 @@ COPY . .
 RUN bun install --frozen-lockfile
 RUN bun run build:packages
 RUN bun run build:cloud
-RUN bun --filter @open-pencil/cloud build:standalone
+RUN bun --filter @open-designer/cloud build:standalone
 
 FROM node:22-bookworm-slim
 ENV NODE_ENV=production \
-    OPENPENCIL_CLOUD_SITE_DIR=/app/site \
+    OPENDESIGNER_CLOUD_SITE_DIR=/app/site \
     HOST=0.0.0.0 \
     PORT=8787
 WORKDIR /app

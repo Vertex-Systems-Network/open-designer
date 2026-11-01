@@ -2,9 +2,9 @@
 
 ## Versione web
 
-OpenPencil funziona direttamente nel browser e non richiede installazione. Apri [app.openpencil.dev](https://app.openpencil.dev) per iniziare a progettare.
+OpenDesigner funziona direttamente nel browser e non richiede installazione. Apri [app.openpencil.dev](https://app.openpencil.dev) per iniziare a progettare.
 
-Se vuoi creare un prodotto basato su OpenPencil invece di utilizzare soltanto l'applicazione predefinita, consulta la sezione [Automazione](/programmable/) e la documentazione del [Vue SDK](/programmable/sdk/).
+Se vuoi creare un prodotto basato su OpenDesigner invece di utilizzare soltanto l'applicazione predefinita, consulta la sezione [Automazione](/programmable/) e la documentazione del [Vue SDK](/programmable/sdk/).
 
 ## Applicazione desktop
 
@@ -20,7 +20,7 @@ Le versioni pronte per macOS, Windows e Linux sono disponibili nella [pagina dei
 
 ## Requisiti di sistema {#system-requirements}
 
-OpenPencil esegue il rendering con CanvasKit su WebGL e usa funzionalità recenti della piattaforma web, quindi richiede un motore del browser aggiornato. L’app web supporta Chrome 111, Edge 111, Firefox 128 e Safari 16.4 o versioni successive; i browser basati su Chromium, come Brave e Opera, seguono la versione di Chrome. L’app desktop usa il WebView di sistema, quindi il requisito minimo dipende dal motore del sistema operativo:
+OpenDesigner esegue il rendering con CanvasKit su WebGL e usa funzionalità recenti della piattaforma web, quindi richiede un motore del browser aggiornato. L’app web supporta Chrome 111, Edge 111, Firefox 128 e Safari 16.4 o versioni successive; i browser basati su Chromium, come Brave e Opera, seguono la versione di Chrome. L’app desktop usa il WebView di sistema, quindi il requisito minimo dipende dal motore del sistema operativo:
 
 | Piattaforma | Requisito |
 | ----------- | --------- |
@@ -28,21 +28,21 @@ OpenPencil esegue il rendering con CanvasKit su WebGL e usa funzionalità recent
 | Windows | Windows 10 o successivo con il runtime Evergreen di Microsoft Edge WebView2, che si aggiorna da solo. |
 | Linux | WebKitGTK 2.40 o successivo (`webkit2gtk-4.1`). |
 
-Se il motore è troppo vecchio, OpenPencil mostra cosa aggiornare invece di una finestra vuota. Se vedi questo avviso su un sistema che soddisfa i requisiti, usa il link «Report a problem», che precompila i dettagli di browser e motore.
+Se il motore è troppo vecchio, OpenDesigner mostra cosa aggiornare invece di una finestra vuota. Se vedi questo avviso su un sistema che soddisfa i requisiti, usa il link «Report a problem», che precompila i dettagli di browser e motore.
 
 ## Installazione in macOS con Homebrew
 
 ```sh
-brew install --cask openpencil
+brew install --cask opendesigner
 ```
 
-Il comando installa l’app firmata per Mac con Apple Silicon o processore Intel dal [catalogo ufficiale Homebrew](https://formulae.brew.sh/cask/openpencil). Gli aggiornamenti vengono verificati da Homebrew e possono arrivare dopo le versioni su GitHub. Nel frattempo, usa il [download diretto](https://github.com/open-pencil/open-pencil/releases/latest). La CLI si installa separatamente: `npm install -g @open-pencil/cli`.
+Il comando installa l’app firmata per Mac con Apple Silicon o processore Intel dal [catalogo ufficiale Homebrew](https://formulae.brew.sh/cask/opendesigner). Gli aggiornamenti vengono verificati da Homebrew e possono arrivare dopo le versioni su GitHub. Nel frattempo, usa il [download diretto](https://github.com/open-pencil/open-pencil/releases/latest). La CLI si installa separatamente: `npm install -g @open-designer/cli`.
 
 Se usavi il tap personalizzato archiviato, migra con:
 
 ```sh
-brew uninstall open-pencil/tap/open-pencil
-brew install --cask openpencil
+brew uninstall open-designer/tap/open-designer
+brew install --cask opendesigner
 ```
 
 ## Compilazione dal codice sorgente {#building-from-source}
@@ -56,7 +56,7 @@ brew install --cask openpencil
 
 ```sh
 git clone https://github.com/open-pencil/open-pencil.git
-cd open-pencil
+cd open-designer
 bun install
 ```
 

@@ -1,7 +1,7 @@
 import { limitAsync, retry } from 'es-toolkit'
 
-import type { CloudAPIClient } from '@open-pencil/cloud/client'
-import type { ObjectUploadTarget } from '@open-pencil/cloud/contract'
+import type { CloudAPIClient } from '@open-designer/cloud/client'
+import type { ObjectUploadTarget } from '@open-designer/cloud/contract'
 
 import type { StorageTransferProgress } from '../types'
 

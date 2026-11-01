@@ -1,11 +1,11 @@
 import { prepareSource } from './source'
 
-/** The Mermaid diagrams OpenPencil reads. */
+/** The Mermaid diagrams OpenDesigner reads. */
 export type MermaidDiagramType = 'flowchart'
 
 /**
  * The kind of Mermaid diagram `text` holds, by its first keyword after any front matter,
- * directives, and comments, as Mermaid's detectors decide; null for a kind OpenPencil does not
+ * directives, and comments, as Mermaid's detectors decide; null for a kind OpenDesigner does not
  * read, or text that is not Mermaid.
  */
 export function detectMermaidDiagram(text: string): MermaidDiagramType | null {

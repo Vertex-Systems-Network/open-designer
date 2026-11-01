@@ -1,7 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm'
 
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import type { RenderColorSpace } from '@open-pencil/scene-graph/color'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import type { RenderColorSpace } from '@open-designer/scene-graph/color'
 
 import type { SkiaRenderer } from '#core/canvas'
 import type { IconProvider } from '#core/icons'

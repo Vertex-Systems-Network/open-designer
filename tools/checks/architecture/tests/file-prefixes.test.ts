@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import { openPencilArchitecturePlugin } from '../src/steiger-rules/index'
 
 const rule = openPencilArchitecturePlugin.ruleDefinitions.find(
-  (candidate) => candidate.name === 'open-pencil/prefer-domain-folders-over-filename-prefixes'
+  (candidate) => candidate.name === 'open-designer/prefer-domain-folders-over-filename-prefixes'
 )
 
 function check(files: string[]) {

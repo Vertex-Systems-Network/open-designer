@@ -1,9 +1,9 @@
 import type { Ref } from 'vue'
 
-import { opacityFromBuffer } from '@open-pencil/core'
-import { generatedFrameText } from '@open-pencil/scene-graph/generated'
-import type { useEditorCommands } from '@open-pencil/vue/editor/commands'
-import type { useViewportKind } from '@open-pencil/vue/editor/viewport-kind'
+import { opacityFromBuffer } from '@open-designer/core'
+import { generatedFrameText } from '@open-designer/scene-graph/generated'
+import type { useEditorCommands } from '@open-designer/vue/editor/commands'
+import type { useViewportKind } from '@open-designer/vue/editor/viewport-kind'
 
 import type { PropertiesTab } from '@/app/ai/chat/panel'
 import { useComments } from '@/app/comments/use'

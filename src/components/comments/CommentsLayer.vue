@@ -11,9 +11,9 @@ import {
 } from 'reka-ui'
 import { computed, ref, useTemplateRef, watch } from 'vue'
 
-import type { ViewportTransform } from '@open-pencil/core/geometry'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
-import { useCommentMessages } from '@open-pencil/vue/i18n'
+import type { ViewportTransform } from '@open-designer/core/geometry'
+import type { Vector } from '@open-designer/scene-graph/primitives'
+import { useCommentMessages } from '@open-designer/vue/i18n'
 
 import { useComments } from '@/app/comments/use'
 import { useEditorStore } from '@/app/editor/active-store'

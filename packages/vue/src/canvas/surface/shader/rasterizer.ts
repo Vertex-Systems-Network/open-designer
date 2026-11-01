@@ -1,5 +1,5 @@
-import type { ShaderRasterizer } from '@open-pencil/core'
-import { shaderFrameEncoding } from '@open-pencil/scene-graph/shaders'
+import type { ShaderRasterizer } from '@open-designer/core'
+import { shaderFrameEncoding } from '@open-designer/scene-graph/shaders'
 
 /** Whether this browser can draw shaders, which need WebGPU. */
 export function canDrawShaders(): boolean {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { useVisibilityBindingProvider } from '@open-pencil/vue/controls/binding-provider'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { BindableValueRoot } from '@open-pencil/vue/primitives/BindableValue'
+import { useVisibilityBindingProvider } from '@open-designer/vue/controls/binding-provider'
+import { useI18n } from '@open-designer/vue/i18n'
+import { BindableValueRoot } from '@open-designer/vue/primitives/BindableValue'
 
 import FieldBindingPicker from '@/components/properties/binding/FieldBindingPicker.vue'
 import IconButton from '@/components/ui/button/IconButton.vue'

@@ -1,6 +1,6 @@
 import { omit } from 'es-toolkit/object'
 
-import type { SceneGraph, Variable } from '@open-pencil/scene-graph'
+import type { SceneGraph, Variable } from '@open-designer/scene-graph'
 
 import {
   assertProxyEditable,

@@ -21,9 +21,9 @@ const config = parseCloudServerConfig({
   authSecret: 'integration-test-secret-at-least-32-characters',
   s3Endpoint: 'http://localhost:9000',
   s3Region: 'us-east-1',
-  s3Bucket: 'openpencil',
-  s3AccessKeyId: 'openpencil',
-  s3SecretAccessKey: 'openpencil-secret',
+  s3Bucket: 'opendesigner',
+  s3AccessKeyId: 'opendesigner',
+  s3SecretAccessKey: 'opendesigner-secret',
   internalServiceToken: SERVICE_TOKEN
 })
 

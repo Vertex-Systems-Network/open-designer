@@ -5,13 +5,13 @@ import { normalizeFigFragment } from '#fig/document/fragment'
 import { generationOverridesOf } from '#fig/node-change/generated/records'
 import { nodeChangeToProps, sceneNodeToKiwi } from '#fig/node-change/index'
 
-import { materializeDocument } from '@open-pencil/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { createShapeWithText, shapeWithTextLabel } from '@open-pencil/scene-graph/generated'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { shapeWithTextLabelBox } from '@open-pencil/scene-graph/shape-with-text'
-import { percentLength } from '@open-pencil/scene-graph/text'
+import { materializeDocument } from '@open-designer/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { createShapeWithText, shapeWithTextLabel } from '@open-designer/scene-graph/generated'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { shapeWithTextLabelBox } from '@open-designer/scene-graph/shape-with-text'
+import { percentLength } from '@open-designer/scene-graph/text'
 
 const guid = (localID: number) => ({ sessionID: 0, localID })
 const slot = (localID: number) => ({ guids: [{ sessionID: 40_000_000, localID }] })

@@ -1,12 +1,12 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   connectorLineEnds,
   connectorRoute,
   connectorSublayers,
   curveMidpoint
-} from '@open-pencil/scene-graph/connectors'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/connectors'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import { createSceneGeometry } from './scene'
 import type { RotationPreview, ViewportTransform } from './types'

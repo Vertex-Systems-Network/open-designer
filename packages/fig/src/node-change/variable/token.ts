@@ -1,22 +1,22 @@
 import { mapKeys } from 'es-toolkit/object'
 import { isEmptyObject } from 'es-toolkit/predicate'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import type {
   PluginDataEntry,
   Variable,
   VariableCollection,
   VariableValue
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 import {
-  OPEN_PENCIL_PLUGIN_DATA,
+  OPEN_DESIGNER_PLUGIN_DATA,
   pluginDataEntry,
   withoutPluginData
-} from '@open-pencil/scene-graph/plugin-data'
+} from '@open-designer/scene-graph/plugin-data'
 
 import { readNodeChangePluginData } from '../plugin-data'
 
-const { token, modeConditions, modeAttribute } = OPEN_PENCIL_PLUGIN_DATA
+const { token, modeConditions, modeAttribute } = OPEN_DESIGNER_PLUGIN_DATA
 
 type TokenFields = Pick<Variable, 'unit' | 'expressions'>
 

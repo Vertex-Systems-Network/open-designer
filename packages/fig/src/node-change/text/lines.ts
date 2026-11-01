@@ -1,12 +1,12 @@
 import { isEmptyObject } from 'es-toolkit/predicate'
 
-import type { NodeChange, TextLineData } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange, TextLineData } from '@open-designer/kiwi/fig/codec'
 import type {
   SceneNode,
   TextListType,
   TextParagraphSpacingField,
   TextParagraphStyle
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 import {
   TEXT_PARAGRAPH_SPACING_FIELDS,
   paragraphStyleAt,
@@ -15,7 +15,7 @@ import {
   trimParagraphStyles,
   withIndentation,
   withParagraphSpacing
-} from '@open-pencil/scene-graph/text'
+} from '@open-designer/scene-graph/text'
 
 const LINE_TYPES: Record<TextListType, NonNullable<TextLineData['lineType']>> = {
   NONE: 'PLAIN',

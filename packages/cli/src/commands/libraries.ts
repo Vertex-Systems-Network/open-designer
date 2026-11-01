@@ -2,7 +2,7 @@ import { extname, resolve } from 'node:path'
 
 import { defineCommand } from 'citty'
 
-import { ensureLibraryAssetKeys } from '@open-pencil/core/library'
+import { ensureLibraryAssetKeys } from '@open-designer/core/library'
 
 import { bold, dim, fmtList, ok, printError } from '#cli/format'
 import { loadDocument, populateWholeDocument, writeFigDocument } from '#cli/headless'

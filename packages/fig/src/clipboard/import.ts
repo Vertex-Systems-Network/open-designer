@@ -2,9 +2,9 @@ import { inflateSync } from 'fflate'
 import { decode as decodeText, toUint8Array, isValid } from 'js-base64'
 import * as v from 'valibot'
 
-import type { NodeChange as KiwiNodeChange } from '@open-pencil/kiwi/fig/codec'
-import { decompressFigKiwiDataAsync, parseFigKiwiChunks } from '@open-pencil/kiwi/fig/container'
-import { decodeBinarySchema, compileSchema, ByteBuffer } from '@open-pencil/kiwi/schema-runtime'
+import type { NodeChange as KiwiNodeChange } from '@open-designer/kiwi/fig/codec'
+import { decompressFigKiwiDataAsync, parseFigKiwiChunks } from '@open-designer/kiwi/fig/container'
+import { decodeBinarySchema, compileSchema, ByteBuffer } from '@open-designer/kiwi/schema-runtime'
 
 import { isFigClipboardVisualType } from '../node-classification'
 

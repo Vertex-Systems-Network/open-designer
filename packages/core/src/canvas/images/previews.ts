@@ -1,4 +1,4 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { ResourceCache } from '#core/cache/resource'
 
@@ -35,6 +35,15 @@ export function needsImagePreviews(graph: SceneGraph): boolean {
 export function previewEdge(node: Pick<SceneNode, 'width' | 'height'>, zoom: number, dpr = 1) {
   const pixels = Math.max(node.width, node.height) * zoom * dpr
   return PREVIEW_EDGES.find((edge) => edge >= pixels) ?? 2048
+}
+
+/** Picks a view-sized image preview while the scene is rendered without its backing cache. */
+export function viewportPreviewEdge(
+  node: Pick<SceneNode, 'width' | 'height'>,
+  viewport: { zoom: number },
+  dpr = 1
+) {
+  return previewEdge(node, viewport.zoom, dpr)
 }
 
 export interface ImagePreview {

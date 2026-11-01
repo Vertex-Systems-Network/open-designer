@@ -83,7 +83,7 @@ export class CanvasHelper {
     return this.page.evaluate(
       async ({ markup, x, y }) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const pasted = await store.pasteSVG(markup, x, y)
         store.clearSelection()
         store.requestRender()

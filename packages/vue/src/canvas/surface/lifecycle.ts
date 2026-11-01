@@ -2,8 +2,8 @@ import type { CanvasKit } from 'canvaskit-wasm'
 import { onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import { SkiaRenderer } from '@open-pencil/core/canvas'
+import type { Editor } from '@open-designer/core'
+import { SkiaRenderer } from '@open-designer/core/canvas'
 
 import {
   supportsWideGamutPresentation,
@@ -176,11 +176,32 @@ export function createCanvasSurfaceManager({
     return options?.getOverlayObstacles?.() ?? []
   }
 
+  function scheduleSceneBackingRender() {
+    const renderer = state.renderer
+    if (options?.layer !== 'scene' || !renderer) return
+    if (renderer.tiledScenePending) renderLoop.markDirty()
+    if (!renderer.sceneBackingNeedsCrispRender) return
+    const delay = Math.max(0, renderer.sceneBackingPreviewUntil - performance.now())
+    sceneBackingRenderTimer = setTimeout(() => renderLoop.markDirty(), delay)
+  }
+
+  function finishRenderedFrame(view: typeof editor.state) {
+    const renderer = state.renderer
+    if (!renderer) return
+    renderLoop.markRendered()
+    if (renderer.frameGuard.health === 'degraded') renderLoop.markDirty()
+    options?.onFrame?.({ panX: view.panX, panY: view.panY, zoom: view.zoom })
+    acknowledgePresentation()
+    clearSceneBackingRenderTimer()
+    scheduleSceneBackingRender()
+  }
+
   function renderNow() {
-    if (!state.renderer || isDestroyed()) return
-    state.renderer.overlayObstacles = overlayObstacles()
+    const renderer = state.renderer
+    if (!renderer || isDestroyed()) return
+    renderer.overlayObstacles = overlayObstacles()
     const view = options?.getRenderState?.() ?? editor.state
-    const drawn = state.renderer.renderFromEditorState(
+    const drawn = renderer.renderFromEditorState(
       view,
       editor.graph,
       editor.textEditor,
@@ -191,21 +212,10 @@ export function createCanvasSurfaceManager({
       editor.isInteractiveEditing()
     )
     if (!drawn) {
-      if (state.renderer.frameGuard.retryPending) renderLoop.markDirty()
+      if (renderer.frameGuard.retryPending) renderLoop.markDirty()
       return
     }
-    renderLoop.markRendered()
-    if (state.renderer.frameGuard.health === 'degraded') renderLoop.markDirty()
-    options?.onFrame?.({ panX: view.panX, panY: view.panY, zoom: view.zoom })
-    acknowledgePresentation()
-    clearSceneBackingRenderTimer()
-    if (options?.layer === 'scene' && state.renderer.tiledScenePending) {
-      renderLoop.markDirty()
-    }
-    if (options?.layer === 'scene' && state.renderer.sceneBackingNeedsCrispRender) {
-      const delay = Math.max(0, state.renderer.sceneBackingPreviewUntil - performance.now())
-      sceneBackingRenderTimer = setTimeout(() => renderLoop.markDirty(), delay)
-    }
+    finishRenderedFrame(view)
   }
 
   const renderLoop = createCanvasRenderLoop(editor, renderNow, {

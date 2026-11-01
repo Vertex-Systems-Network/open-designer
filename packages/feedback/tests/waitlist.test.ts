@@ -61,7 +61,7 @@ describe('waitlist', () => {
     expect(service.sentEmails).toHaveLength(1)
     const [email] = service.sentEmails
     expect(email.to).toBe('Ada@Example.com')
-    expect(email.from).toEqual({ name: 'OpenPencil', email: 'hello@openpencil.dev' })
+    expect(email.from).toEqual({ name: 'OpenDesigner', email: 'hello@openpencil.dev' })
 
     const confirm = linkFrom(email.text, '/waitlist/confirm')
     // Opening the link only asks; a mail scanner following it confirms nothing.

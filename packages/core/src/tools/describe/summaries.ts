@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { colorToHex } from '@open-pencil/scene-graph/color'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { colorToHex } from '@open-designer/scene-graph/color'
 
 function boundFillSuffix(node: SceneNode, fillIndex: number, graph?: SceneGraph): string {
   const varId = node.boundVariables[`fills/${fillIndex}/color`]

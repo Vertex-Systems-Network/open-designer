@@ -4,7 +4,7 @@ import {
   Container,
   Head,
   Heading,
-  // eslint-disable-next-line open-pencil/no-mixed-case-acronym-identifiers -- Upstream export spelling.
+  // eslint-disable-next-line open-designer/no-mixed-case-acronym-identifiers -- Upstream export spelling.
   Html as HTML,
   Img,
   Link,
@@ -80,7 +80,7 @@ function noteContent(note: NonNullable<EmailLayoutProps['note']>) {
   return [`${note.text} `, h(Link, { href: url, style: styles.link }, () => label), '.']
 }
 
-/** The branded email every OpenPencil service sends: the waitlist and Cloud alike. */
+/** The branded email every OpenDesigner service sends: the waitlist and Cloud alike. */
 export function emailLayout(props: EmailLayoutProps): VNode {
   const { note } = props
   return h(HTML, { lang: 'en' }, () => [
@@ -88,7 +88,7 @@ export function emailLayout(props: EmailLayoutProps): VNode {
     h(Preview, () => props.preview),
     h(Body, { style: styles.body }, () => [
       h(Container, { style: styles.card }, () => [
-        h(Img, { src: LOGO_URL, width: 44, height: 44, alt: 'OpenPencil', style: styles.logo }),
+        h(Img, { src: LOGO_URL, width: 44, height: 44, alt: 'OpenDesigner', style: styles.logo }),
         h(Heading, { as: 'h1', style: styles.heading }, () => props.heading),
         h(Text, { style: styles.text }, () => props.message),
         h(Section, () =>
@@ -97,7 +97,7 @@ export function emailLayout(props: EmailLayoutProps): VNode {
         note ? h(Text, { style: styles.note }, () => noteContent(note)) : null
       ]),
       h(Text, { style: styles.footer }, () => [
-        'OpenPencil, the open-source design editor · ',
+        'OpenDesigner, the open-source design editor · ',
         h(Link, { href: SITE_URL, style: { color: MUTED } }, () => 'openpencil.dev')
       ])
     ])

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 
 import { range } from 'es-toolkit'
 
-import { useCommandPalette } from '@open-pencil/vue/primitives/CommandPalette'
+import { useCommandPalette } from '@open-designer/vue/primitives/CommandPalette'
 
 const palette = () =>
   useCommandPalette({

@@ -1,1 +1,1 @@
-- `openpencil convert` reports a font it cannot load and takes `--font-policy`, as `export` does.
+- `opendesigner convert` reports a font it cannot load and takes `--font-policy`, as `export` does.

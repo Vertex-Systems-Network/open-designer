@@ -1,1 +1,1 @@
-- Self-hosted OpenPencil Cloud installs from npm: `npm install -g @open-pencil/cloud` provides the `openpencil-cloud` server and the `openpencil-ai-relay` AI relay commands.
+- Self-hosted OpenDesigner Cloud installs from npm: `npm install -g @open-designer/cloud` provides the `opendesigner-cloud` server and the `opendesigner-ai-relay` AI relay commands.

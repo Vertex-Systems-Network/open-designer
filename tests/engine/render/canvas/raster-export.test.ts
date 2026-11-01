@@ -2,11 +2,11 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 
 import type { Canvas } from 'canvaskit-wasm'
 
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { renderNodesToImage } from '@open-pencil/core/io/formats/raster'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { renderNodesToImage } from '@open-designer/core/io/formats/raster'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { initCanvasKit } from '#cli/headless'
 import { NodePathCaches } from '#core/canvas/paths/cache'

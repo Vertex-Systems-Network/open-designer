@@ -2,8 +2,8 @@
 import { computedAsync, useLocalStorage, useOnline } from '@vueuse/core'
 import { computed, shallowRef, watch } from 'vue'
 
-import { useDocumentWorkspace } from '@open-pencil/vue/document/workspace'
-import { useCloudMessages, useI18n } from '@open-pencil/vue/i18n'
+import { useDocumentWorkspace } from '@open-designer/vue/document/workspace'
+import { useCloudMessages, useI18n } from '@open-designer/vue/i18n'
 
 import { cloudSyncState } from '@/app/cloud/documents/status'
 import { findCloudServer } from '@/app/cloud/servers/store'

@@ -1,5 +1,5 @@
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { DocumentKind, EnabledLibraryBinding, SceneNode } from '@open-pencil/scene-graph'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { DocumentKind, EnabledLibraryBinding, SceneNode } from '@open-designer/scene-graph'
 
 import type { PortableSceneGraphData } from '#core/kiwi/fig/parse/portable-data'
 

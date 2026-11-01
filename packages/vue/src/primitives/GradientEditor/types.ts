@@ -1,6 +1,6 @@
 import type { PrimitiveProps } from 'reka-ui'
 
-import type { GradientStop } from '@open-pencil/scene-graph'
+import type { GradientStop } from '@open-designer/scene-graph'
 
 export interface GradientEditorStopProps extends PrimitiveProps {
   stop: GradientStop

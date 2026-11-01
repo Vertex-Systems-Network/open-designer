@@ -17,7 +17,7 @@ export function strokeSceneDriver(page: () => Page, name: StrokeScene) {
     show() {
       return page().evaluate(async (sceneName) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const sceneURL = '/tests/helpers/canvas/strokes/scene.ts'
         const scenes: typeof StrokeScenes = await import(sceneURL)
         scenes[sceneName](store.graph, store.state.currentPageId)

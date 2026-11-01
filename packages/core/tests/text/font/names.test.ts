@@ -2,8 +2,8 @@ import { beforeAll, expect, test } from 'bun:test'
 
 import { styleRunsWithPatch, textStyleChanges } from '#core/text/character-style'
 
-import { createEditor } from '@open-pencil/core'
-import { fontManager, faceForStyle, textStyleName } from '@open-pencil/core/text'
+import { createEditor } from '@open-designer/core'
+import { fontManager, faceForStyle, textStyleName } from '@open-designer/core/text'
 
 beforeAll(async () => {
   await fontManager.familyFaces('Inter')

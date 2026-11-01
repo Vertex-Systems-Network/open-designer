@@ -24,8 +24,8 @@ mutation and undo behavior stay in `useEditorPropertyList()` or an application a
 ```vue twoslash
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { Fill } from '@open-pencil/scene-graph'
-import { PropertyListItem, PropertyListRemove, PropertyListRoot } from '@open-pencil/vue/primitives/PropertyList'
+import type { Fill } from '@open-designer/scene-graph'
+import { PropertyListItem, PropertyListRemove, PropertyListRoot } from '@open-designer/vue/primitives/PropertyList'
 
 const fills = ref<Fill[]>([])
 </script>
@@ -55,9 +55,9 @@ See the [PropertySection demo](./property-section) for the shared interactive st
 
 ## Editor adapter
 
-OpenPencil panels use `useEditorPropertyList(propKey)` to connect controlled events to selection,
+OpenDesigner panels use `useEditorPropertyList(propKey)` to connect controlled events to selection,
 multi-node updates, undo batching, and reordering. Third-party SDK consumers can provide their own
-state adapter without an OpenPencil editor context.
+state adapter without an OpenDesigner editor context.
 
 ## Generated API reference
 

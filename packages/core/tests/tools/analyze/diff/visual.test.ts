@@ -2,15 +2,15 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
+import { FigmaAPI } from '@open-designer/core/figma-api'
 import {
   createCanvasKitRasterCodec,
   headlessRenderNodes,
   initCanvasKit
-} from '@open-pencil/core/io/formats/raster'
-import { ALL_TOOLS } from '@open-pencil/core/tools'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { Color, Rect } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/core/io/formats/raster'
+import { ALL_TOOLS } from '@open-designer/core/tools'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { Color, Rect } from '@open-designer/scene-graph/primitives'
 
 type VisualDiff = {
   error?: string

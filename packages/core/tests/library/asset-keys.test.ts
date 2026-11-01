@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { ensureLibraryAssetKeys, isValidLibraryAssetKey } from '@open-pencil/core/library'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { ensureLibraryAssetKeys, isValidLibraryAssetKey } from '@open-designer/core/library'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 describe('asset keys a library gives from component names', () => {
   test('are valid however the component is named, and distinct among namesakes', () => {

@@ -1,8 +1,8 @@
 import type { Canvas, Paint, Path } from 'canvaskit-wasm'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { polygonOutline, type PolygonOutlineCommand } from '@open-pencil/scene-graph/polygon'
-import { shapeWithTextGeometry } from '@open-pencil/scene-graph/shape-with-text'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { polygonOutline, type PolygonOutlineCommand } from '@open-designer/scene-graph/polygon'
+import { shapeWithTextGeometry } from '@open-designer/scene-graph/shape-with-text'
 
 import { isWholeArc } from '#core/geometry'
 import { vectorNetworkToPath, geometryBlobToPath } from '#core/vector'

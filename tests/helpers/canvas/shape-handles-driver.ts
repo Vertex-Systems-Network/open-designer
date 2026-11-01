@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 type CornerProps = Partial<
   Pick<
@@ -28,7 +28,7 @@ export function shapeHandlesDriver(page: () => Page) {
       return page().evaluate(
         ({ props, type }) => {
           const store = window.openPencil?.getStore?.()
-          if (!store) throw new Error('OpenPencil store not initialized')
+          if (!store) throw new Error('OpenDesigner store not initialized')
           const node = store.graph.createNode(type, store.state.currentPageId, {
             name: 'Card',
             x: 0,

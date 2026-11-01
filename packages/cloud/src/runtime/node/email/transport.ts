@@ -25,7 +25,7 @@ export function createNodemailerTransactionalEmailTransport(
         html: message.html,
         text: message.text,
         headers: message.headers,
-        messageId: `<${message.deliveryId}@openpencil.cloud>`
+        messageId: `<${message.deliveryId}@opendesigner.cloud>`
       })) as { messageId?: unknown }
       if (typeof result.messageId !== 'string') {
         throw new TypeError('SMTP transport returned no message ID')
@@ -92,7 +92,7 @@ export function createNodemailerInvitationDelivery(
         from: options.from,
         to: message.recipientEmail,
         ...rendered,
-        headers: { 'X-OpenPencil-Delivery-ID': message.deliveryId }
+        headers: { 'X-OpenDesigner-Delivery-ID': message.deliveryId }
       })
     }
   }

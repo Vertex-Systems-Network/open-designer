@@ -3,8 +3,8 @@ import { useFileDialog } from '@vueuse/core'
 import { DialogTitle } from 'reka-ui'
 import { computed, defineAsyncComponent, ref, shallowRef, watch } from 'vue'
 
-import type { DesignTokenBundle } from '@open-pencil/core/io/formats/design-tokens'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { DesignTokenBundle } from '@open-designer/core/io/formats/design-tokens'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import { createTokenCopy } from '@/app/editor/tokens/copy'
@@ -59,7 +59,7 @@ function importFiles(files: readonly File[]) {
   const request = ++importRequest
   void (async () => {
     const sources = await readDesignTokenFiles(files)
-    const { readDesignTokens } = await import('@open-pencil/core/io/formats/design-tokens')
+    const { readDesignTokens } = await import('@open-designer/core/io/formats/design-tokens')
     if (request !== importRequest) return
     importBundle.value = readDesignTokens(sources)
     importOpen.value = true

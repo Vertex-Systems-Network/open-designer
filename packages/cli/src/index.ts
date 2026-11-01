@@ -7,9 +7,9 @@ const { version } = await import('../package.json')
 
 const main = defineCommand({
   meta: {
-    name: 'openpencil',
+    name: 'opendesigner',
     description:
-      'OpenPencil CLI — inspect, export, and lint design documents, and drive the running app',
+      'OpenDesigner CLI — inspect, export, and lint design documents, and drive the running app',
     version
   },
   subCommands: COMMANDS

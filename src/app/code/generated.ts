@@ -1,12 +1,12 @@
-import { vectorElement } from '@open-pencil/core/io'
-import { selectionToJSXWithLayers } from '@open-pencil/design-jsx'
+import { vectorElement } from '@open-designer/core/io'
+import { selectionToJSXWithLayers } from '@open-designer/design-jsx'
 import {
   layerComponents,
   layerMarkup,
   type ComponentStyling,
   type LayerComponent
-} from '@open-pencil/dom-css/export'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/dom-css/export'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { starterSourceFor, type CodeSource } from '@/app/code/templates'
 

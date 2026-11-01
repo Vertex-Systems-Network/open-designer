@@ -47,7 +47,7 @@ describe('recent documents', () => {
 
   test('keeps documents of different server profiles apart', () => {
     const document = {
-      providerId: 'openpencil-cloud',
+      providerId: 'opendesigner-cloud',
       containerId: 'workspace-1',
       documentId: 'doc-1'
     }
@@ -55,8 +55,8 @@ describe('recent documents', () => {
     rememberRecentStorageDocument({ ...document, profileId: 'server-b' }, 'On B')
 
     expect(recentFiles.value.map(({ id, name }) => ({ id, name }))).toEqual([
-      { id: 'storage:openpencil-cloud:server-b:doc-1', name: 'On B' },
-      { id: 'storage:openpencil-cloud:server-a:doc-1', name: 'On A' }
+      { id: 'storage:opendesigner-cloud:server-b:doc-1', name: 'On B' },
+      { id: 'storage:opendesigner-cloud:server-a:doc-1', name: 'On A' }
     ])
     expect(recentFiles.value[0]).toMatchObject({
       profileId: 'server-b',

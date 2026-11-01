@@ -1,14 +1,14 @@
 import { computed } from 'vue'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   figJamTextSize,
   figJamTypeface,
   type FigJamTextSize,
   type FigJamTypeface
-} from '@open-pencil/scene-graph/figjam'
-import { stickySublayers } from '@open-pencil/scene-graph/generated'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/figjam'
+import { stickySublayers } from '@open-designer/scene-graph/generated'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { useEditor } from '#vue/editor/context'
 import { useSelectionState } from '#vue/editor/selection-state/use'

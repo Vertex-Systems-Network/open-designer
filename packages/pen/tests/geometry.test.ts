@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { PenNode } from '@open-pencil/pen'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { PenNode } from '@open-designer/pen'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { getNodeLocalMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { expectDefined, getNodeOrThrow } from './helpers/assert'
 import { parseDocument } from './helpers/document'

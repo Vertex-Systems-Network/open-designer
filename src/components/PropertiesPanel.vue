@@ -3,7 +3,7 @@ import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import { useDesignCheckMessages, useI18n } from '@open-pencil/vue/i18n'
+import { useDesignCheckMessages, useI18n } from '@open-designer/vue/i18n'
 
 import { useAIChat } from '@/app/ai/chat/use'
 import { isVersionHistoryOpen } from '@/app/cloud/integration'

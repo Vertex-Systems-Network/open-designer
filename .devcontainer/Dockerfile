@@ -18,19 +18,19 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/* \
     && git lfs install --system \
     && install -d -o bun -g bun \
-        /workspace/open-pencil/node_modules \
-        /workspace/open-pencil/packages/scene-graph/node_modules \
-        /workspace/open-pencil/packages/pen/node_modules \
-        /workspace/open-pencil/packages/kiwi/node_modules \
-        /workspace/open-pencil/packages/fig/node_modules \
-        /workspace/open-pencil/packages/core/node_modules \
-        /workspace/open-pencil/packages/dom-css/node_modules \
-        /workspace/open-pencil/packages/design-jsx/node_modules \
-        /workspace/open-pencil/packages/emit/node_modules \
-        /workspace/open-pencil/packages/vue/node_modules \
-        /workspace/open-pencil/packages/cli/node_modules \
-        /workspace/open-pencil/packages/mcp/node_modules \
-        /workspace/open-pencil/packages/docs/node_modules \
-        /workspace/open-pencil/tools/docs/node_modules
+        /workspace/open-designer/node_modules \
+        /workspace/open-designer/packages/scene-graph/node_modules \
+        /workspace/open-designer/packages/pen/node_modules \
+        /workspace/open-designer/packages/kiwi/node_modules \
+        /workspace/open-designer/packages/fig/node_modules \
+        /workspace/open-designer/packages/core/node_modules \
+        /workspace/open-designer/packages/dom-css/node_modules \
+        /workspace/open-designer/packages/design-jsx/node_modules \
+        /workspace/open-designer/packages/emit/node_modules \
+        /workspace/open-designer/packages/vue/node_modules \
+        /workspace/open-designer/packages/cli/node_modules \
+        /workspace/open-designer/packages/mcp/node_modules \
+        /workspace/open-designer/packages/docs/node_modules \
+        /workspace/open-designer/tools/docs/node_modules
 
 USER bun

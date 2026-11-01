@@ -1,6 +1,6 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
-import type { Matrix } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getNodeLocalMatrix } from '@open-designer/scene-graph/coordinate'
+import type { Matrix } from '@open-designer/scene-graph/primitives'
 
 export function mapToFigmaType(type: SceneNode['type']): string {
   switch (type) {

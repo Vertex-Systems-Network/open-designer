@@ -1,5 +1,5 @@
-import type { VariableModeChoice } from '@open-pencil/vue/controls/variable-modes'
-import type { usePanelMessages } from '@open-pencil/vue/i18n'
+import type { VariableModeChoice } from '@open-designer/vue/controls/variable-modes'
+import type { usePanelMessages } from '@open-designer/vue/i18n'
 
 type PanelMessages = ReturnType<typeof usePanelMessages>['value']
 

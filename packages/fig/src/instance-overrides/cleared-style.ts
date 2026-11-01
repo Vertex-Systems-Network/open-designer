@@ -1,5 +1,5 @@
-import type { NodeChange, StyleReference } from '@open-pencil/kiwi/fig/codec'
-import { isUnsetGuid } from '@open-pencil/kiwi/fig/guid'
+import type { NodeChange, StyleReference } from '@open-designer/kiwi/fig/codec'
+import { isUnsetGuid } from '@open-designer/kiwi/fig/guid'
 
 import type { STYLE_REFERENCE_FIELDS } from '../document/style-dependencies'
 import { OVERRIDE_FIELDS } from './fields'

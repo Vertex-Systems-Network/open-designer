@@ -2,7 +2,7 @@
 
 import { defineCommand, runMain } from 'citty'
 
-import { resolveWorkspaceRoot } from '@open-pencil/package-artifacts-tools'
+import { resolveWorkspaceRoot } from '@open-designer/package-artifacts-tools'
 
 import {
   buildReleasePackages,

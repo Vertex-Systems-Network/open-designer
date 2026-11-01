@@ -1,6 +1,6 @@
-import { tryParseColor } from '@open-pencil/scene-graph/color'
-import { parseCSSNumber } from '@open-pencil/scene-graph/css'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import { tryParseColor } from '@open-designer/scene-graph/color'
+import { parseCSSNumber } from '@open-designer/scene-graph/css'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 /** What Mermaid's CSS declarations set that a layer can show; `null` colours are `none`. */
 export interface FlowStyle {

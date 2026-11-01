@@ -1,12 +1,17 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2023", "DOM"],
+    "lib": [
+      "ES2023",
+      "DOM"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowArbitraryExtensions": true,
-    "types": ["node", "bun"],
-
+    "types": [
+      "node",
+      "bun"
+    ],
     "strict": true,
     "skipLibCheck": true,
     "declaration": true,
@@ -15,10 +20,24 @@
     "outDir": "dist",
     "rootDir": "src",
     "paths": {
-      "#core/*": ["./src/*"],
-      "@open-pencil/core": ["./src/index.ts"],
-      "@open-pencil/core/*": ["./src/*"]
+      "#core/*": [
+        "./src/*"
+      ],
+      "@open-designer/core": [
+        "./src/index.ts"
+      ],
+      "@open-designer/core/*": [
+        "./src/*"
+      ],
+      "@open-pencil/core": [
+        "./src/index.ts"
+      ],
+      "@open-pencil/core/*": [
+        "./src/*"
+      ]
     }
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "open-pencil-app",
+      "name": "open-designer-app",
       "dependencies": {
         "@ai-sdk/anthropic": "^4.0.71",
         "@ai-sdk/deepseek": "^3.0.58",
@@ -32,19 +32,19 @@
         "@lezer/highlight": "^1.2.3",
         "@nanostores/i18n": "^1.3.3",
         "@nanostores/vue": "^1.1.0",
-        "@open-pencil/cli": "workspace:*",
-        "@open-pencil/cloud": "workspace:*",
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/design-jsx": "workspace:*",
-        "@open-pencil/dom-css": "workspace:*",
-        "@open-pencil/feedback": "workspace:*",
-        "@open-pencil/fig": "workspace:*",
-        "@open-pencil/harness": "workspace:*",
-        "@open-pencil/kiwi": "workspace:*",
-        "@open-pencil/mermaid": "workspace:*",
-        "@open-pencil/pen": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
-        "@open-pencil/vue": "workspace:*",
+        "@open-designer/cli": "workspace:*",
+        "@open-designer/cloud": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/design-jsx": "workspace:*",
+        "@open-designer/dom-css": "workspace:*",
+        "@open-designer/feedback": "workspace:*",
+        "@open-designer/fig": "workspace:*",
+        "@open-designer/harness": "workspace:*",
+        "@open-designer/kiwi": "workspace:*",
+        "@open-designer/mermaid": "workspace:*",
+        "@open-designer/pen": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
+        "@open-designer/vue": "workspace:*",
         "@openrouter/ai-sdk-provider": "^3.1.0",
         "@smithy/fetch-http-handler": "^5.8.0",
         "@stream-markdown/code": "2.0.0-beta.5",
@@ -125,10 +125,10 @@
         "@iconify-json/lucide": "^1.2.139",
         "@lobehub/icons-static-svg": "^1.95.1",
         "@modelcontextprotocol/client": "^2.0.0",
-        "@open-pencil/brand-tools": "workspace:*",
-        "@open-pencil/demo-tools": "workspace:*",
-        "@open-pencil/mcp": "workspace:*",
-        "@open-pencil/vite-config": "workspace:*",
+        "@open-designer/brand-tools": "workspace:*",
+        "@open-designer/demo-tools": "workspace:*",
+        "@open-designer/mcp": "workspace:*",
+        "@open-designer/vite-config": "workspace:*",
         "@oxlint/plugins": "1.57.0",
         "@playwright/test": "^1.63.0",
         "@storybook/addon-a11y": "^10.6.2",
@@ -195,16 +195,16 @@
       },
     },
     "packages/cli": {
-      "name": "@open-pencil/cli",
+      "name": "@open-designer/cli",
       "version": "0.16.0",
       "bin": {
-        "openpencil": "./bin/openpencil.js",
+        "opendesigner": "./bin/opendesigner.js",
       },
       "dependencies": {
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/dom-css": "workspace:*",
-        "@open-pencil/mcp": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/dom-css": "workspace:*",
+        "@open-designer/mcp": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@valibot/to-json-schema": "^1.8.0",
         "agentfmt": "^0.1.3",
         "canvaskit-wasm": "^0.41.1",
@@ -214,16 +214,16 @@
         "valibot": "^1.5.0",
       },
       "devDependencies": {
-        "@open-pencil/fig": "workspace:*",
+        "@open-designer/fig": "workspace:*",
         "@types/bun": "^1.3.14",
       },
     },
     "packages/cloud": {
-      "name": "@open-pencil/cloud",
+      "name": "@open-designer/cloud",
       "version": "0.16.0",
       "bin": {
-        "openpencil-ai-relay": "./dist/bin/ai-relay.mjs",
-        "openpencil-cloud": "./dist/bin/server.mjs",
+        "opendesigner-ai-relay": "./dist/bin/ai-relay.mjs",
+        "opendesigner-cloud": "./dist/bin/server.mjs",
       },
       "dependencies": {
         "@aws-sdk/client-s3": "^3.1149.0",
@@ -234,7 +234,7 @@
         "@hono/node-server": "^1.19.17",
         "@internationalized/date": "^3.12.3",
         "@noble/hashes": "^2.4.0",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@openfeature/server-sdk": "^1.23.0",
         "@vue-email/components": "^0.0.21",
         "@vue-email/render": "^0.0.9",
@@ -249,6 +249,7 @@
         "jose": "^6.2.8",
         "js-base64": "^3.9.3",
         "kysely": "^0.29.6",
+        "kysely-libsql": "0.7.1",
         "lib0": "^0.2.117",
         "nodemailer": "^9.0.5",
         "smol-toml": "^1.8.0",
@@ -276,19 +277,19 @@
       },
     },
     "packages/core": {
-      "name": "@open-pencil/core",
+      "name": "@open-designer/core",
       "version": "0.16.0",
       "dependencies": {
         "@chenglou/pretext": "^0.0.7",
         "@iconify/utils": "^3.1.4",
-        "@open-pencil/design-jsx": "workspace:*",
-        "@open-pencil/dom-css": "workspace:*",
-        "@open-pencil/drawio": "workspace:*",
-        "@open-pencil/fig": "workspace:*",
-        "@open-pencil/kiwi": "workspace:*",
-        "@open-pencil/mermaid": "workspace:*",
-        "@open-pencil/pen": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/design-jsx": "workspace:*",
+        "@open-designer/dom-css": "workspace:*",
+        "@open-designer/drawio": "workspace:*",
+        "@open-designer/fig": "workspace:*",
+        "@open-designer/kiwi": "workspace:*",
+        "@open-designer/mermaid": "workspace:*",
+        "@open-designer/pen": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@tauri-apps/api": "^2.12.1",
         "@valibot/to-json-schema": "^1.8.0",
         "@xmldom/xmldom": "^0.9.12",
@@ -340,12 +341,12 @@
       ],
     },
     "packages/design-jsx": {
-      "name": "@open-pencil/design-jsx",
+      "name": "@open-designer/design-jsx",
       "version": "0.16.0",
       "dependencies": {
         "@lezer/common": "^1.5.2",
         "@lezer/javascript": "^1.5.4",
-        "@open-pencil/emit": "workspace:*",
+        "@open-designer/emit": "workspace:*",
         "acorn": "^8.18.0",
         "dedent": "^1.7.2",
         "entities": "^8.0.0",
@@ -360,19 +361,19 @@
         "unplugin-raw": "^0.7.0",
       },
       "peerDependencies": {
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
       },
     },
     "packages/docs": {
-      "name": "@open-pencil/docs",
+      "name": "@open-designer/docs",
       "version": "0.1.0",
       "dependencies": {
         "@ai-sdk/vue": "^4.0.127",
         "@iconify/vue": "^5.0.1",
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/design-jsx": "workspace:*",
-        "@open-pencil/dom-css": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/design-jsx": "workspace:*",
+        "@open-designer/dom-css": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@vueuse/core": "^14.4.0",
         "ai": "^7.0.127",
         "canvaskit-wasm": "^0.41.1",
@@ -383,12 +384,12 @@
       },
       "devDependencies": {
         "@iconify-json/simple-icons": "^1.2.98",
-        "@open-pencil/brand-tools": "workspace:*",
-        "@open-pencil/cli": "workspace:*",
-        "@open-pencil/demo-tools": "workspace:*",
-        "@open-pencil/feedback": "workspace:*",
-        "@open-pencil/landing-posters-tools": "workspace:*",
-        "@open-pencil/vite-config": "workspace:*",
+        "@open-designer/brand-tools": "workspace:*",
+        "@open-designer/cli": "workspace:*",
+        "@open-designer/demo-tools": "workspace:*",
+        "@open-designer/feedback": "workspace:*",
+        "@open-designer/landing-posters-tools": "workspace:*",
+        "@open-designer/vite-config": "workspace:*",
         "@shikijs/vitepress-twoslash": "^4.4.3",
         "@tailwindcss/vite": "^4.3.3",
         "vitepress": "^2.0.0-alpha.19",
@@ -398,11 +399,11 @@
       },
     },
     "packages/dom-css": {
-      "name": "@open-pencil/dom-css",
+      "name": "@open-designer/dom-css",
       "version": "0.16.0",
       "dependencies": {
         "@acemir/cssom": "^0.9.31",
-        "@open-pencil/emit": "workspace:*",
+        "@open-designer/emit": "workspace:*",
         "css-tree": "^3.2.1",
         "cssesc": "^3.0.0",
         "dedent": "^1.7.2",
@@ -433,11 +434,11 @@
         "vue": "^3.5.43",
       },
       "peerDependencies": {
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
       },
     },
     "packages/drawio": {
-      "name": "@open-pencil/drawio",
+      "name": "@open-designer/drawio",
       "version": "0.16.0",
       "dependencies": {
         "@xmldom/xmldom": "^0.9.12",
@@ -452,7 +453,7 @@
       },
     },
     "packages/emit": {
-      "name": "@open-pencil/emit",
+      "name": "@open-designer/emit",
       "version": "0.16.0",
       "dependencies": {
         "@sveltejs/acorn-typescript": "^1.0.13",
@@ -468,12 +469,12 @@
       },
     },
     "packages/feedback": {
-      "name": "@open-pencil/feedback",
+      "name": "@open-designer/feedback",
       "version": "0.16.0",
       "dependencies": {
         "@internationalized/date": "^3.12.3",
-        "@open-pencil/cloud": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/cloud": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@vue-email/components": "^0.0.21",
         "@vue-email/render": "^0.0.9",
         "es-toolkit": "^1.52.0",
@@ -492,7 +493,7 @@
       },
     },
     "packages/fig": {
-      "name": "@open-pencil/fig",
+      "name": "@open-designer/fig",
       "version": "0.16.0",
       "dependencies": {
         "es-toolkit": "^1.52.0",
@@ -506,22 +507,22 @@
         "typescript": "npm:@typescript/typescript6@^6.0.2",
       },
       "peerDependencies": {
-        "@open-pencil/kiwi": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/kiwi": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
       },
     },
     "packages/harness": {
-      "name": "@open-pencil/harness",
+      "name": "@open-designer/harness",
       "version": "0.16.0",
       "bin": {
-        "openpencil-harness": "./dist/stdio.mjs",
+        "opendesigner-harness": "./dist/stdio.mjs",
       },
       "dependencies": {
         "@ai-sdk/harness": "1.0.138",
         "@ai-sdk/harness-pi": "1.0.140",
         "@ai-sdk/sandbox-just-bash": "1.0.138",
         "@earendil-works/pi-tui": "0.85.1",
-        "@open-pencil/core": "workspace:*",
+        "@open-designer/core": "workspace:*",
         "amaro": "1.2.2",
       },
       "devDependencies": {
@@ -530,7 +531,7 @@
       },
     },
     "packages/kiwi": {
-      "name": "@open-pencil/kiwi",
+      "name": "@open-designer/kiwi",
       "version": "0.16.0",
       "dependencies": {
         "@hpcc-js/wasm-zstd": "^1.16.2",
@@ -543,17 +544,17 @@
       },
     },
     "packages/mcp": {
-      "name": "@open-pencil/mcp",
+      "name": "@open-designer/mcp",
       "version": "0.16.0",
       "bin": {
-        "openpencil-mcp": "./dist/stdio.mjs",
-        "openpencil-mcp-http": "./dist/index.mjs",
+        "opendesigner-mcp": "./dist/stdio.mjs",
+        "opendesigner-mcp-http": "./dist/index.mjs",
       },
       "dependencies": {
         "@hono/node-server": "^1.19.17",
         "@modelcontextprotocol/server": "^2.0.0",
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@valibot/to-json-schema": "^1.8.0",
         "es-toolkit": "^1.52.0",
         "hono": "^4.13.13",
@@ -568,7 +569,7 @@
       },
     },
     "packages/mermaid": {
-      "name": "@open-pencil/mermaid",
+      "name": "@open-designer/mermaid",
       "version": "0.16.0",
       "dependencies": {
         "entities": "^8.0.0",
@@ -583,7 +584,7 @@
       },
     },
     "packages/pen": {
-      "name": "@open-pencil/pen",
+      "name": "@open-designer/pen",
       "version": "0.16.0",
       "dependencies": {
         "es-toolkit": "^1.52.0",
@@ -595,11 +596,11 @@
         "typescript": "npm:@typescript/typescript6@^6.0.2",
       },
       "peerDependencies": {
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
       },
     },
     "packages/scene-graph": {
-      "name": "@open-pencil/scene-graph",
+      "name": "@open-designer/scene-graph",
       "version": "0.16.0",
       "dependencies": {
         "@noble/hashes": "^2.4.0",
@@ -619,15 +620,15 @@
       },
     },
     "packages/vue": {
-      "name": "@open-pencil/vue",
+      "name": "@open-designer/vue",
       "version": "0.16.0",
       "dependencies": {
         "@atlaskit/pragmatic-drag-and-drop": "^1.8.1",
         "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.2.0",
         "@nanostores/i18n": "^1.3.3",
         "@nanostores/vue": "^1.1.0",
-        "@open-pencil/dom-css": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/dom-css": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@vueuse/core": "^14.4.0",
         "es-toolkit": "^1.52.0",
         "fuse.js": "^7.5.0",
@@ -642,7 +643,7 @@
         "unplugin-vue": "^7.2.0",
       },
       "peerDependencies": {
-        "@open-pencil/core": "workspace:*",
+        "@open-designer/core": "workspace:*",
         "canvaskit-wasm": ">=0.41.1",
         "vue": "^3.5.41",
       },
@@ -651,7 +652,7 @@
       ],
     },
     "tools": {
-      "name": "@open-pencil/tools",
+      "name": "@open-designer/tools",
       "devDependencies": {
         "@types/bun": "^1.3.14",
         "@types/mdast": "^4.0.4",
@@ -659,115 +660,115 @@
       },
     },
     "tools/checks/architecture": {
-      "name": "@open-pencil/architecture-tools",
+      "name": "@open-designer/architecture-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
       },
     },
     "tools/checks/cloud-off": {
-      "name": "@open-pencil/cloud-off-tools",
+      "name": "@open-designer/cloud-off-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "vite": "8.1.4",
       },
     },
     "tools/checks/docs": {
-      "name": "@open-pencil/docs-tools",
+      "name": "@open-designer/docs-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
       },
     },
     "tools/checks/i18n": {
-      "name": "@open-pencil/i18n-tools",
+      "name": "@open-designer/i18n-tools",
       "dependencies": {
         "es-toolkit": "^1.52.0",
       },
     },
     "tools/checks/lint": {
-      "name": "@open-pencil/lint-tools",
+      "name": "@open-designer/lint-tools",
       "dependencies": {
         "@tailwindcss/node": "^4.3.3",
         "es-toolkit": "^1.52.0",
       },
       "devDependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
       },
     },
     "tools/checks/package-quality": {
-      "name": "@open-pencil/package-quality-tools",
+      "name": "@open-designer/package-quality-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "citty": "^0.1.6",
         "es-toolkit": "^1.52.0",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
       },
     },
     "tools/checks/secret-scan": {
-      "name": "@open-pencil/secret-scan-tools",
+      "name": "@open-designer/secret-scan-tools",
     },
     "tools/checks/test-homes": {
-      "name": "@open-pencil/test-homes-tools",
+      "name": "@open-designer/test-homes-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
-        "@open-pencil/unit-tests-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
+        "@open-designer/unit-tests-tools": "workspace:*",
       },
     },
     "tools/checks/type-shapes": {
-      "name": "@open-pencil/type-shapes-tools",
+      "name": "@open-designer/type-shapes-tools",
       "dependencies": {
         "es-toolkit": "^1.52.0",
       },
     },
     "tools/ci/images": {
-      "name": "@open-pencil/ci-images-tools",
+      "name": "@open-designer/ci-images-tools",
     },
     "tools/ci/policy": {
-      "name": "@open-pencil/ci-policy-tools",
+      "name": "@open-designer/ci-policy-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
       },
     },
     "tools/ci/pr-review-guidance": {
-      "name": "@open-pencil/pr-review-guidance-tools",
+      "name": "@open-designer/pr-review-guidance-tools",
       "dependencies": {
         "valibot": "^1.5.0",
       },
     },
     "tools/dev/cloud": {
-      "name": "@open-pencil/cloud-tools",
+      "name": "@open-designer/cloud-tools",
       "dependencies": {
-        "@open-pencil/cloud": "workspace:*",
-        "@open-pencil/package-artifacts-tools": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/cloud": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "smol-toml": "^1.8.0",
       },
     },
     "tools/dev/dev-server": {
-      "name": "@open-pencil/dev-server-tools",
+      "name": "@open-designer/dev-server-tools",
     },
     "tools/dev/navigation-benchmark": {
-      "name": "@open-pencil/navigation-benchmark-tools",
+      "name": "@open-designer/navigation-benchmark-tools",
     },
     "tools/dev/unit-tests": {
-      "name": "@open-pencil/unit-tests-tools",
+      "name": "@open-designer/unit-tests-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "es-toolkit": "^1.52.0",
       },
     },
     "tools/generate/authoring-reference": {
-      "name": "@open-pencil/authoring-reference-tools",
+      "name": "@open-designer/authoring-reference-tools",
       "dependencies": {
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/design-jsx": "workspace:*",
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/design-jsx": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "dedent": "^1.7.2",
       },
     },
     "tools/generate/brand": {
-      "name": "@open-pencil/brand-tools",
+      "name": "@open-designer/brand-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "@realfavicongenerator/generate-favicon": "0.9.0",
         "@realfavicongenerator/image-adapter-node": "0.9.0",
         "@tauri-apps/cli": "2.12.1",
@@ -783,13 +784,13 @@
       },
     },
     "tools/generate/demo": {
-      "name": "@open-pencil/demo-tools",
+      "name": "@open-designer/demo-tools",
       "dependencies": {
         "@iconify-json/lucide": "^1.2.139",
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/design-jsx": "workspace:*",
-        "@open-pencil/package-artifacts-tools": "workspace:*",
-        "@open-pencil/scene-graph": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/design-jsx": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
+        "@open-designer/scene-graph": "workspace:*",
         "@playwright/test": "^1.63.0",
         "js-base64": "^3.9.3",
         "proper-lockfile": "4.1.2",
@@ -803,19 +804,19 @@
       },
     },
     "tools/generate/emoji-metrics": {
-      "name": "@open-pencil/emoji-metrics-tools",
+      "name": "@open-designer/emoji-metrics-tools",
       "dependencies": {
         "harfbuzzjs": "1.6.4",
       },
       "devDependencies": {
-        "@open-pencil/core": "workspace:*",
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/core": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
       },
     },
     "tools/generate/landing-posters": {
-      "name": "@open-pencil/landing-posters-tools",
+      "name": "@open-designer/landing-posters-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "@playwright/test": "^1.63.0",
         "sharp": "0.34.5",
       },
@@ -826,34 +827,34 @@
       },
     },
     "tools/generate/mermaid-sources": {
-      "name": "@open-pencil/mermaid-sources-tools",
+      "name": "@open-designer/mermaid-sources-tools",
       "dependencies": {
         "jison": "0.4.18",
         "typescript": "npm:@typescript/typescript6@^6.0.2",
       },
       "devDependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
         "valibot": "^1.5.0",
       },
     },
     "tools/generate/tauri-menu": {
-      "name": "@open-pencil/tauri-menu-tools",
+      "name": "@open-designer/tauri-menu-tools",
       "dependencies": {
         "es-toolkit": "^1.52.0",
       },
       "devDependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
-        "@open-pencil/vue": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
+        "@open-designer/vue": "workspace:*",
       },
     },
     "tools/generate/visual-oracles": {
-      "name": "@open-pencil/visual-oracles-tools",
+      "name": "@open-designer/visual-oracles-tools",
       "dependencies": {
         "citty": "^0.1.6",
       },
     },
     "tools/release/package-artifacts": {
-      "name": "@open-pencil/package-artifacts-tools",
+      "name": "@open-designer/package-artifacts-tools",
       "dependencies": {
         "@publint/pack": "^0.1.5",
         "pkg-types": "^2.3.1",
@@ -865,10 +866,10 @@
       },
     },
     "tools/release/release-packages": {
-      "name": "@open-pencil/release-packages-tools",
+      "name": "@open-designer/release-packages-tools",
       "dependencies": {
-        "@open-pencil/package-artifacts-tools": "workspace:*",
-        "@open-pencil/package-quality-tools": "workspace:*",
+        "@open-designer/package-artifacts-tools": "workspace:*",
+        "@open-designer/package-quality-tools": "workspace:*",
         "citty": "^0.1.6",
         "es-toolkit": "^1.52.0",
         "js-base64": "^3.9.3",
@@ -879,9 +880,9 @@
       },
     },
     "vite": {
-      "name": "@open-pencil/vite-config",
+      "name": "@open-designer/vite-config",
       "dependencies": {
-        "@open-pencil/core": "workspace:*",
+        "@open-designer/core": "workspace:*",
         "unplugin-icons": "^23.0.1",
         "unplugin-vue-components": "^31.1.0",
         "vite": "8.1.4",
@@ -1588,6 +1589,34 @@
 
     "@lezer/lr": ["@lezer/lr@1.4.10", "", { "dependencies": { "@lezer/common": "^1.0.0" } }, "sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A=="],
 
+    "@libsql/client": ["@libsql/client@0.15.15", "", { "dependencies": { "@libsql/core": "^0.15.14", "@libsql/hrana-client": "^0.7.0", "js-base64": "^3.7.5", "libsql": "^0.5.22", "promise-limit": "^2.7.0" } }, "sha512-twC0hQxPNHPKfeOv3sNT6u2pturQjLcI+CnpTM0SjRpocEGgfiZ7DWKXLNnsothjyJmDqEsBQJ5ztq9Wlu470w=="],
+
+    "@libsql/core": ["@libsql/core@0.15.15", "", { "dependencies": { "js-base64": "^3.7.5" } }, "sha512-C88Z6UKl+OyuKKPwz224riz02ih/zHYI3Ho/LAcVOgjsunIRZoBw7fjRfaH9oPMmSNeQfhGklSG2il1URoOIsA=="],
+
+    "@libsql/darwin-arm64": ["@libsql/darwin-arm64@0.5.29", "", { "os": "darwin", "cpu": "arm64" }, "sha512-K+2RIB1OGFPYQbfay48GakLhqf3ArcbHqPFu7EZiaUcRgFcdw8RoltsMyvbj5ix2fY0HV3Q3Ioa/ByvQdaSM0A=="],
+
+    "@libsql/darwin-x64": ["@libsql/darwin-x64@0.5.29", "", { "os": "darwin", "cpu": "x64" }, "sha512-OtT+KFHsKFy1R5FVadr8FJ2Bb1mghtXTyJkxv0trocq7NuHntSki1eUbxpO5ezJesDvBlqFjnWaYYY516QNLhQ=="],
+
+    "@libsql/hrana-client": ["@libsql/hrana-client@0.7.0", "", { "dependencies": { "@libsql/isomorphic-fetch": "^0.3.1", "@libsql/isomorphic-ws": "^0.1.5", "js-base64": "^3.7.5", "node-fetch": "^3.3.2" } }, "sha512-OF8fFQSkbL7vJY9rfuegK1R7sPgQ6kFMkDamiEccNUvieQ+3urzfDFI616oPl8V7T9zRmnTkSjMOImYCAVRVuw=="],
+
+    "@libsql/isomorphic-fetch": ["@libsql/isomorphic-fetch@0.3.1", "", {}, "sha512-6kK3SUK5Uu56zPq/Las620n5aS9xJq+jMBcNSOmjhNf/MUvdyji4vrMTqD7ptY7/4/CAVEAYDeotUz60LNQHtw=="],
+
+    "@libsql/isomorphic-ws": ["@libsql/isomorphic-ws@0.1.5", "", { "dependencies": { "@types/ws": "^8.5.4", "ws": "^8.13.0" } }, "sha512-DtLWIH29onUYR00i0GlQ3UdcTRC6EP4u9w/h9LxpUZJWRMARk6dQwZ6Jkd+QdwVpuAOrdxt18v0K2uIYR3fwFg=="],
+
+    "@libsql/linux-arm-gnueabihf": ["@libsql/linux-arm-gnueabihf@0.5.29", "", { "os": "linux", "cpu": "arm" }, "sha512-CD4n4zj7SJTHso4nf5cuMoWoMSS7asn5hHygsDuhRl8jjjCTT3yE+xdUvI4J7zsyb53VO5ISh4cwwOtf6k2UhQ=="],
+
+    "@libsql/linux-arm-musleabihf": ["@libsql/linux-arm-musleabihf@0.5.29", "", { "os": "linux", "cpu": "arm" }, "sha512-2Z9qBVpEJV7OeflzIR3+l5yAd4uTOLxklScYTwpZnkm2vDSGlC1PRlueLaufc4EFITkLKXK2MWBpexuNJfMVcg=="],
+
+    "@libsql/linux-arm64-gnu": ["@libsql/linux-arm64-gnu@0.5.29", "", { "os": "linux", "cpu": "arm64" }, "sha512-gURBqaiXIGGwFNEaUj8Ldk7Hps4STtG+31aEidCk5evMMdtsdfL3HPCpvys+ZF/tkOs2MWlRWoSq7SOuCE9k3w=="],
+
+    "@libsql/linux-arm64-musl": ["@libsql/linux-arm64-musl@0.5.29", "", { "os": "linux", "cpu": "arm64" }, "sha512-fwgYZ0H8mUkyVqXZHF3mT/92iIh1N94Owi/f66cPVNsk9BdGKq5gVpoKO+7UxaNzuEH1roJp2QEwsCZMvBLpqg=="],
+
+    "@libsql/linux-x64-gnu": ["@libsql/linux-x64-gnu@0.5.29", "", { "os": "linux", "cpu": "x64" }, "sha512-y14V0vY0nmMC6G0pHeJcEarcnGU2H6cm21ZceRkacWHvQAEhAG0latQkCtoS2njFOXiYIg+JYPfAoWKbi82rkg=="],
+
+    "@libsql/linux-x64-musl": ["@libsql/linux-x64-musl@0.5.29", "", { "os": "linux", "cpu": "x64" }, "sha512-gquqwA/39tH4pFl+J9n3SOMSymjX+6kZ3kWgY3b94nXFTwac9bnFNMffIomgvlFaC4ArVqMnOZD3nuJ3H3VO1w=="],
+
+    "@libsql/win32-x64-msvc": ["@libsql/win32-x64-msvc@0.5.29", "", { "os": "win32", "cpu": "x64" }, "sha512-4/0CvEdhi6+KjMxMaVbFM2n2Z44escBRoEYpR+gZg64DdetzGnYm8mcNLcoySaDJZNaBd6wz5DNdgRmcI4hXcg=="],
+
     "@loaderkit/resolve": ["@loaderkit/resolve@1.0.6", "", { "dependencies": { "@braidai/lang": "^1.0.0" } }, "sha512-G8FdIoF5CypfwmD9rl8BXod5HDn8JqB0CCNBXDTaRZ+yRYhARrrSToX1zg1zy9jX3zLqigsELwhT4gNtkdQAUg=="],
 
     "@lobehub/icons-static-svg": ["@lobehub/icons-static-svg@1.95.1", "", {}, "sha512-Hw7EPPgVnC4NZLXBfTNJG6hyQgqECfUPC11VVXodPSr1aebKcFxDZlSpxhWwYNdCc6bhxps/x5TtXoPmfKH2ag=="],
@@ -1648,6 +1677,8 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.2.3", "", { "dependencies": { "@tybys/wasm-util": "^0.10.3" }, "peerDependencies": { "@emnapi/core": "^1.7.1 || ^2.0.0-alpha.4", "@emnapi/runtime": "^1.7.1 || ^2.0.0-alpha.4" } }, "sha512-UMduMbqO5s5zF2NkNacMT/yK5Y5QiKvWr2+50bzIIxFDwVJ2h49b+oyjaCGPhJxd2/gC2x39EHv/gHVuu36x2Q=="],
 
+    "@neon-rs/load": ["@neon-rs/load@0.0.4", "", {}, "sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw=="],
+
     "@noble/ciphers": ["@noble/ciphers@2.4.0", "", {}, "sha512-AnjFn0Jv92laAkvMrghlFZq4qQCIN/4DxFV/eooqtC2YTjB7kBeLMS2T9KJX4Dn+ZVXLOwK0lSgqDtx9gvxtiw=="],
 
     "@noble/hashes": ["@noble/hashes@2.4.0", "", {}, "sha512-X5XaVWZIBCT7HHZGm5I7ZQXDwLG+bGXuSrMQAW+7Zvl87h1kmc1ZB1VSRJcpUfoUrGQp4Fkoxm5kZ+Ms+aW+eA=="],
@@ -1662,95 +1693,95 @@
 
     "@one-ini/wasm": ["@one-ini/wasm@0.1.1", "", {}, "sha512-XuySG1E38YScSJoMlqovLru4KTUNSjgVTIjyh7qMX6aNN5HY5Ct5LhRJdxO79JtTzKfzV/bnWpz+zquYrISsvw=="],
 
-    "@open-pencil/architecture-tools": ["@open-pencil/architecture-tools@workspace:tools/checks/architecture"],
+    "@open-designer/architecture-tools": ["@open-designer/architecture-tools@workspace:tools/checks/architecture"],
 
-    "@open-pencil/authoring-reference-tools": ["@open-pencil/authoring-reference-tools@workspace:tools/generate/authoring-reference"],
+    "@open-designer/authoring-reference-tools": ["@open-designer/authoring-reference-tools@workspace:tools/generate/authoring-reference"],
 
-    "@open-pencil/brand-tools": ["@open-pencil/brand-tools@workspace:tools/generate/brand"],
+    "@open-designer/brand-tools": ["@open-designer/brand-tools@workspace:tools/generate/brand"],
 
-    "@open-pencil/ci-images-tools": ["@open-pencil/ci-images-tools@workspace:tools/ci/images"],
+    "@open-designer/ci-images-tools": ["@open-designer/ci-images-tools@workspace:tools/ci/images"],
 
-    "@open-pencil/ci-policy-tools": ["@open-pencil/ci-policy-tools@workspace:tools/ci/policy"],
+    "@open-designer/ci-policy-tools": ["@open-designer/ci-policy-tools@workspace:tools/ci/policy"],
 
-    "@open-pencil/cli": ["@open-pencil/cli@workspace:packages/cli"],
+    "@open-designer/cli": ["@open-designer/cli@workspace:packages/cli"],
 
-    "@open-pencil/cloud": ["@open-pencil/cloud@workspace:packages/cloud"],
+    "@open-designer/cloud": ["@open-designer/cloud@workspace:packages/cloud"],
 
-    "@open-pencil/cloud-off-tools": ["@open-pencil/cloud-off-tools@workspace:tools/checks/cloud-off"],
+    "@open-designer/cloud-off-tools": ["@open-designer/cloud-off-tools@workspace:tools/checks/cloud-off"],
 
-    "@open-pencil/cloud-tools": ["@open-pencil/cloud-tools@workspace:tools/dev/cloud"],
+    "@open-designer/cloud-tools": ["@open-designer/cloud-tools@workspace:tools/dev/cloud"],
 
-    "@open-pencil/core": ["@open-pencil/core@workspace:packages/core"],
+    "@open-designer/core": ["@open-designer/core@workspace:packages/core"],
 
-    "@open-pencil/demo-tools": ["@open-pencil/demo-tools@workspace:tools/generate/demo"],
+    "@open-designer/demo-tools": ["@open-designer/demo-tools@workspace:tools/generate/demo"],
 
-    "@open-pencil/design-jsx": ["@open-pencil/design-jsx@workspace:packages/design-jsx"],
+    "@open-designer/design-jsx": ["@open-designer/design-jsx@workspace:packages/design-jsx"],
 
-    "@open-pencil/dev-server-tools": ["@open-pencil/dev-server-tools@workspace:tools/dev/dev-server"],
+    "@open-designer/dev-server-tools": ["@open-designer/dev-server-tools@workspace:tools/dev/dev-server"],
 
-    "@open-pencil/docs": ["@open-pencil/docs@workspace:packages/docs"],
+    "@open-designer/docs": ["@open-designer/docs@workspace:packages/docs"],
 
-    "@open-pencil/docs-tools": ["@open-pencil/docs-tools@workspace:tools/checks/docs"],
+    "@open-designer/docs-tools": ["@open-designer/docs-tools@workspace:tools/checks/docs"],
 
-    "@open-pencil/dom-css": ["@open-pencil/dom-css@workspace:packages/dom-css"],
+    "@open-designer/dom-css": ["@open-designer/dom-css@workspace:packages/dom-css"],
 
-    "@open-pencil/drawio": ["@open-pencil/drawio@workspace:packages/drawio"],
+    "@open-designer/drawio": ["@open-designer/drawio@workspace:packages/drawio"],
 
-    "@open-pencil/emit": ["@open-pencil/emit@workspace:packages/emit"],
+    "@open-designer/emit": ["@open-designer/emit@workspace:packages/emit"],
 
-    "@open-pencil/emoji-metrics-tools": ["@open-pencil/emoji-metrics-tools@workspace:tools/generate/emoji-metrics"],
+    "@open-designer/emoji-metrics-tools": ["@open-designer/emoji-metrics-tools@workspace:tools/generate/emoji-metrics"],
 
-    "@open-pencil/feedback": ["@open-pencil/feedback@workspace:packages/feedback"],
+    "@open-designer/feedback": ["@open-designer/feedback@workspace:packages/feedback"],
 
-    "@open-pencil/fig": ["@open-pencil/fig@workspace:packages/fig"],
+    "@open-designer/fig": ["@open-designer/fig@workspace:packages/fig"],
 
-    "@open-pencil/harness": ["@open-pencil/harness@workspace:packages/harness"],
+    "@open-designer/harness": ["@open-designer/harness@workspace:packages/harness"],
 
-    "@open-pencil/i18n-tools": ["@open-pencil/i18n-tools@workspace:tools/checks/i18n"],
+    "@open-designer/i18n-tools": ["@open-designer/i18n-tools@workspace:tools/checks/i18n"],
 
-    "@open-pencil/kiwi": ["@open-pencil/kiwi@workspace:packages/kiwi"],
+    "@open-designer/kiwi": ["@open-designer/kiwi@workspace:packages/kiwi"],
 
-    "@open-pencil/landing-posters-tools": ["@open-pencil/landing-posters-tools@workspace:tools/generate/landing-posters"],
+    "@open-designer/landing-posters-tools": ["@open-designer/landing-posters-tools@workspace:tools/generate/landing-posters"],
 
-    "@open-pencil/lint-tools": ["@open-pencil/lint-tools@workspace:tools/checks/lint"],
+    "@open-designer/lint-tools": ["@open-designer/lint-tools@workspace:tools/checks/lint"],
 
-    "@open-pencil/mcp": ["@open-pencil/mcp@workspace:packages/mcp"],
+    "@open-designer/mcp": ["@open-designer/mcp@workspace:packages/mcp"],
 
-    "@open-pencil/mermaid": ["@open-pencil/mermaid@workspace:packages/mermaid"],
+    "@open-designer/mermaid": ["@open-designer/mermaid@workspace:packages/mermaid"],
 
-    "@open-pencil/mermaid-sources-tools": ["@open-pencil/mermaid-sources-tools@workspace:tools/generate/mermaid-sources"],
+    "@open-designer/mermaid-sources-tools": ["@open-designer/mermaid-sources-tools@workspace:tools/generate/mermaid-sources"],
 
-    "@open-pencil/navigation-benchmark-tools": ["@open-pencil/navigation-benchmark-tools@workspace:tools/dev/navigation-benchmark"],
+    "@open-designer/navigation-benchmark-tools": ["@open-designer/navigation-benchmark-tools@workspace:tools/dev/navigation-benchmark"],
 
-    "@open-pencil/package-artifacts-tools": ["@open-pencil/package-artifacts-tools@workspace:tools/release/package-artifacts"],
+    "@open-designer/package-artifacts-tools": ["@open-designer/package-artifacts-tools@workspace:tools/release/package-artifacts"],
 
-    "@open-pencil/package-quality-tools": ["@open-pencil/package-quality-tools@workspace:tools/checks/package-quality"],
+    "@open-designer/package-quality-tools": ["@open-designer/package-quality-tools@workspace:tools/checks/package-quality"],
 
-    "@open-pencil/pen": ["@open-pencil/pen@workspace:packages/pen"],
+    "@open-designer/pen": ["@open-designer/pen@workspace:packages/pen"],
 
-    "@open-pencil/pr-review-guidance-tools": ["@open-pencil/pr-review-guidance-tools@workspace:tools/ci/pr-review-guidance"],
+    "@open-designer/pr-review-guidance-tools": ["@open-designer/pr-review-guidance-tools@workspace:tools/ci/pr-review-guidance"],
 
-    "@open-pencil/release-packages-tools": ["@open-pencil/release-packages-tools@workspace:tools/release/release-packages"],
+    "@open-designer/release-packages-tools": ["@open-designer/release-packages-tools@workspace:tools/release/release-packages"],
 
-    "@open-pencil/scene-graph": ["@open-pencil/scene-graph@workspace:packages/scene-graph"],
+    "@open-designer/scene-graph": ["@open-designer/scene-graph@workspace:packages/scene-graph"],
 
-    "@open-pencil/secret-scan-tools": ["@open-pencil/secret-scan-tools@workspace:tools/checks/secret-scan"],
+    "@open-designer/secret-scan-tools": ["@open-designer/secret-scan-tools@workspace:tools/checks/secret-scan"],
 
-    "@open-pencil/tauri-menu-tools": ["@open-pencil/tauri-menu-tools@workspace:tools/generate/tauri-menu"],
+    "@open-designer/tauri-menu-tools": ["@open-designer/tauri-menu-tools@workspace:tools/generate/tauri-menu"],
 
-    "@open-pencil/test-homes-tools": ["@open-pencil/test-homes-tools@workspace:tools/checks/test-homes"],
+    "@open-designer/test-homes-tools": ["@open-designer/test-homes-tools@workspace:tools/checks/test-homes"],
 
-    "@open-pencil/tools": ["@open-pencil/tools@workspace:tools"],
+    "@open-designer/tools": ["@open-designer/tools@workspace:tools"],
 
-    "@open-pencil/type-shapes-tools": ["@open-pencil/type-shapes-tools@workspace:tools/checks/type-shapes"],
+    "@open-designer/type-shapes-tools": ["@open-designer/type-shapes-tools@workspace:tools/checks/type-shapes"],
 
-    "@open-pencil/unit-tests-tools": ["@open-pencil/unit-tests-tools@workspace:tools/dev/unit-tests"],
+    "@open-designer/unit-tests-tools": ["@open-designer/unit-tests-tools@workspace:tools/dev/unit-tests"],
 
-    "@open-pencil/visual-oracles-tools": ["@open-pencil/visual-oracles-tools@workspace:tools/generate/visual-oracles"],
+    "@open-designer/visual-oracles-tools": ["@open-designer/visual-oracles-tools@workspace:tools/generate/visual-oracles"],
 
-    "@open-pencil/vite-config": ["@open-pencil/vite-config@workspace:vite"],
+    "@open-designer/vite-config": ["@open-designer/vite-config@workspace:vite"],
 
-    "@open-pencil/vue": ["@open-pencil/vue@workspace:packages/vue"],
+    "@open-designer/vue": ["@open-designer/vue@workspace:packages/vue"],
 
     "@openfeature/core": ["@openfeature/core@1.12.0", "", {}, "sha512-7PCPzyd1OC19begz30+CRknFB0ChtyaZUhk7YWrk+Bov1fpVw0HYkTXtoxxsvPfDZB9P9WsT7uixN+Z8f9+bcA=="],
 
@@ -3148,7 +3179,7 @@
 
     "d3-time-format": ["d3-time-format@4.1.0", "", { "dependencies": { "d3-time": "1 - 3" } }, "sha512-dJxPBlzC7NugB2PDLwo9Q8JiTR3M3e4/XANkreKSUxF8vvXKqm1Yfq4Q5dl8budlunRVlUUaDUgFt7eA8D6NLg=="],
 
-    "data-uri-to-buffer": ["data-uri-to-buffer@6.0.2", "", {}, "sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw=="],
+    "data-uri-to-buffer": ["data-uri-to-buffer@4.0.1", "", {}, "sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A=="],
 
     "data-view-buffer": ["data-view-buffer@1.0.2", "", { "dependencies": { "call-bound": "^1.0.3", "es-errors": "^1.3.0", "is-data-view": "^1.0.2" } }, "sha512-EmKO5V3OLXh1rtK2wgXRansaK1/mtVdTUEiEI0W8RkvgT05kfxaH29PliLnpLP73yYO6142Q72QNa8Wx/A5CqQ=="],
 
@@ -3852,6 +3883,8 @@
 
     "kysely-d1": ["kysely-d1@0.4.0", "", { "peerDependencies": { "kysely": "*" } }, "sha512-wUcVvQNtm30OTfuo7Ad5vYJ1qHqPXOCZc+zWchVKNyuvqY3u8OuGw4gmUx1Ypdx2wRVFLHVQC9I7v0pTmF7Nkw=="],
 
+    "kysely-libsql": ["kysely-libsql@0.7.1", "", { "dependencies": { "@libsql/client": "^0.15.0" }, "peerDependencies": { "kysely": "*" } }, "sha512-65zt+cBklFuTJLirWep3ZC+K2mDSwyR/af1cW6xUFy9PUYJBp/MNaswX7iaiP9bybRsTxe/b3VM8IDbqK4jY9Q=="],
+
     "kysely-pglite-dialect": ["kysely-pglite-dialect@1.3.1", "", { "peerDependencies": { "@electric-sql/pglite": "^0.2.0 || ^0.3.0 || ^0.4.0", "kysely": ">=0.23.0" } }, "sha512-QwB87FWSM63JsHouhTil3MNLcP9ajguDv+fFUokVEXEBdjxbtoXZd4iJEZtmdmyGshCFWrE565Ua6fdAfNRxJw=="],
 
     "lazystream": ["lazystream@1.0.1", "", { "dependencies": { "readable-stream": "^2.0.5" } }, "sha512-b94GiNHQNy6JNTrt5w6zNyffMrNkXZb3KTkCZJb2V1xaEGCk093vkZ2jk3tpaeP33/OiXC+WvK9AxUebnf5nbw=="],
@@ -3865,6 +3898,8 @@
     "lex-parser": ["lex-parser@0.1.4", "", {}, "sha512-DuAEISsr1H4LOpmFLkyMc8YStiRWZCO8hMsoXAXSbgyfvs2WQhSt0+/FBv3ZU/JBFZMGcE+FWzEBSzwUU7U27w=="],
 
     "lib0": ["lib0@0.2.117", "", { "dependencies": { "isomorphic.js": "^0.2.4" }, "bin": { "0serve": "bin/0serve.js", "0gentesthtml": "bin/gentesthtml.js", "0ecdsa-generate-keypair": "bin/0ecdsa-generate-keypair.js" } }, "sha512-DeXj9X5xDCjgKLU/7RR+/HQEVzuuEUiwldwOGsHK/sfAfELGWEyTcf0x+uOvCvK3O2zPmZePXWL85vtia6GyZw=="],
+
+    "libsql": ["libsql@0.5.29", "", { "dependencies": { "@neon-rs/load": "^0.0.4", "detect-libc": "2.0.2" }, "optionalDependencies": { "@libsql/darwin-arm64": "0.5.29", "@libsql/darwin-x64": "0.5.29", "@libsql/linux-arm-gnueabihf": "0.5.29", "@libsql/linux-arm-musleabihf": "0.5.29", "@libsql/linux-arm64-gnu": "0.5.29", "@libsql/linux-arm64-musl": "0.5.29", "@libsql/linux-x64-gnu": "0.5.29", "@libsql/linux-x64-musl": "0.5.29", "@libsql/win32-x64-msvc": "0.5.29" }, "os": [ "linux", "win32", "darwin", ], "cpu": [ "arm", "x64", "arm64", ] }, "sha512-8lMP8iMgiBzzoNbAPQ59qdVcj6UaE/Vnm+fiwX4doX4Narook0a4GPKWBEv+CR8a1OwbfkgL18uBfBjWdF0Fzg=="],
 
     "lie": ["lie@3.3.0", "", { "dependencies": { "immediate": "~3.0.5" } }, "sha512-UaiMJzeWRlEujzAuw5LokY1L5ecNQYZKfmyZ9L7wDHb/p5etKaxXhohBcrw0EYby+G/NA52vRSN4N39dxHAIwQ=="],
 
@@ -4359,6 +4394,8 @@
     "progress": ["progress@2.0.3", "", {}, "sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA=="],
 
     "promise": ["promise@7.3.1", "", { "dependencies": { "asap": "~2.0.3" } }, "sha512-nolQXZ/4L+bP/UGlkfaIujX9BKxGwmQ9OT4mOt5yvy8iK1h3wqTEJCijzGANTCCl9nWjY41juyAn2K3Q1hLLTg=="],
+
+    "promise-limit": ["promise-limit@2.7.0", "", {}, "sha512-7nJ6v5lnJsXwGprnGXga4wx6d1POjvi5Qmf1ivTRxTjH4Z/9Czja/UCMLVmB9N93GeWOU93XaFaEt6jbuoagNw=="],
 
     "proper-lockfile": ["proper-lockfile@4.1.2", "", { "dependencies": { "graceful-fs": "^4.2.4", "retry": "^0.12.0", "signal-exit": "^3.0.2" } }, "sha512-TjNPblN4BwAWMXU8s9AEz4JmQxnD1NNL7bNOY/AKUzyamc379FWASUhc/K1pL2noVb+XmZKLL68cjzLsiOAMaA=="],
 
@@ -5584,6 +5621,8 @@
 
     "foreground-child/signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
 
+    "get-uri/data-uri-to-buffer": ["data-uri-to-buffer@6.0.2", "", {}, "sha512-7hvf7/GW8e86rW0ptuwS3OcBGDjIi6SZva7hCyWC0yYry2cOPmLIjXAUHI6DK2HsnwJd9ifmt57i8eV2n4YNpw=="],
+
     "glob/minimatch": ["minimatch@9.0.9", "", { "dependencies": { "brace-expansion": "^2.0.2" } }, "sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg=="],
 
     "globby/ignore": ["ignore@7.0.5", "", {}, "sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg=="],
@@ -5611,6 +5650,8 @@
     "jws/safe-buffer": ["safe-buffer@5.2.1", "", {}, "sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ=="],
 
     "lazystream/readable-stream": ["readable-stream@2.3.8", "", { "dependencies": { "core-util-is": "~1.0.0", "inherits": "~2.0.3", "isarray": "~1.0.0", "process-nextick-args": "~2.0.0", "safe-buffer": "~5.1.1", "string_decoder": "~1.1.1", "util-deprecate": "~1.0.1" } }, "sha512-8p0AUk4XODgIewSi0l8Epjs+EVnWiK7NoDIEGU0HhE7+ZyY8D1IMY7odu5lRrFXGg71L15KG8QrPmum45RTtdA=="],
+
+    "libsql/detect-libc": ["detect-libc@2.0.2", "", {}, "sha512-UX6sGumvvqSaXgdKGUsgZWqcUyIXZ/vZTrlRT/iobiKhGL0zL4d3osHj3uqllWJK+i+sixDS/3COVEOFbupFyw=="],
 
     "local-pkg/quansync": ["quansync@0.2.11", "", {}, "sha512-AifT7QEbW9Nri4tAwR5M/uzpBuqfZf+zwaEM/QkzEjj7NBuFD2rBuy0K3dE+8wltbezDV7JMA0WfnCPYRSYbXA=="],
 
@@ -5659,8 +5700,6 @@
     "mocha/yargs-parser": ["yargs-parser@20.2.9", "", {}, "sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w=="],
 
     "mqtt/lru-cache": ["lru-cache@10.4.3", "", {}, "sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ=="],
-
-    "node-fetch/data-uri-to-buffer": ["data-uri-to-buffer@4.0.1", "", {}, "sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A=="],
 
     "nomnom/colors": ["colors@0.5.1", "", {}, "sha512-XjsuUwpDeY98+yz959OlUK6m7mLBM+1MEG5oaenfuQnNnrQk1WvtcvFgN3FNDP3f2NmZ211t0mNEfSEN1h0eIg=="],
 

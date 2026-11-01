@@ -2,18 +2,18 @@ import { pick } from 'es-toolkit/object'
 import { deflateSync } from 'fflate'
 import { toUint8Array } from 'js-base64'
 
-import { computeAllLayouts, computeLayout } from '@open-pencil/core/layout'
-import { materializeDocument, writeFigArchive } from '@open-pencil/fig'
+import { computeAllLayouts, computeLayout } from '@open-designer/core/layout'
+import { materializeDocument, writeFigArchive } from '@open-designer/fig'
 import {
   createNodeChangesMessage,
   encodeMessage,
   getSchemaBytes,
   initCodec,
   type NodeChange
-} from '@open-pencil/kiwi/fig/codec'
-import { type SceneNode, SceneGraph } from '@open-pencil/scene-graph'
-import { rescaleNodeTree } from '@open-pencil/scene-graph/scaling'
-import { reconcileVariableBindings } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/kiwi/fig/codec'
+import { type SceneNode, SceneGraph } from '@open-designer/scene-graph'
+import { rescaleNodeTree } from '@open-designer/scene-graph/scaling'
+import { reconcileVariableBindings } from '@open-designer/scene-graph/variables'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 import bindingFixture from '#tests/fixtures/nested-binding-ownership-records.json' with { type: 'json' }

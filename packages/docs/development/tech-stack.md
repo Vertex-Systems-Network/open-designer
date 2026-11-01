@@ -28,7 +28,7 @@
 {
   "canvaskit-wasm": "^0.41.1",
   "vue": "^3.5.41",
-  "yoga-layout": "npm:@open-pencil/yoga-layout@3.3.0-grid.3",
+  "yoga-layout": "npm:@open-designer/yoga-layout@3.3.0-grid.3",
   "nanoevents": "^9.1.0",
   "sucrase": "^3.35.1",
   "reka-ui": "^2.10.3",
@@ -64,4 +64,4 @@ Yoga is maintained by Meta, battle-tested across billions of React Native device
 
 | Technology | Purpose | Status |
 |-----------|---------|--------|
-| CSS Grid in Yoga | Grid-based auto layout | Shipped via [Yoga fork](https://github.com/open-pencil/yoga/tree/grid) (`@open-pencil/yoga-layout`) |
+| CSS Grid in Yoga | Grid-based auto layout | Shipped via [Yoga fork](https://github.com/open-designer/yoga/tree/grid) (`@open-designer/yoga-layout`) |

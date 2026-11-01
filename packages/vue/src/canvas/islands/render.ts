@@ -6,10 +6,10 @@ import {
   type ControlRole,
   type DesignElement,
   type DesignNode
-} from '@open-pencil/dom-css/export'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { layerPath } from '@open-pencil/scene-graph/behaviours'
-import { shaderOfPaint } from '@open-pencil/scene-graph/shaders'
+} from '@open-designer/dom-css/export'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { layerPath } from '@open-designer/scene-graph/behaviours'
+import { shaderOfPaint } from '@open-designer/scene-graph/shaders'
 
 import { wrapRole } from './controls'
 import IslandShader from './IslandShader.vue'
@@ -69,7 +69,7 @@ export function renderElement(
       : []),
     ...content()
   ]
-  const { 'data-open-pencil-node-id': _id, ...attrs } = element.attrs
+  const { 'data-open-designer-node-id': _id, ...attrs } = element.attrs
   return h(
     override.tag ?? element.tagName,
     { ...attrs, key: path, 'data-layer': path, style, ...override.props },

@@ -1,5 +1,5 @@
-import type { CloudAITokenSource } from '@open-pencil/cloud/client'
-import type { AIToken } from '@open-pencil/cloud/contract'
+import type { CloudAITokenSource } from '@open-designer/cloud/client'
+import type { AIToken } from '@open-designer/cloud/contract'
 
 /** A token this close to expiring is replaced, so a long request does not outlive it. */
 const REFRESH_MARGIN_MS = 60_000

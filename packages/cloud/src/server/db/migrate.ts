@@ -1,4 +1,4 @@
-import type { Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 import { Migrator, type Migration, type MigrationProvider } from 'kysely/migration'
 
 import * as foundation from './migrations/001_foundation'
@@ -28,6 +28,7 @@ import * as accountActivity from './migrations/024_account_activity'
 import * as tableNames from './migrations/025_table_names'
 import * as userPicture from './migrations/026_user_picture'
 import type { CloudDatabase } from './tables'
+import { TURSO_SCHEMA_STATEMENTS } from './turso-schema'
 
 const migrations: Record<string, Migration> = {
   '001_foundation': foundation,
@@ -61,6 +62,70 @@ const migrations: Record<string, Migration> = {
 class CloudMigrationProvider implements MigrationProvider {
   async getMigrations(): Promise<Record<string, Migration>> {
     return migrations
+  }
+}
+
+/**
+ * Turso's initial snapshot incorporates every PostgreSQL migration listed here.
+ * When a new PostgreSQL migration changes the schema, add an ordered Turso migration below
+ * and move its name from this initial snapshot's mirror list to that migration.
+ */
+const tursoMigrations: Array<{ name: string; mirrors: readonly string[]; migration: Migration }> = [
+  {
+    name: '001_turso_schema',
+    mirrors: [
+      '001_foundation',
+      '002_upload_cleanup_claims',
+      '003_document_cleanup_claims',
+      '004_document_sharing',
+      '005_document_collaboration_epoch',
+      '006_invitation_continuation',
+      '007_collaboration_state',
+      '008_storage_reservations',
+      '009_workspace_entitlements',
+      '010_upload_finalization',
+      '011_upload_finalization_lease',
+      '012_transactional_email',
+      '013_admin_enrollment',
+      '014_enrollment_email_kinds',
+      '015_cloud_rate_limit',
+      '016_auth_schema',
+      '017_authentication_email_kinds',
+      '018_authentication_mfa',
+      '019_better_auth_account_issuer',
+      '020_workspace_invitations',
+      '021_document_versions',
+      '022_entitlement_external_version',
+      '023_document_images',
+      '024_account_activity',
+      '025_table_names',
+      '026_user_picture'
+    ],
+    migration: {
+      async up(database) {
+        for (const statement of TURSO_SCHEMA_STATEMENTS) {
+          await sql.raw(statement).execute(database)
+        }
+      }
+    }
+  }
+]
+
+function assertTursoMigrationCoverage(): void {
+  const mirrored = tursoMigrations.flatMap((entry) => entry.mirrors)
+  const missing = Object.keys(migrations).filter((name) => !mirrored.includes(name))
+  const unknown = mirrored.filter((name) => !Object.hasOwn(migrations, name))
+  if (missing.length || unknown.length) {
+    throw new Error(
+      `Turso migration coverage mismatch. Missing: ${missing.join(', ') || 'none'}; unknown: ${unknown.join(', ') || 'none'}`
+    )
+  }
+}
+
+class TursoMigrationProvider implements MigrationProvider {
+  async getMigrations(): Promise<Record<string, Migration>> {
+    assertTursoMigrationCoverage()
+    return Object.fromEntries(tursoMigrations.map(({ name, migration }) => [name, migration]))
   }
 }
 
@@ -165,11 +230,26 @@ export async function migrateToLatest(migrator: Migrator, failure: string): Prom
 
 export async function migrateCloudDatabase(
   database: Kysely<CloudDatabase>,
-  authMigration?: CloudAuthMigration
+  authMigration?: CloudAuthMigration,
+  options: { dialect?: 'postgres' | 'libsql' } = {}
 ): Promise<void> {
+  if (options.dialect === 'libsql') {
+    const tables = await database.introspection.getTables({ withInternalKyselyTables: true })
+    const applicationTables = tables.filter(
+      (table) => table.name !== 'kysely_migration' && table.name !== 'kysely_migration_lock'
+    )
+    const hasMigrationHistory = tables.some((table) => table.name === 'kysely_migration')
+    if (applicationTables.length > 0 && !hasMigrationHistory) {
+      throw new Error('Refusing to initialize Turso because the database is not empty')
+    }
+  }
   await migrateToLatest(
-    new Migrator({ db: database, provider: new CloudMigrationProvider() }),
-    'OpenPencil Cloud database migration failed'
+    new Migrator({
+      db: database,
+      provider:
+        options.dialect === 'libsql' ? new TursoMigrationProvider() : new CloudMigrationProvider()
+    }),
+    'OpenDesigner Cloud database migration failed'
   )
   if (authMigration) await migrateAuthSchema(database, authMigration)
 }

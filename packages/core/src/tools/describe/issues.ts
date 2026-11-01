@@ -1,7 +1,7 @@
 import { uniq } from 'es-toolkit'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { colorDistance, colorToHex } from '@open-pencil/scene-graph/color'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { colorDistance, colorToHex } from '@open-designer/scene-graph/color'
 
 import { detectLayoutIssues } from './layout-issues'
 import { CONTAINER_TYPES, findAncestorBackground, looksLikeButton } from './shared'

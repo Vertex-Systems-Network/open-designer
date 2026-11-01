@@ -3,8 +3,8 @@ import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { BUILTIN_IO_FORMATS, IORegistry } from '@open-pencil/core/io'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { BUILTIN_IO_FORMATS, IORegistry } from '@open-designer/core/io'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { loadDocument, prepareDocumentForRPC } from '#cli/headless'
 
@@ -38,7 +38,7 @@ async function createLazyFixture() {
     height: 40
   })
 
-  const dir = await mkdtemp(join(tmpdir(), 'open-pencil-headless-lazy-'))
+  const dir = await mkdtemp(join(tmpdir(), 'open-designer-headless-lazy-'))
   const path = join(dir, 'lazy.fig')
   const result = await io.writeDocument('fig', graph)
   await Bun.write(path, result.data as Uint8Array)

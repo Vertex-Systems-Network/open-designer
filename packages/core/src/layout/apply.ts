@@ -1,21 +1,19 @@
 import type { Node as YogaNode } from 'yoga-layout'
 
-import type { SceneGraph, SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
-import { scaleGeometryPaths } from '@open-pencil/scene-graph/copy'
-import { enforcedAspectRatio } from '@open-pencil/scene-graph/layout'
+import type { SceneGraph, SceneNode, VectorNetwork } from '@open-designer/scene-graph'
+import { scaleGeometryPaths } from '@open-designer/scene-graph/copy'
+import { enforcedAspectRatio } from '@open-designer/scene-graph/layout'
 import {
   layoutConstrainedChildRect,
   scaleVectorNetworkForResize
-} from '@open-pencil/scene-graph/resize'
+} from '@open-designer/scene-graph/resize'
 
 import { keepsSavedLayout, usesDetachedDerivedLayout } from './derived'
 
 export type ComputeLayoutFn = (graph: SceneGraph, frameId: string) => void
 
 /** The per-axis extent of a network, including Bézier control points. */
-function networkExtent(
-  network: VectorNetwork | null
-): { width: number; height: number } | null {
+function networkExtent(network: VectorNetwork | null): { width: number; height: number } | null {
   if (!network || network.vertices.length === 0) return null
   let minX = Number.POSITIVE_INFINITY
   let maxX = Number.NEGATIVE_INFINITY
@@ -29,10 +27,16 @@ function networkExtent(
   }
   for (const vertex of network.vertices) include(vertex.x, vertex.y)
   for (const segment of network.segments) {
-    const start = network.vertices[segment.start]
-    const end = network.vertices[segment.end]
-    if (start) include(start.x + segment.tangentStart.x, start.y + segment.tangentStart.y)
-    if (end) include(end.x + segment.tangentEnd.x, end.y + segment.tangentEnd.y)
+    const startIndex = segment.start
+    const endIndex = segment.end
+    if (Number.isInteger(startIndex) && startIndex >= 0 && startIndex < network.vertices.length) {
+      const start = network.vertices[startIndex]
+      include(start.x + segment.tangentStart.x, start.y + segment.tangentStart.y)
+    }
+    if (Number.isInteger(endIndex) && endIndex >= 0 && endIndex < network.vertices.length) {
+      const end = network.vertices[endIndex]
+      include(end.x + segment.tangentEnd.x, end.y + segment.tangentEnd.y)
+    }
   }
   const width = maxX - minX
   const height = maxY - minY
@@ -77,7 +81,84 @@ export function rescaleVectorNetworkForLayout(
   )
 }
 
-type LayoutGeometry = Partial<Pick<SceneNode, 'x' | 'y' | 'width' | 'height' | 'vectorNetwork' | 'fillGeometry' | 'strokeGeometry'>>
+type LayoutGeometry = Partial<
+  Pick<
+    SceneNode,
+    'x' | 'y' | 'width' | 'height' | 'vectorNetwork' | 'fillGeometry' | 'strokeGeometry'
+  >
+>
+
+function vectorSourceSize(
+  current: number | undefined,
+  remembered: number | undefined,
+  extent: number | undefined
+): number | undefined {
+  return positiveSize(current) ?? positiveSize(remembered) ?? positiveSize(extent)
+}
+
+function updateVectorPathGeometry(
+  node: Extract<SceneNode, { type: 'VECTOR' }>,
+  changes: LayoutGeometry,
+  sx: number,
+  sy: number
+): void {
+  if (sx === 1 && sy === 1) return
+  if (node.fillGeometry.length > 0) {
+    changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
+  }
+  if (node.strokeGeometry.length === 0) return
+  changes.strokeGeometry =
+    node.vectorNetwork && node.vectorNetwork.segments.length > 0
+      ? []
+      : scaleGeometryPaths(node.strokeGeometry, sx, sy)
+}
+
+function rememberVectorSize(
+  id: string,
+  toWidth: number,
+  toHeight: number,
+  sourceWidth: number | undefined,
+  sourceHeight: number | undefined
+): void {
+  if (toWidth <= 0 || toHeight <= 0) {
+    lastBoxWithSize.set(id, {
+      width: positiveSize(toWidth) ?? sourceWidth,
+      height: positiveSize(toHeight) ?? sourceHeight
+    })
+    return
+  }
+  lastBoxWithSize.delete(id)
+}
+
+function updateVectorLayoutGeometry(id: string, node: SceneNode, changes: LayoutGeometry): void {
+  if (node.type !== 'VECTOR') return
+  const toWidth = changes.width ?? node.width
+  const toHeight = changes.height ?? node.height
+  const remembered = lastBoxWithSize.get(id)
+  const extent = networkExtent(node.vectorNetwork)
+  const sourceWidth = vectorSourceSize(node.width, remembered?.width, extent?.width)
+  const sourceHeight = vectorSourceSize(node.height, remembered?.height, extent?.height)
+  const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
+  const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
+  const targetWidth = positiveSize(toWidth) ?? effectiveWidth
+  const targetHeight = positiveSize(toHeight) ?? effectiveHeight
+  const network = rescaleVectorNetworkForLayout(
+    node.vectorNetwork,
+    node.width,
+    node.height,
+    toWidth,
+    toHeight,
+    remembered
+  )
+  if (network) changes.vectorNetwork = network
+  updateVectorPathGeometry(
+    node,
+    changes,
+    targetWidth / effectiveWidth,
+    targetHeight / effectiveHeight
+  )
+  rememberVectorSize(id, toWidth, toHeight, sourceWidth, sourceHeight)
+}
 
 /**
  * Writes only the geometry layout changed. Laying out a large page leaves most layers where they
@@ -101,59 +182,7 @@ function writeLayoutGeometry(
     const value = geometry[key]
     if (value !== undefined && value !== node[key]) changes[key] = value
   }
-  // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
-  // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
-  // which is what an instance smaller than its component turns into.
-  if (node.type === 'VECTOR') {
-    const toWidth = changes.width ?? node.width
-    const toHeight = changes.height ?? node.height
-    const remembered = lastBoxWithSize.get(id)
-    const extent = networkExtent(node.vectorNetwork)
-    const sourceWidth =
-      positiveSize(node.width) ??
-      positiveSize(remembered?.width) ??
-      positiveSize(extent?.width)
-    const sourceHeight =
-      positiveSize(node.height) ??
-      positiveSize(remembered?.height) ??
-      positiveSize(extent?.height)
-    const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
-    const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
-    const targetWidth = positiveSize(toWidth) ?? effectiveWidth
-    const targetHeight = positiveSize(toHeight) ?? effectiveHeight
-    const sx = targetWidth / effectiveWidth
-    const sy = targetHeight / effectiveHeight
-    const network = rescaleVectorNetworkForLayout(
-      node.vectorNetwork,
-      node.width,
-      node.height,
-      toWidth,
-      toHeight,
-      remembered
-    )
-    if (network) changes.vectorNetwork = network
-    if (sx !== 1 || sy !== 1) {
-      if (node.fillGeometry.length > 0) {
-        changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
-      }
-      // Live paths regenerate their strokes; outline-only vectors keep their saved outline.
-      if (node.strokeGeometry.length > 0) {
-        changes.strokeGeometry =
-          node.vectorNetwork && node.vectorNetwork.segments.length > 0
-            ? []
-            : scaleGeometryPaths(node.strokeGeometry, sx, sy)
-      }
-    }
-
-    if (toWidth <= 0 || toHeight <= 0) {
-      lastBoxWithSize.set(id, {
-        width: positiveSize(toWidth) ?? sourceWidth,
-        height: positiveSize(toHeight) ?? sourceHeight
-      })
-    } else {
-      lastBoxWithSize.delete(id)
-    }
-  }
+  updateVectorLayoutGeometry(id, node, changes)
   if (Object.keys(changes).length > 0) graph.updateNode(id, changes)
   if (!CONSTRAINT_PARENT_TYPES.has(node.type)) return
   // Laying out what a file holds, as a page opens or its fonts arrive, resizes a frame only where
@@ -241,6 +270,29 @@ function hugStart(frame: SceneNode): { width: number; height: number } | null {
   }
 }
 
+function savedStretchedCrossSize(
+  graph: SceneGraph,
+  frame: SceneNode,
+  axis: 'width' | 'height'
+): number | undefined {
+  if (frame.source.format !== 'fig') return undefined
+  const padding =
+    axis === 'width'
+      ? frame.paddingLeft + frame.paddingRight
+      : frame.paddingTop + frame.paddingBottom
+  const sizes = graph
+    .getChildren(frame.id)
+    .filter(
+      (child) =>
+        child.visible &&
+        child.layoutPositioning !== 'ABSOLUTE' &&
+        (child.layoutAlignSelf === 'STRETCH' ||
+          (child.layoutAlignSelf === 'AUTO' && frame.counterAxisAlign === 'STRETCH'))
+    )
+    .map((child) => child.derivedLayout?.[axis] ?? child[axis])
+  return sizes.length > 0 ? Math.max(...sizes) + padding : undefined
+}
+
 function applyFrameSize(
   graph: SceneGraph,
   frame: SceneNode,
@@ -266,10 +318,11 @@ function applyFrameSize(
     axis === 'width' ? yogaNode.getComputedWidth() : yogaNode.getComputedHeight()
   if (frame.primaryAxisSizing === 'HUG') updates[primary] = derived?.[primary] ?? computed(primary)
   if (frame.counterAxisSizing === 'HUG') {
+    const savedCross =
+      derived?.[counter] ??
+      (keepsSaved ? savedStretchedCrossSize(graph, frame, counter) : undefined)
     updates[counter] =
-      keepsSaved && preservesImportedHugCrossSize(graph, frame, counter)
-        ? frame[counter]
-        : (derived?.[counter] ?? computed(counter))
+      savedCross === undefined ? computed(counter) : Math.max(savedCross, computed(counter))
   }
 
   writeLayoutGeometry(graph, frame.id, updates, computeLayout, before)

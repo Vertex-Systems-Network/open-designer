@@ -1,6 +1,6 @@
 ---
 title: Niskopoziomowe API
-description: Wyspecjalizowane publiczne API pakietu @open-pencil/vue.
+description: Wyspecjalizowane publiczne API pakietu @open-designer/vue.
 ---
 
 # Niskopoziomowe API

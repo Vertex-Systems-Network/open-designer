@@ -1,9 +1,9 @@
 import { prepareWithSegments, layoutWithLines } from '@chenglou/pretext'
 
-import type { CharacterStyleOverride, SceneNode } from '@open-pencil/scene-graph'
-import { faceStyleKey } from '@open-pencil/scene-graph/font-style'
-import { rangeFontStyle } from '@open-pencil/scene-graph/shared-styles'
-import { lineHeightPixels, textLengthPixels } from '@open-pencil/scene-graph/text'
+import type { CharacterStyleOverride, SceneNode } from '@open-designer/scene-graph'
+import { faceStyleKey } from '@open-designer/scene-graph/font-style'
+import { rangeFontStyle } from '@open-designer/scene-graph/shared-styles'
+import { lineHeightPixels, textLengthPixels } from '@open-designer/scene-graph/text'
 
 import {
   fontHasGlyphSync,

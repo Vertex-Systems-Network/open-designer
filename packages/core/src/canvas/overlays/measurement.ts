@@ -1,10 +1,10 @@
 import type { Canvas } from 'canvaskit-wasm'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { computeBounds } from '@open-pencil/scene-graph/geometry'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import { computeBounds } from '@open-designer/scene-graph/geometry'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import {

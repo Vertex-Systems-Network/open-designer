@@ -1,18 +1,18 @@
 import { clamp } from 'es-toolkit'
 
-import { guidToString, isUnsetGuid } from '@open-pencil/kiwi/fig/guid'
+import { guidToString, isUnsetGuid } from '@open-designer/kiwi/fig/guid'
 import {
   DEFAULT_FONT_FAMILY,
   DEFAULT_STROKE_MITER_LIMIT,
   DEFAULT_STROKE_WEIGHT
-} from '@open-pencil/scene-graph/constants'
-import { getNodeLocalMatrix } from '@open-pencil/scene-graph/coordinate'
-import { createDefaultSourceMetadata } from '@open-pencil/scene-graph/node-defaults'
-import { OPEN_PENCIL_PLUGIN_DATA } from '@open-pencil/scene-graph/plugin-data'
-import { POINT_COUNT_RANGE } from '@open-pencil/scene-graph/polygon'
-import { isShapeWithTextType } from '@open-pencil/scene-graph/shape-with-text'
-import { pixelLength } from '@open-pencil/scene-graph/text'
-import { parseVariantName } from '@open-pencil/scene-graph/variant-name'
+} from '@open-designer/scene-graph/constants'
+import { getNodeLocalMatrix } from '@open-designer/scene-graph/coordinate'
+import { createDefaultSourceMetadata } from '@open-designer/scene-graph/node-defaults'
+import { OPEN_DESIGNER_PLUGIN_DATA } from '@open-designer/scene-graph/plugin-data'
+import { POINT_COUNT_RANGE } from '@open-designer/scene-graph/polygon'
+import { isShapeWithTextType } from '@open-designer/scene-graph/shape-with-text'
+import { pixelLength } from '@open-designer/scene-graph/text'
+import { parseVariantName } from '@open-designer/scene-graph/variant-name'
 /* eslint-disable max-lines -- kiwi↔scene conversion helpers are tightly coupled */
 
 import { importCanvasGuides } from './canvas-guides'
@@ -59,7 +59,7 @@ export {
 } from './text/values'
 export { resolveGeometryPaths } from './vector/geometry'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import type {
   SceneNode,
   TextLength,
@@ -87,8 +87,8 @@ import type {
   SymbolLink,
   VariantPropSpec,
   VariableModeMap
-} from '@open-pencil/scene-graph'
-import type { Vector, GUID } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph'
+import type { Vector, GUID } from '@open-designer/scene-graph/primitives'
 
 import { savedFace } from './font/style'
 import { numericVariableAssignmentScales, sourceVariableBindingScales } from './variable/bindings'
@@ -329,7 +329,7 @@ function convertPolygonProps(
 }
 
 /**
- * A text's line height. Figma writes auto as 100 percent, and OpenPencil once wrote none for
+ * A text's line height. Figma writes auto as 100 percent, and OpenDesigner once wrote none for
  * it; a text in auto lines up each line at its own font's height. Figma saves each line at the
  * larger of its line height and its tallest font's height, so a first line shorter than the
  * text's height in pixels was laid out at another one, which a style the text uses set. A first
@@ -482,7 +482,7 @@ function convertTextProps(nc: NodeChange, blobs: Uint8Array[]): TextProps {
     opticalSizeFromFontSize: nc.detachOpticalSizeFromFontSize !== true,
     fontFeatures: convertFontFeatures(nc),
     textTruncation: (nc.textTruncation as string) === 'ENDING' ? 'ENDING' : 'DISABLED',
-    textDirection: readNodeChangePluginData(nc, OPEN_PENCIL_PLUGIN_DATA.textDirection) ?? 'AUTO',
+    textDirection: readNodeChangePluginData(nc, OPEN_DESIGNER_PLUGIN_DATA.textDirection) ?? 'AUTO',
     ...convertDerivedText(nc, blobs)
   }
 }
@@ -615,7 +615,7 @@ function convertLayoutProps(
     itemReverseZIndex: (nc.stackReverseZIndex ?? false) as boolean,
     strokesIncludedInLayout: (nc.strokesIncludedInLayout ?? false) as boolean,
     layoutDirection:
-      readNodeChangePluginData(nc, OPEN_PENCIL_PLUGIN_DATA.layoutDirection) ?? 'AUTO',
+      readNodeChangePluginData(nc, OPEN_DESIGNER_PLUGIN_DATA.layoutDirection) ?? 'AUTO',
     ...(derivedLayout ? { derivedLayout } : {})
   }
 }
@@ -704,7 +704,7 @@ function resolveNodeType(nc: NodeChange): NodeType | 'DOCUMENT' | 'VARIABLE' {
   const nodeType = mapNodeType(nc.type)
   if (
     (nodeType === 'FRAME' && isComponentSet(nc)) ||
-    readNodeChangePluginData(nc, OPEN_PENCIL_PLUGIN_DATA.nodeType) === 'COMPONENT_SET'
+    readNodeChangePluginData(nc, OPEN_DESIGNER_PLUGIN_DATA.nodeType) === 'COMPONENT_SET'
   ) {
     return 'COMPONENT_SET'
   }
@@ -808,7 +808,7 @@ export function nodeChangeToProps(
   // See path/text-layout.ts — expand the layout box before node creation so
   // clipsContent parents don't shave overflowing path lettering at first paint.
   expandPathTextLayoutBox(props, textPathData)
-  // A saved OpenPencil doc carries the true textPathBox (reflow may have
+  // A saved OpenDesigner doc carries the true textPathBox (reflow may have
   // scaled it); the expand-time reconstruction is only right for pristine
   // Figma exports. Plugin box is in pre-expansion local coords — expand's
   // shift is textPathBox.x/y by construction, so re-home it.

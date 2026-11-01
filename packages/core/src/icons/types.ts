@@ -1,5 +1,5 @@
-import type { VectorNetwork, WindingRule } from '@open-pencil/scene-graph'
-import type { IconOptions } from '@open-pencil/scene-graph/icons'
+import type { VectorNetwork, WindingRule } from '@open-designer/scene-graph'
+import type { IconOptions } from '@open-designer/scene-graph/icons'
 
 export interface IconPath {
   vectorNetwork: VectorNetwork

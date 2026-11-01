@@ -1,29 +1,29 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph, type PluginDataEntry } from '@open-pencil/scene-graph'
+import { SceneGraph, type PluginDataEntry } from '@open-designer/scene-graph'
 import {
   clearNodeFillOkHCL,
   getNodeOkHCLPayloads,
   setNodeFillOkHCL,
   setNodeStrokeOkHCL
-} from '@open-pencil/scene-graph/color'
+} from '@open-designer/scene-graph/color'
 import {
   contentPluginData,
-  OPEN_PENCIL_PLUGIN_DATA,
-  OPEN_PENCIL_PLUGIN_ID,
+  OPEN_DESIGNER_PLUGIN_DATA,
+  OPEN_DESIGNER_PLUGIN_ID,
   readAllPluginData,
   readPluginData,
   withPluginData
-} from '@open-pencil/scene-graph/plugin-data'
+} from '@open-designer/scene-graph/plugin-data'
 
-const { exportSettings, okhcl, textDirection } = OPEN_PENCIL_PLUGIN_DATA
+const { exportSettings, okhcl, textDirection } = OPEN_DESIGNER_PLUGIN_DATA
 const OTHER_PLUGIN: PluginDataEntry = { pluginId: 'other-plugin', key: 'okhcl', value: 'theirs' }
 
 function entry(key: string, value: string): PluginDataEntry {
-  return { pluginId: OPEN_PENCIL_PLUGIN_ID, key, value }
+  return { pluginId: OPEN_DESIGNER_PLUGIN_ID, key, value }
 }
 
-describe('OpenPencil plugin data', () => {
+describe('OpenDesigner plugin data', () => {
   test('keeps content and other plugins’ entries as a node’s content', () => {
     const entries = [
       OTHER_PLUGIN,
@@ -35,7 +35,7 @@ describe('OpenPencil plugin data', () => {
   })
 
   test('gives every field its own key', () => {
-    const keys = Object.values(OPEN_PENCIL_PLUGIN_DATA).map((field) => field.key)
+    const keys = Object.values(OPEN_DESIGNER_PLUGIN_DATA).map((field) => field.key)
     expect(new Set(keys).size).toBe(keys.length)
   })
 

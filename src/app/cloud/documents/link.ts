@@ -6,8 +6,8 @@ import {
   cloudDocumentPath,
   cloudDocumentURL,
   parseCloudLinkPath
-} from '@open-pencil/cloud/contract'
-import { cloudMessages } from '@open-pencil/vue/i18n'
+} from '@open-designer/cloud/contract'
+import { cloudMessages } from '@open-designer/vue/i18n'
 
 import type { EditorStore } from '@/app/editor/session'
 import { toast } from '@/app/shell/ui'

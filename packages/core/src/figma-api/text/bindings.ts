@@ -8,9 +8,9 @@ import {
   type StyleRun,
   type TextBindableField,
   type Variable
-} from '@open-pencil/scene-graph'
-import { copyFills } from '@open-pencil/scene-graph/copy'
-import { getSharedStyles, SHARED_TEXT_STYLE_FIELDS } from '@open-pencil/scene-graph/shared-styles'
+} from '@open-designer/scene-graph'
+import { copyFills } from '@open-designer/scene-graph/copy'
+import { getSharedStyles, SHARED_TEXT_STYLE_FIELDS } from '@open-designer/scene-graph/shared-styles'
 
 import { variableAlias, type FigmaVariableAlias } from '#core/figma-api/variables/values'
 import { styleRunsWithPatch } from '#core/text/character-style'

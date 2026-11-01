@@ -1,10 +1,10 @@
 import { isEqual } from 'es-toolkit'
 import { pick } from 'es-toolkit/object'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
-import { createResizeSnapshot, type ResizeSnapshot } from '@open-pencil/scene-graph/resize'
-import type { UndoEntry } from '@open-pencil/scene-graph/undo'
+import type { SceneNode } from '@open-designer/scene-graph'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
+import { createResizeSnapshot, type ResizeSnapshot } from '@open-designer/scene-graph/resize'
+import type { UndoEntry } from '@open-designer/scene-graph/undo'
 
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 

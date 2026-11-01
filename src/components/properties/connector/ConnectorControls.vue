@@ -2,9 +2,9 @@
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import type { ConnectorLineType, StrokeCap } from '@open-pencil/scene-graph'
-import type { FigJamColorName } from '@open-pencil/scene-graph/figjam'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { ConnectorLineType, StrokeCap } from '@open-designer/scene-graph'
+import type { FigJamColorName } from '@open-designer/scene-graph/figjam'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import FigJamPalette from '@/components/figjam/FigJamPalette.vue'
 import { CONNECTOR_LINE_TYPE_ICONS, connectorCapIcon } from '@/components/icons/connectors'

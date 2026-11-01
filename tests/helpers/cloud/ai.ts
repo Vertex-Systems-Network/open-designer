@@ -72,7 +72,7 @@ async function startRelay(appOrigin: string) {
           ]
         }
       },
-      { DATABASE_URL: 'postgresql://unused', OPENPENCIL_AI_RELAY_UPSTREAM_KEY: 'upstream-key' }
+      { DATABASE_URL: 'postgresql://unused', OPENDESIGNER_AI_RELAY_UPSTREAM_KEY: 'upstream-key' }
     ),
     database,
     keys: createLocalJWKSet({ keys: [{ ...(await exportJWK(publicKey)), kid: 'cloud' }] }),
@@ -142,7 +142,7 @@ export async function routeCloudAI(page: Page, appOrigin: string, options: Cloud
     ...(options.billingURL ? { billing: { portalURL: options.billingURL } } : {})
   }
   const cloud: Record<string, () => unknown | Promise<unknown>> = {
-    'GET /.well-known/openpencil': () => discovery,
+    'GET /.well-known/opendesigner': () => discovery,
     'GET /api/account/status': () => ({
       user: { userId: ACCOUNT.id, email: ACCOUNT.email, name: ACCOUNT.name },
       state: 'active'

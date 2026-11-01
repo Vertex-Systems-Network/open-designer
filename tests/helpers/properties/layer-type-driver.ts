@@ -8,7 +8,7 @@ export function layerTypeDriver(page: () => Page) {
     async build() {
       id = await page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const frame = store.createShape('FRAME', 100, 100, 200, 150)
         store.createShape('RECTANGLE', 20, 20, 40, 40, frame)
         store.select([frame])

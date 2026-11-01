@@ -1,5 +1,5 @@
-import type { Variable, VariableFormulaNode } from '@open-pencil/scene-graph'
-import { foldFormula } from '@open-pencil/scene-graph/variables'
+import type { Variable, VariableFormulaNode } from '@open-designer/scene-graph'
+import { foldFormula } from '@open-designer/scene-graph/variables'
 
 import { tokenNumberToCSS, variableUnit } from './values'
 

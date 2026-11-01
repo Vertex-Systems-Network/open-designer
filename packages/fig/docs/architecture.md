@@ -16,10 +16,10 @@ This shows responsibility flow, not a dependency graph of package imports.
 
 | Domain | Owner |
 | --- | --- |
-| Kiwi schema/runtime and protocol containers | `@open-pencil/kiwi` |
-| FIG archives, record interpretation, resource association, format conversion | `@open-pencil/fig` |
-| Format-neutral graph, component-property mutations, override storage | `@open-pencil/scene-graph` |
-| Editor actions, undo, render invalidation, layout scheduling, runtime fonts | `@open-pencil/core` |
+| Kiwi schema/runtime and protocol containers | `@open-designer/kiwi` |
+| FIG archives, record interpretation, resource association, format conversion | `@open-designer/fig` |
+| Format-neutral graph, component-property mutations, override storage | `@open-designer/scene-graph` |
+| Editor actions, undo, render invalidation, layout scheduling, runtime fonts | `@open-designer/core` |
 | Worker lifecycle and format-neutral document I/O | Core |
 
 **Required invariant:** adapters converge on the same document semantics. Neither Vue nor

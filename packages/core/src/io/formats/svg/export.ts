@@ -1,4 +1,6 @@
-import type { RenderColorSpace } from '@open-pencil/scene-graph/color'
+import { uniq } from 'es-toolkit'
+
+import type { RenderColorSpace } from '@open-designer/scene-graph/color'
 
 import { normalizeDashPattern } from '#core/canvas/strokes'
 import { lineStrokePath } from '#core/canvas/strokes/line'
@@ -28,8 +30,8 @@ import {
 
 export { geometryBlobToSVGPath, nodeOutlinePath, type OutlineNode } from './paths'
 
-import type { SceneGraph, SceneNode, Fill, Stroke, VectorNetwork } from '@open-pencil/scene-graph'
-import { looseSegments, regionSVGPaths } from '@open-pencil/scene-graph/vector-network'
+import type { SceneGraph, SceneNode, Fill, Stroke, VectorNetwork } from '@open-designer/scene-graph'
+import { looseSegments, regionSVGPaths } from '@open-designer/scene-graph/vector-network'
 
 import { arrowHeadElements, openPathElements, vectorArrowHeads } from './arrows'
 import type { SVGExportContext, SVGExportWarning, SVGFontAlias } from './defs'
@@ -509,7 +511,7 @@ export function renderNodesToSVG(
 ): string | null {
   const result = renderNodesToSVGWithWarnings(graph, pageId, nodeIds, options)
   if (result.warnings.length > 0 && !options.skipUnsupportedEffects) {
-    const effects = [...new Set(result.warnings.map((warning) => warning.effectType))]
+    const effects = uniq(result.warnings.map((warning) => warning.effectType))
     throw new Error(
       `Unsupported SVG effects: ${effects.join(', ')}. Retry with skipUnsupportedEffects to omit them.`
     )

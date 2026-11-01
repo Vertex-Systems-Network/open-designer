@@ -1,4 +1,4 @@
-import type { TestId } from '@open-pencil/vue/testing'
+import type { TestId } from '@open-designer/vue/testing'
 
 export type CanvasContextActionId =
   | 'copy-as-text'
