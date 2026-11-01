@@ -35,6 +35,8 @@ export interface FigRecordFieldPatch {
    */
   symbolOverrides?: FigEntryListPatch
   derivedSymbolData?: FigEntryListPatch
+  /** Variable collection modes merge by their GUID so untouched archive entries stay intact. */
+  variableSetModes?: FigEntryListPatch
 }
 
 /** A layer path as a key, matching entries across lists. */
@@ -85,5 +87,18 @@ export function patchedRecord(record: NodeChange, patch: FigRecordFieldPatch): N
   }
   if (patch.derivedSymbolData)
     merged.derivedSymbolData = patchedEntries(derivedSymbolDataOf(merged), patch.derivedSymbolData)
+  if (patch.variableSetModes && merged.variableSetModes) {
+    const entries = merged.variableSetModes.map(({ id, ...fields }) => ({
+      guidPath: { guids: [id] },
+      ...fields
+    }))
+    merged.variableSetModes = patchedEntries(entries, patch.variableSetModes).map(
+      ({ guidPath, ...fields }) => {
+        const id = guidPath?.guids?.[0]
+        if (!id) throw new Error('Variable mode patch is missing its GUID')
+        return { id, ...fields }
+      }
+    ) as NodeChange['variableSetModes']
+  }
   return merged
 }
