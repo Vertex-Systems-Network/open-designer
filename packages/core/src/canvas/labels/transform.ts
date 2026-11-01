@@ -1,6 +1,6 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import {
   createSceneGeometry,

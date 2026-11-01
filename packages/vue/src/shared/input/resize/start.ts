@@ -1,7 +1,7 @@
-import type { Editor } from '@open-pencil/core'
-import { layerResizes } from '@open-pencil/scene-graph/generated'
-import { enforcedAspectRatio } from '@open-pencil/scene-graph/layout'
-import { collectResizeDescendants, createResizeSnapshot } from '@open-pencil/scene-graph/resize'
+import type { Editor } from '@open-designer/core'
+import { layerResizes } from '@open-designer/scene-graph/generated'
+import { enforcedAspectRatio } from '@open-designer/scene-graph/layout'
+import { collectResizeDescendants, createResizeSnapshot } from '@open-designer/scene-graph/resize'
 
 import { getHitHandleByMatrix } from '#vue/shared/input/geometry'
 import type { DragResize } from '#vue/shared/input/types'

@@ -1,7 +1,7 @@
 import { uniq } from 'es-toolkit'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { colorToHex } from '@open-pencil/scene-graph/color'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { colorToHex } from '@open-designer/scene-graph/color'
 
 import { presets } from './presets'
 import { allRules } from './rules'

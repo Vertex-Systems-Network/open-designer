@@ -1,5 +1,5 @@
-import { symbolOverridesOf } from '@open-pencil/fig/instance-overrides'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import { symbolOverridesOf } from '@open-designer/fig/instance-overrides'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import fixture from '#tests/fixtures/nested-binding-ownership-records.json' with { type: 'json' }
 import { expectDefined } from '#tests/helpers/assert'

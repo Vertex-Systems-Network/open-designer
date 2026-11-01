@@ -10,7 +10,7 @@ interface __BaseEnv_Env {
 	POSTHOG_HOST: "https://eu.i.posthog.com";
 	EMAIL_FROM: "hello@openpencil.dev";
 	TURNSTILE_HOSTNAMES: "openpencil.dev,app.openpencil.dev";
-	GITHUB_REPOSITORY: "open-pencil/open-pencil";
+	GITHUB_REPOSITORY: "open-designer/open-designer";
 	SITE_ZONE_ID: "6a1c3366d17c9cdefab66cf5dd4e1cbe";
 	SITE_HOSTS: "openpencil.dev,app.openpencil.dev";
 	POSTHOG_APP_HOST: "https://eu.posthog.com";

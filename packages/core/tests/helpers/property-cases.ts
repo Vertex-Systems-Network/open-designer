@@ -1,5 +1,5 @@
-import type { SceneGraph, Fill, SceneNode, Stroke } from '@open-pencil/scene-graph'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import type { SceneGraph, Fill, SceneNode, Stroke } from '@open-designer/scene-graph'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { expectDefined } from './assert'
 

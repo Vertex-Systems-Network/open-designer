@@ -1,6 +1,6 @@
 import type { Component, ComputedRef, VNode } from 'vue'
 
-import type { Effect, Fill, Stroke } from '@open-pencil/scene-graph'
+import type { Effect, Fill, Stroke } from '@open-designer/scene-graph'
 
 export interface PropertyListItemMap {
   fills: Fill

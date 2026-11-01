@@ -3,8 +3,8 @@ layout: page
 landing: true
 sidebar: false
 aside: false
-title: Download OpenPencil
-description: Download the OpenPencil desktop app for macOS, Windows, and Linux, or install it with Homebrew.
+title: Download OpenDesigner
+description: Download the OpenDesigner desktop app for macOS, Windows, and Linux, or install it with Homebrew.
 ---
 
 <script setup>

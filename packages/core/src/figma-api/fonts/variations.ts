@@ -1,5 +1,5 @@
-import type { FontVariation } from '@open-pencil/scene-graph'
-import { parseFontStyle } from '@open-pencil/scene-graph/font-style'
+import type { FontVariation } from '@open-designer/scene-graph'
+import { parseFontStyle } from '@open-designer/scene-graph/font-style'
 
 import { fontManager } from '#core/text/font/manager'
 import {

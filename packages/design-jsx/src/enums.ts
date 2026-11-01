@@ -15,12 +15,12 @@ import type {
   TextDecoration,
   TextDecorationStyle,
   TextDirection
-} from '@open-pencil/scene-graph'
-import type { FigJamTextSize, FigJamTypeface } from '@open-pencil/scene-graph/figjam'
+} from '@open-designer/scene-graph'
+import type { FigJamTextSize, FigJamTypeface } from '@open-designer/scene-graph/figjam'
 import {
   SHAPE_WITH_TEXT_TYPES,
   type ShapeWithTextType
-} from '@open-pencil/scene-graph/shape-with-text'
+} from '@open-designer/scene-graph/shape-with-text'
 
 /**
  * A Figma enum as design JSX spells it. Reading and writing come from one table, so whatever the

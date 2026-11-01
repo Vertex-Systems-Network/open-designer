@@ -1,8 +1,8 @@
 import * as v from 'valibot'
 
-import type { VariableType } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { VariableType } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import type { FigmaVariableValue } from '#core/figma-api'
 import { defineTool } from '#core/tools/schema'

@@ -1,5 +1,5 @@
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { useCommentMessages } from '@open-pencil/vue/i18n'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { useCommentMessages } from '@open-designer/vue/i18n'
 
 import { PEER_COLORS } from '@/constants'
 

@@ -6,7 +6,7 @@ const editor = useEditorSetupWithClear()
 function createFrameWithChildren() {
   return editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const pageId = store.state.currentPageId
     const frame = store.graph.createNode('FRAME', pageId, { x: 100, y: 100, width: 300 })
     const children = ['Bottom', 'Middle', 'Top'].map(
@@ -64,7 +64,7 @@ test('Tab keeps moving focus while a panel control holds it', async () => {
 test('N and Shift+N zoom to the next and previous top-level frame', async () => {
   const frames = await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const pageId = store.state.currentPageId
     return [0, 600].map(
       (x) => store.graph.createNode('FRAME', pageId, { x, y: 0, width: 200, height: 200 }).id
@@ -82,7 +82,7 @@ test('N and Shift+N zoom to the next and previous top-level frame', async () => 
 test('Page Down and Page Up switch pages', async () => {
   const [first, second] = await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const pages = store.graph.getPages()
     const firstPage = pages[0]
     const secondPage = pages[1] ?? store.graph.addPage('Second')

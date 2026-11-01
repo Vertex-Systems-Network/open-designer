@@ -1,12 +1,12 @@
 import { beforeAll, describe, expect, it } from 'bun:test'
 
-import { buildFigmaClipboardHTML, importClipboardNodes } from '@open-pencil/core/clipboard'
-import { fontManager } from '@open-pencil/core/text'
-import { parseFigmaClipboard } from '@open-pencil/fig/clipboard'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { slotPropertyId } from '@open-pencil/scene-graph/slots'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import { buildFigmaClipboardHTML, importClipboardNodes } from '@open-designer/core/clipboard'
+import { fontManager } from '@open-designer/core/text'
+import { parseFigmaClipboard } from '@open-designer/fig/clipboard'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { slotPropertyId } from '@open-designer/scene-graph/slots'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { expectDefined } from '#tests/helpers/assert'
 

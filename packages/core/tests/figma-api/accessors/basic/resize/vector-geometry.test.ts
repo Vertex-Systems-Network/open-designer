@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { createSVGNodes } from '@open-pencil/core/io/formats/svg'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { createSVGNodes } from '@open-designer/core/io/formats/svg'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 const SVG =
   '<svg xmlns="http://www.w3.org/2000/svg"><rect width="318" height="80" rx="12" fill="#558855"/></svg>'

@@ -8,10 +8,10 @@ function isPackageOrSubpath(source: string, packageName: string): boolean {
 }
 
 const noVueSelfPackageImports = createImportSourceRule({
-  description: 'Disallow @open-pencil/vue self-imports inside the Vue SDK — use #vue/* aliases',
+  description: 'Disallow @open-designer/vue self-imports inside the Vue SDK — use #vue/* aliases',
   applies: (file) => file.includes('/packages/vue/src/'),
   check: (source) =>
-    isPackageOrSubpath(source, '@open-pencil/vue') &&
+    isPackageOrSubpath(source, '@open-designer/vue') &&
     `Use #vue/* for internal Vue SDK imports instead of self-package import '${source}'.`
 })
 
@@ -179,11 +179,11 @@ const noCliParentRelativeImports = createParentRelativeImportRule({
 })
 
 const noCoreSelfPackageImports = createImportSourceRule({
-  description: 'Disallow @open-pencil/core self-imports inside packages/core/src',
+  description: 'Disallow @open-designer/core self-imports inside packages/core/src',
   applies: (file) => file.includes('/packages/core/src/'),
   check: (source) =>
-    isPackageOrSubpath(source, '@open-pencil/core') &&
-    'Core internals must import local modules directly instead of importing the @open-pencil/core public package entrypoints.'
+    isPackageOrSubpath(source, '@open-designer/core') &&
+    'Core internals must import local modules directly instead of importing the @open-designer/core public package entrypoints.'
 })
 
 const noInlinePromptConstants = {
@@ -218,13 +218,13 @@ const noAppImportsInPackages = createImportSourceRule({
 const frameworkImportPrefixes = ['@vue/', '@tauri-apps/', '@/']
 
 const noCoreFrameworkImports = createImportSourceRule({
-  description: 'Keep @open-pencil/core framework-agnostic by disallowing Vue/Tauri/app imports',
+  description: 'Keep @open-designer/core framework-agnostic by disallowing Vue/Tauri/app imports',
   applies: (file) => file.includes('/packages/core/src/'),
   check: (source) =>
     (source === 'vue' ||
-      isPackageOrSubpath(source, '@open-pencil/vue') ||
+      isPackageOrSubpath(source, '@open-designer/vue') ||
       frameworkImportPrefixes.some((prefix) => source.startsWith(prefix))) &&
-    `@open-pencil/core must stay framework-agnostic; do not import '${source}'.`
+    `@open-designer/core must stay framework-agnostic; do not import '${source}'.`
 })
 
 /**

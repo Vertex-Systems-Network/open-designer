@@ -1,4 +1,4 @@
-import type { CommentThread } from '@open-pencil/scene-graph'
+import type { CommentThread } from '@open-designer/scene-graph'
 
 // Dark enough for white initials to read, as in the presence stories' sample room.
 const red = { r: 0.75, g: 0.16, b: 0.16, a: 1 }

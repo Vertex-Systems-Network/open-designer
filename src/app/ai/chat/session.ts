@@ -3,8 +3,8 @@ import type { ChatTransport, FinishReason, UIMessage } from 'ai'
 import type { ComputedRef, Ref } from 'vue'
 import { ref } from 'vue'
 
-import { ACP_AGENTS, AI_PROVIDERS } from '@open-pencil/core/constants'
-import type { ACPAgentID, AIProviderID } from '@open-pencil/core/constants'
+import { ACP_AGENTS, AI_PROVIDERS } from '@open-designer/core/constants'
+import type { ACPAgentID, AIProviderID } from '@open-designer/core/constants'
 
 import { AgentSetupError, assertAgentReady } from '@/app/ai/agents/setup/readiness'
 import { classifyAIChatError, type AIChatFailure } from '@/app/ai/chat/failure'
@@ -14,8 +14,8 @@ import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
 import { chatThinkingLevel } from '@/app/ai/chat/thinking'
 import { createAIModelRuntime, resolveModelConnectionAPIKey } from '@/app/ai/models'
 import { resolveLanguageModelID } from '@/app/ai/models/language-model'
-import { cloudCreditRefusal } from '@/app/ai/providers/openpencil/failure'
-import { OPENPENCIL_AI_PROVIDER } from '@/app/ai/providers/openpencil/provider'
+import { cloudCreditRefusal } from '@/app/ai/providers/opendesigner/failure'
+import { OPENDESIGNER_AI_PROVIDER } from '@/app/ai/providers/opendesigner/provider'
 import { settleMessage } from '@/app/ai/reply/settle'
 import { currentRun } from '@/app/ai/tools'
 import type { AgentTurnUsage } from '@/app/ai/transports/acp'
@@ -201,8 +201,8 @@ export function createChatSessionManager({
         skills: await harnessSkills()
       },
       apiKey
-        ? { OPENPENCIL_HARNESS_API_KEY: apiKey }
-        : { OPENPENCIL_HARNESS_AGENT_DIR: account?.agentDir ?? '' },
+        ? { OPENDESIGNER_HARNESS_API_KEY: apiKey }
+        : { OPENDESIGNER_HARNESS_AGENT_DIR: account?.agentDir ?? '' },
       undefined,
       (usage) => recordModelStepCompleted({ provider: providerID.value, model, ...usage }, context)
     )
@@ -284,7 +284,7 @@ export function createChatSessionManager({
           )
           const classified = classifyAIChatError(reportedError, { signInOnly })
           const refusal =
-            chatProviderID === OPENPENCIL_AI_PROVIDER ? cloudCreditRefusal(reportedError) : null
+            chatProviderID === OPENDESIGNER_AI_PROVIDER ? cloudCreditRefusal(reportedError) : null
           failure.value = refusal
             ? {
                 ...classified,

@@ -1,4 +1,4 @@
-import type { AIProviderID } from '@open-pencil/core/constants'
+import type { AIProviderID } from '@open-designer/core/constants'
 
 import type { AIProviderOptions } from '@/app/ai/models/reasoning/settings'
 

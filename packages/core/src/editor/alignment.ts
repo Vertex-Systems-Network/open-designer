@@ -1,10 +1,10 @@
 import { sumBy } from 'es-toolkit'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getAbsolutePositionFull, getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { computeAbsoluteBounds } from '@open-pencil/scene-graph/geometry'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getAbsolutePositionFull, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import { computeAbsoluteBounds } from '@open-designer/scene-graph/geometry'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { createArrangeActions } from '#core/editor/alignment/arrange'
 import { createFlipRotateActions } from '#core/editor/alignment/flip-rotate'

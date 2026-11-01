@@ -12,9 +12,9 @@ import { interpretInstance } from '#fig/instance-overrides/interpret'
 import { materializeInstance } from '#fig/instance-overrides/materialize-instance'
 import { mapInstanceSourceChildren } from '#fig/instance-overrides/source-children'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { hasInstanceOverride } from '@open-pencil/scene-graph/instances'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { hasInstanceOverride } from '@open-designer/scene-graph/instances'
 
 test('materialization preserves explicit equal-to-default text', () => {
   const changes: NodeChange[] = [

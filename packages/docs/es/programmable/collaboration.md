@@ -5,7 +5,7 @@ description: Edición P2P en tiempo real mediante WebRTC y Yjs, sin servidor cen
 
 # Colaboración
 
-OpenPencil permite editar un documento entre varias personas en tiempo real. La conexión es P2P: los cambios viajan directamente entre participantes mediante WebRTC.
+OpenDesigner permite editar un documento entre varias personas en tiempo real. La conexión es P2P: los cambios viajan directamente entre participantes mediante WebRTC.
 
 ## Iniciar una sesión
 
@@ -39,7 +39,7 @@ No es necesario crear una cuenta ni desplegar una infraestructura propia. La cal
 
 ## Privacidad
 
-El contenido no se almacena en un servidor de OpenPencil. Cada participante conserva una copia local. Comparte el enlace solo con personas de confianza: quien conoce la sala puede intentar unirse mientras esté activa.
+El contenido no se almacena en un servidor de OpenDesigner. Cada participante conserva una copia local. Comparte el enlace solo con personas de confianza: quien conoce la sala puede intentar unirse mientras esté activa.
 
 ## Finalizar
 

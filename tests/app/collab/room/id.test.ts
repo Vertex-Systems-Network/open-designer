@@ -12,7 +12,7 @@ describe('room links and IDs', () => {
       `https://app.openpencil.dev/rooms/${ROOM}`,
       `https://app.openpencil.dev/rooms/${ROOM}/`,
       `https://app.openpencil.dev/rooms/${ROOM}?test#layers`,
-      `open-pencil.localhost/rooms/${ROOM}#x`
+      `open-designer.localhost/rooms/${ROOM}#x`
     ]) {
       expect(parseRoomInput(input)).toBe(ROOM)
     }

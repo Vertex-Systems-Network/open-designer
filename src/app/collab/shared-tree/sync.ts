@@ -1,8 +1,8 @@
 import { isEqual } from 'es-toolkit/predicate'
 import type * as Y from 'yjs'
 
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { siblingOrderKeys } from '@open-pencil/scene-graph/order-keys'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { siblingOrderKeys } from '@open-designer/scene-graph/order-keys'
 
 import { LayerTree, type TreeMove } from '@/app/collab/tree/layer-tree'
 

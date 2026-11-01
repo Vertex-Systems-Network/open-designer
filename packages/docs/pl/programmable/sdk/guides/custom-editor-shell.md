@@ -5,15 +5,15 @@ description: Tworzenie własnego interfejsu edytora za pomocą provideEditor, Ca
 
 # Własny interfejs edytora
 
-Typowa aplikacja OpenPencil oparta na Vue składa się z trzech warstw:
+Typowa aplikacja OpenDesigner oparta na Vue składa się z trzech warstw:
 
-1. `@open-pencil/core` tworzy edytor;
-2. `@open-pencil/vue` łączy go z composables i komponentami Vue bez narzuconego wyglądu;
+1. `@open-designer/core` tworzy edytor;
+2. `@open-designer/vue` łączy go z composables i komponentami Vue bez narzuconego wyglądu;
 3. aplikacja określa układ, wygląd i zachowanie właściwe dla produktu.
 
 ## Dlaczego warto rozdzielić te warstwy
 
-Gotowa aplikacja OpenPencil jest tylko jednym z możliwych interfejsów.
+Gotowa aplikacja OpenDesigner jest tylko jednym z możliwych interfejsów.
 
 Na podstawie SDK można utworzyć edytor osadzony w innym produkcie, wewnętrzne narzędzie do pracy z zasobami, edytor szablonów, interfejs do adnotacji albo wyspecjalizowany edytor z obsługą AI.
 
@@ -31,12 +31,12 @@ Wygodny interfejs zwykle:
 
 ```vue
 <script setup lang="ts">
-import { createEditor } from '@open-pencil/core'
-import { provideEditor } from '@open-pencil/vue'
-import { CanvasRoot, CanvasSurface } from '@open-pencil/vue/canvas'
-import { ToolbarRoot } from '@open-pencil/vue/primitives/Toolbar'
-import { PageListRoot } from '@open-pencil/vue/primitives/PageList'
-import { LayerTreeRoot } from '@open-pencil/vue/primitives/LayerTree'
+import { createEditor } from '@open-designer/core'
+import { provideEditor } from '@open-designer/vue'
+import { CanvasRoot, CanvasSurface } from '@open-designer/vue/canvas'
+import { ToolbarRoot } from '@open-designer/vue/primitives/Toolbar'
+import { PageListRoot } from '@open-designer/vue/primitives/PageList'
+import { LayerTreeRoot } from '@open-designer/vue/primitives/LayerTree'
 
 const editor = createEditor({ width: 1440, height: 900 })
 provideEditor(editor)

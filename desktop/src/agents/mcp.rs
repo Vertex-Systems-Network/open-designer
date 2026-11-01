@@ -1,9 +1,9 @@
-//! Finding the OpenPencil MCP server that agents connect to.
+//! Finding the OpenDesigner MCP server that agents connect to.
 
 use super::path::search_dirs;
 
-/// Name of the MCP entry point installed by `@open-pencil/mcp`.
-const MCP_EXECUTABLE: &str = "openpencil-mcp-http";
+/// Name of the MCP entry point installed by `@open-designer/mcp`.
+const MCP_EXECUTABLE: &str = "opendesigner-mcp-http";
 /// Bound on the directories reported back to the settings diagnostics.
 const MAX_REPORTED_SEARCH_DIRS: usize = 12;
 

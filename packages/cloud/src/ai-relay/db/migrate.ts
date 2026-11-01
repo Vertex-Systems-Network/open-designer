@@ -27,6 +27,6 @@ export async function migrateAIRelayDatabase(database: Kysely<AIRelayDatabase>):
       migrationTableName: 'ai_relay_migration',
       migrationLockTableName: 'ai_relay_migration_lock'
     }),
-    'OpenPencil AI relay database migration failed'
+    'OpenDesigner AI relay database migration failed'
   )
 }

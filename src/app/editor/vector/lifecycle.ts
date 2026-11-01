@@ -1,12 +1,12 @@
-import type { Editor } from '@open-pencil/core'
-import { vectorChangesFromPagePath } from '@open-pencil/core/vector'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { slotScope } from '@open-pencil/scene-graph/slots'
+import type { Editor } from '@open-designer/core'
+import { vectorChangesFromPagePath } from '@open-designer/core/vector'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import { slotScope } from '@open-designer/scene-graph/slots'
 import {
   cloneVectorNetwork,
   transformVectorNetwork,
   vectorNetworksEqual
-} from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/vector-network'
 
 import { getLiveNetwork } from './network'
 import type { VectorEditState } from './types'

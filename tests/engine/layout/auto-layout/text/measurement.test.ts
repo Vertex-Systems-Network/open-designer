@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { computeAllLayouts, setTextMeasurer } from '@open-pencil/core/layout'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import { createEditor } from '@open-designer/core'
+import { computeAllLayouts, setTextMeasurer } from '@open-designer/core/layout'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { getNodeOrThrow } from '#tests/helpers/assert'
 import { autoFrame, loadFixtureGraph, pageId, rect } from '#tests/helpers/layout'

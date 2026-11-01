@@ -1,8 +1,8 @@
 import { mapValues } from 'es-toolkit'
 import { fromUint8Array, isValid, toUint8Array } from 'js-base64'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import type { PortableSceneGraphData } from '#core/kiwi/fig/parse/portable-data'
 
@@ -38,8 +38,8 @@ export function serializeLibraryRevision(
   }
 }
 
-const MAP_TAG = 'openpencil/map'
-const OBJECT_TAG = 'openpencil/object'
+const MAP_TAG = 'opendesigner/map'
+const OBJECT_TAG = 'opendesigner/object'
 
 function encodeStoredValue(value: unknown): unknown {
   if (value instanceof Map) {

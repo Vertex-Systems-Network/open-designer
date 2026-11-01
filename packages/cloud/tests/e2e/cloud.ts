@@ -30,13 +30,13 @@ const config = parseCloudServerConfig({
   publicURL: 'http://localhost:8787',
   databaseURL:
     process.env.DATABASE_URL ??
-    'postgresql://openpencil:openpencil-development-password@localhost:54329/openpencil',
+    'postgresql://openpencil:opendesigner-development-password@localhost:54329/opendesigner',
   authSecret: 'full-stack-e2e-secret-at-least-32-characters',
   s3Endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:8333',
   s3Region: process.env.S3_REGION ?? 'us-east-1',
-  s3Bucket: process.env.S3_BUCKET ?? 'openpencil',
-  s3AccessKeyId: process.env.S3_ACCESS_KEY_ID ?? 'openpencil',
-  s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? 'openpencil-development-secret',
+  s3Bucket: process.env.S3_BUCKET ?? 'opendesigner',
+  s3AccessKeyId: process.env.S3_ACCESS_KEY_ID ?? 'opendesigner',
+  s3SecretAccessKey: process.env.S3_SECRET_ACCESS_KEY ?? 'opendesigner-development-secret',
   s3ForcePathStyle: true,
   s3ChecksumVerification: 'metadata'
 })
@@ -103,7 +103,7 @@ try {
     name: 'E2E.fig'
   })
 
-  const firstBytes = new TextEncoder().encode('OpenPencil Cloud full-stack E2E revision one')
+  const firstBytes = new TextEncoder().encode('OpenDesigner Cloud full-stack E2E revision one')
   const firstChecksum = checksum(firstBytes)
   const firstUpload = await client.createUpload(document.id, {
     baseRevisionId: null,

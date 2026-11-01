@@ -1,14 +1,14 @@
 import { pick } from 'es-toolkit'
 
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   buildStickySublayers,
   STICKY_SUBLAYER_LAYOUT,
   stickyFrameFields,
   stickyScale,
   stickySublayers
-} from '@open-pencil/scene-graph/generated'
+} from '@open-designer/scene-graph/generated'
 
 import { nodeChangeToProps } from '../convert'
 import { createFillPaints } from '../export/context'

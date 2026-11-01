@@ -1,5 +1,5 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { copyEffects, copyStrokes } from '@open-pencil/scene-graph/copy'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { copyEffects, copyStrokes } from '@open-designer/scene-graph/copy'
 
 import { restoreSubtree, snapshotSubtree } from '#core/editor/history/subtree'
 import type { EditorContext } from '#core/editor/types'

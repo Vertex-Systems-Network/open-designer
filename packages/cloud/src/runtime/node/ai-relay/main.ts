@@ -5,11 +5,11 @@ import { startNodeAIRelay } from './server'
 
 if (process.argv.includes('--help') || process.argv.includes('-h')) {
   console.log(dedent`
-    Usage: openpencil-ai-relay
+    Usage: opendesigner-ai-relay
 
-    Runs the reference AI service for a self-hosted OpenPencil Cloud. Settings come from the
+    Runs the reference AI service for a self-hosted OpenDesigner Cloud. Settings come from the
     environment:
-      OPENPENCIL_AI_RELAY_CONFIG  the relay TOML file (required)
+      OPENDESIGNER_AI_RELAY_CONFIG  the relay TOML file (required)
       PORT, HOST                  where to listen (default 8788 on 0.0.0.0)
     plus the secrets the TOML names. See https://openpencil.dev/reference/self-hosting-cloud
   `)
@@ -17,7 +17,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
 }
 
 const relay = await startNodeAIRelay()
-console.log(`OpenPencil AI relay listening on ${relay.url}`)
+console.log(`OpenDesigner AI relay listening on ${relay.url}`)
 
 let stopping: Promise<void> | undefined
 

@@ -5,14 +5,14 @@ import {
   AI_PROVIDERS,
   type AIProviderID,
   type ModelOption
-} from '@open-pencil/core/constants'
+} from '@open-designer/core/constants'
 
 import type { AIModelProfileDraft, AIModelCapability } from '@/app/ai/models'
 import { resolveModelsDevModel } from '@/app/ai/models/catalog'
 import { useProviderModelCatalog } from '@/app/ai/models/catalog/use'
 import { modelPickerOptions, type ModelPickerLabels } from '@/app/ai/models/picker/options'
 import { supportsThinkingLevel } from '@/app/ai/models/thinking'
-import { OPENPENCIL_AI_PROVIDER } from '@/app/ai/providers/openpencil/provider'
+import { OPENDESIGNER_AI_PROVIDER } from '@/app/ai/providers/opendesigner/provider'
 
 import { useCloudModelSelection } from './cloud'
 
@@ -136,7 +136,7 @@ export function useProfileModelSelection(
     customModelSelected.value = providerID === 'harness:pi'
     draft.customBaseURL = ''
     draft.customAPIType = 'completions'
-    if (providerID !== OPENPENCIL_AI_PROVIDER) draft.cloudWorkspaceId = undefined
+    if (providerID !== OPENDESIGNER_AI_PROVIDER) draft.cloudWorkspaceId = undefined
     if (providerID.startsWith('acp:')) {
       draft.capabilities = ['tools']
       if (!draft.name.trim()) draft.name = providerDisplayName.value

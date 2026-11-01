@@ -6,21 +6,21 @@ import type {
   FillType,
   GradientStop,
   GradientTransform
-} from '@open-pencil/scene-graph'
-import { colorToFill, parseColor } from '@open-pencil/scene-graph/color'
-import { TRANSPARENT } from '@open-pencil/scene-graph/constants'
+} from '@open-designer/scene-graph'
+import { colorToFill, parseColor } from '@open-designer/scene-graph/color'
+import { TRANSPARENT } from '@open-designer/scene-graph/constants'
 import {
   IDENTITY_GRADIENT_TRANSFORM,
   type GradientTransformRows
-} from '@open-pencil/scene-graph/gradient'
-import { paintTransformSchema } from '@open-pencil/scene-graph/paints'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/gradient'
+import { paintTransformSchema } from '@open-designer/scene-graph/paints'
+import type { Color } from '@open-designer/scene-graph/primitives'
 import {
   createShaderPaint,
   shaderPresetSchema,
   type ShaderComponent,
   type ShaderPreset
-} from '@open-pencil/scene-graph/shaders'
+} from '@open-designer/scene-graph/shaders'
 
 import { parseScriptInput } from './schema'
 

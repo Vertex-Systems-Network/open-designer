@@ -1,11 +1,11 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { BLACK, TRANSPARENT } from '@open-pencil/core/constants'
-import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
-import { fontManager } from '@open-pencil/core/text'
-import { vectorNetworkToPath } from '@open-pencil/core/vector'
+import { createEditor } from '@open-designer/core'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { BLACK, TRANSPARENT } from '@open-designer/core/constants'
+import { initCanvasKit } from '@open-designer/core/io/formats/raster'
+import { fontManager } from '@open-designer/core/text'
+import { vectorNetworkToPath } from '@open-designer/core/vector'
 
 import { textNodeToOutlineLayout } from '#core/text/outlines'
 

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url'
 import { build, type Plugin } from 'vite'
 
 import { viteBuildTarget } from '../src/app/shell/support/baseline.ts'
-import { createOpenPencilAliases } from './aliases.ts'
+import { createOpenDesignerAliases } from './aliases.ts'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 /** `?script` among an id's query, which Vite extends, as with `?t=…&script` after a hot update. */
@@ -21,7 +21,7 @@ const withoutQuery = (id: string) => id.replace(/[?#].*$/s, '')
  */
 export function inlineScriptPlugin(): Plugin {
   return {
-    name: 'open-pencil-inline-script',
+    name: 'open-designer-inline-script',
     load: {
       filter: { id: SCRIPT_QUERY },
       async handler(id) {
@@ -31,7 +31,7 @@ export function inlineScriptPlugin(): Plugin {
           root: REPO_ROOT,
           publicDir: false,
           logLevel: 'warn',
-          resolve: { alias: createOpenPencilAliases(REPO_ROOT) },
+          resolve: { alias: createOpenDesignerAliases(REPO_ROOT) },
           // An entry may itself inline another, as the sandbox frame inlines its worker.
           plugins: [inlineScriptPlugin()],
           build: {

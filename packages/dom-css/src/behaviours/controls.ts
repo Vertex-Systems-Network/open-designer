@@ -1,4 +1,4 @@
-import type { ComponentPropertyDefinition, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { ComponentPropertyDefinition, SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   behaviourContract,
   behaviourOwner,
@@ -10,10 +10,10 @@ import {
   readBehaviour,
   textBinding,
   type Behaviour
-} from '@open-pencil/scene-graph/behaviours'
-import { findComponentPropertyTargets } from '@open-pencil/scene-graph/components'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
-import { instanceSlotFrames, slotPropertyId } from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/behaviours'
+import { findComponentPropertyTargets } from '@open-designer/scene-graph/components'
+import { instanceMainComponent } from '@open-designer/scene-graph/instances'
+import { instanceSlotFrames, slotPropertyId } from '@open-designer/scene-graph/slots'
 
 /** A boolean value of a control and the property that draws it. */
 export interface BooleanModel {

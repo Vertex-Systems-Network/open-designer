@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { describe, expect, test } from 'bun:test'
 
-import { cloudDesktopLinkURL } from '@open-pencil/cloud/contract'
+import { cloudDesktopLinkURL } from '@open-designer/cloud/contract'
 
 import { readCloudLink } from '@/app/cloud/links'
 

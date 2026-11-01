@@ -1,9 +1,9 @@
 import type { Canvas, Image, Paint, Shader } from 'canvaskit-wasm'
 
-import type { SceneNode, SceneGraph, Fill } from '@open-pencil/scene-graph'
-import { invertGradientTransform } from '@open-pencil/scene-graph/gradient'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Color, Rect, Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode, SceneGraph, Fill } from '@open-designer/scene-graph'
+import { invertGradientTransform } from '@open-designer/scene-graph/gradient'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Color, Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import { setPaintBlendMode } from './blend'
 import { makeDiamondGradient } from './gradients/diamond'

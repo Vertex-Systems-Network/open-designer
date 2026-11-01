@@ -18,7 +18,7 @@ export const storageMessageDefaults = {
   region: 'Region',
   accessKeyID: 'Access key ID',
   secretAccessKey: 'Secret access key',
-  cloudTitle: 'OpenPencil Cloud',
+  cloudTitle: 'OpenDesigner Cloud',
   cloudDescription:
     'Your team’s workspace, hosted for you: live sync, share links, team libraries, and hosted AI, with no bucket to set up. Join the waitlist and we’ll email you when it opens.',
   waitlistEmail: 'Email address',
@@ -28,7 +28,7 @@ export const storageMessageDefaults = {
   waitlistInvalid: 'Enter a valid email address.',
   waitlistJoined: 'Check your inbox',
   waitlistJoinedDetail:
-    'Open the link we sent to confirm your address. We only email you about OpenPencil Cloud.',
+    'Open the link we sent to confirm your address. We only email you about OpenDesigner Cloud.',
   waitlistRefused: 'We couldn’t confirm you’re not a bot. Try again.',
   waitlistLimited: 'Too many attempts. Try again in a minute.',
   waitlistFailed: 'Couldn’t reach the waitlist. Check your connection and try again.',

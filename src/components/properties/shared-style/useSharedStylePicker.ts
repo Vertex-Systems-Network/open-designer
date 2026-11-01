@@ -1,9 +1,9 @@
 import { computed } from 'vue'
 
-import type { SharedStyleKind } from '@open-pencil/scene-graph'
-import { MIXED } from '@open-pencil/vue/controls/node-props'
-import { useSharedStyleBinding } from '@open-pencil/vue/controls/shared-style'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { SharedStyleKind } from '@open-designer/scene-graph'
+import { MIXED } from '@open-designer/vue/controls/node-props'
+import { useSharedStyleBinding } from '@open-designer/vue/controls/shared-style'
+import { useI18n } from '@open-designer/vue/i18n'
 
 export function useSharedStylePicker(kind: SharedStyleKind) {
   const { panels } = useI18n()

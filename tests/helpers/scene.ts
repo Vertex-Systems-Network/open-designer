@@ -1,6 +1,6 @@
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { computeImageHash } from '@open-pencil/scene-graph/images'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { computeImageHash } from '@open-designer/scene-graph/images'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 export function makeSceneGraph(pageName = 'Test'): SceneGraph {
   const graph = new SceneGraph()

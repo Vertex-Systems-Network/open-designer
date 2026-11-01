@@ -4,9 +4,9 @@ import type {
   VariableLiteral,
   VariableType,
   VariableValue
-} from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { variableValueReferences } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { variableValueReferences } from '@open-designer/scene-graph/variables'
 
 /** A reference to a variable, as Figma's plugin API writes one. */
 export interface FigmaVariableAlias {

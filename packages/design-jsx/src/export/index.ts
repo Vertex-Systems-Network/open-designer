@@ -1,11 +1,11 @@
 import { compact } from 'es-toolkit/array'
 
-import { jsx, type SyntaxNode } from '@open-pencil/emit'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-pencil/scene-graph/components'
-import { instanceMainComponent } from '@open-pencil/scene-graph/instances'
-import { ownsSlotContent } from '@open-pencil/scene-graph/slots'
-import { isGeneratedFrame, type GeneratedFrameType } from '@open-pencil/scene-graph/generated'
+import { jsx, type SyntaxNode } from '@open-designer/emit'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { componentPropertyDefinitions, resolveComponentPropertyValue } from '@open-designer/scene-graph/components'
+import { instanceMainComponent } from '@open-designer/scene-graph/instances'
+import { ownsSlotContent } from '@open-designer/scene-graph/slots'
+import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
 
 import {
   connectorExportScope,

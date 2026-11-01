@@ -16,7 +16,7 @@ description: Управление автоматической компонов�
 ## Использование
 
 ```ts
-import { useLayout } from '@open-pencil/vue/controls/layout'
+import { useLayout } from '@open-designer/vue/controls/layout'
 
 const layout = useLayout()
 ```

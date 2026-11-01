@@ -2,10 +2,10 @@
 import { SelectRoot, SelectTrigger } from 'reka-ui'
 import { computed } from 'vue'
 
-import type { MixedValue } from '@open-pencil/vue/controls/node-props'
-import type { TypographyAxis } from '@open-pencil/vue/controls/typography'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { useRetainedPopup } from '@open-pencil/vue/lifecycle/retention'
+import type { MixedValue } from '@open-designer/vue/controls/node-props'
+import type { TypographyAxis } from '@open-designer/vue/controls/typography'
+import { useI18n } from '@open-designer/vue/i18n'
+import { useRetainedPopup } from '@open-designer/vue/lifecycle/retention'
 
 import NumberField from '@/components/inputs/NumberField.vue'
 import AppSelectContent from '@/components/ui/select/AppSelectContent.vue'

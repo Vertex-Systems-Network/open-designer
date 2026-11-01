@@ -18,9 +18,9 @@ import {
   formatShortcut,
   useEditorCommands,
   type EditorCommandId
-} from '@open-pencil/vue/editor/commands'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { useRetainedPopup } from '@open-pencil/vue/lifecycle/retention'
+} from '@open-designer/vue/editor/commands'
+import { useI18n } from '@open-designer/vue/i18n'
+import { useRetainedPopup } from '@open-designer/vue/lifecycle/retention'
 
 import { menuItem, useMenuUI } from '@/components/ui/menu/menu'
 import MenuScrollArea from '@/components/ui/menu/MenuScrollArea.vue'

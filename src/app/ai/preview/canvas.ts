@@ -6,11 +6,11 @@ import {
   recordJSXPreview,
   stageJSXPreview,
   type StagedJSXPreview
-} from '@open-pencil/core/design-jsx'
-import { computeContentBounds } from '@open-pencil/core/io/formats/raster'
-import type { JSXPreviewNode } from '@open-pencil/design-jsx'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/core/design-jsx'
+import { computeContentBounds } from '@open-designer/core/io/formats/raster'
+import type { JSXPreviewNode } from '@open-designer/design-jsx'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import {
   getActiveEditorStoreOrNull,

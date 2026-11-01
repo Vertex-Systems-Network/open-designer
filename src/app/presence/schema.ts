@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { MAX_PRESENCE_NAME_LENGTH } from '@open-pencil/cloud/contract'
+import { MAX_PRESENCE_NAME_LENGTH } from '@open-designer/cloud/contract'
 
 import type { RemotePeer } from '@/app/collab/types'
 import { PEER_COLORS } from '@/constants'

@@ -19,7 +19,7 @@ export function mixedSelectionDriver(page: () => Page) {
     async build() {
       ids = await page().evaluate(async () => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const fixtureURL = '/tests/helpers/canvas/mixed-selection/scene.ts'
         const scene: typeof MixedScene = await import(fixtureURL)
         const built = scene.createMixedSelectionScene(store.graph, store.state.currentPageId)

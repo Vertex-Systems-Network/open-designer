@@ -4,8 +4,8 @@ import { until, useMediaQuery } from '@vueuse/core'
 import { onMounted, onScopeDispose, shallowRef, watch } from 'vue'
 import IconSparkles from '~icons/lucide/sparkles'
 
-import { CHAPTERS } from '@open-pencil/demo-tools/chapters'
-import { colorToCSS } from '@open-pencil/scene-graph/color'
+import { CHAPTERS } from '@open-designer/demo-tools/chapters'
+import { colorToCSS } from '@open-designer/scene-graph/color'
 
 import type { useCollabIdentity } from '@/app/collab/identity'
 import { openRoomSession, type RoomSession } from '@/app/collab/session'

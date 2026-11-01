@@ -114,7 +114,7 @@ if (remote.isPrerelease !== isPrerelease(version)) {
   throw new Error(`Draft ${identity.tag} has the wrong pre-release flag`)
 }
 
-const temporary = await mkdtemp(join(tmpdir(), 'open-pencil-release-verify-'))
+const temporary = await mkdtemp(join(tmpdir(), 'open-designer-release-verify-'))
 
 try {
   await github(

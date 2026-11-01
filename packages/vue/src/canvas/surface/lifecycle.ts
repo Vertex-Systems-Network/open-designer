@@ -2,8 +2,8 @@ import type { CanvasKit } from 'canvaskit-wasm'
 import { onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import { SkiaRenderer } from '@open-pencil/core/canvas'
+import type { Editor } from '@open-designer/core'
+import { SkiaRenderer } from '@open-designer/core/canvas'
 
 import {
   supportsWideGamutPresentation,

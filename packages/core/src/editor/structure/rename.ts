@@ -1,6 +1,6 @@
 import { escapeRegExp } from 'es-toolkit/string'
 
-import type { NodeType, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { NodeType, SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 export interface RenameSelectionOptions {
   match: string

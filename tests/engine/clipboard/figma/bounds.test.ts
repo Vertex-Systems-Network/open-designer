@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test'
 
-import { figmaNodesBounds } from '@open-pencil/fig/clipboard'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import { figmaNodesBounds } from '@open-designer/fig/clipboard'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 describe('figmaNodesBounds', () => {
   it('computes bounds of top-level visual nodes', () => {

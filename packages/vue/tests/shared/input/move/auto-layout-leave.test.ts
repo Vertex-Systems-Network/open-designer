@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
 
 import { createMoveHarness } from './harness'
 

@@ -1,7 +1,7 @@
 import { cloneRecord } from '#fig/node-change/clone'
 
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import { sameGuid } from '../source-index'
 import type {

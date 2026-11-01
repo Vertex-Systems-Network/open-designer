@@ -1,7 +1,7 @@
 import { union } from 'es-toolkit'
 
-import { sceneNodeToJSX } from '@open-pencil/design-jsx'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import { sceneNodeToJSX } from '@open-designer/design-jsx'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import type { TreeArgs } from '#core/rpc'
 

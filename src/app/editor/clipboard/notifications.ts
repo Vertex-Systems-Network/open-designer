@@ -1,5 +1,5 @@
-import type { ClipboardImageResolution, Editor } from '@open-pencil/core'
-import { filesMessages } from '@open-pencil/vue/i18n'
+import type { ClipboardImageResolution, Editor } from '@open-designer/core'
+import { filesMessages } from '@open-designer/vue/i18n'
 
 import { toast } from '@/app/shell/ui'
 

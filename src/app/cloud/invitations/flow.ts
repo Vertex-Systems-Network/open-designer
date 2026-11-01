@@ -2,12 +2,12 @@ import { useSessionStorage } from '@vueuse/core'
 import * as v from 'valibot'
 import { computed, ref, shallowRef } from 'vue'
 
-import { CloudAPIError, createCloudAPIClient } from '@open-pencil/cloud/client'
+import { CloudAPIError, createCloudAPIClient } from '@open-designer/cloud/client'
 import {
   cloudDesktopLinkURL,
   type AcceptedInvitation,
   type InvitationPreview
-} from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/contract'
 
 import { openHomeLocation } from '@/app/shell/menu/navigation'
 import { openStorageDocumentInNewTab } from '@/app/tabs'

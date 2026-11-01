@@ -11,7 +11,7 @@ import * as v from 'valibot'
 
 let service: TestService
 
-const REPO = 'https://api.github.com/repos/open-pencil/open-pencil'
+const REPO = 'https://api.github.com/repos/open-designer/open-designer'
 const GRAPHQL = 'https://api.cloudflare.com/client/v4/graphql'
 // The cron fires just after midnight, so the day that just ended is Oct 19.
 const RUN_AT = new Date('2026-10-20T00:05:00.000Z')
@@ -42,19 +42,19 @@ const RELEASES = [
   {
     tag_name: 'v0.16.0',
     assets: [
-      { name: 'OpenPencil_0.16.0_aarch64.dmg', download_count: 100 },
-      { name: 'OpenPencil_aarch64.app.tar.gz', download_count: 300 },
-      { name: 'OpenPencil_aarch64.app.tar.gz.sig', download_count: 6 },
-      { name: 'OpenPencil_0.16.0_x64-setup.exe', download_count: 234 },
-      { name: 'OpenPencil_0.16.0_x64_en-US.msi', download_count: 42 },
-      { name: 'OpenPencil_0.16.0_amd64.deb', download_count: 72 },
+      { name: 'OpenDesigner_0.16.0_aarch64.dmg', download_count: 100 },
+      { name: 'OpenDesigner_aarch64.app.tar.gz', download_count: 300 },
+      { name: 'OpenDesigner_aarch64.app.tar.gz.sig', download_count: 6 },
+      { name: 'OpenDesigner_0.16.0_x64-setup.exe', download_count: 234 },
+      { name: 'OpenDesigner_0.16.0_x64_en-US.msi', download_count: 42 },
+      { name: 'OpenDesigner_0.16.0_amd64.deb', download_count: 72 },
       { name: 'latest.json', download_count: 1110 },
       { name: 'SHA256SUMS', download_count: 23 }
     ]
   },
   {
     tag_name: 'v0.15.1',
-    assets: [{ name: 'OpenPencil_0.15.1_amd64.AppImage', download_count: 393 }]
+    assets: [{ name: 'OpenDesigner_0.15.1_amd64.AppImage', download_count: 393 }]
   }
 ]
 
@@ -174,12 +174,12 @@ afterAll(async () => {
 
 describe('release files', () => {
   test('counts installers, macOS updates, and update checks, and nothing else', () => {
-    expect(releaseFileKind('OpenPencil_0.16.0_aarch64.dmg')).toBe('macos-installer')
-    expect(releaseFileKind('OpenPencil_x64.app.tar.gz')).toBe('macos-update')
-    expect(releaseFileKind('OpenPencil_0.16.0_arm64-setup.exe')).toBe('windows-installer')
-    expect(releaseFileKind('OpenPencil-0.16.0-1.x86_64.rpm')).toBe('linux-installer')
+    expect(releaseFileKind('OpenDesigner_0.16.0_aarch64.dmg')).toBe('macos-installer')
+    expect(releaseFileKind('OpenDesigner_x64.app.tar.gz')).toBe('macos-update')
+    expect(releaseFileKind('OpenDesigner_0.16.0_arm64-setup.exe')).toBe('windows-installer')
+    expect(releaseFileKind('OpenDesigner-0.16.0-1.x86_64.rpm')).toBe('linux-installer')
     expect(releaseFileKind('latest.json')).toBe('update-check')
-    expect(releaseFileKind('OpenPencil_x64.app.tar.gz.sig')).toBeUndefined()
+    expect(releaseFileKind('OpenDesigner_x64.app.tar.gz.sig')).toBeUndefined()
     expect(releaseFileKind('SHA256SUMS')).toBeUndefined()
   })
 })

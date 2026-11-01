@@ -1,7 +1,7 @@
 {
-  "name": "@open-pencil/cloud",
+  "name": "@open-designer/cloud",
   "version": "0.16.0",
-  "description": "Self-hostable OpenPencil Cloud: accounts, workspaces, document revisions, sharing, collaboration, and the AI relay, for Node and Cloudflare Workers.",
+  "description": "Self-hostable OpenDesigner Cloud: accounts, workspaces, document revisions, sharing, collaboration, and the AI relay, for Node and Cloudflare Workers.",
   "license": "Apache-2.0 AND MIT",
   "repository": {
     "type": "git",
@@ -9,8 +9,8 @@
     "directory": "packages/cloud"
   },
   "bin": {
-    "openpencil-ai-relay": "./dist/bin/ai-relay.mjs",
-    "openpencil-cloud": "./dist/bin/server.mjs"
+    "opendesigner-ai-relay": "./dist/bin/ai-relay.mjs",
+    "opendesigner-cloud": "./dist/bin/server.mjs"
   },
   "files": [
     "dist",
@@ -116,7 +116,7 @@
     "@hono/node-server": "^1.19.17",
     "@internationalized/date": "^3.12.3",
     "@noble/hashes": "^2.4.0",
-    "@open-pencil/scene-graph": "workspace:*",
+    "@open-designer/scene-graph": "workspace:*",
     "@openfeature/server-sdk": "^1.23.0",
     "@vue-email/components": "^0.0.21",
     "@vue-email/render": "^0.0.9",

@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import type { Size } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import type { Size } from '@open-designer/scene-graph/primitives'
 
 import { getTextMeasurer } from './text-measurement'
 import { primaryAxisGap, siblingOverlap } from './item-spacing'

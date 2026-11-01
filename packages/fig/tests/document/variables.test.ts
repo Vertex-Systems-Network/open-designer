@@ -3,7 +3,7 @@ import { expect, test } from 'bun:test'
 import { guid } from '#fig-tests/helpers/guid'
 import { materializeDocument } from '#fig/document/materialize'
 
-import type { NodeChange, VariableDataEntry } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange, VariableDataEntry } from '@open-designer/kiwi/fig/codec'
 
 function resources(operand: VariableDataEntry): NodeChange[] {
   return [

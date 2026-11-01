@@ -71,10 +71,10 @@
       "identifier": "fs:allow-open",
       "allow": [{ "path": "**" }],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        { "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json" },
+        { "path": "$LOCALDATA/OpenDesigner/mcp.json" },
+        { "path": "$RUNTIME/opendesigner/mcp.json" },
+        { "path": "$HOME/.opendesigner/mcp.json" }
       ]
     },
     "fs:allow-fstat",
@@ -84,30 +84,30 @@
       "identifier": "fs:allow-read-text-file",
       "allow": [
         { "path": "$HOME/.pi/agent/settings.json" },
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        { "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json" },
+        { "path": "$LOCALDATA/OpenDesigner/mcp.json" },
+        { "path": "$RUNTIME/opendesigner/mcp.json" },
+        { "path": "$HOME/.opendesigner/mcp.json" }
       ]
     },
     {
       "identifier": "fs:allow-write-file",
       "allow": [{ "path": "**" }],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        { "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json" },
+        { "path": "$LOCALDATA/OpenDesigner/mcp.json" },
+        { "path": "$RUNTIME/opendesigner/mcp.json" },
+        { "path": "$HOME/.opendesigner/mcp.json" }
       ]
     },
     {
       "identifier": "fs:allow-exists",
       "allow": [
         { "path": "$HOME/.pi/agent/auth.json" },
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        { "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json" },
+        { "path": "$LOCALDATA/OpenDesigner/mcp.json" },
+        { "path": "$RUNTIME/opendesigner/mcp.json" },
+        { "path": "$HOME/.opendesigner/mcp.json" }
       ]
     },
     {
@@ -118,10 +118,10 @@
       "identifier": "fs:allow-remove",
       "allow": [{ "path": "**" }],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        { "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json" },
+        { "path": "$LOCALDATA/OpenDesigner/mcp.json" },
+        { "path": "$RUNTIME/opendesigner/mcp.json" },
+        { "path": "$HOME/.opendesigner/mcp.json" }
       ]
     },
     {
@@ -147,7 +147,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -159,13 +159,13 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
-        { "name": "openpencil-mcp-http", "cmd": "openpencil-mcp-http", "args": false },
-        { "name": "openpencil-harness", "cmd": "openpencil-harness", "args": false },
+        { "name": "opendesigner-mcp-http", "cmd": "opendesigner-mcp-http", "args": false },
+        { "name": "opendesigner-harness", "cmd": "opendesigner-harness", "args": false },
         { "name": "cmd-claude-agent-acp", "cmd": "cmd", "args": ["/c", "claude-agent-acp"] },
         {
           "name": "cmd-claude-agent-acp-sign-in",
@@ -183,7 +183,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -197,13 +197,13 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
-        { "name": "cmd-openpencil-mcp-http", "cmd": "cmd", "args": ["/c", "openpencil-mcp-http"] },
-        { "name": "cmd-openpencil-harness", "cmd": "cmd", "args": ["/c", "openpencil-harness"] }
+        { "name": "cmd-opendesigner-mcp-http", "cmd": "cmd", "args": ["/c", "opendesigner-mcp-http"] },
+        { "name": "cmd-opendesigner-harness", "cmd": "cmd", "args": ["/c", "opendesigner-harness"] }
       ]
     },
     "shell:allow-stdin-write",

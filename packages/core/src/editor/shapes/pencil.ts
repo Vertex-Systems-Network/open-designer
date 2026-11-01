@@ -1,8 +1,8 @@
 import { pick } from 'es-toolkit'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { compositeOver, readableForeground } from '@open-pencil/scene-graph/color'
-import type { Color, Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { compositeOver, readableForeground } from '@open-designer/scene-graph/color'
+import type { Color, Vector } from '@open-designer/scene-graph/primitives'
 
 import { PEN_CLOSE_THRESHOLD, PENCIL_STROKE_WEIGHT, PENCIL_TOLERANCE } from '#core/constants'
 import { createVectorFromNetwork, type CreateShape } from '#core/editor/shapes/vector'

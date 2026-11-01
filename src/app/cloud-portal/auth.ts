@@ -6,8 +6,8 @@ import {
   signUpToCloudWithEmail,
   type CloudAuthResult,
   type CloudSocialProvider
-} from '@open-pencil/cloud/client'
-import type { CloudDiscovery } from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/client'
+import type { CloudDiscovery } from '@open-designer/cloud/contract'
 
 const done = <T>(value: T): CloudAuthResult<T> => ({ ok: true, value })
 

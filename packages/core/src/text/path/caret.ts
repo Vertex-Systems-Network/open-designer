@@ -1,5 +1,5 @@
-import type { DerivedTextGlyph } from '@open-pencil/scene-graph'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { DerivedTextGlyph } from '@open-designer/scene-graph'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 /** How far the font reaches above and below the baseline, in ems. */
 export interface PathTextLineMetrics {

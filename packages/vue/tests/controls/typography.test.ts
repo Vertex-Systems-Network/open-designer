@@ -2,11 +2,11 @@ import { afterAll, beforeAll, expect, test } from 'bun:test'
 
 import { computed, effectScope, nextTick, shallowRef } from 'vue'
 
-import { createEditor } from '@open-pencil/core'
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
-import { facesFromStyles, fontManager, WEB_FONT_PROVIDER_IDS } from '@open-pencil/core/text'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import { createEditor } from '@open-designer/core'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { initCanvasKit } from '@open-designer/core/io/formats/raster'
+import { facesFromStyles, fontManager, WEB_FONT_PROVIDER_IDS } from '@open-designer/core/text'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import { createTypographyActions } from '#vue/controls/typography/actions'
 import { createTypographyAxes } from '#vue/controls/typography/axes'

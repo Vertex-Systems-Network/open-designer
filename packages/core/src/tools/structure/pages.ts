@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
+import { fractionalPosition } from '@open-designer/scene-graph/order-keys'
 
 import { defineTool } from '#core/tools/schema'
 

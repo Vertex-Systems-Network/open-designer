@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { toolbarToolTestId } from '#tests/helpers/test-ids'
 
@@ -43,7 +43,7 @@ export function stickyDriver(page: () => Page) {
     showOrigin() {
       return page().evaluate((origin) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.state.zoom = 1
         store.state.panX = origin
         store.state.panY = origin
@@ -55,7 +55,7 @@ export function stickyDriver(page: () => Page) {
     add(notes: StickyNoteSetup[]) {
       return page().evaluate((specs) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         for (const spec of specs) {
           const note = store.createStickyNote(store.state.currentPageId, spec)
           const [body, author] = store.graph.getChildren(note.id)
@@ -73,7 +73,7 @@ export function stickyDriver(page: () => Page) {
     notes(): Promise<StickyNoteState[]> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const hex = (value = 0) =>
           Math.round(value * 255)
             .toString(16)
@@ -103,7 +103,7 @@ export function stickyDriver(page: () => Page) {
     focus(): Promise<StickyFocus> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         return {
           tool: store.state.activeTool,
           selected: [...store.state.selectedIds],

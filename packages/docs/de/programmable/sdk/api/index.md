@@ -1,6 +1,6 @@
 ---
 title: API-Referenz
-description: Komponenten, Composables und erweiterte APIs aus @open-pencil/vue.
+description: Komponenten, Composables und erweiterte APIs aus @open-designer/vue.
 ---
 
 # API-Referenz

@@ -5,7 +5,7 @@ import { openPencilArchitecturePlugin } from '../src/steiger-rules/index'
 
 test('keeps tool test helpers beside tests without allowing arbitrary tool locations', () => {
   const rule = openPencilArchitecturePlugin.ruleDefinitions.find(
-    (rule) => rule.name === 'open-pencil/strict-tools-layout'
+    (rule) => rule.name === 'open-designer/strict-tools-layout'
   )
   if (!rule) throw new Error('Missing tool layout rule')
   for (const [file, valid] of [

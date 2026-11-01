@@ -1,4 +1,4 @@
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 
 type DemoViewportEditor = Pick<Editor, 'graph' | 'state' | 'zoomToBounds'>
 

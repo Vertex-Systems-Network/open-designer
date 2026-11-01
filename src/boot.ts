@@ -2,8 +2,8 @@ import { createHead } from '@unhead/vue/client'
 import { createApp, nextTick } from 'vue'
 import { registerSW } from 'virtual:pwa-register'
 
-import { ReadOnlyDocumentError } from '@open-pencil/core'
-import { createRetainedScopePlugin } from '@open-pencil/vue/lifecycle/retention'
+import { ReadOnlyDocumentError } from '@open-designer/core'
+import { createRetainedScopePlugin } from '@open-designer/vue/lifecycle/retention'
 
 import './app.css'
 import { recordRuntimeError } from '@/app/diagnostics'

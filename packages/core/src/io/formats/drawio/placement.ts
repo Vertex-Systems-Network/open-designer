@@ -1,7 +1,7 @@
-import type { DrawIOGeometry } from '@open-pencil/drawio'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import Matrix, { type Mat3 } from '@open-pencil/scene-graph/matrix'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { DrawIOGeometry } from '@open-designer/drawio'
+import type { SceneNode } from '@open-designer/scene-graph'
+import Matrix, { type Mat3 } from '@open-designer/scene-graph/matrix'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 /** A cell with no box or points, for the fields a cell leaves unset. */
 export const EMPTY_GEOMETRY: DrawIOGeometry = {

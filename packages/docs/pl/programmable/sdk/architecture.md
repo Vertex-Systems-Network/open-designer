@@ -1,11 +1,11 @@
 ---
 title: Architektura SDK
-description: Struktura pakietu, granice publicznego API i zasady projektowania @open-pencil/vue.
+description: Struktura pakietu, granice publicznego API i zasady projektowania @open-designer/vue.
 ---
 
 # Architektura SDK
 
-`@open-pencil/vue` łączy `@open-pencil/core` z Vue.
+`@open-designer/vue` łączy `@open-designer/core` z Vue.
 
 Model edytora nadal znajduje się w core. Ten pakiet dodaje:
 
@@ -113,7 +113,7 @@ Przekazuj do slot tylko potrzebne props albo użyj composable bezpośrednio. Kom
 
 ## Prosta zasada
 
-Jeśli kod można bez stylów aplikacji wykorzystać w innym edytorze opartym na OpenPencil, prawdopodobnie powinien znaleźć się w `@open-pencil/vue`.
+Jeśli kod można bez stylów aplikacji wykorzystać w innym edytorze opartym na OpenDesigner, prawdopodobnie powinien znaleźć się w `@open-designer/vue`.
 
 ## Zobacz też
 

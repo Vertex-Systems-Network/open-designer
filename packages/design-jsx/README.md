@@ -1,14 +1,14 @@
-# @open-pencil/design-jsx
+# @open-designer/design-jsx
 
-OpenPencil design JSX: build editable scene trees with `<Frame>`, `<Text>`, and the other elements, style them with paint and effect helpers and design variables, and export scene nodes back to JSX.
+OpenDesigner design JSX: build editable scene trees with `<Frame>`, `<Text>`, and the other elements, style them with paint and effect helpers and design variables, and export scene nodes back to JSX.
 
-Set the JSX import source in `tsconfig.json` (`"jsx": "react-jsx"`, `"jsxImportSource": "@open-pencil/design-jsx"`) or per file:
+Set the JSX import source in `tsconfig.json` (`"jsx": "react-jsx"`, `"jsxImportSource": "@open-designer/design-jsx"`) or per file:
 
 ```tsx
-/** @jsxImportSource @open-pencil/design-jsx */
-import { renderTree } from '@open-pencil/core/design-jsx'
-import { Frame, Text, solid } from '@open-pencil/design-jsx'
-import { SceneGraph } from '@open-pencil/scene-graph'
+/** @jsxImportSource @open-designer/design-jsx */
+import { renderTree } from '@open-designer/core/design-jsx'
+import { Frame, Text, solid } from '@open-designer/design-jsx'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 const graph = new SceneGraph()
 await renderTree(
@@ -22,7 +22,7 @@ await renderTree(
 JSX written as a string, as agents and the MCP `render` tool send it, needs no build step:
 
 ```ts
-import { renderJSX } from '@open-pencil/core/design-jsx'
+import { renderJSX } from '@open-designer/core/design-jsx'
 
 await renderJSX(graph, '<Frame w={320} p={16} bg="#FFFFFF"><Text>Hello</Text></Frame>')
 ```
@@ -46,4 +46,4 @@ Components that behave as controls are written with Reka UI's element names, in 
 </Switch.Root>
 ```
 
-This package depends only on `@open-pencil/scene-graph` and `@open-pencil/emit`. Rendering needs icons, SVG conversion, and layout, which `@open-pencil/core/design-jsx` provides; other engines can supply their own through `createDesignJSXRenderer(services)`.
+This package depends only on `@open-designer/scene-graph` and `@open-designer/emit`. Rendering needs icons, SVG conversion, and layout, which `@open-designer/core/design-jsx` provides; other engines can supply their own through `createDesignJSXRenderer(services)`.

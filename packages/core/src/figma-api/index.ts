@@ -1,10 +1,10 @@
 import { fromUint8Array, isValid, toUint8Array } from 'js-base64'
 
-import type { SceneGraph, SceneNode as CoreSceneNode, NodeType } from '@open-pencil/scene-graph'
-import { createConnector, freeEndpoint } from '@open-pencil/scene-graph/connectors'
-import { computeBounds } from '@open-pencil/scene-graph/geometry'
-import type { GroupFitOptions } from '@open-pencil/scene-graph/group-bounds'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode as CoreSceneNode, NodeType } from '@open-designer/scene-graph'
+import { createConnector, freeEndpoint } from '@open-designer/scene-graph/connectors'
+import { computeBounds } from '@open-designer/scene-graph/geometry'
+import type { GroupFitOptions } from '@open-designer/scene-graph/group-bounds'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import type { SkiaRenderer } from '#core/canvas'
 import { groupFitOptions } from '#core/canvas/boolean'
@@ -258,7 +258,7 @@ export class FigmaAPI implements NodeProxyHost {
   }
 
   /** The layers Figma makes from SVG markup, on the current page at its origin. */
-  // eslint-disable-next-line open-pencil/no-mixed-case-acronym-identifiers -- Figma Plugin API name.
+  // eslint-disable-next-line open-designer/no-mixed-case-acronym-identifiers -- Figma Plugin API name.
   createNodeFromSvg(svg: string): FigmaFrameNode {
     const node = createSVGNodes(this.graph, this._currentPageId, svg, { keepEmpty: true })
     if (!node) throw new Error('in createNodeFromSvg: Failed to convert SVG file')
@@ -558,7 +558,7 @@ export class FigmaAPI implements NodeProxyHost {
 
   /**
    * The axis tags a variable family takes in `variationSettings`, or `null` for a static family.
-   * Figma answers for any family it lists; OpenPencil reads the axes from a file the family has
+   * Figma answers for any family it lists; OpenDesigner reads the axes from a file the family has
    * loaded, so a family has to be loaded first.
    */
   getFontFamilyVariationAxes(family: string): string[] | null {

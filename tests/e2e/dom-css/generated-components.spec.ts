@@ -5,9 +5,9 @@ import react from '@vitejs/plugin-react'
 import vue from '@vitejs/plugin-vue'
 import { createServer, type PluginOption, type ViteDevServer } from 'vite'
 
-import { exportStorybook } from '@open-pencil/dom-css'
-import { SceneGraph, type ComponentPropertyReference } from '@open-pencil/scene-graph'
-import { emptyBehaviour, withBehaviour, type Behaviour } from '@open-pencil/scene-graph/behaviours'
+import { exportStorybook } from '@open-designer/dom-css'
+import { SceneGraph, type ComponentPropertyReference } from '@open-designer/scene-graph'
+import { emptyBehaviour, withBehaviour, type Behaviour } from '@open-designer/scene-graph/behaviours'
 
 import { expect, test } from '../fixtures'
 

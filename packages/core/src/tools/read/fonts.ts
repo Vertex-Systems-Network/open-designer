@@ -1,7 +1,7 @@
 import { uniq } from 'es-toolkit/array'
 import * as v from 'valibot'
 
-import { OpenPencilAPI } from '#core/openpencil-api'
+import { OpenDesignerAPI } from '#core/opendesigner-api'
 import { defineTool } from '#core/tools/schema'
 
 export const getFontStatus = defineTool({
@@ -13,7 +13,7 @@ export const getFontStatus = defineTool({
   execution: { kind: 'sync', mutation: 'none' },
   exposure: { webmcp: false },
   input: v.strictObject({}),
-  execute: (figma) => new OpenPencilAPI(figma).getFontStatus()
+  execute: (figma) => new OpenDesignerAPI(figma).getFontStatus()
 })
 
 export const listFonts = defineTool({

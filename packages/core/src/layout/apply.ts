@@ -1,12 +1,12 @@
 import type { Node as YogaNode } from 'yoga-layout'
 
-import type { SceneGraph, SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
-import { scaleGeometryPaths } from '@open-pencil/scene-graph/copy'
-import { enforcedAspectRatio } from '@open-pencil/scene-graph/layout'
+import type { SceneGraph, SceneNode, VectorNetwork } from '@open-designer/scene-graph'
+import { scaleGeometryPaths } from '@open-designer/scene-graph/copy'
+import { enforcedAspectRatio } from '@open-designer/scene-graph/layout'
 import {
   layoutConstrainedChildRect,
   scaleVectorNetworkForResize
-} from '@open-pencil/scene-graph/resize'
+} from '@open-designer/scene-graph/resize'
 
 import { keepsSavedLayout, usesDetachedDerivedLayout } from './derived'
 

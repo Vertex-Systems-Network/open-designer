@@ -1,14 +1,14 @@
 import { isEqual } from 'es-toolkit'
 import { camelCase } from 'es-toolkit/string'
 
-import { jsx } from '@open-pencil/emit'
+import { jsx } from '@open-designer/emit'
 import type {
   SceneGraph,
   Variable,
   VariableCollection,
   VariableValue
-} from '@open-pencil/scene-graph'
-import { modesDefaultFirst } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import { modesDefaultFirst } from '@open-designer/scene-graph/variables'
 
 import { layersUnder } from '../connectors'
 import { DESIGN_JSX_ELEMENTS } from '../elements'

@@ -1,11 +1,11 @@
 {
   "identities": [
     {
-      "name": "openpencil-cloud",
+      "name": "opendesigner-cloud",
       "credentials": [
         {
-          "accessKey": "openpencil",
-          "secretKey": "openpencil-development-secret"
+          "accessKey": "opendesigner",
+          "secretKey": "opendesigner-development-secret"
         }
       ],
       "actions": ["Admin", "Read", "List", "Write"]

@@ -7,7 +7,7 @@ const editor = useEditorSetupWithClear('/?test&no-chrome&no-rulers')
 test('the pen previews a continued path and lines the next point up with its vertices', async () => {
   await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const straight = { tangentStart: { x: 0, y: 0 }, tangentEnd: { x: 0, y: 0 } }
     const vector = store.graph.createNode('VECTOR', store.state.currentPageId, {
       name: 'Open path',

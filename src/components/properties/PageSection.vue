@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import type { Fill } from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { useVariableModes } from '@open-pencil/vue/controls/variable-modes'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { Fill } from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { useVariableModes } from '@open-designer/vue/controls/variable-modes'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import ColorPicker from '@/components/ColorPicker/ColorPicker.vue'

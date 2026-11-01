@@ -8,8 +8,8 @@ import {
   type VariableCollection,
   type VariableType,
   type VariableValue
-} from '@open-pencil/scene-graph'
-import { tokenExpressionForValue, type BindingScope } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import { tokenExpressionForValue, type BindingScope } from '@open-designer/scene-graph/variables'
 
 import { reconcileVariableLayouts } from '#core/layout/variables'
 

@@ -1,6 +1,6 @@
 import { ref, shallowRef, toValue, watch, type MaybeRefOrGetter } from 'vue'
 
-import type { DocumentPermission } from '@open-pencil/cloud/contract'
+import type { DocumentPermission } from '@open-designer/cloud/contract'
 
 import {
   changeCloudLink,

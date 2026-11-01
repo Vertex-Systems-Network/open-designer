@@ -9,7 +9,7 @@ export function pixelGridDriver(page: () => Page) {
     showAtZoom(zoom: number) {
       return page().evaluate(async (zoom) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const fixtureURL = '/tests/helpers/canvas/pixel-grid/scene.ts'
         const scene: typeof PixelGridScene = await import(fixtureURL)
         scene.createPixelGridScene(store.graph, store.state.currentPageId)

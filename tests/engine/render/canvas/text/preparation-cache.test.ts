@@ -2,8 +2,8 @@ import { describe, expect, test } from 'bun:test'
 
 import type { CanvasKit } from 'canvaskit-wasm'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { initCanvasKit } from '#cli/headless'
 import { buildParagraph, nodeFontReadiness } from '#core/canvas/text'

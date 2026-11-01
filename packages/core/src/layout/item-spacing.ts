@@ -1,5 +1,5 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { isGeneratedFrame } from '@open-designer/scene-graph/generated'
 
 // Space between takes the place of the gap in Figma's auto layout. A generated frame keeps it
 // as the least space between its sublayers, as a sticky note keeps its author clear of a long body.

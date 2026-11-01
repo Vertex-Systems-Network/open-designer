@@ -7,8 +7,8 @@ import { join } from 'node:path'
 
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
 
-import { MCP_AGENT_HEADER, MCP_CHAT_HEADER } from '@open-pencil/core/constants'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { MCP_AGENT_HEADER, MCP_CHAT_HEADER } from '@open-designer/core/constants'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { startServer, type ServerHandle } from '#mcp/server'
 import { createToolDescriptors, getMCPToolDefinitions } from '#mcp/tool/manifest'
@@ -24,8 +24,8 @@ import {
 } from '#tests/helpers/mcp/server'
 
 const isUnix = process.platform !== 'win32'
-const SOCKET_DIR = join(tmpdir(), `openpencil-test-server-${process.pid}`)
-const TEST_MCP_ROOT = join(tmpdir(), 'open-pencil-mcp-root')
+const SOCKET_DIR = join(tmpdir(), `opendesigner-test-server-${process.pid}`)
+const TEST_MCP_ROOT = join(tmpdir(), 'open-designer-mcp-root')
 const TEST_AUTH_TOKEN = 'test-auth-token'
 const TEST_CLIENT_AUTH_TOKEN = 'test-client-token'
 let testCounter = 0

@@ -1,12 +1,12 @@
 import { beforeAll, expect, setDefaultTimeout, test } from 'bun:test'
 import { readFileSync } from 'node:fs'
 
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { renderNodesToImage } from '@open-pencil/core/io/formats/raster'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { parseFigFile } from '@open-designer/core/io/formats/fig'
+import { renderNodesToImage } from '@open-designer/core/io/formats/raster'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { initCanvasKit } from '#cli/headless'
 

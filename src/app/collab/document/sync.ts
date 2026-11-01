@@ -8,21 +8,21 @@ import type {
   DocumentColorSpace,
   EnabledLibraryBinding,
   PluginDataEntry
-} from '@open-pencil/scene-graph'
-import { commentThreadsSchema } from '@open-pencil/scene-graph/comments'
+} from '@open-designer/scene-graph'
+import { commentThreadsSchema } from '@open-designer/scene-graph/comments'
 import {
   isPluginDataEntry,
-  OPEN_PENCIL_PLUGIN_DATA,
+  OPEN_DESIGNER_PLUGIN_DATA,
   readPluginData,
   withPluginData
-} from '@open-pencil/scene-graph/plugin-data'
+} from '@open-designer/scene-graph/plugin-data'
 
 import type { EditorStore } from '@/app/editor/active-store'
 
 import { changedIds, writeChanges, type YRecords } from '../records'
 import { readRoot, type YMeta } from '../shared-tree/fields'
 
-const { comments } = OPEN_PENCIL_PLUGIN_DATA
+const { comments } = OPEN_DESIGNER_PLUGIN_DATA
 const COLOR_SPACE_KEY = 'colorSpace'
 /** A thread's replies are a map of their own by id, so replies written at once all stay. */
 const BY_REPLY = new Set(['replies'])

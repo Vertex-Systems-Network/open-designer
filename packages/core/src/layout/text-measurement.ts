@@ -1,6 +1,6 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { faceStyleKey } from '@open-pencil/scene-graph/font-style'
-import { lineHeightPixels } from '@open-pencil/scene-graph/text'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { faceStyleKey } from '@open-designer/scene-graph/font-style'
+import { lineHeightPixels } from '@open-designer/scene-graph/text'
 
 import { measureTextWithFont } from '#core/text/font/glyphs'
 

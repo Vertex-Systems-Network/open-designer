@@ -2,11 +2,11 @@ import { beforeAll, expect, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { fontManager } from '@open-pencil/core/text'
-import { parseFigBuffer } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph, type TextParagraphStyle } from '@open-pencil/scene-graph'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { fontManager } from '@open-designer/core/text'
+import { parseFigBuffer } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph, type TextParagraphStyle } from '@open-designer/scene-graph'
 
 const LIST: TextParagraphStyle[] = [
   { listType: 'NONE', indentation: 0, paragraphSpacing: 24, paragraphIndent: 30 },
