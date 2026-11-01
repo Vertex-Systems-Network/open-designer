@@ -267,15 +267,11 @@ function nodeToJSX(
   )
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
-    const attributes = withRef(mergeProps(collectedProps, ownProps)).map(
-      propAttribute
-    )
+    const attributes = withRef(mergeProps(collectedProps, ownProps)).map(propAttribute)
     const instanceChildren = ownsSlotContent(graph, node) ? children(depth + 1) : []
     return [jsx.element(tag, attributes, instanceChildren, depth)]
   }
-  const attributes = withRef(mergeProps(collectedProps, ownProps)).map(
-    propAttribute
-  )
+  const attributes = withRef(mergeProps(collectedProps, ownProps)).map(propAttribute)
   if (node.type === 'TEXT') {
     const { children: content, inline } = textChildren(node, depth)
     for (let count = elementCount(content); count > 0; count--) layerIds?.push(null)
