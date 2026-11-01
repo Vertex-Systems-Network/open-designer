@@ -15,6 +15,29 @@ function createInstanceSnapshot(instance: SceneNode): InstanceCreateSnapshot {
   return snapshot
 }
 
+/**
+ * The overrides of the instances an instance holds, down to the first instance on each branch:
+ * the ones detaching it hands their layers' overrides to.
+ */
+function nestedInstanceOverrides(
+  ctx: EditorContext,
+  instanceId: string
+): Map<string, import('@open-designer/scene-graph/instances/overrides').InstanceOverrideState> {
+  const states = new Map<
+    string,
+    import('@open-designer/scene-graph/instances/overrides').InstanceOverrideState
+  >()
+  const visit = (parentId: string): void => {
+    for (const child of ctx.graph.getChildren(parentId)) {
+      if (child.type === 'INSTANCE')
+        states.set(child.id, cloneInstanceOverrideState(child.instanceOverrides))
+      else visit(child.id)
+    }
+  }
+  visit(instanceId)
+  return states
+}
+
 type DefaultInstancePlacement = {
   local: Vector
   world: Vector
@@ -114,6 +137,7 @@ export function createComponentInstanceActions(ctx: EditorContext) {
 
     const prevComponentId = selectedNode.componentId
     const previousOverrides = cloneInstanceOverrideState(selectedNode.instanceOverrides)
+    const previousNestedOverrides = nestedInstanceOverrides(ctx, selectedNode.id)
 
     ctx.graph.detachInstance(selectedNode.id)
     ctx.setSelectedIds(new Set([selectedNode.id]))
@@ -130,6 +154,9 @@ export function createComponentInstanceActions(ctx: EditorContext) {
           componentId: prevComponentId,
           instanceOverrides: cloneInstanceOverrideState(previousOverrides)
         })
+        // Detaching gave the instances it holds their layers' overrides; undoing takes them back.
+        for (const [id, overrides] of previousNestedOverrides)
+          ctx.graph.updateNode(id, { instanceOverrides: cloneInstanceOverrideState(overrides) })
       }
     })
   }
