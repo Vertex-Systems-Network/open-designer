@@ -5,7 +5,7 @@ import type { DerivedTextGlyph, SceneNode } from '@open-designer/scene-graph'
  * sequences with every emoji 1 em wide, as Figma lays them out, and no outlines. Built by
  * `tools/generate/emoji-metrics`; the emoji themselves are drawn over it.
  */
-export const EMOJI_METRICS_FAMILY = 'OpenDesigner Emoji Metrics'
+export const EMOJI_METRICS_FAMILY = 'OpenPencil Emoji Metrics'
 
 /** The colour emoji font that draws emoji where the platform cannot. */
 export const NOTO_COLOR_EMOJI_FAMILY = 'Noto Color Emoji'
