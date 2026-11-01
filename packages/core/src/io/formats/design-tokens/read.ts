@@ -122,7 +122,10 @@ export function documentTokens(parsed: Record<string, unknown>): ReadToken[] {
       const legacy = v.safeParse(nameExtensionSchema, extensions[OPENPENCIL_EXTENSION])
       tokens.push({
         path: at,
-        name: (own.success ? own.output.name : undefined) ?? (legacy.success ? legacy.output.name : undefined) ?? pathName(at),
+        name:
+          (own.success ? own.output.name : undefined) ??
+          (legacy.success ? legacy.output.name : undefined) ??
+          pathName(at),
         type: typeof child.$type === 'string' ? child.$type : type,
         value: child.$value,
         description: typeof child.$description === 'string' ? child.$description : undefined,
