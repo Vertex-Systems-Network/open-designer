@@ -20,7 +20,8 @@ const LEGACY_SECRET_NAMES: Readonly<Record<string, string>> = {
 }
 
 function secretValue(environment: CloudEnvironment, name: string): string | undefined {
-  return environment[name] || environment[LEGACY_SECRET_NAMES[name]]
+  const legacyName = LEGACY_SECRET_NAMES[name]
+  return environment[name] || (legacyName ? environment[legacyName] : undefined)
 }
 
 export function parseCloudDeploymentSource(source: string): CloudDeploymentConfig {
