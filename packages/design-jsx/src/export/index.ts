@@ -200,14 +200,18 @@ function nestedInstancePropertyOverrides(
   return overrides
 }
 
-function instanceProps(graph: SceneGraph, node: SceneNode): JSXProp[] {
+function instanceProps(
+  graph: SceneGraph,
+  node: SceneNode,
+  hasRekaComponentRef = false
+): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
   const props: JSXProp[] = []
   const hasSwapBinding = node.componentPropertyReferences.some(
     (reference) => reference.field === 'INSTANCE_SWAP'
   )
-  if (component && !hasSwapBinding) props.push(['of', component.id])
+  if (component && !hasSwapBinding && !hasRekaComponentRef) props.push(['of', component.id])
   const definitions = componentPropertyDefinitions(graph, node)
   const values = assignedPropertyValues(definitions, node.componentPropertyAssignments)
   if (Object.keys(values).length > 0) props.push(['properties', values])
@@ -250,10 +254,12 @@ function nodeToJSX(
     const children = own.text ? [jsx.text(own.text)] : []
     return [jsx.element(tag, own.props.map(propAttribute), children, depth, true)]
   }
+  const rekaProps = reka.props.get(node.id) ?? []
+  const hasRekaComponentRef = rekaProps.some(([name]) => name === 'of')
   const ownProps = [
-    ...(reka.props.get(node.id) ?? []),
+    ...rekaProps,
     ...componentPropertyProps(graph, node),
-    ...instanceProps(graph, node)
+    ...instanceProps(graph, node, hasRekaComponentRef)
   ]
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
