@@ -5,6 +5,7 @@ import type {
   SessionNotification,
   RequestPermissionRequest,
   RequestPermissionResponse,
+  ContentBlock,
   Usage
 } from '@agentclientprotocol/sdk'
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai'
@@ -23,6 +24,18 @@ import { describeDiagnosticError, recordACPTransportFailure } from '@/app/diagno
 import type { EditorStore } from '@/app/editor/active-store'
 
 type TauriChild = Awaited<ReturnType<typeof spawnACPProcess>>['child']
+
+/** ACP prompt blocks: text plus image attachments when the agent advertises image support. */
+export function promptBlocks(message: UIMessage | undefined, text: string, images: boolean): ContentBlock[] {
+  const blocks: ContentBlock[] = [{ type: 'text', text }]
+  if (!images) return blocks
+  for (const part of message?.parts ?? []) {
+    if (part.type !== 'file' || !part.mediaType.startsWith('image/')) continue
+    const match = /^data:[^;,]+;base64,(.*)$/.exec(part.url)
+    if (match?.[1]) blocks.push({ type: 'image', mimeType: part.mediaType, data: match[1] })
+  }
+  return blocks
+}
 
 interface ACPSession {
   connection: ClientSideConnection
@@ -135,6 +148,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   private agentDef: ACPAgentDef
   private cwd: string
   private sentContext = false
+  private imagePrompts = false
   private destroying = false
   /** The agent while it starts, before it becomes the session, so destroying can stop it. */
   private starting: TauriChild | null = null
@@ -236,7 +250,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
         connection
           .prompt({
             sessionId,
-            prompt: [{ type: 'text', text: promptText }]
+            prompt: promptBlocks(lastUserMessage, promptText, this.imagePrompts)
           })
           // The prompt answers once the agent's turn is over; nothing else ends the reply.
           .then((result) => {
@@ -352,10 +366,15 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
     try {
       await untilStopped(
-        connection.initialize({
-          protocolVersion: PROTOCOL_VERSION,
-          clientCapabilities: {}
-        })
+        connection
+          .initialize({
+            protocolVersion: PROTOCOL_VERSION,
+            clientCapabilities: {}
+          })
+          .then((init) => {
+            this.imagePrompts = init.agentCapabilities?.promptCapabilities?.image === true
+            return init
+          })
       )
     } catch (e) {
       await child.kill().catch(() => undefined)
