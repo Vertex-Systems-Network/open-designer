@@ -1,4 +1,4 @@
-import type { Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 import { Migrator, type Migration, type MigrationProvider } from 'kysely/migration'
 
 import * as foundation from './migrations/001_foundation'
@@ -28,6 +28,7 @@ import * as accountActivity from './migrations/024_account_activity'
 import * as tableNames from './migrations/025_table_names'
 import * as userPicture from './migrations/026_user_picture'
 import type { CloudDatabase } from './tables'
+import { TURSO_SCHEMA_STATEMENTS } from './turso-schema'
 
 const migrations: Record<string, Migration> = {
   '001_foundation': foundation,
@@ -61,6 +62,20 @@ const migrations: Record<string, Migration> = {
 class CloudMigrationProvider implements MigrationProvider {
   async getMigrations(): Promise<Record<string, Migration>> {
     return migrations
+  }
+}
+
+class TursoMigrationProvider implements MigrationProvider {
+  async getMigrations(): Promise<Record<string, Migration>> {
+    return {
+      '001_turso_schema': {
+        async up(database) {
+          for (const statement of TURSO_SCHEMA_STATEMENTS) {
+            await sql.raw(statement).execute(database)
+          }
+        }
+      }
+    }
   }
 }
 
@@ -165,10 +180,25 @@ export async function migrateToLatest(migrator: Migrator, failure: string): Prom
 
 export async function migrateCloudDatabase(
   database: Kysely<CloudDatabase>,
-  authMigration?: CloudAuthMigration
+  authMigration?: CloudAuthMigration,
+  options: { dialect?: 'postgres' | 'libsql' } = {}
 ): Promise<void> {
+  if (options.dialect === 'libsql') {
+    const tables = await database.introspection.getTables({ withInternalKyselyTables: true })
+    const applicationTables = tables.filter(
+      (table) => table.name !== 'kysely_migration' && table.name !== 'kysely_migration_lock'
+    )
+    const hasMigrationHistory = tables.some((table) => table.name === 'kysely_migration')
+    if (applicationTables.length > 0 && !hasMigrationHistory) {
+      throw new Error('Refusing to initialize Turso because the database is not empty')
+    }
+  }
   await migrateToLatest(
-    new Migrator({ db: database, provider: new CloudMigrationProvider() }),
+    new Migrator({
+      db: database,
+      provider:
+        options.dialect === 'libsql' ? new TursoMigrationProvider() : new CloudMigrationProvider()
+    }),
     'OpenDesigner Cloud database migration failed'
   )
   if (authMigration) await migrateAuthSchema(database, authMigration)

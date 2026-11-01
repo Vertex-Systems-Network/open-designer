@@ -11,6 +11,8 @@ local-first and works without it.
 - `@open-designer/cloud/email` — Vue Email rendering.
 - `@open-designer/cloud/server` — runtime-neutral Hono routes and services with injected dependencies.
 - `@open-designer/cloud/runtime/node` — PostgreSQL, S3, SMTP, the HTTP listener, and workers.
+- Cloudflare Workers can use PostgreSQL through Hyperdrive or Turso/libSQL through `TURSO_URL` and
+  `TURSO_AUTH_TOKEN`.
 
 ## Running
 

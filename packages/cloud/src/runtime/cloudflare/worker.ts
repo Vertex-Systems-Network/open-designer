@@ -1,5 +1,4 @@
 import { defaultRelayURL, RELAY_PATH } from '#cloud/contract'
-import { createPostgresCloudDatabase } from '#cloud/runtime/postgres/database'
 import { createS3ObjectStore } from '#cloud/runtime/s3/objects'
 import { createCloudServer } from '#cloud/runtime/site/server'
 import {
@@ -15,6 +14,7 @@ import {
 } from '#cloud/server'
 import { Hono } from 'hono'
 
+import { createCloudflareDatabase } from './database'
 import { createCloudflareEmailTransport } from './email'
 import {
   cloudflareCloudSetup,
@@ -34,13 +34,13 @@ function emailTransport({ config }: PreparedCloudflareCloud, env: CloudflareClou
  * What one request or cron run needs. Workers can't share connections between requests, so each
  * gets its own database client, closed once its background work settles.
  */
-function cloudServices(
+async function cloudServices(
   prepared: PreparedCloudflareCloud,
   env: CloudflareCloudEnvironment,
   context: Pick<ExecutionContext, 'waitUntil'>
 ) {
   const { config } = prepared
-  const database = createPostgresCloudDatabase({ connectionString: config.databaseURL })
+  const database = await createCloudflareDatabase(env, config.databaseURL)
   const objects = createS3ObjectStore(config)
   const transport = emailTransport(prepared, env)
   const queued = createTransactionalEmailService(database, {
@@ -102,7 +102,7 @@ export function createCloudflareCloud(configSource: string) {
     .get(RELAY_PATH, routeToRelay)
     .all('*', async (c) => {
       const prepared = await prepare(c.env)
-      const services = cloudServices(prepared, c.env, c.executionCtx)
+      const services = await cloudServices(prepared, c.env, c.executionCtx)
       const { config, database, email, transport, runInBackground } = services
       try {
         const { auth, enrollment } = createCloudAuthenticationRuntime(config, database, email, {
@@ -138,7 +138,7 @@ export function createCloudflareCloud(configSource: string) {
 
     async scheduled(_controller, env, context) {
       const prepared = await prepare(env)
-      const services = cloudServices(prepared, env, context)
+      const services = await cloudServices(prepared, env, context)
       const { config, database, objects } = services
       try {
         if (config.cleanupEnabled) {

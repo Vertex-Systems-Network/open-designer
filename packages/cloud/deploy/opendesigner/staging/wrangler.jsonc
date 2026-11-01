@@ -13,7 +13,6 @@
     "run_worker_first": true
   },
   "workers_dev": true,
-  "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "4e4c4652a8a14c77bfdb2d50862d2e64" }],
   "durable_objects": {
     "bindings": [{ "name": "RELAY", "class_name": "CollaborationRelayObject" }]
   },
@@ -22,6 +21,8 @@
   "triggers": { "crons": ["*/5 * * * *"] },
   "secrets": {
     "required": [
+      "TURSO_URL",
+      "TURSO_AUTH_TOKEN",
       "BETTER_AUTH_SECRET",
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",

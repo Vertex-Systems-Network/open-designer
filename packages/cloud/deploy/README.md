@@ -5,6 +5,21 @@ store, with optional SMTP for email, or on Cloudflare Workers by copying [`cloud
 live in [`opendesigner/`](./opendesigner). See
 [security.md](./security.md) for hardening checks.
 
+## Cloudflare Workers with Turso
+
+The official staging Worker uses Turso/libSQL. Add `TURSO_URL` (`libsql://…`) and
+`TURSO_AUTH_TOKEN` to the GitHub `cloudflare-deploy` environment. The manual deployment workflow
+runs the Turso schema migration before publishing the Worker and passes both values to Wrangler as
+Worker secrets. The first migration initializes an empty database; it refuses to initialize a
+database that already contains application tables.
+
+For a local migration, set `TURSO_URL`, `TURSO_AUTH_TOKEN`, `OPENDESIGNER_CLOUD_CONFIG`, and the
+deployment's other required secret variables, then run:
+
+```sh
+bun --filter @open-designer/cloud migrate:turso
+```
+
 ## Local development
 
 From the repository root, with Docker running:

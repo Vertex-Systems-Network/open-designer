@@ -1,6 +1,6 @@
-# cloud-staging.openpencil.dev, the official staging deployment. Secrets come from the Worker's
-# secrets: BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, S3_ACCESS_KEY_ID, and
-# S3_SECRET_ACCESS_KEY; DATABASE_URL is Hyperdrive's.
+# Staging's database URL and token come from Worker secrets TURSO_URL and TURSO_AUTH_TOKEN. Other
+# secrets are BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, S3_ACCESS_KEY_ID, and
+# S3_SECRET_ACCESS_KEY.
 schema_version = 2
 
 # Staging is only for people the team approved: no editor or shared files without signing in.
