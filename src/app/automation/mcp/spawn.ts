@@ -196,6 +196,18 @@ async function computeExpectedDiscoveryPath(): Promise<string> {
   return join(home, '.opendesigner', 'mcp.json')
 }
 
+/** Legacy location used by OpenPencil before the OpenDesigner rebrand. */
+async function computeLegacyDiscoveryPath(): Promise<string> {
+  const home = await homeDir()
+  if (!home) throw new Error('homeDir() returned an empty string')
+
+  const isMac = navigator.platform.includes('Mac')
+  const isWindows = navigator.platform.includes('Win')
+  if (isMac) return join(home, 'Library', 'Application Support', 'OpenPencil', 'mcp.json')
+  if (isWindows) return join(home, 'AppData', 'Local', 'OpenPencil', 'mcp.json')
+  return join(home, '.openpencil', 'mcp.json')
+}
+
 /**
  * Resolves the discovery path to use for reading the auth token.
  *
@@ -437,7 +449,11 @@ export async function getAutomationAuthToken(): Promise<string | null> {
 
 async function readExistingServerHandle(): Promise<AutomationServerHandle | null> {
   const expectedDiscoveryPath = await computeExpectedDiscoveryPath()
-  if (!(await discoveryFileExists(expectedDiscoveryPath))) return null
+  const legacyDiscoveryPath = await computeLegacyDiscoveryPath()
+  if (
+    !(await discoveryFileExists(expectedDiscoveryPath)) &&
+    !(await discoveryFileExists(legacyDiscoveryPath))
+  ) return null
 
   const health = await readAutomationHealth()
   if (!health) return null
@@ -525,7 +541,9 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
   // The app bundle directory (Tauri executableDir) is read-only and cannot be
   // used as a safe fallback for open_file, save_file, or export tools.
   const mcpRoot = mcpRootDirectory.value.trim() || (await resolveTauriHomeDir())
-  const resolved = resolvePlatformCommand(MCP_EXECUTABLE)
+  const installedExecutable = lookup.path?.split(/[\\/]/).pop()?.replace(/\.cmd$/i, '')
+  const executable = installedExecutable === 'openpencil-mcp-http' ? installedExecutable : MCP_EXECUTABLE
+  const resolved = resolvePlatformCommand(executable)
   const command = Command.create(resolved.command, resolved.args, {
     env: {
       PORT: String(AUTOMATION_HTTP_PORT),
