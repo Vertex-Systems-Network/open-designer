@@ -1,0 +1,1 @@
+- Home's recent and stored document entries show image previews when context menus are enabled.
