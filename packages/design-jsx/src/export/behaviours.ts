@@ -93,7 +93,7 @@ function exportPart(
     if (partId !== 'items' || !item) continue
     // A group's items keep the specific component instance they refer to.
     result.tags.set(child.id, `${namespace}.Item`)
-    result.props.set(child.id, [['of', item.id]])
+    result.props.set(child.id, [['of', child.componentId ?? item.id]])
   }
 }
 
