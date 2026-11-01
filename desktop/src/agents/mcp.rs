@@ -3,7 +3,7 @@
 use super::path::search_dirs;
 
 /// Name of the MCP entry point installed by `@open-designer/mcp`.
-const MCP_EXECUTABLE: &str = "opendesigner-mcp-http";
+const MCP_EXECUTABLES: [&str; 2] = ["opendesigner-mcp-http", "openpencil-mcp-http"];
 /// Bound on the directories reported back to the settings diagnostics.
 const MAX_REPORTED_SEARCH_DIRS: usize = 12;
 
@@ -24,7 +24,7 @@ pub struct McpLookup {
 
 #[tauri::command]
 pub fn mcp_lookup() -> McpLookup {
-    let resolved = which::which(MCP_EXECUTABLE).ok();
+    let resolved = MCP_EXECUTABLES.iter().find_map(|name| which::which(name).ok());
     let path = resolved.as_ref().map(|p| p.display().to_string());
     let mut searched: Vec<String> = Vec::new();
     if let Some(dir) = resolved.as_ref().and_then(|p| p.parent()) {
