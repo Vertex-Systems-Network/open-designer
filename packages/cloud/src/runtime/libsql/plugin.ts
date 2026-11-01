@@ -67,8 +67,9 @@ function transformRow(row: UnknownRow): UnknownRow {
     } else if ((key === 'metadata' || key === 'values') && typeof value === 'string') {
       try {
         transformed[key] = JSON.parse(value) as unknown
-      } catch {
-        // Leave an unexpected database value intact so the caller can report the schema problem.
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) throw error
+        // Keep malformed JSON intact so the caller can report the schema problem.
       }
     } else if (value instanceof ArrayBuffer) {
       transformed[key] = new Uint8Array(value)
