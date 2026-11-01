@@ -82,6 +82,63 @@ type LayoutGeometry = Partial<
   >
 >
 
+function updateVectorLayoutGeometry(
+  id: string,
+  node: SceneNode,
+  changes: LayoutGeometry
+): void {
+  if (node.type !== 'VECTOR') return
+    // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
+    // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
+    // which is what an instance smaller than its component turns into.
+    if (node.type === 'VECTOR') {
+      const toWidth = changes.width ?? node.width
+      const toHeight = changes.height ?? node.height
+      const remembered = lastBoxWithSize.get(id)
+      const extent = networkExtent(node.vectorNetwork)
+      const sourceWidth =
+        positiveSize(node.width) ?? positiveSize(remembered?.width) ?? positiveSize(extent?.width)
+      const sourceHeight =
+        positiveSize(node.height) ?? positiveSize(remembered?.height) ?? positiveSize(extent?.height)
+      const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
+      const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
+      const targetWidth = positiveSize(toWidth) ?? effectiveWidth
+      const targetHeight = positiveSize(toHeight) ?? effectiveHeight
+      const sx = targetWidth / effectiveWidth
+      const sy = targetHeight / effectiveHeight
+      const network = rescaleVectorNetworkForLayout(
+        node.vectorNetwork,
+        node.width,
+        node.height,
+        toWidth,
+        toHeight,
+        remembered
+      )
+      if (network) changes.vectorNetwork = network
+      if (sx !== 1 || sy !== 1) {
+        if (node.fillGeometry.length > 0) {
+          changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
+        }
+        // Live paths regenerate their strokes; outline-only vectors keep their saved outline.
+        if (node.strokeGeometry.length > 0) {
+          changes.strokeGeometry =
+            node.vectorNetwork && node.vectorNetwork.segments.length > 0
+              ? []
+              : scaleGeometryPaths(node.strokeGeometry, sx, sy)
+        }
+      }
+  
+      if (toWidth <= 0 || toHeight <= 0) {
+        lastBoxWithSize.set(id, {
+          width: positiveSize(toWidth) ?? sourceWidth,
+          height: positiveSize(toHeight) ?? sourceHeight
+        })
+      } else {
+        lastBoxWithSize.delete(id)
+      }
+    }
+}
+
 /**
  * Writes only the geometry layout changed. Laying out a large page leaves most layers where they
  * were, and each write would notify every graph listener for nothing. A frame it resizes from
@@ -104,55 +161,7 @@ function writeLayoutGeometry(
     const value = geometry[key]
     if (value !== undefined && value !== node[key]) changes[key] = value
   }
-  // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
-  // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
-  // which is what an instance smaller than its component turns into.
-  if (node.type === 'VECTOR') {
-    const toWidth = changes.width ?? node.width
-    const toHeight = changes.height ?? node.height
-    const remembered = lastBoxWithSize.get(id)
-    const extent = networkExtent(node.vectorNetwork)
-    const sourceWidth =
-      positiveSize(node.width) ?? positiveSize(remembered?.width) ?? positiveSize(extent?.width)
-    const sourceHeight =
-      positiveSize(node.height) ?? positiveSize(remembered?.height) ?? positiveSize(extent?.height)
-    const effectiveWidth = sourceWidth ?? positiveSize(toWidth) ?? 1
-    const effectiveHeight = sourceHeight ?? positiveSize(toHeight) ?? 1
-    const targetWidth = positiveSize(toWidth) ?? effectiveWidth
-    const targetHeight = positiveSize(toHeight) ?? effectiveHeight
-    const sx = targetWidth / effectiveWidth
-    const sy = targetHeight / effectiveHeight
-    const network = rescaleVectorNetworkForLayout(
-      node.vectorNetwork,
-      node.width,
-      node.height,
-      toWidth,
-      toHeight,
-      remembered
-    )
-    if (network) changes.vectorNetwork = network
-    if (sx !== 1 || sy !== 1) {
-      if (node.fillGeometry.length > 0) {
-        changes.fillGeometry = scaleGeometryPaths(node.fillGeometry, sx, sy)
-      }
-      // Live paths regenerate their strokes; outline-only vectors keep their saved outline.
-      if (node.strokeGeometry.length > 0) {
-        changes.strokeGeometry =
-          node.vectorNetwork && node.vectorNetwork.segments.length > 0
-            ? []
-            : scaleGeometryPaths(node.strokeGeometry, sx, sy)
-      }
-    }
-
-    if (toWidth <= 0 || toHeight <= 0) {
-      lastBoxWithSize.set(id, {
-        width: positiveSize(toWidth) ?? sourceWidth,
-        height: positiveSize(toHeight) ?? sourceHeight
-      })
-    } else {
-      lastBoxWithSize.delete(id)
-    }
-  }
+  updateVectorLayoutGeometry(id, node, changes)
   if (Object.keys(changes).length > 0) graph.updateNode(id, changes)
   if (!CONSTRAINT_PARENT_TYPES.has(node.type)) return
   // Laying out what a file holds, as a page opens or its fonts arrive, resizes a frame only where
