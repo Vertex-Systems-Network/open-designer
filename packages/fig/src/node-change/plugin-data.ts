@@ -44,8 +44,7 @@ export function readNodeChangePluginData<T>(
 ): T | undefined {
   return field.decode(
     nc.pluginData?.find(
-      (entry) =>
-        isOpenDesignerPluginId(entry.pluginID) && entry.key === field.key
+      (entry) => isOpenDesignerPluginId(entry.pluginID) && entry.key === field.key
     )?.value
   )
 }
