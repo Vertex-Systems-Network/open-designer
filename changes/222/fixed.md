@@ -1,0 +1,1 @@
+- Text uses live layout when fonts are loaded, and clicks follow Figma's depth rules through nested frames, groups, and text.
