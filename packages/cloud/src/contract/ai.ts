@@ -8,7 +8,9 @@ import * as v from 'valibot'
  */
 export const CLOUD_AI_CONTRACT_VERSION = '1' as const
 /** The `aud` of every token Cloud signs for an AI service. */
-export const CLOUD_AI_TOKEN_AUDIENCE = 'openpencil-ai' as const
+export const CLOUD_AI_TOKEN_AUDIENCE = 'opendesigner-ai' as const
+/** Accept tokens issued before the product rebrand while self-hosted relays roll forward. */
+export const CLOUD_AI_TOKEN_AUDIENCES = [CLOUD_AI_TOKEN_AUDIENCE, 'openpencil-ai'] as const
 /** Where Cloud publishes the public keys an AI service verifies its tokens with. */
 export const CLOUD_AI_JWKS_PATH = '/.well-known/jwks.json' as const
 
@@ -52,7 +54,7 @@ export type AIToken = v.InferOutput<typeof aiTokenSchema>
 /** What an AI service may rely on once a token's signature, issuer, audience, and expiry check. */
 export const aiTokenClaimsSchema = v.object({
   iss: urlSchema,
-  aud: v.literal(CLOUD_AI_TOKEN_AUDIENCE),
+  aud: v.picklist(CLOUD_AI_TOKEN_AUDIENCES),
   sub: v.pipe(v.string(), v.minLength(1)),
   workspaceId: v.pipe(v.string(), v.uuid()),
   /** Credits the workspace's plan grants each month; `null` when Cloud sets no allowance. */
