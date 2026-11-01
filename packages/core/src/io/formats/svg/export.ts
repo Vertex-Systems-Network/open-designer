@@ -494,6 +494,7 @@ export interface SVGExportOptions {
   fontAlias?: SVGFontAlias
   /** Unsupported effects are omitted when explicitly requested. */
   skipUnsupportedEffects?: boolean
+  onWarning?: (warning: SVGExportWarning) => void
 }
 
 export interface SVGExportResult {
@@ -538,7 +539,8 @@ export function renderNodesToSVGWithWarnings(
     textLayout: options.textLayout,
     fontAlias: options.fontAlias,
     skipUnsupportedEffects: options.skipUnsupportedEffects,
-    warnings: []
+    warnings: [],
+    onWarning: options.onWarning
   }
 
   const contentNodes: SVGNode[] = []
