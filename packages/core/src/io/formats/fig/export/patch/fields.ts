@@ -131,6 +131,17 @@ function patchEntryList(
   record: NodeChange,
   patch: FigRecordFieldPatch
 ): boolean {
+  if (field === 'variableSetModes') {
+    const entries = (modes: NonNullable<NodeChange['variableSetModes']>) =>
+      modes.map(({ id, ...fields }) => ({ guidPath: { guids: [id] }, ...fields }))
+    const changed = entryListPatch(
+      entries(saved.variableSetModes ?? []),
+      entries(record.variableSetModes ?? [])
+    )
+    if (changed === null) return false
+    if (changed) patch.variableSetModes = changed
+    return true
+  }
   if (field === 'symbolData') {
     const before = symbolDataOf(saved)
     const after = symbolDataOf(record)
