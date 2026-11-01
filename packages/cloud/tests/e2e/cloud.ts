@@ -30,7 +30,7 @@ const config = parseCloudServerConfig({
   publicURL: 'http://localhost:8787',
   databaseURL:
     process.env.DATABASE_URL ??
-    'postgresql://openpencil:opendesigner-development-password@localhost:54329/opendesigner',
+    'postgresql://opendesigner:opendesigner-development-password@localhost:54329/opendesigner',
   authSecret: 'full-stack-e2e-secret-at-least-32-characters',
   s3Endpoint: process.env.S3_ENDPOINT ?? 'http://localhost:8333',
   s3Region: process.env.S3_REGION ?? 'us-east-1',
