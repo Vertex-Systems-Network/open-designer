@@ -217,6 +217,35 @@ function instanceProps(graph: SceneGraph, node: SceneNode, hasRekaComponentRef =
   return props
 }
 
+function collectNodeProps(
+  node: SceneNode,
+  graph: SceneGraph,
+  variables: VariableExport,
+  hasRekaComponentRef: boolean
+): JSXProp[] {
+  const component =
+    hasRekaComponentRef && node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
+  if (!component) return collectProps(node, graph, variables)
+
+  const defaults = new Set<string>()
+  if (node.name === component.name) defaults.add('name')
+  if (
+    node.width === component.width &&
+    layoutSizing(graph, node, 'HORIZONTAL') === layoutSizing(graph, component, 'HORIZONTAL')
+  )
+    defaults.add('w')
+  if (
+    node.height === component.height &&
+    layoutSizing(graph, node, 'VERTICAL') === layoutSizing(graph, component, 'VERTICAL')
+  )
+    defaults.add('h')
+
+  return collectProps(node, graph, variables).filter(([name, value]) => {
+    if (!defaults.has(name)) return true
+    return (name === 'w' || name === 'h') && typeof value !== 'number'
+  })
+}
+
 function nodeToJSX(
   node: SceneNode,
   graph: SceneGraph,
@@ -258,25 +287,7 @@ function nodeToJSX(
     ...componentPropertyProps(graph, node),
     ...instanceProps(graph, node, hasRekaComponentRef)
   ]
-  const component = node.type === 'INSTANCE' ? instanceMainComponent(graph, node) : undefined
-  const defaultComponentProps = new Set<string>()
-  if (hasRekaComponentRef && component) {
-    if (node.name === component.name) defaultComponentProps.add('name')
-    if (
-      node.width === component.width &&
-      layoutSizing(graph, node, 'HORIZONTAL') === layoutSizing(graph, component, 'HORIZONTAL')
-    )
-      defaultComponentProps.add('w')
-    if (
-      node.height === component.height &&
-      layoutSizing(graph, node, 'VERTICAL') === layoutSizing(graph, component, 'VERTICAL')
-    )
-      defaultComponentProps.add('h')
-  }
-  const collectedProps = collectProps(node, graph, variables).filter(([name, value]) => {
-    if (!defaultComponentProps.has(name)) return true
-    return (name === 'w' || name === 'h') && typeof value !== 'number'
-  })
+  const collectedProps = collectNodeProps(node, graph, variables, hasRekaComponentRef)
   // Instances are references to components; writing their copied child layers would detach them.
   if (ownProps.some(([name]) => name === 'of')) {
     const attributes = withRef(mergeProps(collectedProps, ownProps)).map(propAttribute)
