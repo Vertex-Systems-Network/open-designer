@@ -6,13 +6,19 @@ import type { IconData } from '#core/icons/types'
 import { layoutAuthoredNodes } from '#core/layout'
 import { computeAccurateBounds } from '#core/vector/curve-math'
 
-function parseViewBox(viewBox: string | undefined): { w: number; h: number } {
-  if (!viewBox) return { w: 0, h: 0 }
+function parseViewBox(viewBox: string | undefined): { x: number; y: number; w: number; h: number } {
+  if (!viewBox) return { x: 0, y: 0, w: 0, h: 0 }
   const parts = viewBox
     .trim()
     .split(/[\s,]+/)
     .map(Number)
-  return { w: parts[2] ?? 0, h: parts[3] ?? 0 }
+  const [x = 0, y = 0, w = 0, h = 0] = parts
+  return {
+    x: Number.isFinite(x) ? x : 0,
+    y: Number.isFinite(y) ? y : 0,
+    w: Number.isFinite(w) ? w : 0,
+    h: Number.isFinite(h) ? h : 0
+  }
 }
 
 /** The set inline SVG artwork is reported in, which no icon provider has. */
@@ -33,7 +39,9 @@ function svgIconData({ body, elements, props }: SVGSource, size: number): IconDa
     paths: scalePathInfos(
       pathInfos,
       viewBox.w > 0 ? size / viewBox.w : 1,
-      viewBox.h > 0 ? size / viewBox.h : 1
+      viewBox.h > 0 ? size / viewBox.h : 1,
+      viewBox.x,
+      viewBox.y
     )
   }
 }
