@@ -41,6 +41,13 @@ function transformNode(value: unknown): unknown {
   const transformed = Object.fromEntries(
     Object.entries(value).map(([key, child]) => [key, transformNode(child)])
   )
+  if (
+    value.kind === 'OperatorNode' &&
+    typeof value.operator === 'string' &&
+    value.operator.toLowerCase() === 'ilike'
+  ) {
+    transformed.operator = 'like'
+  }
   if (value.kind === 'SelectQueryNode' && Array.isArray(transformed.endModifiers)) {
     transformed.endModifiers = transformed.endModifiers.filter(
       (modifier) =>
