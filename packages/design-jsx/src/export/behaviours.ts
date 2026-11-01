@@ -91,10 +91,9 @@ function exportPart(
     if (repeated) result.tags.set(child.id, repeated)
     const item = child.type === 'INSTANCE' ? instanceMainComponent(graph, child) : undefined
     if (partId !== 'items' || !item) continue
-    // A group's items are written as the group's Item, naming their component.
-    const set = item.parentId ? graph.getNode(item.parentId) : undefined
+    // A group's items keep the specific component instance they refer to.
     result.tags.set(child.id, `${namespace}.Item`)
-    result.props.set(child.id, [['of', (set?.type === 'COMPONENT_SET' ? set : item).id]])
+    result.props.set(child.id, [['of', item.id]])
   }
 }
 
