@@ -2,7 +2,7 @@ import { access, chmod, mkdir } from 'node:fs/promises'
 import { homedir, platform } from 'node:os'
 import { dirname, join } from 'node:path'
 
-import { applyLegacyMcpEnvironment } from '../env'
+import { applyLegacyMCPEnvironment } from '#mcp/env'
 
 /**
  * Platform-specific paths for the MCP server's Unix domain socket
@@ -34,6 +34,10 @@ const LEGACY_DIR_NAME_MACOS = 'OpenPencil'
 const SOCKET_FILENAME = 'mcp.sock'
 const DISCOVERY_FILENAME = 'mcp.json'
 
+function isMissingPath(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT'
+}
+
 const isMacOS = platform() === 'darwin'
 const isWindows = platform() === 'win32'
 
@@ -48,9 +52,9 @@ const isWindows = platform() === 'win32'
  * filesystem, not the permission bits.
  */
 async function getPlatformDir(): Promise<string> {
-  applyLegacyMcpEnvironment()
+  applyLegacyMCPEnvironment()
   let dir: string
-  let legacyDir = ''
+  let legacyDir: string
 
   if (isMacOS) {
     dir = join(homedir(), 'Library', 'Application Support', DIR_NAME_MACOS)
@@ -79,8 +83,8 @@ async function getPlatformDir(): Promise<string> {
   try {
     await access(legacyDir)
     dir = legacyDir
-  } catch {
-    // A clean install uses the new directory; upgrades keep using the existing one.
+  } catch (error) {
+    if (!isMissingPath(error)) throw error
   }
   await mkdir(dir, { recursive: true, mode: 0o700 })
   if (!isWindows) await chmod(dir, 0o700)
@@ -98,7 +102,7 @@ async function getPlatformDir(): Promise<string> {
  * OPENDESIGNER_MCP_SOCKET. This function should NOT be used to locate it.
  */
 export async function getSocketDir(): Promise<string> {
-  applyLegacyMcpEnvironment()
+  applyLegacyMCPEnvironment()
   const socketOverride = process.env.OPENDESIGNER_MCP_SOCKET?.trim()
 
   if (socketOverride) {
@@ -122,7 +126,7 @@ export async function getSocketDir(): Promise<string> {
  * (no directory resolution needed).
  */
 export async function getSocketPath(): Promise<string> {
-  applyLegacyMcpEnvironment()
+  applyLegacyMCPEnvironment()
   const socketOverride = process.env.OPENDESIGNER_MCP_SOCKET?.trim()
   if (socketOverride) {
     // Ensure the override directory exists. getSocketDir() creates the
@@ -152,7 +156,7 @@ export async function getSocketPath(): Promise<string> {
  * writeDiscoveryFile's atomic temp-then-rename succeeds.
  */
 export async function getDiscoveryPath(): Promise<string> {
-  applyLegacyMcpEnvironment()
+  applyLegacyMCPEnvironment()
   const override = process.env.OPENDESIGNER_MCP_DISCOVERY_PATH?.trim()
   if (override) {
     const dir = dirname(override)
