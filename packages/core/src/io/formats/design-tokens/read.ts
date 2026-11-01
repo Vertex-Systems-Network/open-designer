@@ -102,7 +102,9 @@ function modeInfo(parsed: Record<string, unknown> | undefined) {
   const own = v.safeParse(modeExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
   const legacy = v.safeParse(modeExtensionSchema, extensions[OPENPENCIL_EXTENSION])
   if (own.success && legacy.success) return { ...legacy.output, ...own.output }
-  return own.success ? own.output : legacy.success ? legacy.output : {}
+  if (own.success) return own.output
+  if (legacy.success) return legacy.output
+  return {}
 }
 
 /** Tokens in a document, groups flattened, each with the type it declares or inherits. */
