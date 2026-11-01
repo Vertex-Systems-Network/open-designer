@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useFlatReorderDrag } from '@open-designer/vue/shared/drag'
 import { computed, ref, type ComponentPublicInstance } from 'vue'
+
+import { useFlatReorderDrag } from '@open-designer/vue/shared/drag'
 
 import {
   combineToolbarEntry,
