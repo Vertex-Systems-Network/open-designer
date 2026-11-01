@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { AIProviderID } from '@open-designer/core/constants'
 import { computed, nextTick, ref, useTemplateRef } from 'vue'
 
 import { useI18n } from '@open-designer/vue/i18n'
+
+import type { AIProviderID } from '@open-designer/core/constants'
 
 import { useCodingAgentSetup, usePiSetup } from '@/app/ai/agents/setup/use'
 import { useModelProfileFeedback } from '@/app/ai/models/settings/profile-editor/feedback'
