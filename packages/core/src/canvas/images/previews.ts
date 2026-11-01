@@ -32,8 +32,12 @@ export function needsImagePreviews(graph: SceneGraph): boolean {
   return needed
 }
 
-export function previewEdge(node: Pick<SceneNode, 'width' | 'height'>, zoom: number, dpr = 1) {
-  const pixels = Math.max(node.width, node.height) * zoom * dpr
+export function previewEdge(
+  node: Pick<SceneNode, 'width' | 'height'>,
+  viewport: { zoom: number },
+  dpr = 1
+) {
+  const pixels = Math.max(node.width, node.height) * viewport.zoom * dpr
   return PREVIEW_EDGES.find((edge) => edge >= pixels) ?? 2048
 }
 
