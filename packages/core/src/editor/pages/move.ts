@@ -25,6 +25,8 @@ export function movePageInGraph(
   if (pages.length === 1) return currentIndex
 
   const nextIndex = Math.max(0, Math.min(Math.trunc(index), pages.length - 1))
+  if (nextIndex === currentIndex) return currentIndex
+
   const rootChildren = graph.getChildren(rootId)
   const currentRootIndex = rootChildren.findIndex((child) => child.id === pageId)
   const remainingChildren = rootChildren.filter((child) => child.id !== pageId)
