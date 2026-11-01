@@ -44,6 +44,28 @@ export interface SVGExportWarning {
   message: string
 }
 
+export class SVGUnsupportedEffectError extends Error {
+  readonly warnings: SVGExportWarning[]
+
+  constructor(warnings: SVGExportWarning[]) {
+    super(warnings.map((warning) => warning.message).join('\n'))
+    this.name = 'SVGUnsupportedEffectError'
+    this.warnings = warnings
+  }
+}
+
+export function unsupportedEffectWarnings(effects: Effect[], node: SceneNode): SVGExportWarning[] {
+  return effects
+    .filter((effect) => effect.visible && effect.type === 'BACKGROUND_BLUR')
+    .map((effect): SVGExportWarning => ({
+      code: 'unsupported-effect',
+      nodeId: node.id,
+      nodeName: node.name,
+      effectType: effect.type,
+      message: `Cannot faithfully represent BACKGROUND_BLUR on "${node.name}" (${node.id}); the target format cannot sample the backdrop.`
+    }))
+}
+
 export interface SVGExportContext {
   defs: SVGNode[]
   defIdCounter: number
@@ -58,6 +80,7 @@ export interface SVGExportContext {
   fontAlias?: SVGFontAlias
   skipUnsupportedEffects?: boolean
   warnings?: SVGExportWarning[]
+  onWarning?: (warning: SVGExportWarning) => void
 }
 
 export function nextDefId(ctx: SVGExportContext, prefix: string): string {
@@ -227,17 +250,13 @@ export function createFilterDef(
   const visible = effects.filter((e) => e.visible)
   if (visible.length === 0) return null
 
-  const supported = visible.filter((effect) => {
-    if (effect.type !== 'BACKGROUND_BLUR') return true
-    ctx.warnings?.push({
-      code: 'unsupported-effect',
-      nodeId: node.id,
-      nodeName: node.name,
-      effectType: effect.type,
-      message: 'SVG cannot apply background blur to content behind this node.'
-    })
-    return false
-  })
+  const warnings = unsupportedEffectWarnings(visible, node)
+  for (const warning of warnings) {
+    ctx.warnings?.push(warning)
+    if (ctx.skipUnsupportedEffects) ctx.onWarning?.(warning)
+  }
+
+  const supported = visible.filter((effect) => effect.type !== 'BACKGROUND_BLUR')
   if (supported.length === 0) return null
 
   const id = nextDefId(ctx, 'fx')
