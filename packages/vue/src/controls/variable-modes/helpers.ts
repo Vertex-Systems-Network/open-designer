@@ -45,7 +45,8 @@ function shared<T>(values: readonly T[]): MixedValue<T> {
 export function variableModeChoices(editor: Editor, targets: SceneNode[]): VariableModeChoice[] {
   if (targets.length === 0) return []
   const { graph } = editor
-  const holders = targets.every((target) => CONTAINER_TYPES.has(target.type))
+  const page = targets.every((target) => target.type === 'CANVAS')
+  const holders = page || targets.every((target) => CONTAINER_TYPES.has(target.type))
   const used = holders
     ? null
     : collectionsBoundIn(
