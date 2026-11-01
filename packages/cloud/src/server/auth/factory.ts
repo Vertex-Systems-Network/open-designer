@@ -107,7 +107,8 @@ export function createBetterAuthAdapter(
   })
   const devices = deviceAuthorization({
     verificationUri: new URL('/auth/device', config.publicURL).href,
-    validateClient: (clientId) => clientId.startsWith('opendesigner-desktop:')
+    validateClient: (clientId) =>
+      clientId.startsWith('opendesigner-desktop:') || clientId.startsWith('openpencil-desktop:')
   })
   const administration = admin()
   const auth = betterAuth({
