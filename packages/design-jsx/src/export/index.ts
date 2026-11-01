@@ -7,9 +7,9 @@ import {
   resolveComponentPropertyValue
 } from '@open-designer/scene-graph/components'
 import { instanceMainComponent } from '@open-designer/scene-graph/instances'
+import { layoutSizing } from '@open-designer/scene-graph/layout'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
-import { layoutSizing } from '@open-designer/scene-graph/layout'
 
 import { componentPropertyScope } from '../component-properties'
 import {
