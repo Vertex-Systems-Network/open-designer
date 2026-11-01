@@ -41,7 +41,7 @@ function serverOwnedPaths(extraPrefixes: string | undefined): RegExp[] {
       '|',
       '[',
       ']',
-      '\\\\'
+      '\\'
     ])
     const escaped = Array.from(prefix, (character) =>
       special.has(character) ? `\\\\${character}` : character
