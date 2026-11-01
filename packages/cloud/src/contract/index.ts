@@ -16,6 +16,7 @@ export {
   CLOUD_AI_CONTRACT_VERSION,
   CLOUD_AI_JWKS_PATH,
   CLOUD_AI_TOKEN_AUDIENCE,
+  CLOUD_AI_TOKEN_AUDIENCES,
   cloudAIDiscoverySchema,
   cloudBillingDiscoverySchema,
   createAITokenSchema,
