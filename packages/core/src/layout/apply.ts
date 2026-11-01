@@ -240,18 +240,6 @@ function hugStart(frame: SceneNode): { width: number; height: number } | null {
   }
 }
 
-function preservesImportedHugCrossSize(
-  graph: SceneGraph,
-  frame: SceneNode,
-  axis: 'width' | 'height'
-): boolean {
-  return (
-    graph.isApplyingDerivedLayout &&
-    frame.source.format === 'fig' &&
-    frame.derivedLayout?.[axis] !== undefined
-  )
-}
-
 function applyFrameSize(
   graph: SceneGraph,
   frame: SceneNode,
@@ -277,10 +265,7 @@ function applyFrameSize(
     axis === 'width' ? yogaNode.getComputedWidth() : yogaNode.getComputedHeight()
   if (frame.primaryAxisSizing === 'HUG') updates[primary] = derived?.[primary] ?? computed(primary)
   if (frame.counterAxisSizing === 'HUG') {
-    updates[counter] =
-      keepsSaved && preservesImportedHugCrossSize(graph, frame, counter)
-        ? frame[counter]
-        : (derived?.[counter] ?? computed(counter))
+    updates[counter] = derived?.[counter] ?? computed(counter)
   }
 
   writeLayoutGeometry(graph, frame.id, updates, computeLayout, before)
