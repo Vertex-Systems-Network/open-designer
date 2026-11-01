@@ -143,12 +143,15 @@ function sourceStyle(family: string, font: ReturnType<typeof fontAt>): string | 
  * each family's own file, then its shards.
  */
 function* candidateSources(font: ReturnType<typeof fontAt>) {
+  const variations = font.variations.some(({ axis }) => axis === 'wght')
+    ? font.variations
+    : [...font.variations, { axis: 'wght', value: font.drawn.weight }]
   for (const family of paragraphSourceFamilies(font.family)) {
     const style = sourceStyle(family, font)
     if (!style) continue
-    const source = glyphOutlineSourceSync(family, style, font.variations)
+    const source = glyphOutlineSourceSync(family, style, variations)
     if (source) yield source
-    yield* shardOutlineSources(family, style, font.variations)
+    yield* shardOutlineSources(family, style, variations)
   }
 }
 
