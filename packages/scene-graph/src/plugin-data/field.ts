@@ -5,6 +5,10 @@ import type { PluginDataEntry } from '../types'
 /** The plugin id OpenDesigner keeps its own state under, on nodes and in `.fig` files. */
 export const OPEN_DESIGNER_PLUGIN_ID = 'open-pencil'
 
+export function isOpenDesignerPluginId(pluginId: string): boolean {
+  return pluginId === OPEN_DESIGNER_PLUGIN_ID || pluginId === 'open-designer'
+}
+
 /**
  * What a field holds:
  * - `content` belongs to the node like its fills do and exists only as plugin data, so it
@@ -69,7 +73,7 @@ export function textPluginDataField<const T extends string>(
 
 export function isPluginDataEntry(entry: PluginDataEntry, field: PluginDataKey): boolean {
   return (
-    (entry.pluginId === OPEN_DESIGNER_PLUGIN_ID || entry.pluginId === 'open-designer') &&
+    isOpenDesignerPluginId(entry.pluginId) &&
     entry.key === field.key
   )
 }

@@ -39,7 +39,7 @@ async function getSelectedFillOkHCL() {
     if (!id) return null
     const node = store.graph.getNode(id)
     const entry = node?.pluginData.find(
-      (value) => value.pluginId === 'open-designer' && value.key === 'okhcl'
+      (value) => value.pluginId === 'open-pencil' && value.key === 'okhcl'
     )
     return entry?.value ?? null
   })

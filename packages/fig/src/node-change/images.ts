@@ -1,8 +1,8 @@
 import type { NodeChange, PluginData } from '@open-designer/kiwi/fig/codec'
 import { computeImageHash } from '@open-designer/scene-graph/images'
 import {
-  OPEN_DESIGNER_PLUGIN_DATA,
-  OPEN_DESIGNER_PLUGIN_ID
+  isOpenDesignerPluginData,
+  OPEN_DESIGNER_PLUGIN_DATA
 } from '@open-designer/scene-graph/plugin-data'
 
 import { bytesToHex, hexToBytes } from './bytes'
@@ -98,7 +98,7 @@ export function nameImagesForFigma(
       image.hash = typeof image.hash === 'string' ? renamed : hexToBytes(renamed)
     },
     pluginData(entry) {
-      if (entry.pluginID !== OPEN_DESIGNER_PLUGIN_ID || entry.key !== shader.key) return
+      if (!isOpenDesignerPluginData({pluginId: entry.pluginID, key: entry.key, value: entry.value}) || entry.key !== shader.key) return
       const paint = shader.decode(entry.value)
       const renamed = paint ? figmaName(paint.image) : null
       if (!paint || !renamed || renamed === paint.image) return

@@ -13,7 +13,7 @@ import { clampExportScale } from '@open-designer/scene-graph/export-scale'
 import {
   hasPluginData,
   OPEN_DESIGNER_PLUGIN_DATA,
-  OPEN_DESIGNER_PLUGIN_ID,
+  isOpenDesignerPluginId,
   withPluginData,
   type PluginDataField
 } from '@open-designer/scene-graph/plugin-data'
@@ -45,7 +45,7 @@ export function readNodeChangePluginData<T>(
   return field.decode(
     nc.pluginData?.find(
       (entry) =>
-        (entry.pluginID === OPEN_DESIGNER_PLUGIN_ID || entry.pluginID === 'open-designer') &&
+        isOpenDesignerPluginId(entry.pluginID) &&
         entry.key === field.key
     )?.value
   )

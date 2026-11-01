@@ -1,4 +1,8 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import {
+  isOpenDesignerPluginId,
+  OPEN_DESIGNER_PLUGIN_ID
+} from '@open-designer/scene-graph/plugin-data'
 
 import {
   assertProxyEditable,
@@ -8,12 +12,12 @@ import {
   type ProxyThis
 } from './accessor-utils'
 
-export const OPEN_DESIGNER_PLUGIN_DATA_NAMESPACE = 'open-designer'
+export const OPEN_DESIGNER_PLUGIN_DATA_NAMESPACE = OPEN_DESIGNER_PLUGIN_ID
 
 type PluginDataEntry = SceneNode['pluginData'][number]
 
 export function isOpenDesignerPluginData(entry: PluginDataEntry): boolean {
-  return entry.pluginId === OPEN_DESIGNER_PLUGIN_DATA_NAMESPACE
+  return isOpenDesignerPluginId(entry.pluginId)
 }
 
 function encodedSharedKey(entry: PluginDataEntry, namespace: string): string | null {
