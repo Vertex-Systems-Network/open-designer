@@ -1,0 +1,1 @@
+- Closing the fill or stroke picker with Escape keeps a newly chosen image, scale mode, or rotation; in-progress colour and gradient edits still cancel.
