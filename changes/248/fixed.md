@@ -1,0 +1,1 @@
+- Text that sizes itself outside auto layout now resizes when a bound variable changes its font size or content.
