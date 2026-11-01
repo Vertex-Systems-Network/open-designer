@@ -53,7 +53,7 @@ export function reloadOnceOnChunkError(options: ChunkReloadOptions = {}): void {
     now = Date.now
   } = options
   target.addEventListener('vite:preloadError', (event) => {
-    if (navigator.onLine === false) return
+    if (!navigator.onLine) return
     if (!claimChunkReload(storage, now())) return
     event.preventDefault()
     reload()
