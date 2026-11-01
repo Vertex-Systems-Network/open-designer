@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCloudPortalMessages } from '@open-pencil/vue/i18n'
+import { useCloudPortalMessages } from '@open-designer/vue/i18n'
 import { computed, ref } from 'vue'
 
 import SettingsGroup from '@/components/settings/layout/SettingsGroup.vue'
