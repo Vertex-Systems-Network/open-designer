@@ -104,7 +104,7 @@ export const batchUpdate = defineTool({
 
   description:
     'Execute multiple modifications in one call. Each operation is {id, props} where props can include: spacing, padding, padding_horizontal, padding_vertical, counter_align, sizing_horizontal, sizing_vertical, grow, name, visible, corner_radius, auto_resize (for text), direction. Runs all updates with one layout recompute.',
-  execution: { kind: 'sync', mutation: 'properties' },
+  execution: { kind: 'sync', mutation: 'document' },
   input: v.strictObject({
     operations: v.pipe(
       v.string(),
@@ -123,18 +123,16 @@ export const batchUpdate = defineTool({
     const ops = parseOperations(operations)
     if (!Array.isArray(ops)) return ops
 
-    // Validate targets before changing anything, so a missing id cannot leave a partial batch.
-    for (const op of ops) {
-      if (!figma.getNodeById(op.id)) {
-        throw new Error(`Node "${op.id}" not found`)
-      }
-    }
+    // Resolve every target before changing anything, so a missing ID cannot leave a partial batch.
+    const targets = ops.map((op) => {
+      const node = figma.getNodeById(op.id)
+      if (!node) throw new Error(`Node "${op.id}" not found`)
+      return { op, node }
+    })
 
     const results: Array<{ id: string; updated: string[] }> = []
 
-    for (const op of ops) {
-      const node = figma.getNodeById(op.id)
-      if (!node) throw new Error(`Node "${op.id}" not found`)
+    for (const { op, node } of targets) {
       const updated = applyBatchProps(node, op.props)
       if (updated.length > 0) results.push({ id: op.id, updated })
     }
