@@ -3,7 +3,7 @@ import { isEqual } from 'es-toolkit/predicate'
 import type { Mat3 } from './matrix'
 import type { VectorPathWindingRule } from './parse-path'
 import type { Vector } from './primitives'
-import type { VectorNetwork, VectorSegment, VectorVertex } from './types'
+import type { Fill, VectorNetwork, VectorSegment, VectorVertex } from './types'
 
 /** Concatenate vector networks while preserving independent geometry. */
 export function mergeVectorNetworks(networks: readonly VectorNetwork[]): VectorNetwork {
@@ -31,7 +31,7 @@ export function mergeVectorNetworks(networks: readonly VectorNetwork[]): VectorN
         for (const segmentIndex of loop) shifted.push(segmentIndex + segmentOffset)
         loops.push(shifted)
       }
-      regions.push({ windingRule: region.windingRule, loops })
+      regions.push({ ...region, loops, fills: region.fills?.map((fill) => ({ ...fill })) })
     }
     vertexOffset += network.vertices.length
     segmentOffset += network.segments.length
@@ -62,10 +62,20 @@ export function transformVectorNetwork(m: Mat3, vn: VectorNetwork): VectorNetwor
       tangentEnd: mapVector(s.tangentEnd)
     })),
     regions: vn.regions.map((r) => ({
-      windingRule: r.windingRule,
-      loops: r.loops.map((l) => [...l])
+      ...r,
+      loops: r.loops.map((l) => [...l]),
+      fills: r.fills?.map((fill) => ({ ...fill }))
     }))
   }
+}
+
+/** Whether vector regions draw different fills, using the layer fill when a region has none. */
+export function regionFillsDiffer(
+  network: VectorNetwork | null,
+  layerFills: readonly Fill[]
+): boolean {
+  const [first, ...rest] = (network?.regions ?? []).map((region) => region.fills ?? layerFills)
+  return rest.some((fills) => !isEqual(fills, first))
 }
 
 /** Structural equality of two VectorNetworks (order-sensitive, exact values). */
