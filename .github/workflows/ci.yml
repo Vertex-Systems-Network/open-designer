@@ -222,15 +222,15 @@ jobs:
     if: needs.changes.outputs.scope == 'code' || needs.changes.outputs.scope == 'cloud'
     timeout-minutes: 8
     runs-on: ubuntu-24.04
-    container:
-      image: ghcr.io/open-pencil/native-contracts-ci@sha256:64e6b1b50a988c1cefe2b69ac9d58076fd743b18391fa2dbd1d153eba2be9521
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
+
+      - name: Install native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libappindicator3-dev librsvg2-dev libwebkit2gtk-4.1-dev pkg-config
 
       - uses: dtolnay/rust-toolchain@stable
 
