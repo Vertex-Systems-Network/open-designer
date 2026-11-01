@@ -270,6 +270,25 @@ function hugStart(frame: SceneNode): { width: number; height: number } | null {
   }
 }
 
+function savedStretchedCrossSize(graph: SceneGraph, frame: SceneNode, axis: 'width' | 'height'): number | undefined {
+  if (frame.source.format !== 'fig') return undefined
+  const row = frame.layoutMode === 'HORIZONTAL'
+  const padding =
+    axis === 'width'
+      ? frame.paddingLeft + frame.paddingRight
+      : frame.paddingTop + frame.paddingBottom
+  const sizes = graph.getChildren(frame.id)
+    .filter(
+      (child): child is SceneNode =>
+        child !== undefined &&
+        child.visible &&
+        child.layoutPositioning !== 'ABSOLUTE' &&
+        child.layoutAlignSelf === 'STRETCH'
+    )
+    .map((child) => child.derivedLayout?.[axis] ?? child[axis])
+  return sizes.length > 0 ? Math.max(...sizes) + padding : undefined
+}
+
 function applyFrameSize(
   graph: SceneGraph,
   frame: SceneNode,
@@ -295,7 +314,10 @@ function applyFrameSize(
     axis === 'width' ? yogaNode.getComputedWidth() : yogaNode.getComputedHeight()
   if (frame.primaryAxisSizing === 'HUG') updates[primary] = derived?.[primary] ?? computed(primary)
   if (frame.counterAxisSizing === 'HUG') {
-    updates[counter] = derived?.[counter] ?? computed(counter)
+    updates[counter] =
+      derived?.[counter] ??
+      (keepsSaved ? savedStretchedCrossSize(graph, frame, counter) : undefined) ??
+      computed(counter)
   }
 
   writeLayoutGeometry(graph, frame.id, updates, computeLayout, before)
