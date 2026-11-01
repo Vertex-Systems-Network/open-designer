@@ -443,3 +443,41 @@ export function strokeNodeShape(
     withNodeOutline(r, node, (outline) => drawOutline(canvas, outline, paint))
   }
 }
+
+
+/** Run a visible stroke with its resolved paint state, then clear transient shaders and blending. */
+export function forVisibleStrokes(
+  r: SkiaRenderer,
+  node: SceneNode,
+  graph: SceneGraph,
+  draw: (stroke: Stroke, color: Color) => void
+): void {
+  for (let index = 0; index < node.strokes.length; index++) {
+    const stroke = node.strokes[index]
+    if (!stroke.visible) continue
+    const draws = applyStrokeShader(r, stroke, index, node, graph)
+    setStrokeBlendMode(r, stroke.blendMode)
+    try {
+      if (draws) draw(stroke, r.resolveStrokeColor(stroke, index, node, graph))
+    } finally {
+      r.strokePaint.setShader(null)
+      r.fillPaint.setShader(null)
+      setStrokeBlendMode(r, 'NORMAL')
+    }
+  }
+}
+
+/** Apply a dash effect only for the duration of a draw. */
+export function withStrokeDash(
+  r: SkiaRenderer,
+  dash: readonly number[],
+  phase: number,
+  draw: () => void
+): void {
+  r.strokePaint.setPathEffect(dash.length > 0 ? r.ck.PathEffect.MakeDash([...dash], phase) : null)
+  try {
+    draw()
+  } finally {
+    r.strokePaint.setPathEffect(null)
+  }
+}

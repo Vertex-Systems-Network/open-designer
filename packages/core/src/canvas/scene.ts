@@ -41,6 +41,7 @@ import { isolatesInnerShadows, renderLayerShadows } from './shadows'
 import { isLayerContainer } from './shadows/silhouette'
 import {
   configureStrokePaint,
+  forVisibleStrokes,
   drawArrowHeads,
   applyStrokeShader,
   drawDashedRRectWithSolidCorners,
@@ -419,31 +420,6 @@ export function renderNode(
 function makeNodeRRect(r: SkiaRenderer, node: SceneNode, radius: number): Float32Array {
   const rect = r.ck.LTRBRect(0, 0, node.width, node.height)
   return r.ck.RRectXY(rect, radius, radius)
-}
-
-/**
- * Every stroke a node draws passes through here, so a gradient or image stroke gets its shader
- * here rather than in each draw helper, and the shader is cleared before the next stroke.
- */
-function forVisibleStrokes(
-  r: SkiaRenderer,
-  node: SceneNode,
-  graph: SceneGraph,
-  draw: (stroke: SceneNode['strokes'][number], color: Color) => void
-): void {
-  for (let index = 0; index < node.strokes.length; index++) {
-    const stroke = node.strokes[index]
-    if (!stroke.visible) continue
-    const draws = applyStrokeShader(r, stroke, index, node, graph)
-    setStrokeBlendMode(r, stroke.blendMode)
-    try {
-      if (draws) draw(stroke, r.resolveStrokeColor(stroke, index, node, graph))
-    } finally {
-      r.strokePaint.setShader(null)
-      r.fillPaint.setShader(null)
-      setStrokeBlendMode(r, 'NORMAL')
-    }
-  }
 }
 
 /** Fill a section's or set's rounded bounds and return them, for its strokes to follow. */
