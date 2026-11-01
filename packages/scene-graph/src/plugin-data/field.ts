@@ -72,9 +72,7 @@ export function textPluginDataField<const T extends string>(
 }
 
 export function isPluginDataEntry(entry: PluginDataEntry, field: PluginDataKey): boolean {
-  return (
-    isOpenDesignerPluginId(entry.pluginId) && entry.key === field.key
-  )
+  return isOpenDesignerPluginId(entry.pluginId) && entry.key === field.key
 }
 
 export function hasPluginData(
