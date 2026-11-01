@@ -456,7 +456,7 @@ function applyInstanceOverrides(
         try {
           const decodedName = decodeURIComponent(target)
           child = findDescendantByName(decodedName)
-        // oxlint-ignore-next-line no-empty -- Invalid percent-encoding keeps the literal name.
+          // oxlint-ignore-next-line no-empty -- Invalid percent-encoding keeps the literal name.
         } catch {
           // Keep the literal name when it is not valid percent-encoding.
         }
