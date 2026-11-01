@@ -3,7 +3,7 @@ import { createNanoEvents } from 'nanoevents'
 import type { Emitter } from 'nanoevents'
 
 import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
-import { UndoManager, type UndoHistorySnapshot } from '@open-designer/scene-graph/undo'
+import { UndoManager } from '@open-designer/scene-graph/undo'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { prefetchFigmaSchema } from '#core/clipboard'
@@ -381,10 +381,10 @@ export function createEditor(options?: EditorOptions) {
     if (_renderers.size === 0) releaseTextMeasurer()
   }
 
-  function replaceGraph(newGraph: SceneGraph, options: { preserveHistory?: boolean } = {}) {
+  function replaceGraph(newGraph: SceneGraph) {
     nodes.cancelNodePreviews()
+    undo.discardBatches()
     _graph = newGraph
-    if (!options.preserveHistory) undo.clear()
     state.documentKind = _graph.documentKind
     setActiveTool(offeredTool(state, state.activeTool))
     pendingTextLayout.clear()
@@ -406,18 +406,6 @@ export function createEditor(options?: EditorOptions) {
       emitEditorEvent('page:changed', state.currentPageId, previousPageId)
     }
     requestRender()
-  }
-
-  function captureUndoHistory(): UndoHistorySnapshot {
-    return undo.snapshotHistory()
-  }
-
-  function restoreUndoHistory(snapshot: UndoHistorySnapshot, notify = true): void {
-    undo.restoreHistory(snapshot, notify)
-  }
-
-  function clearUndoHistory(): void {
-    undo.clear()
   }
 
   function dispose() {
@@ -467,9 +455,6 @@ export function createEditor(options?: EditorOptions) {
     setNavigationPhase,
     removeCanvasRenderer,
     replaceGraph,
-    captureUndoHistory,
-    restoreUndoHistory,
-    clearUndoHistory,
     subscribeToGraph,
     dispose,
     releaseGraphResources,
@@ -499,6 +484,7 @@ export function createEditor(options?: EditorOptions) {
         nodes.updateNodeWithUndo(target, next, label)
       ),
     getTextSelectionStyle: textSelectionStyle.selectionStyle,
+    layerChanges: textSelectionStyle.layerChanges,
 
     // Alignment (align, flip, rotate)
     ...alignment,
