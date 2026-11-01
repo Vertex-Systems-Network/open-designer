@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useCloudMessages, useCommonMessages } from '@open-designer/vue/i18n'
 import { tv } from 'tailwind-variants'
 import { computed, ref } from 'vue'
+
+import { useCloudMessages, useCommonMessages } from '@open-designer/vue/i18n'
 
 import type { CloudLinkPolicy } from '@/app/cloud/sharing/document'
 import AccountAvatar from '@/components/presence/AccountAvatar.vue'
