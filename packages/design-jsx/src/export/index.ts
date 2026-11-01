@@ -11,7 +11,6 @@ import { instanceMainComponent } from '@open-designer/scene-graph/instances'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 
 import { componentPropertyScope } from '../component-properties'
-
 import {
   connectorExportScope,
   connectorLabel,
