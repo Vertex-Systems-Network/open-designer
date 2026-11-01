@@ -28,6 +28,7 @@ import { openSettingsDialog } from '@/app/settings/dialog'
 import { createStoredDocument } from '@/app/storage/workspace/create'
 import { activeStorageLocation, createStorageWorkspaceSource } from '@/app/storage/workspace/source'
 import { openStorageDocumentInNewTab } from '@/app/tabs'
+import { matchingRecoverableSnapshots } from '@/app/tabs/recovery'
 import { CloudSharedSection, CloudWorkspaceSection } from '@/components/cloud/integration'
 import DocumentDeleteDialog from '@/components/home/document/DocumentDeleteDialog.vue'
 import DocumentEntry from '@/components/home/document/DocumentEntry.vue'
@@ -149,6 +150,9 @@ const normalizedQuery = computed(() => query.value.trim().toLocaleLowerCase(loca
 const filteredRecentFiles = computed(() =>
   matchingRecentFiles(documents.value, normalizedQuery.value, locale.value)
 )
+const filteredRecoverableSnapshots = computed(() =>
+  matchingRecoverableSnapshots(normalizedQuery.value, locale.value)
+)
 const filteredStorageDocuments = computed(() => {
   if (!normalizedQuery.value) return storageDocuments.value
   return storageDocuments.value.filter((document) =>
@@ -159,7 +163,8 @@ const noSearchMatches = computed(
   () =>
     Boolean(normalizedQuery.value) &&
     filteredRecentFiles.value.length === 0 &&
-    filteredStorageDocuments.value.length === 0
+    filteredStorageDocuments.value.length === 0 &&
+    filteredRecoverableSnapshots.value.length === 0
 )
 
 async function openRecent(document: RecentDocument): Promise<void> {
