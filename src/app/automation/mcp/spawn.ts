@@ -549,33 +549,38 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
   const executable =
     installedExecutable === 'openpencil-mcp-http' ? installedExecutable : MCP_EXECUTABLE
   const resolved = resolvePlatformCommand(executable)
-  const command = Command.create(resolved.command, resolved.args, {
-    env: {
-      PORT: String(AUTOMATION_HTTP_PORT),
-      OPENDESIGNER_MCP_AUTH_TOKEN: authToken ?? '',
-      OPENDESIGNER_MCP_CORS_ORIGIN: window.location.origin,
-      OPENDESIGNER_MCP_TCP: '1',
-      OPENDESIGNER_MCP_ROOT: mcpRoot,
-      OPENDESIGNER_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
-      // Killing the shell wrapper on Windows leaves the server it started running; the app's end
-      // of the pipe closes with it, and the server exits on that.
-      OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE: '1',
-      OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
-      OPENDESIGNER_MCP_SCOPE: mcpScope(),
-      ...(executable === 'openpencil-mcp-http'
-        ? {
-            OPENPENCIL_MCP_AUTH_TOKEN: authToken ?? '',
-            OPENPENCIL_MCP_CORS_ORIGIN: window.location.origin,
-            OPENPENCIL_MCP_TCP: '1',
-            OPENPENCIL_MCP_ROOT: mcpRoot,
-            OPENPENCIL_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
-            OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: '1',
-            OPENPENCIL_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
-            OPENPENCIL_MCP_SCOPE: mcpScope()
-          }
-        : {})
-    }
+  const environment = withLegacyMCPEnvironment(executable, {
+    PORT: String(AUTOMATION_HTTP_PORT),
+    OPENDESIGNER_MCP_AUTH_TOKEN: authToken ?? '',
+    OPENDESIGNER_MCP_CORS_ORIGIN: window.location.origin,
+    OPENDESIGNER_MCP_TCP: '1',
+    OPENDESIGNER_MCP_ROOT: mcpRoot,
+    OPENDESIGNER_MCP_APP_TIMEOUT_MS: String(MCP_APP_ATTACH_TIMEOUT_MS),
+    // Killing the shell wrapper on Windows leaves the server it started running; the app's end
+    // of the pipe closes with it, and the server exits on that.
+    OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE: '1',
+    OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
+    OPENDESIGNER_MCP_SCOPE: mcpScope()
   })
+  const command = Command.create(resolved.command, resolved.args, { env: environment })
+
+function withLegacyMCPEnvironment(
+  executable: string,
+  environment: Record<string, string>
+): Record<string, string> {
+  if (executable !== 'openpencil-mcp-http') return environment
+  return {
+    ...environment,
+    OPENPENCIL_MCP_AUTH_TOKEN: environment.OPENDESIGNER_MCP_AUTH_TOKEN,
+    OPENPENCIL_MCP_CORS_ORIGIN: environment.OPENDESIGNER_MCP_CORS_ORIGIN,
+    OPENPENCIL_MCP_TCP: environment.OPENDESIGNER_MCP_TCP,
+    OPENPENCIL_MCP_ROOT: environment.OPENDESIGNER_MCP_ROOT,
+    OPENPENCIL_MCP_APP_TIMEOUT_MS: environment.OPENDESIGNER_MCP_APP_TIMEOUT_MS,
+    OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: environment.OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE,
+    OPENPENCIL_MCP_DISABLED_TOOLS: environment.OPENDESIGNER_MCP_DISABLED_TOOLS,
+    OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE
+  }
+}
 
   let startupStderr = ''
   command.stderr.on('data', (raw: Uint8Array | number[] | string) => {
