@@ -11,7 +11,7 @@ const environment = {
   POSTGRES_PORT: String(20_000 + portOffset),
   SEAWEEDFS_S3_PORT: String(21_000 + portOffset),
   SEAWEEDFS_MASTER_PORT: String(22_000 + portOffset),
-  DATABASE_URL: `postgresql://openpencil:opendesigner-development-password@127.0.0.1:${20_000 + portOffset}/opendesigner`,
+  DATABASE_URL: `postgresql://opendesigner:opendesigner-development-password@127.0.0.1:${20_000 + portOffset}/opendesigner`,
   S3_ENDPOINT: `http://127.0.0.1:${21_000 + portOffset}`
 }
 
