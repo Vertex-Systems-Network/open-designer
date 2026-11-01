@@ -34,7 +34,9 @@ function findModeId(collection: VariableCollection, ref: string): string | { err
   if (named.length === 1) return named[0].modeId
   if (named.length > 1) {
     const modeIds = named.map((mode) => mode.modeId).join(', ')
-    return { error: `Several modes are named "${ref}" in collection "${collection.name}"; name one by ID: ${modeIds}` }
+    return {
+      error: `Several modes are named "${ref}" in collection "${collection.name}"; name one by ID: ${modeIds}`
+    }
   }
 
   const names = collection.modes.map((candidate) => `"${candidate.name}"`).join(', ')
