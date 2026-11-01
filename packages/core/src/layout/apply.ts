@@ -270,17 +270,20 @@ function hugStart(frame: SceneNode): { width: number; height: number } | null {
   }
 }
 
-function savedStretchedCrossSize(graph: SceneGraph, frame: SceneNode, axis: 'width' | 'height'): number | undefined {
+function savedStretchedCrossSize(
+  graph: SceneGraph,
+  frame: SceneNode,
+  axis: 'width' | 'height'
+): number | undefined {
   if (frame.source.format !== 'fig') return undefined
-  const row = frame.layoutMode === 'HORIZONTAL'
   const padding =
     axis === 'width'
       ? frame.paddingLeft + frame.paddingRight
       : frame.paddingTop + frame.paddingBottom
-  const sizes = graph.getChildren(frame.id)
+  const sizes = graph
+    .getChildren(frame.id)
     .filter(
-      (child): child is SceneNode =>
-        child !== undefined &&
+      (child) =>
         child.visible &&
         child.layoutPositioning !== 'ABSOLUTE' &&
         child.layoutAlignSelf === 'STRETCH'
