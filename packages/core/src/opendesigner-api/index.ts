@@ -37,7 +37,8 @@ import {
   writeFillOkHCL,
   writeLayoutDirection,
   writeStrokeOkHCL,
-  writeTextDirection
+  writeTextDirection,
+  writeTextMarkdown
 } from './nodes'
 import { getStatus, listStatuses, setStatus, type StatusInfo } from './statuses'
 import { bindVariable, unbindVariable, type VariableRef } from './variables'
@@ -239,4 +240,13 @@ export class OpenDesignerAPI {
   setTextDirection(node: NodeRef, direction: string): void {
     writeTextDirection(this.figma.graph, node, direction)
   }
+
+  /**
+   * Sets a text layer's text from Markdown, with headings, emphasis, code, links, lists, and quotes.
+   * Load the fonts it uses first, as for `characters`.
+   */
+  setTextMarkdown(node: NodeRef, markdown: string): void {
+    writeTextMarkdown(this.figma.graph, node, markdown)
+  }
+
 }
