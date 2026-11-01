@@ -12,7 +12,7 @@ import { tryStartLineEndDrag } from '#vue/shared/input/line/end'
 import { tryStartResize } from '#vue/shared/input/resize'
 import {
   createSelectionMoveDrag,
-  clickSelectsInside,
+  insideSelectedFrame,
   pressesSelection,
   selectionIsLocked
 } from '#vue/shared/input/select/move'
@@ -80,7 +80,7 @@ function selectOnPress(hit: SceneNode, shiftKey: boolean, keepsSelection: boolea
 
 /** A read-only document moves nothing, so a press selects a layer inside a selected frame at once. */
 function selectInsideOnPress(hit: SceneNode, keepsSelection: boolean, editor: Editor) {
-  if (keepsSelection && !editor.state.selectedIds.has(hit.id) && clickSelectsInside(hit, editor))
+  if (keepsSelection && !editor.state.selectedIds.has(hit.id) && insideSelectedFrame(hit, editor))
     editor.select([hit.id])
 }
 
@@ -124,10 +124,6 @@ export function handleSelectDown(
   }
   if (selectionIsLocked(editor)) return
 
-  const drag = createSelectionMoveDrag(cx, cy, sx, sy, editor, e.altKey)
-  // A click without dragging still selects a layer inside a selected frame; groups need a double-click.
-  if (drag.type === 'move' && keepsSelection && !editor.state.selectedIds.has(hit.id)) {
-    drag.selectOnClick = clickSelectsInside(hit, editor) ? hit.id : undefined
-  }
-  setDrag(drag)
+  // A press inside the selection drags it; its layers are a double-click or ⌘-click away, as in Figma.
+  setDrag(createSelectionMoveDrag(cx, cy, sx, sy, editor, e.altKey))
 }

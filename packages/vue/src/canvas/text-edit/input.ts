@@ -53,7 +53,7 @@ export function createTextEditInput(options: TextEditInputOptions) {
       editor.commitTextEdit()
       const hit = hitTestInScope(cx, cy, true)
       if (hit?.type === 'TEXT' && hit.id !== editNode.id) {
-        startTextEditingAt(hit, cx, cy)
+        startTextEditingAt(hit, cx, cy, true)
         return true
       }
       return false
@@ -70,7 +70,11 @@ export function createTextEditInput(options: TextEditInputOptions) {
     return true
   }
 
-  function startTextEditingAt(hit: SceneNode, cx: number, cy: number) {
+  /**
+   * Starts editing `hit` as Figma does: a double-click selects all of its text, a click on it
+   * while another text is edited puts the caret where the click landed.
+   */
+  function startTextEditingAt(hit: SceneNode, cx: number, cy: number, caret = false) {
     editor.select([hit.id])
     editor.startTextEditing(hit.id)
     // Text the editor refuses, such as path text without its font, stays selected only.
@@ -78,7 +82,8 @@ export function createTextEditInput(options: TextEditInputOptions) {
     const textEd = editor.textEditor
     if (textEd) {
       const abs = editor.graph.getAbsolutePosition(hit.id)
-      textEd.selectWordAt(cx - abs.x, cy - abs.y)
+      if (caret) textEd.setCursorAt(cx - abs.x, cy - abs.y, false)
+      else textEd.selectAll()
       editor.textSelectionChanged()
     }
   }
@@ -143,14 +148,17 @@ export function createTextEditInput(options: TextEditInputOptions) {
     }
     const hit = getContainerDescendantHit(selectedId, cx, cy)
     editor.enterContainer(selectedId)
-    if (hit?.type === 'TEXT' && resolveEditorProfile(editor.state).edits)
-      startTextEditingAt(hit, cx, cy)
-    else if (hit) editor.select([hit.id])
+    // A text one level down is selected first; the next double-click edits it, as in Figma.
+    if (hit) editor.select([hit.id])
     else editor.clearSelection()
     return true
   }
 
-  function onDblClick(e: MouseEvent) {
+  /**
+   * One level deeper, as a double-click goes in Figma. A `rapid` click, the third or later of a
+   * run, goes a level deeper too but stops at a text: editing it takes a double-click.
+   */
+  function onDblClick(e: MouseEvent, rapid = false) {
     const nodeEditEditor = editor as Editor & NodeEditMethods
     if (editor.state.editingTextId) return
 
@@ -174,7 +182,10 @@ export function createTextEditInput(options: TextEditInputOptions) {
 
     if (hit.type === 'TEXT') {
       const isTopLevelText = hit.parentId === editor.state.currentPageId
-      if (!isTopLevelText && selectedId !== hit.id && !wasSelectedBeforeClickSequence(hit.id)) {
+      if (
+        rapid ||
+        (!isTopLevelText && selectedId !== hit.id && !wasSelectedBeforeClickSequence(hit.id))
+      ) {
         editor.select([hit.id])
         return
       }

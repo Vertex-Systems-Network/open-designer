@@ -1087,11 +1087,19 @@ function drawResolvedPathText(
   )
 }
 
+/** Whether text uses saved glyphs instead of live layout. */
+function drawsSaved(r: SkiaRenderer, node: SceneNode): boolean {
+  const readiness = r.nodeFontReadiness(node)
+  if (readiness === 'pending') return true
+  if (r.editingTextId === node.id) return false
+  return node.textPathData !== null || readiness !== 'ready'
+}
+
 /** Whether the text is drawn from the editor's own layout, which leaves its emoji to be drawn. */
 function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
   if (!r.fontsLoaded || !r.fontProvider || node.textPathData !== null) return false
   const readiness = r.nodeFontReadiness(node)
-  return readiness !== 'pending' && readiness !== 'exhausted' && mayHoldEmoji(shownText(node))
+  return readiness !== 'pending' && (readiness !== 'exhausted' || !drawsSaved(r, node)) && mayHoldEmoji(shownText(node))
 }
 
 /**
@@ -1099,7 +1107,7 @@ function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
  * over the blank squares the editor's layout gives them.
  */
 function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
-  const saved = drawsSavedText(node)
+  const saved = drawsSaved(r, node) && drawsSavedText(node)
   if (!saved && !drawsLaidOutText(r, node)) return
   canvas.save()
   if (saved) drawSavedEmoji(r, canvas, node)
@@ -1112,7 +1120,7 @@ function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
 }
 
 function drawSavedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): boolean {
-  return canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
+  return drawsSaved(r, node) && canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
 }
 
 export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): void {
@@ -1134,7 +1142,7 @@ export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fil
     canvas.restore()
     return
   }
-  if (fontReadiness === 'exhausted') {
+  if (fontReadiness === 'exhausted' && drawsSaved(r, node)) {
     if (node.textPicture && r.isTextPictureCurrent(node)) {
       const pic = r.ck.MakePicture(node.textPicture)
       if (pic) {
