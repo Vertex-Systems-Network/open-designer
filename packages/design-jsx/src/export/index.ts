@@ -314,6 +314,17 @@ function oneLine(source: string): string {
   return source.replace(/\s*\n\s*/g, ' ')
 }
 
+/** Reka props a component or set assigns to this layer, if one owns it. */
+function rekaPropsForNode(graph: SceneGraph, node: SceneNode): JSXProp[] {
+  let owner: SceneNode | undefined = node
+  while (owner) {
+    const props = rekaExport(graph, owner)?.props.get(node.id)
+    if (props) return props
+    owner = owner.parentId ? graph.getNode(owner.parentId) : undefined
+  }
+  return []
+}
+
 /**
  * The attributes `sceneNodeToJSX` prints for a node, each on one line, with a text node's
  * content, or a connector's label, as a `text` attribute. `null` for a node the export does not
@@ -326,12 +337,15 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !elementTag(node.type)) return null
   const own = ownElement(graph, node)
+  const rekaProps = rekaPropsForNode(graph, node)
+  const hasRekaComponentRef = rekaProps.some(([name]) => name === 'of')
   const props = own
     ? own.props
     : [
+        ...rekaProps,
         ...collectProps(node, graph),
         ...componentPropertyProps(graph, node),
-        ...instanceProps(graph, node)
+        ...instanceProps(graph, node, hasRekaComponentRef)
       ]
   const hasTextBinding = node.componentPropertyReferences.some(
     (reference) => reference.field === 'TEXT'
