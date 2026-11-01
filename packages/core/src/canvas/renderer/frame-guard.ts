@@ -40,7 +40,15 @@ function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
     ]
   if (error instanceof Error) return [error.message, ...errorMessages(error.cause, seen)]
   if (typeof error === 'string') return [error]
-  if (typeof error === 'object') return [Object.prototype.toString.call(error)]
+  if (typeof error === 'object') {
+    try {
+      const message = error.toString()
+      if (message !== '[object Object]') return [message]
+    } catch {
+      return [Object.prototype.toString.call(error)]
+    }
+    return [Object.prototype.toString.call(error)]
+  }
   return [String(error)]
 }
 
