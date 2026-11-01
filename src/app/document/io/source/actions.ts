@@ -87,10 +87,12 @@ export function createDocumentSourceActions({
     const path = getFilePath()
     const renderer = getRenderer()
     if (!path || !renderer || !isFigArchiveName(path)) return
-    if (changes.capture() !== version) return
-    void cacheRecentFileCover(path, editor.graph, renderer).catch((error: unknown) => {
-      console.warn('[Recent files] Could not cache the preview after saving', error)
-    })
+    if (!changes.isCurrent(version)) return
+    void cacheRecentFileCover(path, editor.graph, renderer, () => changes.isCurrent(version)).catch(
+      (error: unknown) => {
+        console.warn(`[Recent files] Could not cache a preview for "${path}" after saving`, error)
+      }
+    )
   }
 
   function buildRecoveryFigFile() {
