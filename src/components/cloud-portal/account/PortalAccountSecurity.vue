@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { useCloudPortalMessages } from '@open-designer/vue/i18n'
 import { computed, ref } from 'vue'
+
+import { useCloudPortalMessages } from '@open-designer/vue/i18n'
 
 import SettingsGroup from '@/components/settings/layout/SettingsGroup.vue'
 import SettingsRow from '@/components/settings/layout/SettingsRow.vue'
