@@ -65,7 +65,7 @@ fileDialog.onChange((files) => {
 })
 
 const SOURCE_TITLES: Record<SkillSourceID, () => string> = {
-  openpencil: () => ai.value.skillsUploadedSource,
+  opendesigner: () => ai.value.skillsUploadedSource,
   project: () => ai.value.skillsProjectSource,
   agents: () => ai.value.skillsAgentsSource,
   claude: () => ai.value.skillsClaudeSource
