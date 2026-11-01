@@ -94,8 +94,8 @@ export function patchedRecord(record: NodeChange, patch: FigRecordFieldPatch): N
     }))
     merged.variableSetModes = patchedEntries(entries, patch.variableSetModes).map(
       ({ guidPath, ...fields }) => {
-        const id = guidPath?.guids?.[0]
-        if (!id) throw new Error('Variable mode patch is missing its GUID')
+        const id = guidPath.guids[0]
+        if (id === undefined) throw new Error('Variable mode patch is missing its GUID')
         return { id, ...fields }
       }
     ) as NodeChange['variableSetModes']
