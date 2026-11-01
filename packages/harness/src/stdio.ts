@@ -28,8 +28,9 @@ const stateRoot =
   process.env.OPENDESIGNER_HARNESS_STATE_DIR ??
   process.env.OPENPENCIL_HARNESS_STATE_DIR ??
   join(homedir(), '.open-pencil', 'harness-sessions')
-const agentDir = process.env.OPENDESIGNER_HARNESS_AGENT_DIR
-const apiKey = process.env.OPENDESIGNER_HARNESS_API_KEY
+const agentDir =
+  process.env.OPENDESIGNER_HARNESS_AGENT_DIR ?? process.env.OPENPENCIL_HARNESS_AGENT_DIR
+const apiKey = process.env.OPENDESIGNER_HARNESS_API_KEY ?? process.env.OPENPENCIL_HARNESS_API_KEY
 const backendOptions: PiHarnessBackendOptions = {}
 if (agentDir) backendOptions.agentDir = agentDir
 if (apiKey) backendOptions.apiKey = apiKey
