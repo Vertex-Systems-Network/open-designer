@@ -81,10 +81,15 @@ async function getPlatformDir(): Promise<string> {
   }
 
   try {
-    await access(legacyDir)
-    dir = legacyDir
+    await access(join(dir, DISCOVERY_FILENAME))
   } catch (error) {
     if (!isMissingPath(error)) throw error
+    try {
+      await access(join(legacyDir, DISCOVERY_FILENAME))
+      dir = legacyDir
+    } catch (legacyError) {
+      if (!isMissingPath(legacyError)) throw legacyError
+    }
   }
   await mkdir(dir, { recursive: true, mode: 0o700 })
   if (!isWindows) await chmod(dir, 0o700)
