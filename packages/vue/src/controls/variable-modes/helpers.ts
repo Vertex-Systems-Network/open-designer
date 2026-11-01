@@ -7,6 +7,7 @@ import {
   type VariableCollection,
   type VariableCollectionMode
 } from '@open-designer/scene-graph'
+import { isLayerContainer } from '@open-designer/scene-graph/node-defaults'
 import { collectionsBoundIn } from '@open-designer/scene-graph/variables'
 
 import { MIXED, type MixedValue } from '#vue/controls/node-props/use'
@@ -44,8 +45,8 @@ function shared<T>(values: readonly T[]): MixedValue<T> {
 export function variableModeChoices(editor: Editor, targets: SceneNode[]): VariableModeChoice[] {
   if (targets.length === 0) return []
   const { graph } = editor
-  const page = targets.every((target) => target.type === 'CANVAS')
-  const used = page
+  const holders = targets.every((target) => target.type === 'CANVAS' || isLayerContainer(target))
+  const used = holders
     ? null
     : collectionsBoundIn(
         graph,
