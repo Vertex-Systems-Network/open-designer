@@ -91,9 +91,12 @@ function exportPart(
     if (repeated) result.tags.set(child.id, repeated)
     const item = child.type === 'INSTANCE' ? instanceMainComponent(graph, child) : undefined
     if (partId !== 'items' || !item) continue
-    // A group's items keep the specific component instance they refer to.
+    // Keep a direct component reference, resolving any intermediate instance to its component.
+    const referenced = child.componentId ? graph.getNode(child.componentId) : undefined
+    const component =
+      referenced?.type === 'COMPONENT' || referenced?.type === 'COMPONENT_SET' ? referenced : item
     result.tags.set(child.id, `${namespace}.Item`)
-    result.props.set(child.id, [['of', child.componentId ?? item.id]])
+    result.props.set(child.id, [['of', component.id]])
   }
 }
 
