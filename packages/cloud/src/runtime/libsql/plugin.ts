@@ -57,9 +57,7 @@ function transformRow(row: UnknownRow): UnknownRow {
   for (const [key, value] of Object.entries(transformed)) {
     if (value === null || value === undefined) continue
     if (key.endsWith('At') && typeof value === 'string') {
-      const timestamp = /^\d{4}-\d\d-\d\d \d/.test(value)
-        ? `${value.replace(' ', 'T')}Z`
-        : value
+      const timestamp = /^\d{4}-\d\d-\d\d \d/.test(value) ? `${value.replace(' ', 'T')}Z` : value
       transformed[key] = new Date(timestamp)
     } else if (
       ['backedUp', 'verified', 'emailVerified', 'twoFactorEnabled', 'banned'].includes(key) &&
