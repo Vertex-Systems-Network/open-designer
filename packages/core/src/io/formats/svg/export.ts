@@ -1,4 +1,5 @@
 import { uniq } from 'es-toolkit'
+
 import type { RenderColorSpace } from '@open-designer/scene-graph/color'
 
 import { normalizeDashPattern } from '#core/canvas/strokes'
