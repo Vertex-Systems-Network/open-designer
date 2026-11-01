@@ -6,7 +6,9 @@ import type { IconData } from '#core/icons/types'
 import { layoutAuthoredNodes } from '#core/layout'
 import { computeAccurateBounds } from '#core/vector/curve-math'
 
-function parseViewBox(viewBox: string | undefined): { x: number; y: number; w: number; h: number } {
+function parseViewBox(
+  viewBox: string | undefined
+): { x: number; y: number; w: number; h: number } {
   if (!viewBox) return { x: 0, y: 0, w: 0, h: 0 }
   const parts = viewBox
     .trim()
