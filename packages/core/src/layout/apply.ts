@@ -321,10 +321,11 @@ function applyFrameSize(
     axis === 'width' ? yogaNode.getComputedWidth() : yogaNode.getComputedHeight()
   if (frame.primaryAxisSizing === 'HUG') updates[primary] = derived?.[primary] ?? computed(primary)
   if (frame.counterAxisSizing === 'HUG') {
-    updates[counter] =
+    const savedCross =
       derived?.[counter] ??
-      (keepsSaved ? savedStretchedCrossSize(graph, frame, counter) : undefined) ??
-      computed(counter)
+      (keepsSaved ? savedStretchedCrossSize(graph, frame, counter) : undefined)
+    updates[counter] =
+      savedCross === undefined ? computed(counter) : Math.max(savedCross, computed(counter))
   }
 
   writeLayoutGeometry(graph, frame.id, updates, computeLayout, before)
