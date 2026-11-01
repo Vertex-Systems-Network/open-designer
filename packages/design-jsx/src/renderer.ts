@@ -283,6 +283,14 @@ function renderSVGNode<Artwork>(
   return placeArtwork(services, graph, artwork, props, size, parentId)
 }
 
+function tryDecodeComponentName(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return undefined
+  }
+}
+
 function findComponentByName(graph: SceneGraph, name: string): SceneNode | undefined {
   for (const node of graph.getAllNodes()) {
     if (node.type === 'COMPONENT' && node.name === name) return node
@@ -453,13 +461,8 @@ function applyInstanceOverrides(
     } else {
       child = findDescendantByName(target)
       if (!child) {
-        try {
-          const decodedName = decodeURIComponent(target)
-          child = findDescendantByName(decodedName)
-          // oxlint-ignore-next-line
-        } catch {
-          // Keep the literal name when it is not valid percent-encoding.
-        }
+        const decodedName = tryDecodeComponentName(target)
+        if (decodedName) child = findDescendantByName(decodedName)
       }
     }
     if (!child) continue
