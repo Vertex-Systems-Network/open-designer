@@ -42,6 +42,14 @@ const dates = useDateFormat()
 const runLocation = useChatRunLocation()
 
 const chat = shallowRef<Chat<UIMessage> | null>(null)
+// Start a selected ACP agent so its controls load before the first prompt.
+watch(
+  providerID,
+  (id) => {
+    if (id.startsWith('acp:')) void ensureChat().catch(() => undefined)
+  },
+  { immediate: true }
+)
 const submission = useChatSubmission({
   chat,
   ensureChat,
