@@ -14,6 +14,7 @@ import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
+import { revertOnFailure } from '#core/editor/history/document-change'
 import type { FigmaAPI } from '#core/figma-api'
 
 import type { DiffOperation } from './operations'
@@ -227,7 +228,10 @@ async function renderAdditions(figma: FigmaAPI, plans: Placed[]): Promise<boolea
     const { jsx, parentId } = plan.place
     if (jsx === undefined) continue
     try {
-      const results = await renderJSX(figma.graph, jsx, { parentId })
+      const pageId = figma.graph.pageOf(parentId) ?? figma.currentPageId
+      const results = await revertOnFailure(figma.graph, pageId, () =>
+        renderJSX(figma.graph, jsx, { parentId })
+      )
       plan.place.ids = results.map((result) => result.id)
       plan.result.id = results[0].id
       rendered.push(...plan.place.ids)
