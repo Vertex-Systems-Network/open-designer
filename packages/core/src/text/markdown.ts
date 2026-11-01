@@ -5,6 +5,8 @@ import { gfmFromMarkdown } from 'mdast-util-gfm'
 import { toString } from 'mdast-util-to-string'
 import { gfm } from 'micromark-extension-gfm'
 
+import { isSupportedHyperlinkUrl } from '#core/figma-api/accessors/text/hyperlink'
+
 import type {
   CharacterStyleOverride,
   SceneNode,
@@ -91,8 +93,8 @@ function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Read
       case 'image':
         return node.alt ? [{ text: node.alt, style }] : []
       case 'html':
-        // An inline tag only marks up the text around it, which keeps its words.
-        return []
+        // Markdown's explicit line break is supported; other inline HTML is not rendered.
+        return /^<br\\s*\\/?>(?:\\s*)$/i.test(node.value) ? [{ text: '\n', style }] : []
       default:
         return [{ text: toString(node), style }]
     }
@@ -100,7 +102,9 @@ function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Read
 }
 
 function linked(style: Style, url: string): Style {
-  return { ...style, hyperlink: { type: 'URL', value: url } }
+  return isSupportedHyperlinkUrl(url)
+    ? { ...style, hyperlink: { type: 'URL', value: url } }
+    : style
 }
 
 /** Paragraphs of segments, a hard break inside one starting another of the same style. */
@@ -147,14 +151,42 @@ function blocks(
       case 'blockquote':
         return blocks(node.children, { ...style, italic: true }, paragraph, reading, depth)
       case 'list':
-        return node.children.flatMap((item) =>
-          item.children.flatMap((child, index) => {
-            // An item's first block is its bullet; a nested list goes a level deeper.
-            if (child.type === 'list') return blocks([child], style, paragraph, reading, depth + 1)
-            const itemStyle = index === 0 ? listStyle(node.ordered === true, depth + 1) : paragraph
-            return blocks([child], style, itemStyle, reading, depth)
-          })
-        )
+        return node.children.flatMap((item) => {
+          const itemParagraphs: Paragraph[] = []
+          let hasItemText = false
+          for (const child of item.children) {
+            // A nested list starts a deeper item group. Keep it separate from this item's text.
+            if (child.type === 'list') {
+              itemParagraphs.push(...blocks([child], style, paragraph, reading, depth + 1))
+              continue
+            }
+            const rendered = blocks(
+              [child],
+              style,
+              hasItemText ? paragraph : listStyle(node.ordered === true, depth + 1),
+              reading,
+              depth
+            )
+            if (!hasItemText) {
+              itemParagraphs.push(...rendered)
+              hasItemText = true
+              continue
+            }
+            // TextParagraphStyle has no continuation-list marker, so keep later loose-list
+            // blocks in the same item paragraph. They wrap under the item text without a bullet.
+            const target = [...itemParagraphs].reverse().find((entry) => entry.style.listType !== 'NONE')
+            if (!target) {
+              itemParagraphs.push(...rendered)
+              continue
+            }
+            for (const continuation of rendered) {
+              if (target.segments.length && continuation.segments.length)
+                target.segments.push({ text: ' ', style: continuation.segments[0].style })
+              target.segments.push(...continuation.segments)
+            }
+          }
+          return itemParagraphs
+        })
       case 'code':
         return node.value.split('\n').map((line) => ({
           segments: line ? [{ text: line, style: codeStyle(style, reading) }] : [],
