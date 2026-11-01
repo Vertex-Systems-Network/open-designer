@@ -124,11 +124,7 @@ function rememberVectorSize(
   lastBoxWithSize.delete(id)
 }
 
-function updateVectorLayoutGeometry(
-  id: string,
-  node: SceneNode,
-  changes: LayoutGeometry
-): void {
+function updateVectorLayoutGeometry(id: string, node: SceneNode, changes: LayoutGeometry): void {
   if (node.type !== 'VECTOR') return
   const toWidth = changes.width ?? node.width
   const toHeight = changes.height ?? node.height
@@ -149,7 +145,12 @@ function updateVectorLayoutGeometry(
     remembered
   )
   if (network) changes.vectorNetwork = network
-  updateVectorPathGeometry(node, changes, targetWidth / effectiveWidth, targetHeight / effectiveHeight)
+  updateVectorPathGeometry(
+    node,
+    changes,
+    targetWidth / effectiveWidth,
+    targetHeight / effectiveHeight
+  )
   rememberVectorSize(id, toWidth, toHeight, sourceWidth, sourceHeight)
 }
 
