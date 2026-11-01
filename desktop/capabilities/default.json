@@ -122,6 +122,9 @@
       "allow": [
         {
           "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
         }
       ]
     },
@@ -200,6 +203,9 @@
       "allow": [
         {
           "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
         }
       ],
       "deny": [
@@ -251,6 +257,9 @@
       "allow": [
         {
           "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
         }
       ]
     },
@@ -259,6 +268,9 @@
       "allow": [
         {
           "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
         }
       ],
       "deny": [
