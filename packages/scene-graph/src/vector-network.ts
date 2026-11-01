@@ -31,7 +31,7 @@ export function mergeVectorNetworks(networks: readonly VectorNetwork[]): VectorN
         for (const segmentIndex of loop) shifted.push(segmentIndex + segmentOffset)
         loops.push(shifted)
       }
-      regions.push({ ...region, loops, fills: region.fills?.map((fill) => ({ ...fill })) })
+      regions.push({ ...region, loops, fills: region.fills?.map((fill) => structuredClone(fill)) })
     }
     vertexOffset += network.vertices.length
     segmentOffset += network.segments.length
@@ -64,7 +64,7 @@ export function transformVectorNetwork(m: Mat3, vn: VectorNetwork): VectorNetwor
     regions: vn.regions.map((r) => ({
       ...r,
       loops: r.loops.map((l) => [...l]),
-      fills: r.fills?.map((fill) => ({ ...fill }))
+      fills: r.fills?.map((fill) => structuredClone(fill))
     }))
   }
 }
@@ -99,7 +99,7 @@ export function cloneVectorNetwork(vn: VectorNetwork): VectorNetwork {
     regions: vn.regions.map((r) => ({
       ...r,
       loops: r.loops.map((l) => [...l]),
-      fills: r.fills?.map((fill) => ({ ...fill }))
+      fills: r.fills?.map((fill) => structuredClone(fill))
     }))
   }
 }
