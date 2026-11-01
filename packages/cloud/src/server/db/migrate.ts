@@ -65,17 +65,67 @@ class CloudMigrationProvider implements MigrationProvider {
   }
 }
 
-class TursoMigrationProvider implements MigrationProvider {
-  async getMigrations(): Promise<Record<string, Migration>> {
-    return {
-      '001_turso_schema': {
-        async up(database) {
-          for (const statement of TURSO_SCHEMA_STATEMENTS) {
-            await sql.raw(statement).execute(database)
-          }
+/**
+ * Turso's initial snapshot incorporates every PostgreSQL migration listed here.
+ * When a new PostgreSQL migration changes the schema, add an ordered Turso migration below
+ * and move its name from this initial snapshot's mirror list to that migration.
+ */
+const tursoMigrations: Array<{ name: string; mirrors: readonly string[]; migration: Migration }> = [
+  {
+    name: '001_turso_schema',
+    mirrors: [
+      '001_foundation',
+      '002_upload_cleanup_claims',
+      '003_document_cleanup_claims',
+      '004_document_sharing',
+      '005_document_collaboration_epoch',
+      '006_invitation_continuation',
+      '007_collaboration_state',
+      '008_storage_reservations',
+      '009_workspace_entitlements',
+      '010_upload_finalization',
+      '011_upload_finalization_lease',
+      '012_transactional_email',
+      '013_admin_enrollment',
+      '014_enrollment_email_kinds',
+      '015_cloud_rate_limit',
+      '016_auth_schema',
+      '017_authentication_email_kinds',
+      '018_authentication_mfa',
+      '019_better_auth_account_issuer',
+      '020_workspace_invitations',
+      '021_document_versions',
+      '022_entitlement_external_version',
+      '023_document_images',
+      '024_account_activity',
+      '025_table_names',
+      '026_user_picture'
+    ],
+    migration: {
+      async up(database) {
+        for (const statement of TURSO_SCHEMA_STATEMENTS) {
+          await sql.raw(statement).execute(database)
         }
       }
     }
+  }
+]
+
+function assertTursoMigrationCoverage(): void {
+  const mirrored = tursoMigrations.flatMap((entry) => entry.mirrors)
+  const missing = Object.keys(migrations).filter((name) => !mirrored.includes(name))
+  const unknown = mirrored.filter((name) => !Object.hasOwn(migrations, name))
+  if (missing.length || unknown.length) {
+    throw new Error(
+      `Turso migration coverage mismatch. Missing: ${missing.join(', ') || 'none'}; unknown: ${unknown.join(', ') || 'none'}`
+    )
+  }
+}
+
+class TursoMigrationProvider implements MigrationProvider {
+  async getMigrations(): Promise<Record<string, Migration>> {
+    assertTursoMigrationCoverage()
+    return Object.fromEntries(tursoMigrations.map(({ name, migration }) => [name, migration]))
   }
 }
 
