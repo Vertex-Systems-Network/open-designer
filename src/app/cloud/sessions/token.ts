@@ -24,10 +24,12 @@ export async function readCloudSessionToken(serverId: string): Promise<string | 
   return legacy
 }
 
-export function saveCloudSessionToken(serverId: string, token: string): Promise<void> {
-  return appCredentialServices.manager.set(sessionRef(serverId), token)
+export async function saveCloudSessionToken(serverId: string, token: string): Promise<void> {
+  await appCredentialServices.manager.set(sessionRef(serverId), token)
+  await appCredentialServices.manager.clear(legacySessionRef(serverId))
 }
 
-export function clearCloudSessionToken(serverId: string): Promise<void> {
-  return appCredentialServices.manager.clear(sessionRef(serverId))
+export async function clearCloudSessionToken(serverId: string): Promise<void> {
+  await appCredentialServices.manager.clear(sessionRef(serverId))
+  await appCredentialServices.manager.clear(legacySessionRef(serverId))
 }
