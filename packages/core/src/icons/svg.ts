@@ -430,12 +430,17 @@ function roundingCollapsesArc(path: ReturnType<typeof svgpath>): boolean {
 export function scalePathInfos(
   pathInfos: IconPathInfo[],
   scaleX: number,
-  scaleY: number
+  scaleY: number,
+  originX = 0,
+  originY = 0
 ): IconData['paths'] {
   return pathInfos.map((path) => {
     let transformedPath = svgpath(path.d)
     if (path.transform && path.transform !== 'none') {
       transformedPath = transformedPath.transform(path.transform)
+    }
+    if (originX !== 0 || originY !== 0) {
+      transformedPath = transformedPath.translate(-originX, -originY)
     }
     if (scaleX !== 1 || scaleY !== 1) transformedPath = transformedPath.scale(scaleX, scaleY)
     const pathToRound = roundingCollapsesArc(svgpath(transformedPath.toString()))
