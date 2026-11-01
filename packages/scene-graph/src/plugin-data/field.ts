@@ -3,7 +3,7 @@ import * as v from 'valibot'
 import type { PluginDataEntry } from '../types'
 
 /** The plugin id OpenDesigner keeps its own state under, on nodes and in `.fig` files. */
-export const OPEN_DESIGNER_PLUGIN_ID = 'open-designer'
+export const OPEN_DESIGNER_PLUGIN_ID = 'open-pencil'
 
 /**
  * What a field holds:
@@ -68,7 +68,10 @@ export function textPluginDataField<const T extends string>(
 }
 
 export function isPluginDataEntry(entry: PluginDataEntry, field: PluginDataKey): boolean {
-  return entry.pluginId === OPEN_DESIGNER_PLUGIN_ID && entry.key === field.key
+  return (
+    (entry.pluginId === OPEN_DESIGNER_PLUGIN_ID || entry.pluginId === 'open-designer') &&
+    entry.key === field.key
+  )
 }
 
 export function hasPluginData(
