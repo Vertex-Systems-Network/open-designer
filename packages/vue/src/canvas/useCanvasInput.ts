@@ -22,7 +22,7 @@ import {
   updateNodeEditHover
 } from '#vue/canvas/vector-input/input'
 import { resolveAutoLayoutHover } from '#vue/shared/input/auto-layout-hover'
-import { createClickCounter } from '#vue/shared/input/click-count'
+import { createClickCounter, MULTI_CLICK_DELAY } from '#vue/shared/input/click-count'
 import {
   attachModifiers,
   handleConnectorDrawMove,
@@ -40,7 +40,7 @@ import type { DragState } from '#vue/shared/input/types'
 import { handleNodeEditMarqueeMove, handleNodeEditMove } from '#vue/shared/input/vector'
 
 /**
- * Wires pointer and mouse interaction to an OpenDesigner canvas.
+ * Wires pointer and mouse interaction to an OpenPencil canvas.
  *
  * This composable coordinates selection, dragging, resizing, rotation,
  * panning, drawing tools, scoped hit testing, and text-edit interaction.
@@ -194,15 +194,40 @@ export function useCanvasInput(
     handleMarqueeMove
   } = createCanvasTransformInput(editor, setDrag)
 
-  function onDblClick(e: MouseEvent) {
-    if (editor.state.activeTool === 'COMMENT' || profile().pointer === 'pan') return
+  /**
+   * The second click of a run and every one after it, on its press: one level deeper, or a value
+   * field, as in Figma. The press decides so that every click of a quick run counts; the browser
+   * fires its double-click event by its own count, which a click shortly before the run shifts.
+   */
+  let multiClickPressAt = 0
+
+  /** Only the select tool takes a double-click on its press; a drawing tool keeps its press. */
+  function takesMultiClick(e: MouseEvent): boolean {
+    return (
+      e.button === 0 &&
+      editor.state.activeTool === 'SELECT' &&
+      !editor.state.editingTextId &&
+      profile().pointer !== 'pan'
+    )
+  }
+
+  function onMultiClickDown(e: MouseEvent, clickCount: number) {
+    multiClickPressAt = performance.now()
     const { cx, cy } = getCoords(e)
-    if (profile().edits && valueEdit.start(cx, cy)) {
+    if (clickCount === 2 && profile().edits && valueEdit.start(cx, cy)) {
       e.preventDefault()
       e.stopPropagation()
       return
     }
-    onTextDblClick(e)
+    onTextDblClick(e, clickCount > 2)
+  }
+
+  function onDblClick(e: MouseEvent) {
+    // Handled on the press, which the event only must not follow with a browser text selection;
+    // a double-click dispatched without presses, as tests do, is handled here instead.
+    e.preventDefault()
+    if (performance.now() - multiClickPressAt < MULTI_CLICK_DELAY) return
+    if (takesMultiClick(e)) onMultiClickDown(e, 2)
   }
 
   function hoverLayers({ event, cx, cy, sx, sy }: CanvasToolPointer) {
@@ -257,13 +282,15 @@ export function useCanvasInput(
       e.preventDefault()
       return
     }
-    if (e.button === 0 || editor.state.activeTool !== 'COMMENT') {
-      editor.setSelectedGuide(null)
-    }
+    editor.setSelectedGuide(null)
 
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
-    const clickCount = recordClick(sx, sy)
+    const clickCount = recordClick(sx, sy, e.detail)
     if (clickCount === 1) selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
+    if (clickCount >= 2 && takesMultiClick(e)) {
+      onMultiClickDown(e, clickCount)
+      return
+    }
     pressCanvasTool({ event: e, cx, cy, sx, sy }, toolContext)
   }
 
