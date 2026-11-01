@@ -78,8 +78,7 @@ export const DESIGN_JSX_ELEMENTS: DesignJSXElementDefinition[] = [
     runtimeType: 'frame',
     description: 'A frame or auto-layout container.',
     nodeType: 'FRAME',
-    // A set and an instance read back as frames: JSX cannot name what they come from.
-    writes: ['FRAME', 'COMPONENT_SET', 'INSTANCE']
+    writes: ['FRAME']
   },
   {
     name: 'Text',
