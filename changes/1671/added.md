@@ -1,0 +1,1 @@
+- Frames and pages can select a variable collection's mode before child layers bind variables; AI and MCP tools can set and inspect explicit modes on existing layers.

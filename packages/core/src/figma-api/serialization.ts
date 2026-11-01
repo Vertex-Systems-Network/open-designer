@@ -72,6 +72,7 @@ export function nodeProxyToJSON(
   // Include variable bindings with resolved values
   const bindings = resolveBindings(graph, n)
   if (bindings) obj.boundVariables = bindings
+  if (Object.keys(n.variableModes).length > 0) obj.explicitVariableModes = { ...n.variableModes }
   if (n.componentPropertyDefinitions.length > 0) {
     obj.componentPropertyDefinitions = n.componentPropertyDefinitions
   }
