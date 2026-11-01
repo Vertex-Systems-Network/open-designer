@@ -1,0 +1,1 @@
+- Rescaled component instances keep inherited vector fills and strokes at the placed size after a FIG file is reopened (#37).

@@ -2,6 +2,7 @@ import type { Vector } from '@open-designer/kiwi/fig'
 import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import type { InstanceOccurrence } from './occurrence/types'
+import { growInheritedOutlineScale } from './scale/outline'
 import { uniformScaleOf } from './types'
 
 export function applyPlacedConstraints(
@@ -48,7 +49,7 @@ export function resizeFreeformOccurrence(
     const props = child.properties
     if (autoLayout && props.stackPositioning !== 'ABSOLUTE') continue
     if (!props.size) continue
-    const transform = props.transform ?? { m00: 1, m01: 0, m02: 0, m10: 0, m11: 1, m12: 0 }
+    const transform = props.transform ?? { m00: 1, m01: 0, m02: 0, m10: 0, m11: 0, m12: 0 }
     const x = constrainedAxis(
       transform.m02,
       props.size.x,
@@ -65,6 +66,13 @@ export function resizeFreeformOccurrence(
     )
     const size = { x: x.size, y: y.size }
     resizeFreeformOccurrence(child, props.size, size)
+    if (props.type === 'VECTOR') {
+      growInheritedOutlineScale(
+        child,
+        props.size.x > 0 ? size.x / props.size.x : 1,
+        props.size.y > 0 ? size.y / props.size.y : 1
+      )
+    }
     props.size = size
     props.transform = { ...transform, m02: x.position, m12: y.position }
   }
