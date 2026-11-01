@@ -34,6 +34,33 @@
       ],
       "@open-pencil/core/*": [
         "./src/*"
+      ],
+      "@open-pencil/scene-graph": [
+        "../scene-graph/dist/index"
+      ],
+      "@open-pencil/scene-graph/*": [
+        "../scene-graph/dist/*"
+      ],
+      "@open-pencil/fig": [
+        "../fig/dist/index"
+      ],
+      "@open-pencil/fig/*": [
+        "../fig/dist/*"
+      ],
+      "@open-pencil/design-jsx": [
+        "../design-jsx/dist/index"
+      ],
+      "@open-pencil/design-jsx/*": [
+        "../design-jsx/dist/*"
+      ],
+      "@open-pencil/kiwi/*": [
+        "../kiwi/dist/*"
+      ],
+      "@open-pencil/pen": [
+        "../pen/dist/index"
+      ],
+      "@open-pencil/pen/*": [
+        "../pen/dist/*"
       ]
     }
   },
