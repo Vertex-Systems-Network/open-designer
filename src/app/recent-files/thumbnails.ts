@@ -52,6 +52,7 @@ const RECENT_FILE_COVER = { width: 1280, height: 720 }
 
 /** Cover writes still running, by file, so each file's covers are cached in the order drawn. */
 const coverWrites = new Map<string, Promise<void>>()
+let coverWriteGeneration = 0
 
 /**
  * Draws the cover page of the document at `path` for its Home card and caches it under the
@@ -65,6 +66,7 @@ export async function cacheRecentFileCover(
   renderer: NonNullable<Editor['renderer']>,
   isCurrent: () => boolean = () => true
 ): Promise<boolean> {
+  const generation = coverWriteGeneration
   const pageId = figThumbnailPageId(graph.getPages())
   if (!pageId) return false
   // Capture the file version's key before waiting behind an earlier cover write.
@@ -77,7 +79,7 @@ export async function cacheRecentFileCover(
   const write = previous
     .catch(() => undefined)
     .then(async () => {
-      if (!isCurrent()) return false
+      if (generation !== coverWriteGeneration || !isCurrent()) return false
       await writeRecentFileThumbnail(cacheKey, bytes)
       return true
     })
@@ -94,7 +96,10 @@ export async function cacheRecentFileCover(
 }
 
 export function clearRecentFileThumbnails(): Promise<void> {
-  return removeCachePrefix(RECENT_FILE_THUMBNAIL_CACHE_DIR)
+  coverWriteGeneration += 1
+  return Promise.all([...coverWrites.values()]).then(() =>
+    removeCachePrefix(RECENT_FILE_THUMBNAIL_CACHE_DIR)
+  )
 }
 
 export async function loadRecentFileThumbnail(path: string): Promise<Uint8Array | null> {
