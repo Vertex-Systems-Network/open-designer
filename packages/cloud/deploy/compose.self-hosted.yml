@@ -44,7 +44,7 @@ services:
 
   bucket:
     image: amazon/aws-cli:2.27.49
-    network_mode: service:opendesigner
+    network_mode: service:openpencil
     depends_on:
       seaweedfs:
         condition: service_healthy
@@ -56,7 +56,7 @@ services:
     command:
       - >-
         aws --endpoint-url http://127.0.0.1:8333 s3api head-bucket --bucket openpencil
-        || aws --endpoint-url http://127.0.0.1:8333 s3api create-bucket --bucket opendesigner
+        || aws --endpoint-url http://127.0.0.1:8333 s3api create-bucket --bucket openpencil
 
   postgres:
     image: postgres:17-alpine
