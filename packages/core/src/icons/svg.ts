@@ -439,7 +439,9 @@ export function scalePathInfos(
     if (path.transform && path.transform !== 'none') {
       transformedPath = transformedPath.transform(path.transform)
     }
-    if (originX !== 0 || originY !== 0) transformedPath = transformedPath.translate(-originX, -originY)
+    if (originX !== 0 || originY !== 0) {
+      transformedPath = transformedPath.translate(-originX, -originY)
+    }
     if (scaleX !== 1 || scaleY !== 1) transformedPath = transformedPath.scale(scaleX, scaleY)
     const pathToRound = roundingCollapsesArc(svgpath(transformedPath.toString()))
       ? svgpath(transformedPath.toString()).abs().unshort().unarc()
