@@ -339,14 +339,15 @@ export function sceneNodeAttributes(
   const own = ownElement(graph, node)
   const rekaProps = rekaPropsForNode(graph, node)
   const hasRekaComponentRef = rekaProps.some(([name]) => name === 'of')
+  const variables = variableExport(graph, [node.id], true)
   const props = own
     ? own.props
-    : [
-        ...rekaProps,
-        ...collectProps(node, graph),
-        ...componentPropertyProps(graph, node),
-        ...instanceProps(graph, node, hasRekaComponentRef)
-      ]
+    : mergeProps(
+        collectNodeProps(node, graph, variables, hasRekaComponentRef),
+        rekaProps,
+        componentPropertyProps(graph, node),
+        instanceProps(graph, node, hasRekaComponentRef)
+      )
   const hasTextBinding = node.componentPropertyReferences.some(
     (reference) => reference.field === 'TEXT'
   )
