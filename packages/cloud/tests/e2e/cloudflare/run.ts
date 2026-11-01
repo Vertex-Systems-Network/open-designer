@@ -11,7 +11,7 @@ const deployDirectory = cloudDeployPath()
 const compose = composeCommand(`opendesigner-cloud-workers-e2e-${process.pid}`, 'compose.yml')
 const portOffset = process.pid % 1_000
 const workerPort = 23_000 + portOffset
-const databaseURL = `postgresql://openpencil:opendesigner-development-password@127.0.0.1:${20_000 + portOffset}/opendesigner`
+const databaseURL = `postgresql://opendesigner:opendesigner-development-password@127.0.0.1:${20_000 + portOffset}/opendesigner`
 const s3Endpoint = `http://127.0.0.1:${21_000 + portOffset}`
 const secrets = {
   BETTER_AUTH_SECRET: 'cloudflare-e2e-secret-at-least-32-characters',
