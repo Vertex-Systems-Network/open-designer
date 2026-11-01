@@ -35,9 +35,13 @@ export async function loadCachedRecentFileThumbnail(path: string): Promise<Uint8
   return bytes ? new Uint8Array(bytes) : null
 }
 
-export async function cacheRecentFileThumbnail(path: string, bytes: Uint8Array): Promise<void> {
+async function writeRecentFileThumbnail(cacheKey: string, bytes: Uint8Array): Promise<void> {
   if (!isTauri()) return
-  await writeCacheBytes(await recentFileThumbnailCacheKey(path), Uint8Array.from(bytes).buffer)
+  await writeCacheBytes(cacheKey, Uint8Array.from(bytes).buffer)
+}
+
+export async function cacheRecentFileThumbnail(path: string, bytes: Uint8Array): Promise<void> {
+  await writeRecentFileThumbnail(await recentFileThumbnailCacheKey(path), bytes)
 }
 
 /**
@@ -58,22 +62,35 @@ const coverWrites = new Map<string, Promise<void>>()
 export async function cacheRecentFileCover(
   path: string,
   graph: SceneGraph,
-  renderer: NonNullable<Editor['renderer']>
+  renderer: NonNullable<Editor['renderer']>,
+  isCurrent: () => boolean = () => true
 ): Promise<boolean> {
   const pageId = figThumbnailPageId(graph.getPages())
   if (!pageId) return false
+  // Capture the file version's key before waiting behind an earlier cover write.
+  const cacheKey = await recentFileThumbnailCacheKey(path)
+  if (!isCurrent()) return false
   const { width, height } = RECENT_FILE_COVER
   const bytes = renderThumbnail(renderer.ck, renderer, graph, pageId, width, height, 'cover')
   if (!bytes) return false
   const previous = coverWrites.get(path) ?? Promise.resolve()
-  const write = previous.catch(() => undefined).then(() => cacheRecentFileThumbnail(path, bytes))
-  coverWrites.set(path, write)
+  const write = previous
+    .catch(() => undefined)
+    .then(async () => {
+      if (!isCurrent()) return false
+      await writeRecentFileThumbnail(cacheKey, bytes)
+      return true
+    })
+  const queued = write.then(
+    () => undefined,
+    () => undefined
+  )
+  coverWrites.set(path, queued)
   try {
-    await write
+    return await write
   } finally {
-    if (coverWrites.get(path) === write) coverWrites.delete(path)
+    if (coverWrites.get(path) === queued) coverWrites.delete(path)
   }
-  return true
 }
 
 export function clearRecentFileThumbnails(): Promise<void> {
