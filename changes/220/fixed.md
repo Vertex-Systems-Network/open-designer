@@ -1,0 +1,1 @@
+- Flatten keeps each source shape's own regions, fills and stroke in layer order, matching Figma instead of applying one layer's paint to the whole flattened vector.
