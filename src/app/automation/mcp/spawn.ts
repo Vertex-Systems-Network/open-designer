@@ -453,7 +453,8 @@ async function readExistingServerHandle(): Promise<AutomationServerHandle | null
   if (
     !(await discoveryFileExists(expectedDiscoveryPath)) &&
     !(await discoveryFileExists(legacyDiscoveryPath))
-  ) return null
+  )
+    return null
 
   const health = await readAutomationHealth()
   if (!health) return null
@@ -541,8 +542,12 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
   // The app bundle directory (Tauri executableDir) is read-only and cannot be
   // used as a safe fallback for open_file, save_file, or export tools.
   const mcpRoot = mcpRootDirectory.value.trim() || (await resolveTauriHomeDir())
-  const installedExecutable = lookup.path?.split(/[\\/]/).pop()?.replace(/\.cmd$/i, '')
-  const executable = installedExecutable === 'openpencil-mcp-http' ? installedExecutable : MCP_EXECUTABLE
+  const installedExecutable = lookup.path
+    ?.split(/[\\/]/)
+    .pop()
+    ?.replace(/\.cmd$/i, '')
+  const executable =
+    installedExecutable === 'openpencil-mcp-http' ? installedExecutable : MCP_EXECUTABLE
   const resolved = resolvePlatformCommand(executable)
   const command = Command.create(resolved.command, resolved.args, {
     env: {
