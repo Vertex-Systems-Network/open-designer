@@ -1,4 +1,4 @@
-// cloud-staging.openpencil.dev and the account's workers.dev URL are served by this Worker.
+// Staging is served from the Cloudflare account's workers.dev subdomain.
 {
   "name": "opendesigner-cloud-staging",
   "main": "worker.ts",
@@ -12,7 +12,6 @@
     "html_handling": "none",
     "run_worker_first": true
   },
-  "routes": [{ "pattern": "cloud-staging.openpencil.dev", "custom_domain": true }],
   "workers_dev": true,
   "hyperdrive": [{ "binding": "HYPERDRIVE", "id": "4e4c4652a8a14c77bfdb2d50862d2e64" }],
   "durable_objects": {
