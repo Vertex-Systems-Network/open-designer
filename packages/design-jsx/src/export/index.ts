@@ -191,11 +191,7 @@ function nestedInstancePropertyOverrides(
   return overrides
 }
 
-function instanceProps(
-  graph: SceneGraph,
-  node: SceneNode,
-  hasRekaComponentRef = false
-): JSXProp[] {
+function instanceProps(graph: SceneGraph, node: SceneNode, hasRekaComponentRef = false): JSXProp[] {
   if (node.type !== 'INSTANCE') return []
   const component = instanceMainComponent(graph, node)
   const props: JSXProp[] = []
