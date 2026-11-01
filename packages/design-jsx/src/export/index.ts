@@ -9,6 +9,7 @@ import {
 import { instanceMainComponent } from '@open-designer/scene-graph/instances'
 import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 import { isGeneratedFrame, type GeneratedFrameType } from '@open-designer/scene-graph/generated'
+import { layoutSizing } from '@open-designer/scene-graph/layout'
 
 import { componentPropertyScope } from '../component-properties'
 import {
@@ -265,8 +266,16 @@ function nodeToJSX(
   const defaultComponentProps = new Set<string>()
   if (hasRekaComponentRef && component) {
     if (node.name === component.name) defaultComponentProps.add('name')
-    if (node.width === component.width) defaultComponentProps.add('w')
-    if (node.height === component.height) defaultComponentProps.add('h')
+    if (
+      node.width === component.width &&
+      layoutSizing(graph, node, 'HORIZONTAL') === layoutSizing(graph, component, 'HORIZONTAL')
+    )
+      defaultComponentProps.add('w')
+    if (
+      node.height === component.height &&
+      layoutSizing(graph, node, 'VERTICAL') === layoutSizing(graph, component, 'VERTICAL')
+    )
+      defaultComponentProps.add('h')
   }
   const collectedProps = collectProps(node, graph, variables).filter(
     ([name]) => !defaultComponentProps.has(name)
