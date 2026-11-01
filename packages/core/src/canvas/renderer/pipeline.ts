@@ -237,7 +237,16 @@ export function render(
   layer: RenderLayer = 'full',
   interactive = false
 ): boolean {
-  r.editingTextId = overlays.editingTextId ?? null
+  const nextEditingTextId = overlays.editingTextId ?? null
+  if (r.editingTextId !== nextEditingTextId) {
+    if (r.editingTextId) r.invalidateNodePicture(r.editingTextId)
+    if (nextEditingTextId) r.invalidateNodePicture(nextEditingTextId)
+    r.editingTextId = nextEditingTextId
+    // Saved scene pictures and tile frames may already contain the old glyphs. Re-record them
+    // once when text editing starts or ends so the scene uses the live layout for that node.
+    invalidateScenePicture(r)
+    r.tiledScene.invalidateStructure()
+  }
 
   const guard = r.frameGuard
   if (!guard.shouldDraw()) return false
