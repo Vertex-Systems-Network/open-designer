@@ -24,7 +24,9 @@ export const movePage = defineTool({
 
     const destination = Math.min(index, pages.length - 1)
     figma.graph.insertChildAt(target.id, figma.graph.rootId, destination)
-    for (const [position, pageId] of figma.graph.getNode(figma.graph.rootId)!.childIds.entries()) {
+    const root = figma.graph.getNode(figma.graph.rootId)
+    if (!root) return { error: 'Document root not found' }
+    for (const [position, pageId] of root.childIds.entries()) {
       const movedPage = figma.graph.getNode(pageId)
       if (!movedPage) continue
       const orderKey = fractionalPosition(position)
