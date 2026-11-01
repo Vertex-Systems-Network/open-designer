@@ -82,11 +82,7 @@ type LayoutGeometry = Partial<
   >
 >
 
-function updateVectorLayoutGeometry(
-  id: string,
-  node: SceneNode,
-  changes: LayoutGeometry
-): void {
+function updateVectorLayoutGeometry(id: string, node: SceneNode, changes: LayoutGeometry): void {
   if (node.type !== 'VECTOR') return
   // A path's geometry is baked at the size it was drawn, so a size the layout gives it has to
   // rescale that geometry too. Without this a path keeps its old extent and draws outside the box,
