@@ -6,6 +6,8 @@ import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 export interface ComponentCheckpoint {
   rootId: string
   nodes: Array<{ path: string[]; nodeId: string; mainComponentId: string | null }>
+  /** Deleted archive records whose GUIDs must survive long enough to write patch removals. */
+  removedSourcePaths?: Array<{ path: string[]; mainComponentId: string | null }>
 }
 
 /** Paths use source identities at every hierarchy level, never names or child indexes. */
@@ -13,10 +15,16 @@ export function checkpointComponent(
   component: MaterializedComponentOccurrence
 ): ComponentCheckpoint {
   const nodes: ComponentCheckpoint['nodes'] = []
+  const removedSourcePaths: NonNullable<ComponentCheckpoint['removedSourcePaths']> = []
   const visit = (occurrence: InstanceOccurrence, path: string[]): void => {
     const node = component.materialized.nodes.get(occurrence)
-    // A layer deleted before a resumed checkpoint is left out, as the restore leaves it out.
-    if (!node && path.length > 0) return
+    // Keep deleted record identities separately so a resumed FIG patch can remove their archive records.
+    if (!node && path.length > 0) {
+      removedSourcePaths.push({ path, mainComponentId: occurrence.mainComponentId })
+      for (const child of occurrence.children)
+        visit(child, [...path, child.sourceId])
+      return
+    }
     if (!node) throw new Error('Missing checkpoint occurrence')
     nodes.push({ path, nodeId: node.id, mainComponentId: occurrence.mainComponentId })
     const ids = new Set<string>()
@@ -27,7 +35,7 @@ export function checkpointComponent(
     }
   }
   visit(component.occurrence, [])
-  return { rootId: component.materialized.root.id, nodes }
+  return { rootId: component.materialized.root.id, nodes, removedSourcePaths }
 }
 
 export function restoreComponentCheckpoint(
