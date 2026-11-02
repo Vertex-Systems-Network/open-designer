@@ -283,7 +283,7 @@ export function shardOutlineSources(
 ): GlyphOutlineSource[] {
   if (!isHarfBuzzLoaded()) return []
   return fontManager.shardData(family, style).flatMap((data) => {
-    const parsed = shardFont(data)
+    const parsed = getParsedFontData(data)
     return parsed ? [outlineSource(parsed, variations)] : []
   })
 }
