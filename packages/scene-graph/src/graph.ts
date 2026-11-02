@@ -24,7 +24,7 @@ import { CONTAINER_TYPES, createDefaultNode } from './node-defaults'
 import { updateNodePreview, type NodePreviewObserver } from './preview'
 import type { Color, Rect, Vector } from './primitives'
 import { markSourceFieldsEdited } from './source-metadata'
-import { invalidateTextCaches } from './text/picture'
+import { textCacheInvalidationChanges } from './text/picture'
 import type {
   DocumentColorSpace,
   DocumentKind,
@@ -46,8 +46,38 @@ import { normalizeVectorNetwork } from './vector-network'
 /** Scopes that graph methods check while a caller's callback runs; scopes nest. */
 type GraphScope = 'preview' | 'sourceMetadata' | 'importedState' | 'layout' | 'derivedLayout'
 
+class ObservableNodeMap extends Map<string, SceneNode> {
+  private readonly mutationObservers = new Set<() => void>()
+
+  observeMutations(observer: () => void): () => void {
+    this.mutationObservers.add(observer)
+    return () => this.mutationObservers.delete(observer)
+  }
+
+  private beforeMutation() {
+    for (const observer of this.mutationObservers) observer()
+  }
+
+  override set(key: string, value: SceneNode): this {
+    if (this.get(key) !== value || !this.has(key)) this.beforeMutation()
+    return super.set(key, value)
+  }
+
+  override delete(key: string): boolean {
+    if (!this.has(key)) return false
+    this.beforeMutation()
+    return super.delete(key)
+  }
+
+  override clear(): void {
+    if (this.size === 0) return
+    this.beforeMutation()
+    super.clear()
+  }
+}
+
 export class SceneGraph {
-  nodes = new Map<string, SceneNode>()
+  nodes = new ObservableNodeMap()
   images = new Map<string, Uint8Array>()
   variables = new Map<string, Variable>()
   variableCollections = new Map<string, VariableCollection>()
@@ -113,6 +143,11 @@ export class SceneGraph {
    * buffered. Graph methods report the nodes they change; code that writes into a node directly
    * reports it with `willChangeNode` first.
    */
+  /** Observe structural node-map writes, including direct Map mutations. */
+  observeNodeMapMutations(observer: () => void): () => void {
+    return this.nodes.observeMutations(observer)
+  }
+
   observeNodeChanges(observer: NodeChangeObserver): () => void {
     this.changeObservers.add(observer)
     return () => this.changeObservers.delete(observer)
@@ -575,9 +610,16 @@ export class SceneGraph {
       if (node.componentId) this.unindexInstance(node.componentId, id)
       if (changes.componentId) this.indexInstance(changes.componentId, id)
     }
-    if (node.type === 'TEXT') invalidateTextCaches(node, changes)
     if (this.scopeDepths.sourceMetadata === 0 && !this.isApplyingLayout) {
       markSourceFieldsEdited(node, Object.keys(changes))
+    }
+    // Cache resets that change the node travel with the change, under the caller's own values,
+    // so a layout put-back cannot drop their event.
+    if (node.type === 'TEXT') {
+      const resets = omitBy(textCacheInvalidationChanges(node, changes), (value, key) =>
+        Object.is(node[key], value)
+      )
+      changes = { ...resets, ...changes }
     }
     if (changes.vectorNetwork) {
       changes = { ...changes, vectorNetwork: normalizeVectorNetwork(changes.vectorNetwork) }

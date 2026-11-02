@@ -8,6 +8,7 @@ import type {
   Variable,
   VariableCollection
 } from '@open-designer/scene-graph'
+import type { TouchedCheckpoint } from '@open-designer/scene-graph/checkpoint'
 import { withLiveComments } from '@open-designer/scene-graph/comments'
 import { cloneInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
 import {
@@ -68,6 +69,7 @@ export interface DocumentChange {
   children: Record<Side, ChildList[]>
   variables: RecordChange<Variable>[]
   collections: RecordChange<VariableCollection>[]
+  documentKind: Record<Side, SceneGraph['documentKind']> | null
 }
 
 /** Layers by id: the live graph's, or those captured before the edit. */
@@ -206,7 +208,10 @@ function recordLayer(
   }
 }
 
-function diffRecords<T>(previous: Map<string, T>, current: Map<string, T>): RecordChange<T>[] {
+function diffRecords<T>(
+  previous: ReadonlyMap<string, T>,
+  current: ReadonlyMap<string, T>
+): RecordChange<T>[] {
   const ids = new Set([...previous.keys(), ...current.keys()])
   return [...ids].flatMap((id) => {
     const before = previous.get(id) ?? null
@@ -275,43 +280,104 @@ export function captureDocumentChange(graph: SceneGraph, pageId: string): () => 
   return () => {
     unobserve()
     unbindEvents()
-    const change: DocumentChange = {
-      pageId,
-      pageIds: [],
-      created: [],
-      deleted: [],
-      updated: [],
-      children: { before: [], after: [] },
-      variables: diffRecords(variables, graph.variables),
-      collections: diffRecords(collections, graph.variableCollections)
-    }
-    const pageIds = new Set<string>()
-    const touched = new Set([
+    const ids = new Set([
       ...impact.changedNodeIds,
       ...impact.previousParentIds,
       ...impact.currentParentIds
     ])
-    for (const id of touched) {
-      const previous = captured.get(id)
-      // A layer changed without telling observers has no state to go back to.
-      if (!previous && !created.has(id)) continue
-      const current = graph.getNode(id)
-      // Comments are never part of an undo step.
-      const kept =
-        previous && current && id === graph.rootId ? withCommentsOf(previous, current) : previous
-      recordLayer(change, id, kept, current)
-      for (const page of [pageOf(captured, id), pageOf(graph.nodes, id)])
-        if (page) pageIds.add(page)
-    }
-    change.pageIds = [...pageIds]
-    const byDepth = (nodes: Lookup) => (a: { id: string }, b: { id: string }) =>
-      depthIn(nodes, a.id) - depthIn(nodes, b.id)
-    change.created.sort(byDepth(graph.nodes))
-    change.children.after.sort(byDepth(graph.nodes))
-    change.deleted.sort(byDepth(captured))
-    change.children.before.sort(byDepth(captured))
-    return change
+    return buildDocumentChange(graph, pageId, ids, captured, created, {
+      variables: diffRecords(variables, graph.variables),
+      collections: diffRecords(collections, graph.variableCollections)
+    })
   }
+}
+
+type RecordChanges = Pick<DocumentChange, 'variables' | 'collections'>
+
+/**
+ * The change of the touched layers `ids`, given each one's state before the edit in `previous`,
+ * which also gives the ancestors of layers the edit moved or removed. A layer neither in
+ * `previous` nor `created` changed without telling observers and has no state to go back to.
+ */
+function buildDocumentChange(
+  graph: SceneGraph,
+  pageId: string,
+  ids: Iterable<string>,
+  previous: Lookup,
+  created: ReadonlySet<string>,
+  records: RecordChanges
+): DocumentChange {
+  const change: DocumentChange = {
+    ...emptyDocumentChange(pageId),
+    variables: records.variables,
+    collections: records.collections
+  }
+  const pageIds = new Set<string>()
+  for (const id of ids) {
+    const before = previous.get(id)
+    if (!before && !created.has(id)) continue
+    const current = graph.getNode(id)
+    // Comments are never part of an undo step.
+    const kept = before && current && id === graph.rootId ? withCommentsOf(before, current) : before
+    recordLayer(change, id, kept, current)
+    for (const page of [pageOf(previous, id), pageOf(graph.nodes, id)]) if (page) pageIds.add(page)
+  }
+  change.pageIds = [...pageIds]
+  const byDepth = (nodes: Lookup) => (a: { id: string }, b: { id: string }) =>
+    depthIn(nodes, a.id) - depthIn(nodes, b.id)
+  change.created.sort(byDepth(graph.nodes))
+  change.children.after.sort(byDepth(graph.nodes))
+  change.deleted.sort(byDepth(previous))
+  change.children.before.sort(byDepth(previous))
+  return change
+}
+
+/** A change that changed nothing, as an edit that failed or did nothing records. */
+export function emptyDocumentChange(pageId: string): DocumentChange {
+  return {
+    pageId,
+    pageIds: [],
+    created: [],
+    deleted: [],
+    updated: [],
+    children: { before: [], after: [] },
+    variables: [],
+    collections: [],
+    documentKind: null
+  }
+}
+
+/** The variables and collections an edit changed, against the copies a checkpoint holds. */
+export function recordChanges(graph: SceneGraph, checkpoint: TouchedCheckpoint): RecordChanges {
+  return {
+    variables: diffRecords(checkpoint.variables, graph.variables),
+    collections: diffRecords(checkpoint.variableCollections, graph.variableCollections)
+  }
+}
+
+/**
+ * What a property edit observed by `checkpoint` changed, at the cost of the layers it touched:
+ * each copied layer is compared with the live one. Layers the checkpoint did not copy are read
+ * live, which they still are, so the pages of the copied layers are found.
+ */
+export function documentChangeFromCheckpoint(
+  graph: SceneGraph,
+  pageId: string,
+  checkpoint: TouchedCheckpoint,
+  records: RecordChanges = recordChanges(graph, checkpoint)
+): DocumentChange {
+  const created = new Set([...checkpoint.reported].filter((id) => !checkpoint.nodes.has(id)))
+  // A layer the edit created has no state before it, though the live graph now holds one.
+  const previous: Lookup = {
+    get: (id) => checkpoint.nodes.get(id) ?? (created.has(id) ? undefined : graph.getNode(id)),
+    size: graph.nodes.size
+  }
+  const ids = [...checkpoint.nodes.keys(), ...created]
+  const change = buildDocumentChange(graph, pageId, ids, previous, created, records)
+  if (checkpoint.documentKind !== graph.documentKind) {
+    change.documentKind = { before: checkpoint.documentKind, after: graph.documentKind }
+  }
+  return change
 }
 
 export function isEmptyDocumentChange(change: DocumentChange): boolean {
@@ -322,7 +388,8 @@ export function isEmptyDocumentChange(change: DocumentChange): boolean {
     change.children.before.length === 0 &&
     change.children.after.length === 0 &&
     change.variables.length === 0 &&
-    change.collections.length === 0
+    change.collections.length === 0 &&
+    change.documentKind === null
   )
 }
 
@@ -337,6 +404,7 @@ export function applyDocumentChange(graph: SceneGraph, change: DocumentChange, s
   const removed = side === 'before' ? change.created : change.deleted
   restoreRecords(graph.variableCollections, change.collections, side)
   restoreRecords(graph.variables, change.variables, side)
+  if (change.documentKind) graph.documentKind = change.documentKind[side]
   graph.preserveSourceMetadataDuring(() => {
     for (const node of restored) {
       const { parentId, childIds: _childIds, ...fields } = structuredClone(node)
