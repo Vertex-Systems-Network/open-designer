@@ -12,6 +12,7 @@ import {
   type ExportedFile
 } from '@/app/document/export/files'
 import type { ExportOptions } from '@/app/document/export/types'
+import { toast } from '@/app/shell/ui'
 import { trackDocumentFormat } from '@/app/telemetry'
 
 type DownloadBlob = (data: Uint8Array, filename: string, mime: string) => void
@@ -54,7 +55,8 @@ export function createDocumentExportActions(
       fileName: getExportFileName(baseName, format, result.extension, options),
       format: format.label,
       ext: `.${result.extension}`,
-      mime: result.mimeType
+      mime: result.mimeType,
+      ...(result.warnings?.length ? { warnings: result.warnings } : {})
     }
   }
 
@@ -69,12 +71,21 @@ export function createDocumentExportActions(
     )
   }
 
+  function warnOmittedEffects(files: ExportedFile[]) {
+    const effects = [\n      ...new Set(\n        files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? [])\n      )\n    ]
+    if (effects.length > 0) {
+      toast.warning(`Export omitted unsupported effects: ${effects.join(', ')}.`)
+    }
+  }
+
   async function exportTarget(
     target: ExportRequest['target'],
     formatId: string,
     options?: ExportOptions
   ) {
-    if (await saveExportFile(await renderExportFile(target, formatId, options))) {
+    const file = await renderExportFile(target, formatId, options)
+    if (await saveExportFile(file)) {
+      warnOmittedEffects([file])
       trackDocumentFormat('document_exported', formatId)
     }
   }
@@ -103,8 +114,10 @@ export function createDocumentExportActions(
             downloadBlob
           )
     // Counted once delivered, so a failed render or a cancelled save is not an export.
-    if (saved)
+    if (saved) {
+      warnOmittedEffects(files)
       for (const { formatId } of requests) trackDocumentFormat('document_exported', formatId)
+    }
   }
 
   async function exportSelection(scale: number, formatId: BuiltinIOFormatId) {
