@@ -1,0 +1,1 @@
+- `set_text` and `opendesigner.setTextMarkdown()` can write Markdown as styled text ranges and paragraphs, including headings, emphasis, links, lists, quotes, and inline code.
