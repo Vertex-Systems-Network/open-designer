@@ -138,6 +138,39 @@
       ],
       "@open-designer/pen/*": [
         "./packages/pen/src/*"
+      ],
+      "@open-pencil/core": [
+        "./packages/core/src/index.ts"
+      ],
+      "@open-pencil/core/*": [
+        "./packages/core/src/*"
+      ],
+      "@open-pencil/scene-graph": [
+        "./packages/scene-graph/src/index.ts"
+      ],
+      "@open-pencil/scene-graph/*": [
+        "./packages/scene-graph/src/*"
+      ],
+      "@open-pencil/fig": [
+        "./packages/fig/src/index.ts"
+      ],
+      "@open-pencil/fig/*": [
+        "./packages/fig/src/*"
+      ],
+      "@open-pencil/design-jsx": [
+        "./packages/design-jsx/src/index.ts"
+      ],
+      "@open-pencil/design-jsx/*": [
+        "./packages/design-jsx/src/*"
+      ],
+      "@open-pencil/kiwi/*": [
+        "./packages/kiwi/src/*"
+      ],
+      "@open-pencil/pen": [
+        "./packages/pen/src/index.ts"
+      ],
+      "@open-pencil/pen/*": [
+        "./packages/pen/src/*"
       ]
     }
   },
