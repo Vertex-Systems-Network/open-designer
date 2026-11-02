@@ -1,0 +1,1 @@
+- Arrow keys used by an open menu, list, or dialog no longer also nudge the selected canvas layer.
