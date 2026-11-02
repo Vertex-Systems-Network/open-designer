@@ -547,6 +547,9 @@ export function renderSceneBacking(
     r.sceneBackingBuild?.surface.delete()
     r.sceneBackingBuild = null
     r.sceneBackingNeedsCrispRender = true
+    // Board dots depend on the live zoom; scaling a retained backing changes their apparent
+    // size until a crisp replacement finishes rendering. Draw the live scene while navigating.
+    if (r.pageDotGrid !== null) return false
     return drawSceneBacking(r, canvas, sceneVersion, true, graph.positionPreviewVersion)
       ? 'backing'
       : false
