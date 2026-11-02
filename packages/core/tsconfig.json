@@ -18,7 +18,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "../..",
     "paths": {
       "#core/*": [
         "./src/*"
@@ -36,31 +36,31 @@
         "./src/*"
       ],
       "@open-pencil/scene-graph": [
-        "../scene-graph/dist/index"
+        "../scene-graph/src/index.ts"
       ],
       "@open-pencil/scene-graph/*": [
-        "../scene-graph/dist/*"
+        "../scene-graph/src/*"
       ],
       "@open-pencil/fig": [
-        "../fig/dist/index"
+        "../fig/src/index.ts"
       ],
       "@open-pencil/fig/*": [
-        "../fig/dist/*"
+        "../fig/src/*"
       ],
       "@open-pencil/design-jsx": [
-        "../design-jsx/dist/index"
+        "../design-jsx/src/index.ts"
       ],
       "@open-pencil/design-jsx/*": [
-        "../design-jsx/dist/*"
+        "../design-jsx/src/*"
       ],
       "@open-pencil/kiwi/*": [
-        "../kiwi/dist/*"
+        "../kiwi/src/*"
       ],
       "@open-pencil/pen": [
-        "../pen/dist/index"
+        "../pen/src/index.ts"
       ],
       "@open-pencil/pen/*": [
-        "../pen/dist/*"
+        "../pen/src/*"
       ]
     }
   },
