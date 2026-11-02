@@ -1,6 +1,9 @@
 import { create, type Delta } from 'jsondiffpatch'
 
-import { sceneNodeAttributes } from '@open-designer/design-jsx'
+import {
+  sceneNodeAttributes,
+  type RekaReferencePropsCache
+} from '@open-designer/design-jsx'
 import type { NodeType, SceneGraph } from '@open-designer/scene-graph'
 
 export const DEFAULT_DIFF_DEPTH = 10
@@ -35,12 +38,13 @@ function projectNode(
   id: string,
   key: string,
   match: DiffMatch,
-  depth: number
+  depth: number,
+  rekaCache: RekaReferencePropsCache
 ): ProjectedNode | null {
   const node = graph.getNode(id)
   if (!node) return null
   const attributes = Object.fromEntries(
-    (sceneNodeAttributes(id, graph) ?? []).map(({ name, source }) => [name, source])
+    (sceneNodeAttributes(id, graph, rekaCache) ?? []).map(({ name, source }) => [name, source])
   )
   let children: ProjectedNode[] | null = null
   if (depth > 0) {
@@ -53,7 +57,7 @@ function projectNode(
       const count = (seen.get(base) ?? 0) + 1
       seen.set(base, count)
       const pathKey = count > 1 ? `${base}[${count}]` : base
-      return projectNode(graph, childId, match === 'id' ? childId : pathKey, match, depth - 1) ?? []
+      return projectNode(graph, childId, match === 'id' ? childId : pathKey, match, depth - 1, rekaCache) ?? []
     })
   }
   return { id, key, type: node.type, name: node.name, attributes, children }
@@ -69,7 +73,8 @@ export function projectTree(
     rootId,
     rootId,
     options.match,
-    options.depth ?? Number.POSITIVE_INFINITY
+    options.depth ?? Number.POSITIVE_INFINITY,
+    new Map()
   )
 }
 
