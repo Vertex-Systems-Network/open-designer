@@ -41,8 +41,6 @@ export function movePageInGraph(
     const lastPage = remainingPages[remainingPages.length - 1]
     rootIndex = remainingChildren.findIndex((child) => child.id === lastPage.id) + 1
   }
-  if (currentRootIndex === rootIndex) return nextIndex
-
   graph.insertChildAt(pageId, rootId, rootIndex)
   persistPageOrder(graph)
   return nextIndex
