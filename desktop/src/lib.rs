@@ -28,7 +28,7 @@ use system::window::show_main_window;
 use tauri::{Emitter, Manager};
 
 /// The arguments to relaunch with when `--detach` is among them, without the flag.
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 fn detach_args(
     args: impl IntoIterator<Item = std::ffi::OsString>,
 ) -> Option<Vec<std::ffi::OsString>> {
@@ -39,7 +39,7 @@ fn detach_args(
 }
 
 /// Relaunch in a new session so closing the terminal does not close the editor.
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 fn detach_if_requested() {
     use std::os::unix::process::CommandExt;
     use std::process::{Command, Stdio};
@@ -73,7 +73,7 @@ fn detach_if_requested() {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    #[cfg(unix)]
+    #[cfg(target_os = "linux")]
     detach_if_requested();
 
     #[cfg(target_os = "linux")]
