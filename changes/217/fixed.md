@@ -1,0 +1,1 @@
+- `batch_update` now applies all property changes together or leaves the document unchanged if any operation fails.
