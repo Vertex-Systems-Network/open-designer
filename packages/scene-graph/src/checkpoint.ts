@@ -163,7 +163,9 @@ export interface TouchedCheckpoint {
  * the edit.
  */
 export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
-  const nodeRefs = new Map(graph.nodes)
+  const nodeRefs = new Map<string, SceneNode>()
+  const initialNodeCount = graph.nodes.size
+  let nodeMapSnapshot: Map<string, SceneNode> | null = null
   const variableRefs = new Map(graph.variables)
   const collectionRefs = new Map(graph.variableCollections)
   const saved = structuredClone({
@@ -183,7 +185,9 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
 
   /** Copies a node as the edit found it: the original object, should the edit have replaced it. */
   function copy(node: SceneNode) {
-    nodes.set(node.id, structuredClone(nodeRefs.get(node.id) ?? node))
+    const original = graph.nodes.get(node.id) ?? node
+    if (!nodeRefs.has(node.id)) nodeRefs.set(node.id, original)
+    nodes.set(node.id, structuredClone(original))
   }
 
   const skipped = (node: SceneNode) => nodes.has(node.id) || created.has(node.id)
@@ -213,6 +217,10 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
       copyLineage(node)
     }
   })
+  const unobserveNodeMap = graph.observeNodeMapMutations(() => {
+    // Structural edits are exceptional: retain the exact pre-edit map only if one occurs.
+    nodeMapSnapshot ??= new Map(graph.nodes)
+  })
   const unbindEvents = recordSceneMutations(graph, impact)
   let observing = true
 
@@ -220,6 +228,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
     if (!observing) return
     observing = false
     unobserve()
+    unobserveNodeMap()
     unbindEvents()
   }
 
@@ -227,15 +236,12 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
     if (
       created.size > 0 ||
       impact.deletedNodeIds.size > 0 ||
-      graph.nodes.size !== nodeRefs.size ||
+      graph.nodes.size !== initialNodeCount ||
+      nodeMapSnapshot !== null ||
       graph.variables.size !== variableRefs.size
     )
       throw new Error(NODE_COUNT_ERROR)
-    for (const [id, node] of graph.nodes) {
-      const original = nodeRefs.get(id)
-      if (!original) throw new Error(NODE_COUNT_ERROR)
-      if (original !== node) throw new Error(NODE_IDENTITY_ERROR)
-    }
+
     for (const [id, before] of nodes) {
       const after = graph.nodes.get(id)
       if (
@@ -295,26 +301,14 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
   function restoreNodeMap(): { removed: Map<string, SceneNode>; readded: Set<string> } {
     const removed = new Map<string, SceneNode>()
     const readded = new Set<string>()
-    let changed = graph.nodes.size !== nodeRefs.size
-    if (!changed) {
-      // In lockstep, so a node removed and set again, which moves to the end, is put back too.
-      const live = graph.nodes.entries()
-      for (const [id, node] of nodeRefs) {
-        const next = live.next()
-        if (next.done || next.value[0] !== id || next.value[1] !== node) {
-          changed = true
-          break
-        }
-      }
-    }
-    if (!changed) return { removed, readded }
+    if (!nodeMapSnapshot) return { removed, readded }
     const failed = new Map(graph.nodes)
     graph.nodes.clear()
-    for (const [id, node] of nodeRefs) {
+    for (const [id, node] of nodeMapSnapshot) {
       graph.nodes.set(id, node)
       if (!failed.has(id)) readded.add(id)
     }
-    for (const [id, node] of failed) if (!nodeRefs.has(id)) removed.set(id, node)
+    for (const [id, node] of failed) if (!nodeMapSnapshot.has(id)) removed.set(id, node)
     return { removed, readded }
   }
 
