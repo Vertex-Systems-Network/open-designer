@@ -382,10 +382,11 @@ export function createEditor(options?: EditorOptions) {
   }
 
   function replaceGraph(newGraph: SceneGraph, options: { preserveHistory?: boolean } = {}) {
-    // A graph swap during an active preview keeps committed history, but clears it otherwise.
-    const preserveHistory = options.preserveHistory ?? interactiveEdits.size > 0
-    nodes.cancelNodePreviews()
-    if (preserveHistory) undo.discardBatches()
+    // Preserve history for explicit preview transitions and a cancelled node preview only.
+    const hadNodePreview = nodes.cancelNodePreviews()
+    const preserveHistory = options.preserveHistory ?? hadNodePreview
+    // Open controls must settle their batches before a graph can change under their undo steps.
+    undo.settlePendingEdits()
     _graph = newGraph
     if (!preserveHistory) undo.clear()
     state.documentKind = _graph.documentKind
