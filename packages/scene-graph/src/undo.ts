@@ -85,6 +85,11 @@ export class UndoManager {
     for (const settle of this.settlers) settle()
   }
 
+  /** Finish edits owned by open controls before history is preserved or cleared. */
+  settlePendingEdits(): void {
+    this.settle()
+  }
+
   undo(): string | null {
     this.settle()
     const entry = this.undoStack.pop()
