@@ -476,6 +476,9 @@ function materializeReaderInto(
       else if (node.mainComponentId === null) node.children.forEach(collectExisting)
     }
     collectExisting(item.occurrence)
+    // A resumed component may have deleted layers that a later, lazily read definition still
+    // references. Prune those stale nested occurrences before mapping source children.
+    if (edited) reconcileOccurrenceStructure(item.occurrence, graph, components)
     const built = materializeInstance(graph, parentId, item.occurrence, componentIds, {
       blobs,
       sourceChildren: mapInstanceSourceChildren(item.occurrence, components),
