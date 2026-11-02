@@ -483,7 +483,7 @@ export async function openStorageDocumentInNewTab(
   const existing = findStorageTab(binding)
   if (existing) {
     switchTab(existing.id)
-    rememberRecentStorageDocument(binding, document.name)
+    rememberRecentStorageDocument(binding, document.name, existing.store.state.documentKind)
     return existing.store
   }
 
@@ -497,7 +497,7 @@ export async function openStorageDocumentInNewTab(
   let succeeded = false
   try {
     await showStorageDocument(store, binding, document, load)
-    rememberRecentStorageDocument(binding, document.name)
+    rememberRecentStorageDocument(binding, document.name, store.state.documentKind)
     succeeded = true
   } catch (error) {
     if (!load.signal.aborted) {
