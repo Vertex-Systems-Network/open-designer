@@ -27,6 +27,7 @@ import {
 } from '#core/text/font/glyphs'
 import type { ShapingFeature } from '#core/text/font/harfbuzz'
 import { fontManager } from '#core/text/font/manager'
+import { isVariableFont } from '#core/text/font/variation'
 import { textFontFace } from '#core/text/requirements/collect'
 
 type GlyphRun = ReturnType<Paragraph['getShapedLines']>[number]['runs'][number]
@@ -143,15 +144,18 @@ function sourceStyle(family: string, font: ReturnType<typeof fontAt>): string | 
  * each family's own file, then its shards.
  */
 function* candidateSources(font: ReturnType<typeof fontAt>) {
-  const variations = font.variations.some(({ axis }) => axis === 'wght')
-    ? font.variations
-    : [...font.variations, { axis: 'wght', value: font.drawn.weight }]
+  const variations = font.variations
   for (const family of paragraphSourceFamilies(font.family)) {
     const style = sourceStyle(family, font)
     if (!style) continue
-    const source = glyphOutlineSourceSync(family, style, variations)
+    const data = fontManager.loadedData(family, style)
+    const sourceVariations =
+      data && !variations.some(({ axis }) => axis === 'wght') && isVariableFont(data)
+        ? [...variations, { axis: 'wght', value: font.drawn.weight }]
+        : variations
+    const source = glyphOutlineSourceSync(family, style, sourceVariations)
     if (source) yield source
-    yield* shardOutlineSources(family, style, variations)
+    yield* shardOutlineSources(family, style, variations, font.drawn.weight)
   }
 }
 
