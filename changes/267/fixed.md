@@ -1,0 +1,1 @@
+- Detaching a component instance preserves the overrides of its nested instances when the document is saved and reopened.
