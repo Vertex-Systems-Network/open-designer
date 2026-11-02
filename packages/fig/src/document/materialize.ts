@@ -1,6 +1,7 @@
 import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import { guidToString } from '@open-designer/kiwi/fig/guid'
 import { generateId, SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { repairHierarchy } from '@open-designer/scene-graph/hierarchy'
 import { OPEN_DESIGNER_PLUGIN_DATA } from '@open-designer/scene-graph/plugin-data'
 import { remapStyleRunReferences } from '@open-designer/scene-graph/text'
 
@@ -594,5 +595,6 @@ function materializeReaderInto(
     applyDocumentPaintBindings(graph, materialized)
     applyDocumentValueBindings(graph, materialized)
   })
+  repairHierarchy(graph)
   return state
 }
