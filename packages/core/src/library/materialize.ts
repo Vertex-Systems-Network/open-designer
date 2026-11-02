@@ -1,7 +1,7 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import { cloneNodeProps } from '@open-designer/scene-graph/copy'
+import { remapCopiedReferences } from '@open-designer/scene-graph/transfer'
 
-import { remapCopiedReferences } from './copied-references'
 import { findLibraryDefinition } from './definitions'
 import { assertLibraryAssetKey, assertLibraryId, libraryAssetIdentityKey } from './identity'
 import type { ComponentLibraryRevision, LibraryAssetDescriptor } from './types'

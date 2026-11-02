@@ -50,6 +50,44 @@ function treeRoots(tree: TreeNode): TreeNode[] {
   return tree.type === FRAGMENT ? tree.children.filter(isTreeNode) : [tree]
 }
 
+/** Stable dependency order for sibling component definitions and every instance that names them. */
+function rootRenderOrder(graph: SceneGraph, roots: readonly TreeNode[]): number[] {
+  const definitions = new Map<unknown, number[]>()
+  roots.forEach((root, index) => {
+    if (root.type !== 'component' && root.type !== 'component-set') return
+    const keys = [root.props.name, root.props.ref].filter((key) => key !== undefined)
+    for (const key of keys) definitions.set(key, [...(definitions.get(key) ?? []), index])
+  })
+  const referencesIn = (root: TreeNode): unknown[] => {
+    const references: unknown[] = []
+    const visit = (node: TreeNode): void => {
+      if (node.type === 'instance')
+        references.push(node.props.component ?? node.props.componentId ?? node.props.of)
+      for (const child of node.children ?? []) if (isTreeNode(child)) visit(child)
+    }
+    visit(root)
+    return references
+  }
+  const dependencies = roots.map((root, index) => {
+    const owners = new Set<number>()
+    for (const reference of referencesIn(root)) {
+      const existing = typeof reference === 'string' ? graph.getNode(reference) : undefined
+      if (existing?.type === 'COMPONENT' || existing?.type === 'COMPONENT_SET') continue
+      for (const owner of definitions.get(reference) ?? []) if (owner !== index) owners.add(owner)
+    }
+    return [...owners]
+  })
+  const pending = roots.map((_, index) => index)
+  const order: number[] = []
+  while (pending.length > 0) {
+    const next = pending.find((index) => dependencies[index].every((owner) => order.includes(owner)))
+      ?? pending[0]
+    order.push(next)
+    pending.splice(pending.indexOf(next), 1)
+  }
+  return order
+}
+
 /** Render every root of `tree` into the parent and lay out once. */
 export async function renderRoots<Artwork>(
   services: DesignJSXServices<Artwork>,
@@ -63,21 +101,29 @@ export async function renderRoots<Artwork>(
   applyVariableDefinitions(graph, tree)
 
   const nodes: SceneNode[] = []
+  const existingChildCount = graph.getNode(parentId)?.childIds.length ?? 0
   const connectors: Array<{ node: SceneNode; tree: TreeNode }> = []
   const refs = new LayerRefs()
+  const order = rootRenderOrder(graph, roots)
   const onNode = (element: TreeNode, node: SceneNode) => {
     if (element.type === CONNECTOR_ELEMENT) connectors.push({ node, tree: element })
     else refs.mark(element.props.ref, node)
     options.onNode?.(element, node)
   }
-  for (const root of roots) {
+  for (const index of order) {
+    const root = roots[index]
     const node = await renderNode(services, graph, root, parentId, onNode)
-    if (options.x !== undefined) graph.updateNode(node.id, { x: options.x })
-    if (options.y !== undefined) graph.updateNode(node.id, { y: options.y })
-    nodes.push(node)
+    const position = options.positions?.[index] ?? options
+    if (position.x !== undefined) graph.updateNode(node.id, { x: position.x })
+    if (position.y !== undefined) graph.updateNode(node.id, { y: position.y })
+    nodes[index] = node
   }
 
   const rootIds = nodes.map((node) => node.id)
+  // Rendering may create dependency roots first, but the graph's sibling order follows the JSX.
+  for (const [index, node] of nodes.entries()) {
+    graph.insertChildAt(node.id, parentId, existingChildCount + index)
+  }
   const warnings = [...refs.warnings, ...resolveConnectorEnds(graph, rootIds, connectors, refs)]
   if (!options.deferLayout) services.layout(graph, rootIds)
 
