@@ -78,7 +78,7 @@ export function nodeProxyToJSON(
   if (n.componentPropertyReferences.length > 0) {
     obj.componentPropertyReferences = n.componentPropertyReferences
   }
-  if (n.componentPropertyAssignments.length > 0) {
+  if (Object.keys(n.componentPropertyAssignments).length > 0) {
     obj.componentPropertyAssignments = n.componentPropertyAssignments
   }
   const children = pluginChildren(graph, nodeId)
