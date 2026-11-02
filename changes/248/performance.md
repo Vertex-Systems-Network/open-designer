@@ -1,0 +1,1 @@
+- Switching a variable mode or editing a bound variable lays out affected subtrees once instead of once per changed layer.
