@@ -13,7 +13,7 @@ import {
   type OutlineCommand,
   type ShapingOptions
 } from './harfbuzz'
-import { fontTableView } from './variation'
+import { fontTableView, isVariableFont } from './variation'
 
 export type { OutlineCommand } from './harfbuzz'
 
