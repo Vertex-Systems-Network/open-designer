@@ -1,9 +1,6 @@
 import { create, type Delta } from 'jsondiffpatch'
 
-import {
-  sceneNodeAttributes,
-  type RekaReferencePropsCache
-} from '@open-designer/design-jsx'
+import { sceneNodeAttributes, type RekaReferencePropsCache } from '@open-designer/design-jsx'
 import type { NodeType, SceneGraph } from '@open-designer/scene-graph'
 
 export const DEFAULT_DIFF_DEPTH = 10
@@ -57,7 +54,10 @@ function projectNode(
       const count = (seen.get(base) ?? 0) + 1
       seen.set(base, count)
       const pathKey = count > 1 ? `${base}[${count}]` : base
-      return projectNode(graph, childId, match === 'id' ? childId : pathKey, match, depth - 1, rekaCache) ?? []
+      return (
+        projectNode(graph, childId, match === 'id' ? childId : pathKey, match, depth - 1, rekaCache) ??
+        []
+      )
     })
   }
   return { id, key, type: node.type, name: node.name, attributes, children }
