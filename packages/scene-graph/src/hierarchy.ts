@@ -59,7 +59,7 @@ export function repairHierarchy(graph: SceneGraph): number {
     placed.add(node.id)
     walk(node)
   }
-  for (const node of roots) start(node, false)
+  for (const node of roots) {\n    const parent = node.parentId ? graph.nodes.get(node.parentId) : undefined\n    const hasUnplacedParent =\n      !!parent && disconnectedIds.has(parent.id) && parent.childIds.includes(node.id)\n    start(node, !hasUnplacedParent)\n  }
   // Any remaining nodes form a parent cycle; break one link, then walk the whole component.
   for (const node of disconnected) start(node, true)
   if (repairs > 0) graph.clearAbsPosCache()
