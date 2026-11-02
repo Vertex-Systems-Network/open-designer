@@ -1,6 +1,7 @@
 import type { SceneNode } from '@open-pencil/scene-graph'
 
 import { LAYER_HIT_PAD } from '#core/constants'
+import { resolveEditorProfile } from '#core/editor/views/profile'
 import type { EditorContext } from '#core/editor/types'
 
 export function createSelectionHitTestActions(
@@ -17,7 +18,14 @@ export function createSelectionHitTestActions(
     const scope = ctx.state.enteredContainerId ?? ctx.state.currentPageId
     return deep
       ? ctx.graph.hitTestDeep(cx, cy, scope, pad)
-      : ctx.graph.hitTestSelectable(cx, cy, scope, ctx.state.selectedIds, pad)
+      : ctx.graph.hitTestSelectable(
+          cx,
+          cy,
+          scope,
+          ctx.state.selectedIds,
+          pad,
+          resolveEditorProfile(ctx.state).framesOpen
+        )
   }
 
   /**
@@ -26,7 +34,12 @@ export function createSelectionHitTestActions(
    */
   function selectAtPoint(cx: number, cy: number) {
     const scopeId = ctx.state.enteredContainerId ?? ctx.state.currentPageId
-    const hit = hitTestAtPoint(cx, cy) ?? ctx.graph.hitTestOpenContainer(cx, cy, scopeId)
+    const hit = hitTestAtPoint(cx, cy) ?? ctx.graph.hitTestOpenContainer(
+      cx,
+      cy,
+      scopeId,
+      resolveEditorProfile(ctx.state).framesOpen
+    )
     if (hit) {
       if (!ctx.state.selectedIds.has(hit.id)) select([hit.id])
     } else {
