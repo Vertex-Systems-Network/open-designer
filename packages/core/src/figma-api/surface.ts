@@ -15,7 +15,8 @@ export const FIGMA_API_HOST_MEMBERS = [
   'exportImage',
   'icons',
   'rasterCodec',
-  'changeBaseline'
+  'changeBaseline',
+  '_setViewportFitHandler'
 ] as const
 
 /**
