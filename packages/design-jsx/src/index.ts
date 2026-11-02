@@ -139,7 +139,8 @@ export {
   type DesignJSXElement,
   type DesignJSXWithLayers,
   type JSXAttributeSource,
-  type JSXExportOptions
+  type JSXExportOptions,
+  type RekaReferencePropsCache
 } from './export'
 export { parseJSXAttributes } from './attributes'
 export { jsxNodeFields, type JSXNodeFields } from './fields'
