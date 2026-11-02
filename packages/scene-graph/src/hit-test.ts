@@ -242,9 +242,9 @@ function frameChildAt(
 /**
  * The containers the selection opens: every ancestor of a selected layer inside the scope, so a
  * click reaches the siblings of selected layers, and a selected container itself, so hover and a
- * read-only click reach the layer under the point. A plain press inside a selected frame still
- * drags the frame, as in Figma, which `pressesSelection` in the Vue input decides. A selected group
- * or boolean stays closed: clicking inside it keeps it selected.
+ * read-only click reach the layer under the point. A selected nested frame can be dragged by
+ * pressing inside it; a selected top-level frame or section stays open, so the press selects the
+ * layer under the point. A selected group or boolean stays closed and keeps the selection.
  */
 function openedBySelection(
   graph: SceneGraph,
