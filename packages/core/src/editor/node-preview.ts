@@ -19,8 +19,10 @@ export function createNodePreviewActions(
 ) {
   let current: NodePreview | null = null
 
-  function cancelNodePreviews() {
+  function cancelNodePreviews(): boolean {
+    const hadPreview = current !== null
     current?.cancel()
+    return hadPreview
   }
 
   function beginNodePreview(label = 'Update'): NodePreview {
