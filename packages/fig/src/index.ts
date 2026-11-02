@@ -11,7 +11,7 @@ export {
 export { figArchiveMetaSchema, type FigArchiveMetaJSON } from './schema'
 export {
   compressFigDataSync,
-  figArchiveKind,
+  figArchiveKind,\n  figCanvasKind,
   figArchiveMetaJSON,
   parseFigBuffer,
   readFigArchiveMeta,
