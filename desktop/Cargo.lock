@@ -3311,6 +3311,7 @@ dependencies = [
 name = "open_pencil"
 version = "0.16.0"
 dependencies = [
+ "libc",
  "fix-path-env",
  "fontique",
  "httparse",
