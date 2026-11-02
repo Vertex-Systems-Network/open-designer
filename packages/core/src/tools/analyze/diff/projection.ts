@@ -55,8 +55,14 @@ function projectNode(
       seen.set(base, count)
       const pathKey = count > 1 ? `${base}[${count}]` : base
       return (
-        projectNode(graph, childId, match === 'id' ? childId : pathKey, match, depth - 1, rekaCache) ??
-        []
+        projectNode(
+          graph,
+          childId,
+          match === 'id' ? childId : pathKey,
+          match,
+          depth - 1,
+          rekaCache
+        ) ?? []
       )
     })
   }
