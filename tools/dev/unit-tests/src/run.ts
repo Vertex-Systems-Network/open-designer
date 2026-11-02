@@ -19,9 +19,7 @@ const bunTestArgs = separator === -1 ? [] : process.argv.slice(separator + 1)
 const flags = new Set(ownArgs.filter((arg) => arg.startsWith('--')))
 const group = (ownArgs.find((arg) => !arg.startsWith('--')) ?? 'all') as UnitTestGroup
 const tsconfigArgs =
-  group === 'core'
-    ? ['--tsconfig-override', resolve(process.cwd(), 'tsconfig.json')]
-    : []
+  group === 'core' ? ['--tsconfig-override', resolve(process.cwd(), 'tsconfig.json')] : []
 
 if (!unitTestGroupNames().includes(group)) {
   throw new Error(
