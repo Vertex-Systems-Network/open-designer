@@ -705,12 +705,17 @@ export class SceneGraph {
     return HitTest.hitTestSelectable(this, px, py, scopeId, selectedIds, pad, framesOpen)
   }
 
-  hitTestOpenContainer(px: number, py: number, scopeId: string): SceneNode | null {
-    return HitTest.hitTestOpenContainer(this, px, py, scopeId)
+  hitTestOpenContainer(
+    px: number,
+    py: number,
+    scopeId: string,
+    framesOpen = true
+  ): SceneNode | null {
+    return HitTest.hitTestOpenContainer(this, px, py, scopeId, framesOpen)
   }
 
-  isOpenContainer(nodeId: string): boolean {
-    return HitTest.isOpenContainer(this, nodeId)
+  isOpenContainer(nodeId: string, framesOpen = true): boolean {
+    return HitTest.isOpenContainer(this, nodeId, framesOpen)
   }
 
   isPointInNode(nodeId: string, px: number, py: number): boolean {
