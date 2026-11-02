@@ -279,12 +279,19 @@ export function glyphOutlineSourceSync(
 export function shardOutlineSources(
   family: string,
   style: string,
-  variations: readonly FontVariation[] = []
+  variations: readonly FontVariation[] = [],
+  weight?: number
 ): GlyphOutlineSource[] {
   if (!isHarfBuzzLoaded()) return []
   return fontManager.shardData(family, style).flatMap((data) => {
     const parsed = getParsedFontData(data)
-    return parsed ? [outlineSource(parsed, variations)] : []
+    if (!parsed) return []
+    const hasWeight = variations.some(({ axis }) => axis === 'wght')
+    const instanceVariations =
+      !hasWeight && weight !== undefined && isVariableFont(data)
+        ? [...variations, { axis: 'wght', value: weight }]
+        : variations
+    return [outlineSource(parsed, instanceVariations)]
   })
 }
 
