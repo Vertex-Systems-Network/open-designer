@@ -43,17 +43,30 @@ export function repairHierarchy(graph: SceneGraph): number {
     }
   }
   walk(root)
-  // A graph may retain nodes absent from the root's child lists. Start each disconnected
-  // component as a forest root so parent cycles cannot survive into absolute-position walks.
-  for (const node of graph.nodes.values()) {
-    if (placed.has(node.id)) continue
-    if (node.parentId !== null) {
+  // Preserve each disconnected tree's root even when a child appears first in map order.
+  const disconnected = [...graph.nodes.values()].filter((node) => !placed.has(node.id))
+  const disconnectedIds = new Set(disconnected.map((node) => node.id))
+  const roots = disconnected.filter((node) => {
+    const parent = node.parentId ? graph.nodes.get(node.parentId) : undefined
+    return !parent || !disconnectedIds.has(parent.id) || !parent.childIds.includes(node.id)
+  })
+  const start = (node: SceneNode, breakParent: boolean) => {
+    if (placed.has(node.id)) return
+    if (breakParent && node.parentId !== null) {
       node.parentId = null
       repairs++
     }
     placed.add(node.id)
     walk(node)
   }
+  for (const node of roots) {
+    const parent = node.parentId ? graph.nodes.get(node.parentId) : undefined
+    const hasUnplacedParent =
+      !!parent && disconnectedIds.has(parent.id) && parent.childIds.includes(node.id)
+    start(node, !hasUnplacedParent)
+  }
+  // Any remaining nodes form a parent cycle; break one link, then walk the whole component.
+  for (const node of disconnected) start(node, true)
   if (repairs > 0) graph.clearAbsPosCache()
   return repairs
 }
