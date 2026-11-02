@@ -42,14 +42,17 @@ function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
   if (typeof error === 'string') return [error]
   if (typeof error === 'object') {
     try {
-      const message = error.toString()
-      if (message !== '[object Object]') return [message]
+      const toString = error.toString
+      if (toString !== Object.prototype.toString) {
+        const message = Reflect.apply(toString, error, [])
+        if (message !== '[object Object]') return [message]
+      }
     } catch {
       return [Object.prototype.toString.call(error)]
     }
     return [Object.prototype.toString.call(error)]
   }
-  return [String(error)]
+  return [error.toString()]
 }
 
 function isFatalCorruption(error: unknown): boolean {
