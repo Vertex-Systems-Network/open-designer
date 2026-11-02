@@ -19,7 +19,7 @@ import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 import { assertNodeEditable } from '#core/editor/capabilities'
 import { assertTextFontsLoaded } from '#core/figma-api/fonts/loaded'
 import { computeAllLayouts, computeLayout } from '#core/layout'
-import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
+import { sizeAutoResizingText, textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { markdownText } from '#core/text/markdown'
 
 import { nodeOf, type NodeRef } from './behaviours'
