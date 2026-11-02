@@ -9,8 +9,10 @@ import * as v from 'valibot'
 export const CLOUD_AI_CONTRACT_VERSION = '1' as const
 /** The `aud` of every token Cloud signs for an AI service. */
 export const CLOUD_AI_TOKEN_AUDIENCE = 'opendesigner-ai' as const
-/** Accept tokens issued before the product rebrand while self-hosted relays roll forward. */
-export const CLOUD_AI_TOKEN_AUDIENCES = [CLOUD_AI_TOKEN_AUDIENCE, 'openpencil-ai'] as const
+/** Audience expected by independently deployed relays that have not adopted the rebrand yet. */
+export const CLOUD_AI_TOKEN_LEGACY_AUDIENCE = 'openpencil-ai' as const
+/** Accept both rebranded and legacy tokens while self-hosted relays roll forward. */
+export const CLOUD_AI_TOKEN_AUDIENCES = [CLOUD_AI_TOKEN_AUDIENCE, CLOUD_AI_TOKEN_LEGACY_AUDIENCE] as const
 /** Where Cloud publishes the public keys an AI service verifies its tokens with. */
 export const CLOUD_AI_JWKS_PATH = '/.well-known/jwks.json' as const
 
