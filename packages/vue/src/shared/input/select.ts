@@ -31,7 +31,12 @@ export interface HitTestFns {
 /** Clears the selection and starts a marquee in the open frame or section under the press. */
 function startMarquee(cx: number, cy: number, editor: Editor, setDrag: (d: DragState) => void) {
   editor.clearSelection()
-  const container = editor.graph.hitTestOpenContainer(cx, cy, editor.state.currentPageId)
+  const container = editor.graph.hitTestOpenContainer(
+    cx,
+    cy,
+    editor.state.currentPageId,
+    resolveEditorProfile(editor.state).framesOpen
+  )
   setDrag({ type: 'marquee', startX: cx, startY: cy, containerId: container?.id })
 }
 

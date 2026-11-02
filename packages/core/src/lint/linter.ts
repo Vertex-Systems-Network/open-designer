@@ -2,6 +2,7 @@ import { uniq } from 'es-toolkit'
 
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import { colorToHex } from '@open-designer/scene-graph/color'
+import { GENERATED_FRAME_TYPES } from '@open-designer/scene-graph/generated'
 
 import { presets } from './presets'
 import { allRules } from './rules'
@@ -27,6 +28,9 @@ function effectiveTextStyles(node: SceneNode): { fontSize: number; fontWeight: n
   const covered = node.styleRuns.reduce((total, run) => total + run.length, 0)
   return covered < node.text.length || runs.length === 0 ? [base, ...runs] : runs
 }
+
+/** Sticky notes, shapes, and connectors: FigJam's own layers, which lint leaves alone. */
+const GENERATED_TYPES: ReadonlySet<string> = GENERATED_FRAME_TYPES
 
 export class Linter {
   private rules = new Map<string, Rule>()
@@ -195,9 +199,20 @@ export class Linter {
     return checks
   }
 
+  private isGeneratedLayer(node: SceneNode): boolean {
+    for (let current: SceneNode | undefined = node; current; ) {
+      if (GENERATED_TYPES.has(current.type)) return true
+      current = current.parentId ? this.graph?.getNode(current.parentId) : undefined
+    }
+    return false
+  }
+
   private lintNode(id: string, parent: LintNode | undefined) {
     const node = this.nodeFor(id, parent)
     if (!node) return
+    // A sticky note, shape, or connector is FigJam's own, with its fixed choices: no design
+    // system rule applies to it or to the sublayers it generates, even when scoped directly.
+    if (this.isGeneratedLayer(node)) return
     for (const { rule, context } of this.checks) {
       if (rule.match && !rule.match.includes(node.type)) continue
       rule.check(node, context)
