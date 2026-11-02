@@ -213,7 +213,7 @@ export function detachInstance(graph: SceneGraph, instanceId: string): void {
   if (node?.type !== 'INSTANCE') return
   const outerOverrides = cloneInstanceOverrideState(node.instanceOverrides).descendants
   for (const nested of outermostNestedInstances(graph, node))
-    adoptNestedOverrides(graph, node, nested, outerOverrides)
+    adoptNestedOverrides(graph, nested, outerOverrides)
   if (node.componentId) {
     graph.instanceIndex.get(node.componentId)?.delete(instanceId)
   }
@@ -241,7 +241,6 @@ function outermostNestedInstances(graph: SceneGraph, instance: SceneNode): Scene
  */
 function adoptNestedOverrides(
   graph: SceneGraph,
-  detached: SceneNode,
   nested: SceneNode,
   outer: Map<string, Map<string, unknown>>
 ): void {
