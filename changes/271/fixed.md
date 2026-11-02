@@ -1,0 +1,1 @@
+- Moving pages in the editor or with `move_page` keeps their saved order in sync, and newly added pages append after the current order.
