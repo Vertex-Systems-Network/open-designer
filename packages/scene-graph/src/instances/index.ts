@@ -211,8 +211,9 @@ function syncInstancesOf(
 export function detachInstance(graph: SceneGraph, instanceId: string): void {
   const node = graph.nodes.get(instanceId)
   if (node?.type !== 'INSTANCE') return
+  const outerOverrides = cloneInstanceOverrideState(node.instanceOverrides).descendants
   for (const nested of outermostNestedInstances(graph, node))
-    adoptNestedOverrides(graph, node, nested)
+    adoptNestedOverrides(graph, node, nested, outerOverrides)
   if (node.componentId) {
     graph.instanceIndex.get(node.componentId)?.delete(instanceId)
   }
@@ -238,14 +239,18 @@ function outermostNestedInstances(graph: SceneGraph, instance: SceneNode): Scene
  * under that instance's layers; those, and the ones the detached instance recorded on its layers,
  * now go under its own.
  */
-function adoptNestedOverrides(graph: SceneGraph, detached: SceneNode, nested: SceneNode): void {
+function adoptNestedOverrides(
+  graph: SceneGraph,
+  detached: SceneNode,
+  nested: SceneNode,
+  outer: Map<string, Map<string, unknown>>
+): void {
   const ownLayer = new Map<string, string>()
   walkInstanceSources(graph, nested, (source, target) => {
     ownLayer.set(source.id, target.id)
     return true
   })
   const { self, descendants: kept } = cloneInstanceOverrideState(nested.instanceOverrides)
-  const outer = cloneInstanceOverrideState(detached.instanceOverrides).descendants
   const descendants = new Map<string, Map<string, unknown>>()
   const claim = (layerId: string, fields: Map<string, unknown>): void => {
     const merged = descendants.get(layerId)
