@@ -97,7 +97,7 @@ function vectorSourceSize(
 }
 
 function updateVectorPathGeometry(
-  node: SceneNode & { type: 'VECTOR' },
+  node: SceneNode,
   changes: LayoutGeometry,
   sx: number,
   sy: number
