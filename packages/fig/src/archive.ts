@@ -5,6 +5,7 @@ import type { FigPageManifestEntry } from '@open-designer/kiwi/fig'
 import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import {
   buildFigKiwi,
+  figFileKind,
   parseFigKiwiChunks,
   type FigDataCompressor,
   type FigFileKind
@@ -66,6 +67,27 @@ function findCanvasData(entries: Partial<Record<string, Uint8Array>>): Uint8Arra
 
 function isCanonicalCanvasEntry(name: string): boolean {
   return name === 'canvas.fig' || name === 'canvas'
+}
+
+/** Read a design or FigJam board kind from a bare canvas header without decoding the document. */
+export function figCanvasKind(bytes: Uint8Array): FigFileKind | null {
+  return figFileKind(bytes)
+}
+
+/**
+ * Whether a `.fig` or `.jam` archive, or a bare canvas, holds a design or a FigJam board, by its
+ * canvas's header, without decoding the document; `null` when it holds no Figma canvas.
+ */
+export function figArchiveKind(bytes: Uint8Array): FigFileKind | null {
+  const bare = figFileKind(bytes)
+  if (bare) return bare
+  try {
+    const entries = unzipSync(bytes)
+    const canvas = findCanvasData(entries)
+    return canvas ? figFileKind(canvas) : null
+  } catch {
+    return null
+  }
 }
 
 function parseRawFigKiwi(
