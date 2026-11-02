@@ -1,6 +1,7 @@
 import { useEventListener } from '@vueuse/core'
 
 import { gridNudge, resolveEditorProfile } from '@open-pencil/core'
+import { getAxisAlignedWorldBounds } from '@open-pencil/scene-graph/coordinate'
 import type { Vector } from '@open-pencil/scene-graph/primitives'
 
 import type { EditorStore } from '@/app/editor/active-store'
@@ -20,9 +21,11 @@ function selectionOrigin(store: EditorStore): Vector {
   let y = Infinity
   for (const id of store.state.selectedIds) {
     if (store.graph.getNode(id)?.locked) continue
-    const position = store.graph.getAbsolutePosition(id)
-    x = Math.min(x, position.x)
-    y = Math.min(y, position.y)
+    const node = store.graph.getNode(id)
+    if (!node) continue
+    const bounds = getAxisAlignedWorldBounds(node, store.graph)
+    x = Math.min(x, bounds.x)
+    y = Math.min(y, bounds.y)
   }
   return { x, y }
 }
