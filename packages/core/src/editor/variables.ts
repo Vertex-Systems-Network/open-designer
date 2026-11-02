@@ -182,14 +182,14 @@ export function createVariableActions(ctx: EditorContext) {
 
     apply(
       null,
-      previousVariables.map(({ id }) => ({ id }))
+      previousVariables.map((variable) => ({ ...variable, key: undefined, version: undefined, isLocal: true }))
     )
     ctx.undo.push({
       label: 'Make collection local',
       forward: () =>
         apply(
           null,
-          previousVariables.map(({ id }) => ({ id }))
+          previousVariables.map((variable) => ({ ...variable, key: undefined, version: undefined, isLocal: true }))
         ),
       inverse: () => apply(previousCollection, previousVariables)
     })
