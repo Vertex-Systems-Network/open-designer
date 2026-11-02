@@ -315,12 +315,26 @@ function oneLine(source: string): string {
 }
 
 /** Reka props a component or set assigns to this layer, if one owns it. */
-function rekaReferencePropsForNode(graph: SceneGraph, node: SceneNode): JSXProp[] {
+export type RekaReferencePropsCache = Map<string, Map<string, JSXProp[]>>
+
+function rekaReferencePropsForNode(
+  graph: SceneGraph,
+  node: SceneNode,
+  cache?: RekaReferencePropsCache
+): JSXProp[] {
   let owner: SceneNode | undefined = node
   while (owner) {
-    const props = rekaExport(graph, owner)?.props.get(node.id)
-    const reference = props?.filter(([name]) => name === 'of')
-    if (reference?.length) return reference
+    let references = cache?.get(owner.id)
+    if (!references) {
+      references = new Map()
+      for (const [nodeId, props] of rekaExport(graph, owner)?.props ?? []) {
+        const reference = props.filter(([name]) => name === 'of')
+        if (reference.length > 0) references.set(nodeId, reference)
+      }
+      cache?.set(owner.id, references)
+    }
+    const reference = references.get(node.id)
+    if (reference) return reference
     owner = owner.parentId ? graph.getNode(owner.parentId) : undefined
   }
   return []
@@ -333,12 +347,13 @@ function rekaReferencePropsForNode(graph: SceneGraph, node: SceneNode): JSXProp[
  */
 export function sceneNodeAttributes(
   nodeId: string,
-  graph: SceneGraph
+  graph: SceneGraph,
+  rekaCache?: RekaReferencePropsCache
 ): JSXAttributeSource[] | null {
   const node = graph.getNode(nodeId)
   if (!node || !elementTag(node.type)) return null
   const own = ownElement(graph, node)
-  const rekaProps = rekaReferencePropsForNode(graph, node)
+  const rekaProps = rekaReferencePropsForNode(graph, node, rekaCache)
   const hasRekaComponentRef = rekaProps.some(([name]) => name === 'of')
   const variables = variableExport(graph, [node.id], false)
   const props = own
