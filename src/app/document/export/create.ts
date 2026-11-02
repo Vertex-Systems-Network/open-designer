@@ -11,7 +11,7 @@ import {
   saveExportedFile,
   type ExportedFile
 } from '@/app/document/export/files'
-import type { ExportOptions } from '@/app/document/export/types'
+import type { ExportOptions } from '@/app/document/export/types'\nimport { toast } from '@/app/shell/ui'
 import { trackDocumentFormat } from '@/app/telemetry'
 
 type DownloadBlob = (data: Uint8Array, filename: string, mime: string) => void
