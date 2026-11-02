@@ -186,17 +186,11 @@ export function createVariableActions(ctx: EditorContext) {
       ctx.requestRefresh()
     }
 
-    apply(
-      null,
-      localVariables
-    )
+    apply(null, localVariables)
     ctx.undo.push({
       label: 'Make collection local',
       forward: () =>
-        apply(
-          null,
-          localVariables
-        ),
+        apply(null, localVariables),
       inverse: () => apply(previousCollection, previousVariables)
     })
     return true
