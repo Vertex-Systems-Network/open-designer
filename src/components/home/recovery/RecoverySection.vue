@@ -75,7 +75,11 @@ function discard(snapshot: RecoverableSnapshot): void {
   setBusy(snapshot.id, true)
   void discardRecoverable(snapshot.id)
     .catch((error: unknown) => {
-      console.warn('[Recovery] Failed to discard a snapshot:', error)
+      toast.error(
+        notifications.value.operationFailed({
+          error: error instanceof Error ? error.message : recovery.value.restoreFailed
+        })
+      )
     })
     .finally(() => setBusy(snapshot.id, false))
 }
