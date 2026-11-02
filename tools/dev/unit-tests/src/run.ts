@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 
+import { resolve } from 'node:path'
 import { listHeavyUnitTests, listUnitTests, type UnitTestGroup, unitTestGroupNames } from './shards'
 
 /**
@@ -19,7 +20,7 @@ const flags = new Set(ownArgs.filter((arg) => arg.startsWith('--')))
 const group = (ownArgs.find((arg) => !arg.startsWith('--')) ?? 'all') as UnitTestGroup
 const tsconfigArgs =
   group === 'core'
-    ? ['--tsconfig-override', new URL('../../../../tsconfig.json', import.meta.url).pathname]
+    ? ['--tsconfig-override', resolve(process.cwd(), 'tsconfig.json')]
     : []
 
 if (!unitTestGroupNames().includes(group)) {
