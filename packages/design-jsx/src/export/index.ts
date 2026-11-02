@@ -315,11 +315,12 @@ function oneLine(source: string): string {
 }
 
 /** Reka props a component or set assigns to this layer, if one owns it. */
-function rekaPropsForNode(graph: SceneGraph, node: SceneNode): JSXProp[] {
+function rekaReferencePropsForNode(graph: SceneGraph, node: SceneNode): JSXProp[] {
   let owner: SceneNode | undefined = node
   while (owner) {
     const props = rekaExport(graph, owner)?.props.get(node.id)
-    if (props) return props
+    const reference = props?.filter(([name]) => name === 'of')
+    if (reference?.length) return reference
     owner = owner.parentId ? graph.getNode(owner.parentId) : undefined
   }
   return []
@@ -337,9 +338,9 @@ export function sceneNodeAttributes(
   const node = graph.getNode(nodeId)
   if (!node || !elementTag(node.type)) return null
   const own = ownElement(graph, node)
-  const rekaProps = rekaPropsForNode(graph, node)
+  const rekaProps = rekaReferencePropsForNode(graph, node)
   const hasRekaComponentRef = rekaProps.some(([name]) => name === 'of')
-  const variables = variableExport(graph, [node.id], true)
+  const variables = variableExport(graph, [node.id], false)
   const props = own
     ? own.props
     : mergeProps(
