@@ -61,6 +61,33 @@
       ],
       "@open-pencil/pen/*": [
         "../pen/src/*"
+      ],
+      "@open-designer/scene-graph": [
+        "../scene-graph/src/index.ts"
+      ],
+      "@open-designer/scene-graph/*": [
+        "../scene-graph/src/*"
+      ],
+      "@open-designer/fig": [
+        "../fig/src/index.ts"
+      ],
+      "@open-designer/fig/*": [
+        "../fig/src/*"
+      ],
+      "@open-designer/design-jsx": [
+        "../design-jsx/src/index.ts"
+      ],
+      "@open-designer/design-jsx/*": [
+        "../design-jsx/src/*"
+      ],
+      "@open-designer/kiwi/*": [
+        "../kiwi/src/*"
+      ],
+      "@open-designer/pen": [
+        "../pen/src/index.ts"
+      ],
+      "@open-designer/pen/*": [
+        "../pen/src/*"
       ]
     }
   },
