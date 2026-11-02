@@ -164,6 +164,7 @@ export class FigmaNodeProxy {
   declare getSharedPluginData: PluginDataMethods['getSharedPluginData']
   declare setSharedPluginData: PluginDataMethods['setSharedPluginData']
   declare getSharedPluginDataKeys: PluginDataMethods['getSharedPluginDataKeys']
+  declare readonly componentPropertyDefinitions: ComponentPropertyDefinitions
   declare readonly explicitVariableModes: VariableNodeMembers['explicitVariableModes']
   declare readonly resolvedVariableModes: VariableNodeMembers['resolvedVariableModes']
   declare setExplicitVariableModeForCollection: VariableNodeMembers['setExplicitVariableModeForCollection']
