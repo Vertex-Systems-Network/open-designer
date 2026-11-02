@@ -12,7 +12,7 @@ import {
   type ExportedFile
 } from '@/app/document/export/files'
 import type { ExportOptions } from '@/app/document/export/types'
-import { toast } from '@/app/shell/ui'\nimport { toast } from '@/app/shell/ui'
+import { toast } from '@/app/shell/ui'
 import { trackDocumentFormat } from '@/app/telemetry'
 
 type DownloadBlob = (data: Uint8Array, filename: string, mime: string) => void
@@ -72,7 +72,7 @@ export function createDocumentExportActions(
   }
 
   function warnOmittedEffects(files: ExportedFile[]) {
-    const effects = [...new Set(files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? []))]
+    const effects = [\n      ...new Set(\n        files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? [])\n      )\n    ]
     if (effects.length > 0) {
       toast.warning(`Export omitted unsupported effects: ${effects.join(', ')}.`)
     }
