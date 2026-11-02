@@ -23,6 +23,8 @@ const defaultNames = new Set([
   'create_collection',
   'create_variable',
   'set_variable',
+  'set_variable_mode',
+  'get_variable_modes',
   'bind_variable',
   'lint',
   'lint_fix',

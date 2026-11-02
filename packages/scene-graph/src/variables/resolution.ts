@@ -23,10 +23,12 @@ export function getNodeVariableModeId(
   collectionId: string,
   fallback: VariableModeFallback = 'active'
 ): string {
+  const collection = graph.variableCollections.get(collectionId)
+  const validModeIds = collection ? new Set(collection.modes.map((mode) => mode.modeId)) : null
   let node = graph.nodes.get(nodeId)
   while (node) {
     const modeId = node.variableModes[collectionId]
-    if (modeId) return modeId
+    if (modeId && validModeIds?.has(modeId)) return modeId
     node = node.parentId ? graph.nodes.get(node.parentId) : undefined
   }
   if (fallback === 'default')
