@@ -512,14 +512,42 @@ function materializeReaderInto(
     const ordered: string[] = []
     for (const child of occurrence.children) {
       if (edited) reconcileOccurrenceStructure(child, graph, components)
-      if (child.mainComponentId !== null && !sources.has(child.sourceId)) {
+      const existingId = sources.get(child.sourceId)
+      const existing = existingId ? graph.getNode(existingId) : undefined
+      const expectedComponentId =
+        child.mainComponentId === null ? undefined : componentIds.get(child.mainComponentId)
+      const staleSwap =
+        existing?.type === 'INSTANCE' &&
+        expectedComponentId !== undefined &&
+        existing.componentId !== expectedComponentId
+      const obsoleteNodeIds: string[] = []
+      if (staleSwap && existing) {
+        const collect = (id: string): void => {
+          const node = graph.getNode(id)
+          if (!node) return
+          obsoleteNodeIds.push(id)
+          for (const childId of node.childIds) collect(childId)
+        }
+        collect(existing.id)
+      }
+      if (child.mainComponentId !== null && (!existing || staleSwap)) {
         onProgress?.()
         const materialized = materializeInstance(graph, parentId, child, componentIds, {
           blobs,
           sourceChildren: mapInstanceSourceChildren(child, components),
+          existingNodes: staleSwap && existing ? new Map([[child, existing]]) : undefined,
           recordId
         })
         rememberDerivedSizes(materialized.nodes)
+        if (staleSwap) {
+          const obsolete = new Set(obsoleteNodeIds)
+          for (const [sourceId, nodeId] of sources)
+            if (obsolete.has(nodeId)) sources.delete(sourceId)
+          for (const id of obsoleteNodeIds.toReversed())
+            if (id !== existing?.id) graph.deleteNode(id)
+          for (const [nodeOccurrence, node] of materialized.nodes)
+            sources.set(nodeOccurrence.sourceId, node.id)
+        }
         linkInstanceSourceChildren(child, materialized, components)
         if (edited) {
           reconcileLiveComponentEdits(graph, materialized)
