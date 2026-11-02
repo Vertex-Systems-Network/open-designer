@@ -328,7 +328,8 @@ function sceneFill(paint: ParsedPaint, site: PaintSite): Fill {
       ...(hash !== null && { imageHash: hash }),
       ...(imageTransform && { imageTransform }),
       ...(paint.rotation !== undefined && { imageRotation: paint.rotation }),
-      ...(paint.scalingFactor !== undefined && { scale: paint.scalingFactor })
+      ...(paint.scalingFactor !== undefined && { scale: paint.scalingFactor }),
+      ...(paint.filters && { filters: { ...NO_FILTERS, ...paint.filters } })
     }
   }
   return {
@@ -380,7 +381,7 @@ function figmaMediaPaint(paint: Fill, type: 'IMAGE' | 'VIDEO', base: ReadBase): 
     scaleMode,
     scalingFactor: scaleMode === 'TILE' ? (paint.scale ?? 1) : 1,
     ...(!crop && { rotation: paint.imageRotation ?? 0 }),
-    filters: { ...NO_FILTERS }
+    filters: { ...NO_FILTERS, ...paint.filters }
   }
   const transform = rows(crop ? paint.imageTransform : undefined)
   const hash = paint.imageHash ?? null

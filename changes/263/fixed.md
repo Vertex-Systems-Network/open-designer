@@ -1,0 +1,1 @@
+- Image fill and stroke adjustments survive `.fig` import, edits, copies, and export; the canvas still does not render these adjustments.
