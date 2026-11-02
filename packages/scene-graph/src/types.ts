@@ -179,6 +179,9 @@ export interface ImageFilters {
   tint?: number
   highlights?: number
   shadows?: number
+  detail?: number
+  vignette?: number
+  brightness?: number
 }
 
 export interface Fill {
