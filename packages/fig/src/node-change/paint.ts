@@ -29,7 +29,10 @@ const PAINT_FILTER_FIELDS = {
   temperature: 'temperature',
   tint: 'tint',
   highlights: 'highlights',
-  shadows: 'shadows'
+  shadows: 'shadows',
+  detail: 'detail',
+  vignette: 'vignette',
+  brightness: 'brightness'
 } as const satisfies Record<keyof ImageFilters, keyof PaintFilter>
 
 const IMAGE_FILTER_FIELDS = invert(PAINT_FILTER_FIELDS)
@@ -39,7 +42,7 @@ function renameAdjustments<To extends string, From extends string>(
   adjustments: Partial<Record<From, number>> | undefined
 ): Partial<Record<To, number>> | undefined {
   if (!adjustments) return undefined
-  const renamed = pickBy(mapValues(names, (name) => adjustments[name]), Boolean)
+  const renamed = pickBy(mapValues(names, (name) => adjustments[name]), (value) => value !== undefined)
   return isEmptyObject(renamed) ? undefined : renamed
 }
 
