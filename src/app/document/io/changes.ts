@@ -80,6 +80,7 @@ export function createDocumentChanges(editor: Editor) {
 
   return {
     hasUnsavedChanges: () => dirty.value,
+    isCurrent: (version: number) => revision.value === version,
     capture,
     markSaved: (version = capture()) => {
       savedHistory = capturedHistory.has(version) ? capturedHistory.get(version) : UNKNOWN_HISTORY
