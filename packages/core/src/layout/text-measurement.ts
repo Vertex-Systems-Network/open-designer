@@ -62,7 +62,8 @@ export function estimateTextSize(
         lineHeight = Math.ceil(fontSize * 1.4)
       }
       lineWidth += charWidth
-      const lineHeightValue = run?.style.lineHeight ?? node.lineHeight
+      const lineHeightValue =
+        run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
       lineHeight = Math.max(
         lineHeight,
         lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4)
