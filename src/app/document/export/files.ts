@@ -21,7 +21,8 @@ type ExportData = string | ArrayBuffer | Uint8Array
 
 type DownloadBlob = (data: Uint8Array, filename: string, mime: string) => void
 
-export interface ExportedFile {\n  warnings?: Array<{ effectType: string }>
+export interface ExportedFile {
+  warnings?: Array<{ effectType: string }>
   bytes: Uint8Array
   fileName: string
   format: string
