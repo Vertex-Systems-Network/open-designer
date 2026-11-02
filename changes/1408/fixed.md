@@ -1,1 +1,1 @@
-- `@open-pencil/dom-css`, `@open-pencil/design-jsx`, `@open-pencil/emit`, and `@open-pencil/cli` load under Bun 1.3 again, and so does `@open-pencil/core/io`, which imports Design JSX; their internal imports named files without an extension, which Bun 1.3 does not add (#1397).
+- `@open-designer/dom-css`, `@open-designer/design-jsx`, `@open-designer/emit`, and `@open-designer/cli` load under Bun 1.3 again, and so does `@open-designer/core/io`, which imports Design JSX; their internal imports named files without an extension, which Bun 1.3 does not add (#1397).

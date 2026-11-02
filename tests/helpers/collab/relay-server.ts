@@ -1,12 +1,12 @@
 import { createServer } from 'node:http'
 
-import { RELAY_PATH, type DocumentPermission } from '@open-pencil/cloud/contract'
-import { attachCollaborationRelay } from '@open-pencil/cloud/runtime/node'
+import { RELAY_PATH, type DocumentPermission } from '@open-designer/cloud/contract'
+import { attachCollaborationRelay } from '@open-designer/cloud/runtime/node'
 import {
   createCollaborationRelay,
   signCollaborationTicket,
   type CollaborationStateStore
-} from '@open-pencil/cloud/server'
+} from '@open-designer/cloud/server'
 
 import { createCloudRelayJoin } from '@/app/collab/transport/cloud'
 

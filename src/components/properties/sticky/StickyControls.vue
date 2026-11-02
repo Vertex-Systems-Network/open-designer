@@ -2,11 +2,11 @@
 import { tv } from 'tailwind-variants'
 import { computed } from 'vue'
 
-import { colorToHex } from '@open-pencil/scene-graph/color'
-import type { FigJamTextSize, FigJamTypeface } from '@open-pencil/scene-graph/figjam'
-import { STICKY_COLORS } from '@open-pencil/scene-graph/generated'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { useFigJamMessages, useI18n } from '@open-pencil/vue/i18n'
+import { colorToHex } from '@open-designer/scene-graph/color'
+import type { FigJamTextSize, FigJamTypeface } from '@open-designer/scene-graph/figjam'
+import { STICKY_COLORS } from '@open-designer/scene-graph/generated'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { useFigJamMessages, useI18n } from '@open-designer/vue/i18n'
 
 import FigJamSwatches from '@/components/figjam/FigJamSwatches.vue'
 import { typefaceModel, useFigJamTextOptions } from '@/components/figjam/text-options'

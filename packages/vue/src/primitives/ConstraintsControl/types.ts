@@ -1,6 +1,6 @@
 import type { VNode } from 'vue'
 
-import type { ConstraintType } from '@open-pencil/scene-graph'
+import type { ConstraintType } from '@open-designer/scene-graph'
 
 import type {
   ConstraintAxis,

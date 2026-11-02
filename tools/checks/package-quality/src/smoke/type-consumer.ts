@@ -1,20 +1,20 @@
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { runCommand } from '@open-pencil/package-artifacts-tools'
+import { runCommand } from '@open-designer/package-artifacts-tools'
 
-const TYPE_CONSUMER = `import { createEditor, type Editor } from '@open-pencil/core'
-import { Frame, type TreeNode } from '@open-pencil/design-jsx'
-import { htmlToDesignDocument, type DesignDocument } from '@open-pencil/dom-css'
-import { parseDrawIOFile, type DrawIOFile } from '@open-pencil/drawio'
-import { FIG_PACKAGE_STATUS, type FigContainerDocument } from '@open-pencil/fig'
-import { FIG_KIWI_DEFAULT_VERSION, buildFigKiwi } from '@open-pencil/kiwi/fig/container'
-import type { GUID as KiwiGUID } from '@open-pencil/kiwi/fig'
-import { parseFlowchart, type Flowchart } from '@open-pencil/mermaid'
-import { parsePenFile, type PenDocument } from '@open-pencil/pen'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import type { Color, Vector } from '@open-pencil/scene-graph/primitives'
-import { testIdSelector } from '@open-pencil/vue/testing'
+const TYPE_CONSUMER = `import { createEditor, type Editor } from '@open-designer/core'
+import { Frame, type TreeNode } from '@open-designer/design-jsx'
+import { htmlToDesignDocument, type DesignDocument } from '@open-designer/dom-css'
+import { parseDrawIOFile, type DrawIOFile } from '@open-designer/drawio'
+import { FIG_PACKAGE_STATUS, type FigContainerDocument } from '@open-designer/fig'
+import { FIG_KIWI_DEFAULT_VERSION, buildFigKiwi } from '@open-designer/kiwi/fig/container'
+import type { GUID as KiwiGUID } from '@open-designer/kiwi/fig'
+import { parseFlowchart, type Flowchart } from '@open-designer/mermaid'
+import { parsePenFile, type PenDocument } from '@open-designer/pen'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import type { Color, Vector } from '@open-designer/scene-graph/primitives'
+import { testIdSelector } from '@open-designer/vue/testing'
 
 const graph = new SceneGraph()
 const editorFactory: typeof createEditor = createEditor

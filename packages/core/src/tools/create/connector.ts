@@ -1,7 +1,7 @@
 import * as v from 'valibot'
 
-import { CONNECTOR_LABEL_FONT } from '@open-pencil/scene-graph/connectors'
-import { faceLoadKey } from '@open-pencil/scene-graph/font-style'
+import { CONNECTOR_LABEL_FONT } from '@open-designer/scene-graph/connectors'
+import { faceLoadKey } from '@open-designer/scene-graph/font-style'
 
 import { toolNumber, defineTool, nodeSummary } from '#core/tools/schema'
 

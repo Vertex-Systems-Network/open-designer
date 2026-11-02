@@ -6,9 +6,9 @@ import type {
   Fill,
   SceneNode,
   TextDecorationStyle
-} from '@open-pencil/scene-graph'
-import { resolveRGBAForPreview } from '@open-pencil/scene-graph/color'
-import { faceStyleKey } from '@open-pencil/scene-graph/font-style'
+} from '@open-designer/scene-graph'
+import { resolveRGBAForPreview } from '@open-designer/scene-graph/color'
+import { faceStyleKey } from '@open-designer/scene-graph/font-style'
 
 import { outlineInk, savedGlyphInk, type InkSpan } from '#core/canvas/text/ink'
 import { COMBINING_KEYCAP, drawKeycapFrame } from '#core/canvas/text/keycap'

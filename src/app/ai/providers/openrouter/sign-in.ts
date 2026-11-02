@@ -1,7 +1,7 @@
 import { listen } from '@tauri-apps/api/event'
 import * as v from 'valibot'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
+import { IS_TAURI } from '@open-designer/core/constants'
 
 import { createDeferred } from '@/app/runtime/deferred'
 import { openExternalLink } from '@/app/shell/ui'
@@ -28,7 +28,7 @@ export const OPENROUTER_CALLBACK_CHANNEL = 'open-pencil:openrouter-oauth'
 export const OPENROUTER_DESKTOP_CALLBACK_PATH = '/oauth/openrouter-desktop.html'
 /** Emitted by the desktop shell for an `openpencil://oauth/<provider>?…` link. */
 const OAUTH_CALLBACK_EVENT = 'oauth-callback'
-const POPUP_NAME = 'open-pencil-openrouter'
+const POPUP_NAME = 'open-designer-openrouter'
 const POPUP_FEATURES = 'popup,width=520,height=720'
 
 export type OpenRouterSignInFailure = SignInFailure | 'blocked'

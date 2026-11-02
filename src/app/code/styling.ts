@@ -1,7 +1,7 @@
 import { useLocalStorage } from '@vueuse/core'
 import { computed } from 'vue'
 
-import { COMPONENT_STYLINGS, type ComponentStyling } from '@open-pencil/dom-css/export'
+import { COMPONENT_STYLINGS, type ComponentStyling } from '@open-designer/dom-css/export'
 
 const stored = useLocalStorage<string>('open-pencil:code-styling', 'css')
 

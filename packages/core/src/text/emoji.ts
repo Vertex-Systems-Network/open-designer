@@ -1,4 +1,4 @@
-import type { DerivedTextGlyph, SceneNode } from '@open-pencil/scene-graph'
+import type { DerivedTextGlyph, SceneNode } from '@open-designer/scene-graph'
 
 /**
  * The font the editor's text layout falls back to for emoji: Noto Color Emoji's characters and

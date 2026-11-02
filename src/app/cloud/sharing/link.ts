@@ -1,8 +1,8 @@
 import { useLocalStorage } from '@vueuse/core'
 import { ref } from 'vue'
 
-import { CloudAPIError, createCloudAPIClient } from '@open-pencil/cloud/client'
-import { randomHex } from '@open-pencil/scene-graph/random'
+import { CloudAPIError, createCloudAPIClient } from '@open-designer/cloud/client'
+import { randomHex } from '@open-designer/scene-graph/random'
 
 import { useCollabIdentity } from '@/app/collab/identity'
 import { downloadCloudDocument } from '@/app/integrations/storage/cloud/download'

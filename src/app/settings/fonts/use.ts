@@ -4,8 +4,8 @@ import type {
   FontFamilyOption,
   LocalFontAccessState,
   WebFontProviderId
-} from '@open-pencil/core/text'
-import { useI18n } from '@open-pencil/vue/i18n'
+} from '@open-designer/core/text'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import {
   clearDownloadedFontCache,

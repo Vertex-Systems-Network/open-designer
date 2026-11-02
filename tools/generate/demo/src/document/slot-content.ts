@@ -1,11 +1,11 @@
-import type { TreeNode } from '@open-pencil/design-jsx'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { TreeNode } from '@open-designer/design-jsx'
+import type { SceneGraph } from '@open-designer/scene-graph'
 import {
   claimSlotContent,
   instanceSlotFrames,
   slotPropertyId,
   slotScope
-} from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/slots'
 
 import { renderTree } from './icons'
 

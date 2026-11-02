@@ -1,8 +1,8 @@
 import { omit } from 'es-toolkit/object'
 
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString } from '@open-pencil/kiwi/fig/guid'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString } from '@open-designer/kiwi/fig/guid'
 
 import { cloneRecord } from '../node-change/clone'
 import { mergeVariableConsumptionMaps } from '../node-change/variable/bindings'

@@ -1,6 +1,6 @@
 import { stat, open, SeekMode } from '@tauri-apps/plugin-fs'
 
-import { extractFigThumbnailFromReader } from '@open-pencil/fig'
+import { extractFigThumbnailFromReader } from '@open-designer/fig'
 
 import { readCacheBytes, removeCachePrefix, writeCacheBytes } from '@/app/cache'
 import { isFigArchiveName } from '@/app/document/io/names'

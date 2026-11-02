@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 
-import { decodeVectorNetworkBlob, encodeVectorNetworkBlob } from '@open-pencil/fig/node-change'
-import type { VectorNetwork } from '@open-pencil/scene-graph'
+import { decodeVectorNetworkBlob, encodeVectorNetworkBlob } from '@open-designer/fig/node-change'
+import type { VectorNetwork } from '@open-designer/scene-graph'
 
 // ---------------------------------------------------------------------------
 // vectorNetworkBlob — precision and handleMirroring round-trip

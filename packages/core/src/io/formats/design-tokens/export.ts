@@ -7,13 +7,13 @@ import type {
   Variable,
   VariableCollection,
   VariableCollectionMode
-} from '@open-pencil/scene-graph'
-import { printFormula, variableValueReferences } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import { printFormula, variableValueReferences } from '@open-designer/scene-graph/variables'
 
 import { fileSegment, placeTokens, tokenPath, tokenReference, tokenTree } from './paths'
 import { styleTokens, withOriginalName, type TokenReferences } from './styles'
 import {
-  OPENPENCIL_EXTENSION,
+  OPENDESIGNER_EXTENSION,
   RESOLVER_VERSION,
   type DesignToken,
   type DesignTokenFile,
@@ -57,7 +57,7 @@ interface ExportContext {
   issues: DesignTokenIssue[]
 }
 
-/** OpenPencil's own token fields, which DTCG has no place for. */
+/** OpenDesigner's own token fields, which DTCG has no place for. */
 function openPencilFields(variable: Variable, modeId: string, formula?: string) {
   const fields = omitBy(
     {
@@ -70,7 +70,7 @@ function openPencilFields(variable: Variable, modeId: string, formula?: string) 
     },
     (value) => value === undefined
   )
-  return isEmptyObject(fields) ? {} : { [OPENPENCIL_EXTENSION]: fields }
+  return isEmptyObject(fields) ? {} : { [OPENDESIGNER_EXTENSION]: fields }
 }
 
 /**
@@ -132,10 +132,10 @@ function variableToken(
   return token
 }
 
-/** What a mode file says about its collection and mode, for OpenPencil to read back. */
+/** What a mode file says about its collection and mode, for OpenDesigner to read back. */
 function modeExtension(collection: VariableCollection, mode: VariableCollectionMode) {
   return {
-    [OPENPENCIL_EXTENSION]: omitBy(
+    [OPENDESIGNER_EXTENSION]: omitBy(
       {
         collection: collection.name,
         mode: mode.name,
@@ -185,8 +185,8 @@ function resolverDocument(collections: readonly CollectionFiles[], stylesPath: s
 /**
  * The document's variables and styles as W3C design tokens: one file per collection mode, which
  * Figma imports as a mode, a file of typography and shadow tokens from text and effect styles,
- * and a resolver document that combines them. OpenPencil's own fields ride in
- * `$extensions["dev.openpencil"]`, so reading the export back loses nothing.
+ * and a resolver document that combines them. OpenDesigner's own fields ride in
+ * `$extensions["dev.opendesigner"]`, so reading the export back loses nothing.
  */
 export function exportDesignTokens(graph: SceneGraph): DesignTokenExport {
   const issues: DesignTokenIssue[] = []

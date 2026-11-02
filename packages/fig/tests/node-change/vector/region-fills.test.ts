@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test'
 
 import { sceneNodeToKiwi } from '#fig/node-change/index'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 const ROOT_GUID = { sessionID: 1, localID: 0 }
 

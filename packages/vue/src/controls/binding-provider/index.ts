@@ -8,9 +8,9 @@ export {
   useBindingProvider
 } from '#vue/controls/binding-provider/context'
 export {
-  useOpenPencilBindingProvider,
-  type OpenPencilBindingProviderOptions
-} from '#vue/controls/binding-provider/open-pencil'
+  useOpenDesignerBindingProvider,
+  type OpenDesignerBindingProviderOptions
+} from '#vue/controls/binding-provider/open-designer'
 export {
   createAndBindNumberVariable,
   useNumberBindingProvider

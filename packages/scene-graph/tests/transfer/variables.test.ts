@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
-import type { Variable, VariableCollection } from '@open-pencil/scene-graph'
-import { prepareVariableTransfer } from '@open-pencil/scene-graph/transfer'
+import type { Variable, VariableCollection } from '@open-designer/scene-graph'
+import { prepareVariableTransfer } from '@open-designer/scene-graph/transfer'
 
 const collections: VariableCollection[] = [
   {

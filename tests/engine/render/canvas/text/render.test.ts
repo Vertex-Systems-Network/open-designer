@@ -2,11 +2,14 @@
 
 import { describe, test, expect, mock, spyOn } from 'bun:test'
 
-import { SkiaRenderer as SkiaRendererClass } from '@open-pencil/core/canvas'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
-import { pixelLength } from '@open-pencil/scene-graph/text'
-import { detectTextDirection, resolveTextDirection } from '@open-pencil/scene-graph/text/direction'
+import { SkiaRenderer as SkiaRendererClass } from '@open-designer/core/canvas'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
+import { pixelLength } from '@open-designer/scene-graph/text'
+import {
+  detectTextDirection,
+  resolveTextDirection
+} from '@open-designer/scene-graph/text/direction'
 
 import { initCanvasKit } from '#cli/headless'
 import type { SkiaRenderer } from '#core/canvas/renderer'

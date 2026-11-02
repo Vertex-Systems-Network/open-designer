@@ -1,5 +1,5 @@
-import type { ToolCapability, ToolDef } from '@open-pencil/core/tools'
-import { ALL_TOOLS, toolChangesDocument, isToolExposed } from '@open-pencil/core/tools'
+import type { ToolCapability, ToolDef } from '@open-designer/core/tools'
+import { ALL_TOOLS, toolChangesDocument, isToolExposed } from '@open-designer/core/tools'
 
 import type { ToolAvailability, ToolDescriptor, ToolEffect } from '#mcp/tool/metadata'
 
@@ -36,7 +36,7 @@ export function createToolDescriptors(filesystemEnabled: boolean): ToolDescripto
     {
       name: 'list_documents',
       description:
-        'List open OpenPencil documents/tabs with their IDs, file paths, current pages, and pages.',
+        'List open OpenDesigner documents/tabs with their IDs, file paths, current pages, and pages.',
       effect: 'read',
       availability: 'default',
       capabilities: ['document:read'],

@@ -4,8 +4,8 @@ import {
   figJamTextSizeFields,
   figJamTypeface,
   figJamTypefaceFields
-} from '@open-pencil/scene-graph/figjam'
-import { percentLength } from '@open-pencil/scene-graph/text'
+} from '@open-designer/scene-graph/figjam'
+import { percentLength } from '@open-designer/scene-graph/text'
 
 // Values measured in FigJam's text menus.
 describe("FigJam's text", () => {

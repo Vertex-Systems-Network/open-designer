@@ -44,7 +44,7 @@ const meta = {
           <CloudSettingsPanel :servers="args.servers" :listed="args.listed" @connect="args.onConnect">
             <template #hosted>
               <div class="rounded border border-dashed border-border p-3 text-[11px] text-muted">
-                The OpenPencil Cloud waitlist
+                The OpenDesigner Cloud waitlist
               </div>
             </template>
           </CloudSettingsPanel>

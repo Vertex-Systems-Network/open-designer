@@ -2,7 +2,7 @@ import { StorageSerializers, useLocalStorage } from '@vueuse/core'
 import * as v from 'valibot'
 import { computed, ref } from 'vue'
 
-import { IS_BROWSER } from '@open-pencil/core/constants'
+import { IS_BROWSER } from '@open-designer/core/constants'
 
 import { OFFICIAL_CLOUD_URL } from '@/constants'
 

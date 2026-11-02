@@ -2,9 +2,9 @@
 import { useLocalStorage } from '@vueuse/core'
 import { computed, ref, shallowRef } from 'vue'
 
-import type { DocumentKind } from '@open-pencil/scene-graph'
-import { useDocumentWorkspace } from '@open-pencil/vue/document/workspace'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { DocumentKind } from '@open-designer/scene-graph'
+import { useDocumentWorkspace } from '@open-designer/vue/document/workspace'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import { CLOUD_INCLUDED, CLOUD_STORAGE_PROVIDER_ID } from '@/app/cloud/integration'
 import { useHomeLocations } from '@/app/home/locations'

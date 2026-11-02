@@ -24,7 +24,7 @@ if (!manifestPath) {
   process.exit(1)
 }
 const manifest = readVisualOracleManifest(manifestPath)
-const outputDir = resolve(values.output ?? manifest.output ?? '/tmp/open-pencil-document-oracle')
+const outputDir = resolve(values.output ?? manifest.output ?? '/tmp/open-designer-document-oracle')
 mkdirSync(outputDir, { recursive: true })
 const bytes = await Bun.file(resolve(manifest.document)).bytes()
 const browser = await chromium.launch({ headless: !values.headed })
@@ -71,8 +71,8 @@ async function compareTarget(page: Page, target: VisualOracleTarget) {
   const targetDir = `${outputDir}/${stem}`
   mkdirSync(targetDir, { recursive: true })
   const figmaPath = `${targetDir}/figma.png`
-  const openPencilPath = `${targetDir}/openpencil.png`
-  const normalizedPath = `${targetDir}/openpencil-normalized.png`
+  const openPencilPath = `${targetDir}/opendesigner.png`
+  const normalizedPath = `${targetDir}/opendesigner-normalized.png`
   const diffPath = `${targetDir}/diff.png`
   const heatmapPath = `${targetDir}/heatmap.png`
   const scale = target.scale ?? 1
@@ -80,7 +80,7 @@ async function compareTarget(page: Page, target: VisualOracleTarget) {
     await $`figma-use export node ${target.figmaNodeId} --output ${figmaPath} --scale ${String(scale)}`.quiet()
   }
 
-  const metadata = await captureOpenPencilTarget(page, target, openPencilPath, scale)
+  const metadata = await captureOpenDesignerTarget(page, target, openPencilPath, scale)
   if (metadata.pageRoots < (target.minimumPageRoots ?? 1)) {
     throw new Error(
       `${target.page} has ${metadata.pageRoots} roots; expected at least ${target.minimumPageRoots ?? 1}`
@@ -128,7 +128,7 @@ async function compareTarget(page: Page, target: VisualOracleTarget) {
   return metrics
 }
 
-async function captureOpenPencilTarget(
+async function captureOpenDesignerTarget(
   page: Page,
   target: VisualOracleTarget,
   outputPath: string,
@@ -137,9 +137,9 @@ async function captureOpenPencilTarget(
   const metadata = await page.evaluate(
     async ({ target, scale }) => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenPencil store unavailable')
+      if (!store) throw new Error('OpenDesigner store unavailable')
       const pageNode = store.graph.getPages().find((candidate) => candidate.name === target.page)
-      if (!pageNode) throw new Error(`OpenPencil page missing: ${target.page}`)
+      if (!pageNode) throw new Error(`OpenDesigner page missing: ${target.page}`)
       await store.switchPage(pageNode.id)
       const pageRoots = store.graph.getChildren(pageNode.id)
       const node = target.openPencilNodeId
@@ -148,7 +148,7 @@ async function captureOpenPencilTarget(
             (candidate) => candidate.name === target.node && candidate.parentId === pageNode.id
           )
       if (!node || node.parentId !== pageNode.id) {
-        throw new Error(`OpenPencil node missing from page: ${target.page} / ${target.node}`)
+        throw new Error(`OpenDesigner node missing from page: ${target.page} / ${target.node}`)
       }
       const position = store.graph.getAbsolutePosition(node.id)
       const viewportWidth = 1280

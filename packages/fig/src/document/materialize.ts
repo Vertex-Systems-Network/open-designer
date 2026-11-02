@@ -1,8 +1,8 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString } from '@open-pencil/kiwi/fig/guid'
-import { generateId, SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { OPEN_PENCIL_PLUGIN_DATA } from '@open-pencil/scene-graph/plugin-data'
-import { remapStyleRunReferences } from '@open-pencil/scene-graph/text'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString } from '@open-designer/kiwi/fig/guid'
+import { generateId, SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { OPEN_DESIGNER_PLUGIN_DATA } from '@open-designer/scene-graph/plugin-data'
+import { remapStyleRunReferences } from '@open-designer/scene-graph/text'
 
 import {
   reconcileLiveComponentEdits,
@@ -277,11 +277,11 @@ function createImportedGraph(
 }
 
 /**
- * The root's id: the one OpenPencil saved it under, or else the document record's GUID, which
+ * The root's id: the one OpenDesigner saved it under, or else the document record's GUID, which
  * Figma always saves as `0:0`.
  */
 function documentRootId(document: NodeChange, recordIds: ReadonlySet<string>): string | undefined {
-  const saved = readNodeChangePluginData(document, OPEN_PENCIL_PLUGIN_DATA.documentId)
+  const saved = readNodeChangePluginData(document, OPEN_DESIGNER_PLUGIN_DATA.documentId)
   if (saved && !recordIds.has(saved)) return saved
   return document.guid && guidToString(document.guid)
 }

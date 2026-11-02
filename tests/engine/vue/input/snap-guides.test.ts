@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
-import { computeSnap } from '@open-pencil/scene-graph/snap'
+import { createEditor } from '@open-designer/core'
+import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
+import { computeSnap } from '@open-designer/scene-graph/snap'
 
 import { computePixelGridSnap, resolveObjectPixelSnap } from '#vue/shared/input/snap'
 

@@ -3,7 +3,7 @@ layout: page
 landing: true
 sidebar: false
 aside: false
-title: OpenPencil — Open-Source-Design-Editor
+title: OpenDesigner — Open-Source-Design-Editor
 description: Open-Source-Alternative zu Figma mit .fig-Unterstützung, integrierter KI und umfassender Automatisierung.
 ---
 

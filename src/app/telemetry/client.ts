@@ -9,7 +9,7 @@ import {
   type Ping,
   type UsageBatch,
   type UsageEvent
-} from '@open-pencil/feedback/contract'
+} from '@open-designer/feedback/contract'
 
 import type { SharingPreferences } from '@/app/settings/preferences/store'
 

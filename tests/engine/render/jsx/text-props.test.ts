@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
 
-import { renderJSX } from '@open-pencil/core/design-jsx'
-import { sceneNodeToJSX } from '@open-pencil/design-jsx'
-import { percentLength, pixelLength } from '@open-pencil/scene-graph/text'
+import { renderJSX } from '@open-designer/core/design-jsx'
+import { sceneNodeToJSX } from '@open-designer/design-jsx'
+import { percentLength, pixelLength } from '@open-designer/scene-graph/text'
 
 import { getNodeOrThrow, childIdAt } from '#tests/helpers/assert'
 import { makeSceneGraph } from '#tests/helpers/scene'

@@ -1,10 +1,10 @@
 import { beforeAll, expect, test } from 'bun:test'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigBuffer } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { getSharedStyles } from '@open-pencil/scene-graph/shared-styles'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigBuffer } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { getSharedStyles } from '@open-designer/scene-graph/shared-styles'
 
 beforeAll(async () => {
   await initCodec()
@@ -100,7 +100,7 @@ test('names local styles by the records it writes for them, whatever their ids',
   }
 })
 
-test('reopen layers and ranges with the styles made in OpenPencil they use', async () => {
+test('reopen layers and ranges with the styles made in OpenDesigner they use', async () => {
   const graph = new SceneGraph()
   const page = graph.getPages()[0]
   const fill = graph.createNode('RECTANGLE', page.id, {

@@ -6,7 +6,7 @@ import {
   parseCounterAxisAlign,
   parseLayoutAlignSelf,
   parsePrimaryAxisAlign
-} from '@open-pencil/scene-graph/layout'
+} from '@open-designer/scene-graph/layout'
 
 describe('auto layout keywords', () => {
   test('read stack directions in each format spelling', () => {

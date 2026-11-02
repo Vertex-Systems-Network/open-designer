@@ -1,27 +1,31 @@
-# OpenPencil
+# OpenDesigner
 
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![npm](https://img.shields.io/npm/v/@open-pencil/cli?label=%40open-pencil%2Fcli)](https://www.npmjs.com/package/@open-pencil/cli)
+[![npm](https://img.shields.io/npm/v/@open-designer/cli?label=%40open-designer%2Fcli)](https://www.npmjs.com/package/@open-designer/cli)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white)](https://discord.gg/4wXc9fuZfm)
-[![GitHub Discussions](https://img.shields.io/github/discussions/open-pencil/open-pencil?logo=github&label=Discussions)](https://github.com/open-pencil/open-pencil/discussions)
+[![GitHub Discussions](https://img.shields.io/github/discussions/open-designer/open-designer?logo=github&label=Discussions)](https://github.com/Vertex-Systems-Network/open-designer/discussions)
 
 Open-source design editor. Opens `.fig` and `.pen` design files, includes built-in AI, and ships as a programmable toolkit with a headless Vue SDK for building custom editors.
 
 > **Status:** Active development. Usable today, with some rough edges as features evolve.
 
-**[Try it online →](https://app.openpencil.dev/demo)** · [Download](https://github.com/open-pencil/open-pencil/releases/latest) · [Documentation](https://openpencil.dev) · [Roadmap](https://openpencil.dev/development/roadmap) · [llms.txt](https://openpencil.dev/llms.txt)
+**[Try it online →](https://app.openpencil.dev/demo)** · [Download](https://github.com/Vertex-Systems-Network/open-designer/releases/latest) · [Documentation](https://openpencil.dev) · [Roadmap](https://openpencil.dev/development/roadmap) · [llms.txt](https://openpencil.dev/llms.txt)
 
-![OpenPencil](packages/docs/public/screenshot.png)
+![OpenDesigner](packages/docs/public/screenshot.png)
+
+## Stewardship
+
+OpenDesigner is the design-editor product maintained by Vertex Systems Network (Private) Limited (VSN). This repository includes code derived from Open Pencil; original license and copyright notices are retained in `LICENSE` and `LICENSES`.
 
 ## Installation
 
 **macOS (Homebrew):**
 
 ```sh
-brew install --cask openpencil
+brew install --cask opendesigner
 ```
 
-Or download from the [releases page](https://github.com/open-pencil/open-pencil/releases/latest), or [use the web app](https://app.openpencil.dev) — no install needed.
+Or download from the [releases page](https://github.com/Vertex-Systems-Network/open-designer/releases/latest), or [use the web app](https://app.openpencil.dev) — no install needed.
 
 Requires macOS 13 or later with current Safari updates, Windows 10 or later, or Linux with WebKitGTK 2.40+; the web app needs Chrome 111, Edge 111, Firefox 128, or Safari 16.4 or later. See [system requirements](https://openpencil.dev/getting-started#system-requirements).
 
@@ -31,23 +35,23 @@ Official builds send one anonymous ping a day and share usage stats only if you 
 
 - **Opens `.fig` and `.pen` files** — read and write native Figma files, open supported Pencil documents from the app or OS file browser, copy & paste nodes between apps
 - **AI builds designs** — describe what you want in chat, 100+ tools create and modify nodes. Bring your own key for the major providers or any compatible endpoint
-- **Fully programmable** — headless CLI, XPath queries, Figma Plugin API plus an `openpencil` API via `eval`, MCP server for AI agents, and desktop agent integrations for Claude Code, Codex, Gemini CLI, and Pi
+- **Fully programmable** — headless CLI, XPath queries, Figma Plugin API plus an `opendesigner` API via `eval`, MCP server for AI agents, and desktop agent integrations for Claude Code, Codex, Gemini CLI, and Pi
 - **Lint, convert, and extract tokens** — inspect documents, lint naming/layout/accessibility, convert between supported formats, analyze colors/typography/spacing/clusters, and extract design tokens
 - **Components and variants** — create reusable components, group variants into component sets, insert local assets as instances, and switch variants from the inspector
 - **Working controls** — give a component a Reka UI behaviour (switch, slider, tabs, text field, …) and preview it live over the canvas, with real inputs, focus, and keyboard
 - **Image vectorization** — convert image layers into editable vector layers with Recraft or fal.ai
 - **Design-to-code export** — export selections as JSX/Tailwind, generate token outputs, and map designs into component-oriented code workflows
-- **Vue SDK for custom editors** — headless components and composables for embedding OpenPencil into other apps or building workflow-specific editing surfaces. [Read the SDK docs →](https://openpencil.dev/programmable/sdk/)
+- **Vue SDK for custom editors** — headless components and composables for embedding OpenDesigner into other apps or building workflow-specific editing surfaces. [Read the SDK docs →](https://openpencil.dev/programmable/sdk/)
 - **Real-time collaboration** — share a peer-to-peer room over WebRTC with no server or account, or edit Cloud documents together. Cursors, presence, follow mode, voice calls
-- **Optional Cloud** — keep documents on your team's own [OpenPencil Cloud](https://openpencil.dev/user-guide/openpencil-cloud) server, or on the hosted service once it opens, and share them by invitation
+- **Optional Cloud** — keep documents on your team's own [OpenDesigner Cloud](https://openpencil.dev/user-guide/opendesigner-cloud) server, or on the hosted service once it opens, and share them by invitation
 - **Auto layout & CSS Grid** — flex and grid layout via Yoga WASM, with gap, padding, alignment, track sizing
 - **~15 MB desktop app** — Tauri v2 for macOS, Windows, Linux. Also runs in the browser as a PWA
 
 ## CLI
 
 ```sh
-npm install -g @open-pencil/cli
-# or: bun add -g @open-pencil/cli
+npm install -g @open-designer/cli
+# or: bun add -g @open-designer/cli
 ```
 
 ### Inspect design files
@@ -55,10 +59,10 @@ npm install -g @open-pencil/cli
 Browse node trees, search by name or type, dig into properties — all without opening the editor:
 
 ```sh
-openpencil tree design.fig
-openpencil find design.pen --type TEXT
-openpencil node design.fig --id 1:23
-openpencil info design.fig
+opendesigner tree design.fig
+opendesigner find design.pen --type TEXT
+opendesigner node design.fig --id 1:23
+opendesigner info design.fig
 ```
 
 ```
@@ -75,8 +79,8 @@ openpencil info design.fig
 Find nodes by type, attributes, and structure:
 
 ```sh
-openpencil query design.fig "//FRAME[@width < 300]"  # Frames under 300px
-openpencil query design.fig "//SECTION//TEXT"        # Text inside sections
+opendesigner query design.fig "//FRAME[@width < 300]"  # Frames under 300px
+opendesigner query design.fig "//SECTION//TEXT"        # Text inside sections
 ```
 
 ### Export, convert, and import
@@ -84,12 +88,12 @@ openpencil query design.fig "//SECTION//TEXT"        # Text inside sections
 Render to PNG, JPG, WEBP, SVG, PDF, PPTX, HTML, JSX, Storybook stories, or `.fig`, convert between document formats, and turn HTML/CSS into editable layers:
 
 ```sh
-openpencil export design.fig                  # PNG
-openpencil export design.fig -f jpg -s 2      # JPG at 2x
-openpencil export design.fig -f tailwind-jsx  # Tailwind JSX
-openpencil export design.fig -f storybook     # Storybook stories per component
-openpencil convert design.pen design.fig      # Between document formats
-openpencil import card.html --css card.css    # HTML/CSS → editable .fig
+opendesigner export design.fig                  # PNG
+opendesigner export design.fig -f jpg -s 2      # JPG at 2x
+opendesigner export design.fig -f tailwind-jsx  # Tailwind JSX
+opendesigner export design.fig -f storybook     # Storybook stories per component
+opendesigner convert design.pen design.fig      # Between document formats
+opendesigner import card.html --css card.css    # HTML/CSS → editable .fig
 ```
 
 ### Lint and analyze
@@ -97,9 +101,9 @@ openpencil import card.html --css card.css    # HTML/CSS → editable .fig
 Catch naming, layout, and accessibility issues, and audit a design system's real palette, type scale, spacing, and repeated components:
 
 ```sh
-openpencil lint design.fig --preset strict  # Naming, layout, accessibility
-openpencil analyze colors design.fig        # Also typography, spacing, clusters
-openpencil variables design.fig             # Variables and collections
+opendesigner lint design.fig --preset strict  # Naming, layout, accessibility
+opendesigner analyze colors design.fig        # Also typography, spacing, clusters
+opendesigner variables design.fig             # Variables and collections
 ```
 
 ```
@@ -114,7 +118,7 @@ openpencil variables design.fig             # Variables and collections
 `eval` runs JavaScript against the document with Figma's Plugin API; `-w` writes the result back:
 
 ```sh
-openpencil eval design.fig -c "figma.currentPage.selection.forEach(n => n.opacity = 0.5)" -w
+opendesigner eval design.fig -c "figma.currentPage.selection.forEach(n => n.opacity = 0.5)" -w
 ```
 
 ### Control the running app
@@ -122,11 +126,11 @@ openpencil eval design.fig -c "figma.currentPage.selection.forEach(n => n.opacit
 Omit the file argument and the CLI works on the document open in the editor:
 
 ```sh
-openpencil tree                                 # Inspect the live document
-openpencil documents list                       # Also open, new, save, close, activate
-openpencil tool call get_selection              # Run any MCP tool
-openpencil undo                                 # Undo the newest automation change
-openpencil settings set appearance.theme light  # Change editor settings
+opendesigner tree                                 # Inspect the live document
+opendesigner documents list                       # Also open, new, save, close, activate
+opendesigner tool call get_selection              # Run any MCP tool
+opendesigner undo                                 # Undo the newest automation change
+opendesigner settings set appearance.theme light  # Change editor settings
 ```
 
 Every command supports `--json`. See the [CLI reference](https://openpencil.dev/reference/cli) for all commands and options.
@@ -143,7 +147,7 @@ Not every provider works in the browser, and not every model streams tool calls 
 
 Use Claude Code, Codex, Gemini CLI, or Pi as the design agent in the chat panel. It runs with your own subscription and reaches the canvas through the editor's MCP server. Requires the desktop app.
 
-Install the agent's ACP program and `@open-pencil/mcp`, then open **Settings → Models → Run guided setup**. It checks that both are installed, signs the agent in, and confirms a session reaches OpenPencil's tools. Pi runs through the `@open-pencil/harness` companion, which guided setup installs with one click. See [Coding agents](https://openpencil.dev/programmable/coding-agents) for each agent's install command.
+Install the agent's ACP program and `@open-designer/mcp`, then open **Settings → Models → Run guided setup**. It checks that both are installed, signs the agent in, and confirms a session reaches OpenDesigner's tools. Pi runs through the `@open-designer/harness` companion, which guided setup installs with one click. See [Coding agents](https://openpencil.dev/programmable/coding-agents) for each agent's install command.
 
 ### MCP server
 
@@ -152,8 +156,8 @@ Connect Claude Code, Cursor, Windsurf, or any MCP client to inspect, modify, and
 **Stdio** (Claude Code, Cursor, Windsurf):
 
 ```sh
-npm install -g @open-pencil/mcp
-claude mcp add --scope user open-pencil -- openpencil-mcp
+npm install -g @open-designer/mcp
+claude mcp add --scope user open-designer -- opendesigner-mcp
 ```
 
 For other MCP clients:
@@ -161,8 +165,8 @@ For other MCP clients:
 ```json
 {
   "mcpServers": {
-    "open-pencil": {
-      "command": "openpencil-mcp"
+    "open-designer": {
+      "command": "opendesigner-mcp"
     }
   }
 }
@@ -171,17 +175,17 @@ For other MCP clients:
 **HTTP** (scripts, CI):
 
 ```sh
-openpencil-mcp-http   # Unix socket on macOS/Linux + http://127.0.0.1:7600/mcp
+opendesigner-mcp-http   # Unix socket on macOS/Linux + http://127.0.0.1:7600/mcp
 ```
 
-Set `OPENPENCIL_MCP_ROOT` to limit file access to one directory; it defaults to the current working directory.
+Set `OPENDESIGNER_MCP_ROOT` to limit file access to one directory; it defaults to the current working directory.
 
-### [AI agent skill](skills/open-pencil/SKILL.md)
+### [AI agent skill](skills/open-designer/SKILL.md)
 
-Teach your AI coding agent to use OpenPencil — inspect designs, export assets, analyze tokens, modify .fig files:
+Teach your AI coding agent to use OpenDesigner — inspect designs, export assets, analyze tokens, modify .fig files:
 
 ```sh
-npx skills add open-pencil/open-pencil
+npx skills add open-designer/open-designer
 ```
 
 Works with Claude Code, Cursor, Windsurf, Codex, and any agent that supports [skills](https://skills.sh).
@@ -202,21 +206,21 @@ Share a link to co-edit in real time. No server, no account — peers connect di
 
 Figma is a closed platform that resists programmatic access: its MCP server is read-only, and automation outside the Plugin API breaks when it ships a point release. Your design files are in a proprietary binary format that only its software can fully read.
 
-OpenPencil is the alternative: open source (MIT), local-first, reads .fig files natively, and every operation is scriptable.
+OpenDesigner is the alternative: open source (MIT), local-first, reads .fig files natively, and every operation is scriptable.
 
 See the [roadmap](https://openpencil.dev/development/roadmap) for product direction and current Figma compatibility gaps.
 
 ## Community
 
 - **[Discord](https://discord.gg/4wXc9fuZfm)** — chat, quick questions, and showing a problem live
-- **[GitHub Discussions](https://github.com/open-pencil/open-pencil/discussions)** — [Q&A](https://github.com/open-pencil/open-pencil/discussions/categories/q-a) for help, [Ideas](https://github.com/open-pencil/open-pencil/discussions/categories/ideas) for feature proposals, [Show and tell](https://github.com/open-pencil/open-pencil/discussions/categories/show-and-tell) for what you built; maintainers post [Announcements](https://github.com/open-pencil/open-pencil/discussions/categories/announcements) there
+- **[GitHub Discussions](https://github.com/Vertex-Systems-Network/open-designer/discussions)** — [Q&A](https://github.com/Vertex-Systems-Network/open-designer/discussions/categories/q-a) for help, [Ideas](https://github.com/Vertex-Systems-Network/open-designer/discussions/categories/ideas) for feature proposals, [Show and tell](https://github.com/Vertex-Systems-Network/open-designer/discussions/categories/show-and-tell) for what you built; maintainers post [Announcements](https://github.com/Vertex-Systems-Network/open-designer/discussions/categories/announcements) there
 - **[Issues](https://github.com/open-pencil/open-pencil/issues)** — reproducible bugs; report security problems through a [private advisory](https://github.com/open-pencil/open-pencil/security/advisories/new)
 
 ## Contributing
 
 ```sh
 bun install
-bun run dev:portless  # Web editor at https://open-pencil.localhost
+bun run dev:portless  # Web editor at https://open-designer.localhost
 bun run tauri dev     # Desktop app (requires Rust)
 ```
 
@@ -227,7 +231,7 @@ bun run tauri dev     # Desktop app (requires Rust)
 | Layer         | Tech                                                                              |
 | ------------- | --------------------------------------------------------------------------------- |
 | Rendering     | Skia (CanvasKit WASM)                                                             |
-| Layout        | Yoga WASM (flex + grid via [fork](https://github.com/open-pencil/yoga/tree/grid)) |
+| Layout        | Yoga WASM (flex + grid via [fork](https://github.com/open-designer/yoga/tree/grid)) |
 | UI            | Vue 3, Reka UI, Tailwind CSS 4                                                    |
 | File format   | Kiwi binary + Zstd + ZIP                                                          |
 | Collaboration | Trystero (WebRTC P2P) + Yjs (CRDT)                                                |
@@ -236,7 +240,7 @@ bun run tauri dev     # Desktop app (requires Rust)
 
 ## Acknowledgments
 
-Thanks to [@sld0Ant](https://github.com/sld0Ant) (Anton Soldatov), who pushed for OpenPencil to be published, has backed and promoted it since, and built the first version of the [documentation site](https://openpencil.dev).
+Thanks to [@sld0Ant](https://github.com/sld0Ant) (Anton Soldatov), who pushed for OpenDesigner to be published, has backed and promoted it since, and built the first version of the [documentation site](https://openpencil.dev).
 
 Thanks to everyone who has [contributed](https://github.com/open-pencil/open-pencil/graphs/contributors) code, translations, bug reports, and feedback.
 
@@ -244,6 +248,6 @@ Thanks to [Anthropic](https://www.anthropic.com) for supporting the project thro
 
 ## License
 
-OpenPencil is licensed under the [MIT License](./LICENSE), except OpenPencil Cloud, which is licensed under the [Apache License 2.0](./LICENSES/Apache-2.0.txt). [`REUSE.toml`](./REUSE.toml) lists the exact paths.
+OpenDesigner is licensed under the [MIT License](./LICENSE), except OpenDesigner Cloud, which is licensed under the [Apache License 2.0](./LICENSES/Apache-2.0.txt). [`REUSE.toml`](./REUSE.toml) lists the exact paths.
 
-Copyright (c) 2026 Danila Poyarkov and OpenPencil contributors.
+Copyright (c) 2026 Danila Poyarkov and OpenDesigner contributors.

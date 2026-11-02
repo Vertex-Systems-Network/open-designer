@@ -19,8 +19,8 @@ import type {
   VectorRegion,
   VectorSegment,
   VectorVertex
-} from '@open-pencil/scene-graph'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 function finishSplitSegment(
   network: VectorNetwork,

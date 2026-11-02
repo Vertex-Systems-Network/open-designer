@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 
-import { IS_TAURI, type ACPAgentDef, type ACPAgentID } from '@open-pencil/core/constants'
+import { IS_TAURI, type ACPAgentDef, type ACPAgentID } from '@open-designer/core/constants'
 
 import {
   checkAgentAuth,
@@ -25,7 +25,7 @@ export interface AgentAccount {
   signInURL: string | null
   /** The sign-in reads a code pasted from its page. */
   acceptsCode: boolean
-  /** Whether a session reached OpenPencil's tools; null until a signed-in check says. */
+  /** Whether a session reached OpenDesigner's tools; null until a signed-in check says. */
   tools: AgentAuthCheck['tools']
   error: 'check' | 'sign-in' | null
 }
@@ -173,7 +173,7 @@ export function createAgentAccounts(options: {
   return { supported: options.enabled, account, check, signIn, cancelSignIn, submitCode, report }
 }
 
-/** Starts a session as a chat does: in the agent workspace, linked to OpenPencil's tools. */
+/** Starts a session as a chat does: in the agent workspace, linked to OpenDesigner's tools. */
 const chatTools: ToolsProbe = {
   cwd: async () => (await import('@/app/ai/agents/setup/native')).agentWorkspace(),
   link: async () => {

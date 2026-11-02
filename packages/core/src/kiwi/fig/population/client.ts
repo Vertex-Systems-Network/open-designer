@@ -1,5 +1,5 @@
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { randomHex } from '@open-pencil/scene-graph/random'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { randomHex } from '@open-designer/scene-graph/random'
 
 import { releaseFigArchive } from '#core/kiwi/fig/session/archive/access'
 import { archiveChanges, trackArchiveChanges } from '#core/kiwi/fig/session/archive/changes'

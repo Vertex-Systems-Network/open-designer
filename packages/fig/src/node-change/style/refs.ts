@@ -1,6 +1,6 @@
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange, StyleReference } from '@open-pencil/kiwi/fig/codec'
-import { guidToString, isUnsetGuid } from '@open-pencil/kiwi/fig/guid'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange, StyleReference } from '@open-designer/kiwi/fig/codec'
+import { guidToString, isUnsetGuid } from '@open-designer/kiwi/fig/guid'
 
 const TEXT_STYLE_FIELDS = [
   'fontSize',

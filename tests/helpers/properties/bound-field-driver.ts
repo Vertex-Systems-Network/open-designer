@@ -31,7 +31,7 @@ export function boundFieldDriver(page: () => Page) {
     async build() {
       scene = await page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const graph = store.graph
         const pageId = store.state.currentPageId
         // The page is cleared between tests; the variables an earlier test made are not.

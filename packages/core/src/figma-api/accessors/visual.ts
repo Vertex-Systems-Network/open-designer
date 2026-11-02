@@ -1,6 +1,9 @@
-import type { SceneGraph, SceneNode, Stroke } from '@open-pencil/scene-graph'
-import { newStrokeGeometry } from '@open-pencil/scene-graph/node-defaults'
-import { independentCornerChanges, resolvedPaintBindings } from '@open-pencil/scene-graph/variables'
+import type { SceneGraph, SceneNode, Stroke } from '@open-designer/scene-graph'
+import { newStrokeGeometry } from '@open-designer/scene-graph/node-defaults'
+import {
+  independentCornerChanges,
+  resolvedPaintBindings
+} from '@open-designer/scene-graph/variables'
 
 import {
   graph,

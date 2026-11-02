@@ -11,7 +11,7 @@ export function sectionClicksDriver(page: () => Page) {
     build() {
       return page().evaluate(async (pan) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const fixtureURL = '/tests/helpers/canvas/section-clicks/scene.ts'
         const scene: typeof SectionScene = await import(fixtureURL)
         scene.createSectionClickScene(store.graph, store.state.currentPageId)

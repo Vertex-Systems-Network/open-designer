@@ -1,11 +1,11 @@
 ---
 title: Composables
-description: Основные composables пакета @open-pencil/vue.
+description: Основные composables пакета @open-designer/vue.
 ---
 
 # Composables
 
-Ниже перечислены composables, которые чаще всего нужны при работе с `@open-pencil/vue`.
+Ниже перечислены composables, которые чаще всего нужны при работе с `@open-designer/vue`.
 
 ## Контекст и холст
 

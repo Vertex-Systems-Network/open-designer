@@ -10,7 +10,7 @@ let service: TestService
 let signingKey: CryptoKey
 let strangerKey: CryptoKey
 
-const TEAM = 'https://openpencil.cloudflareaccess.com'
+const TEAM = 'https://opendesigner.cloudflareaccess.com'
 const AUDIENCE = 'admin-audience'
 const POSTHOG_QUERY = 'https://eu.posthog.com/api/projects/267806/query/'
 const NOW = new Date('2026-10-20T12:00:00.000Z')

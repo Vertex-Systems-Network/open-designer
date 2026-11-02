@@ -1,7 +1,7 @@
 import type { Canvas, ImageFilter } from 'canvaskit-wasm'
 
-import type { BlendMode, Effect, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import type { BlendMode, Effect, SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import Matrix from '@open-designer/scene-graph/matrix'
 
 import { nodeOrientationMatrix } from '#core/geometry'
 

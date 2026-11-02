@@ -1,7 +1,7 @@
 import { computed, type ComputedRef, type Ref } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { Editor } from '@open-designer/core'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 type CanvasVirtualReference = {
   getBoundingClientRect: () => DOMRect

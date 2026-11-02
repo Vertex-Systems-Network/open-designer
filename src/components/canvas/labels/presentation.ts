@@ -1,8 +1,8 @@
-import type { Editor } from '@open-pencil/core'
-import { canvasLabelForeground } from '@open-pencil/core/canvas'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import type { CanvasLabelKind } from '@open-pencil/vue/canvas/labels'
+import type { Editor } from '@open-designer/core'
+import { canvasLabelForeground } from '@open-designer/core/canvas'
+import type { SceneNode } from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import type { CanvasLabelKind } from '@open-designer/vue/canvas/labels'
 
 export interface CanvasLabelPresentation {
   background: Color

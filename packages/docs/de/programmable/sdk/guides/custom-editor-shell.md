@@ -5,15 +5,15 @@ description: Eine eigene Oberfläche mit provideEditor, CanvasRoot, Menüs, Pane
 
 # Eigene Editor-Oberfläche
 
-Eine OpenPencil-Anwendung mit Vue besteht typischerweise aus drei Schichten:
+Eine OpenDesigner-Anwendung mit Vue besteht typischerweise aus drei Schichten:
 
-1. `@open-pencil/core` erstellt den Editor;
-2. `@open-pencil/vue` verbindet ihn mit Vue Composables und Komponenten ohne vorgegebenes Erscheinungsbild;
+1. `@open-designer/core` erstellt den Editor;
+2. `@open-designer/vue` verbindet ihn mit Vue Composables und Komponenten ohne vorgegebenes Erscheinungsbild;
 3. die Anwendung bestimmt Anordnung, Gestaltung und produktspezifisches Verhalten.
 
 ## Mögliche Anwendungen
 
-Die fertige OpenPencil-App ist nur eine mögliche Oberfläche. Mit dem SDK können beispielsweise ein in ein anderes Produkt eingebetteter Editor, ein internes Asset tool, ein Template editor, eine Annotation UI oder ein spezialisierter AI-assisted editor entwickelt werden.
+Die fertige OpenDesigner-App ist nur eine mögliche Oberfläche. Mit dem SDK können beispielsweise ein in ein anderes Produkt eingebetteter Editor, ein internes Asset tool, ein Template editor, eine Annotation UI oder ein spezialisierter AI-assisted editor entwickelt werden.
 
 ## Empfohlene Struktur
 
@@ -29,12 +29,12 @@ Eine typische Oberfläche:
 
 ```vue
 <script setup lang="ts">
-import { createEditor } from '@open-pencil/core'
-import { provideEditor } from '@open-pencil/vue'
-import { CanvasRoot, CanvasSurface } from '@open-pencil/vue/canvas'
-import { ToolbarRoot } from '@open-pencil/vue/primitives/Toolbar'
-import { PageListRoot } from '@open-pencil/vue/primitives/PageList'
-import { LayerTreeRoot } from '@open-pencil/vue/primitives/LayerTree'
+import { createEditor } from '@open-designer/core'
+import { provideEditor } from '@open-designer/vue'
+import { CanvasRoot, CanvasSurface } from '@open-designer/vue/canvas'
+import { ToolbarRoot } from '@open-designer/vue/primitives/Toolbar'
+import { PageListRoot } from '@open-designer/vue/primitives/PageList'
+import { LayerTreeRoot } from '@open-designer/vue/primitives/LayerTree'
 
 const editor = createEditor({ width: 1440, height: 900 })
 provideEditor(editor)

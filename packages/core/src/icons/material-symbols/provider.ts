@@ -1,4 +1,4 @@
-import type { IconOptions } from '@open-pencil/scene-graph/icons'
+import type { IconOptions } from '@open-designer/scene-graph/icons'
 
 import {
   fetchMaterialSymbolsCatalogue,

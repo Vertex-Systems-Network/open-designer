@@ -3,7 +3,7 @@ import { basename, dirname, join, normalize } from 'pathe'
 import * as v from 'valibot'
 
 import { pathName } from './paths'
-import { OPENPENCIL_EXTENSION } from './types'
+import { OPENPENCIL_EXTENSION, OPENDESIGNER_EXTENSION } from './types'
 
 /** A file the user picked: its path within the folder or archive, and its text. */
 export interface DesignTokenSourceFile {
@@ -15,7 +15,7 @@ export interface DesignTokenSourceFile {
 export interface ReadToken {
   /** Placed path, `$root` included, as references name it. */
   path: string[]
-  /** Layer-panel name: the original OpenPencil kept, or the path joined with `/`. */
+  /** Layer-panel name: the original OpenDesigner kept, or the path joined with `/`. */
   name: string
   type: string | undefined
   value: unknown
@@ -96,10 +96,15 @@ function extensionsOf(node: Record<string, unknown>): Record<string, unknown> {
   return isPlainObject(node.$extensions) ? node.$extensions : {}
 }
 
-/** The collection and mode a file says it holds, which OpenPencil writes into each mode file. */
+/** The collection and mode a file says it holds, which OpenDesigner writes into each mode file. */
 function modeInfo(parsed: Record<string, unknown> | undefined) {
-  const own = v.safeParse(modeExtensionSchema, parsed && extensionsOf(parsed)[OPENPENCIL_EXTENSION])
-  return own.success ? own.output : {}
+  const extensions = parsed ? extensionsOf(parsed) : {}
+  const own = v.safeParse(modeExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
+  const legacy = v.safeParse(modeExtensionSchema, extensions[OPENPENCIL_EXTENSION])
+  if (own.success && legacy.success) return { ...legacy.output, ...own.output }
+  if (own.success) return own.output
+  if (legacy.success) return legacy.output
+  return {}
 }
 
 /** Tokens in a document, groups flattened, each with the type it declares or inherits. */
@@ -115,10 +120,14 @@ export function documentTokens(parsed: Record<string, unknown>): ReadToken[] {
         continue
       }
       const extensions = extensionsOf(child)
-      const own = v.safeParse(nameExtensionSchema, extensions[OPENPENCIL_EXTENSION])
+      const own = v.safeParse(nameExtensionSchema, extensions[OPENDESIGNER_EXTENSION])
+      const legacy = v.safeParse(nameExtensionSchema, extensions[OPENPENCIL_EXTENSION])
       tokens.push({
         path: at,
-        name: (own.success ? own.output.name : undefined) ?? pathName(at),
+        name:
+          (own.success ? own.output.name : undefined) ??
+          (legacy.success ? legacy.output.name : undefined) ??
+          pathName(at),
         type: typeof child.$type === 'string' ? child.$type : type,
         value: child.$value,
         description: typeof child.$description === 'string' ? child.$description : undefined,
@@ -332,7 +341,7 @@ function splitComposites(collections: readonly ReadCollection[]) {
 
 /**
  * Reads token files into collections and modes. A resolver document, a Tokens Studio `$themes`
- * file, or OpenPencil's mode extension says how files combine; otherwise each file is a mode of a
+ * file, or OpenDesigner's mode extension says how files combine; otherwise each file is a mode of a
  * collection named after its folder, as Figma imports one mode per file.
  */
 export function readDesignTokens(files: readonly DesignTokenSourceFile[]): DesignTokenBundle {

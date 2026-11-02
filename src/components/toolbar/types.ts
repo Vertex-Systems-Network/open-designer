@@ -1,6 +1,6 @@
 import type { Component } from 'vue'
 
-import type { Tool } from '@open-pencil/core'
+import type { Tool } from '@open-designer/core'
 
 import type { ComponentUI } from '@/components/ui/types'
 import type { ToolbarTheme } from '@/theme/toolbar'

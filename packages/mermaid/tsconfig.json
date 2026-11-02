@@ -16,7 +16,7 @@
     "types": ["bun"],
     "paths": {
       "#mermaid/*": ["./src/*"],
-      "@open-pencil/mermaid": ["./src/index.ts"]
+      "@open-designer/mermaid": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],

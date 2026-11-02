@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useStickyNote } from '@open-pencil/vue/controls/sticky'
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useStickyNote } from '@open-designer/vue/controls/sticky'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import PanelSection from '@/components/ui/panel/PanelSection.vue'
 

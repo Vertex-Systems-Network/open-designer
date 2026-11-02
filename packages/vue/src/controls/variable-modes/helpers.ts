@@ -1,13 +1,13 @@
 import { omit } from 'es-toolkit'
 
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 import {
   isLibraryCollection,
   type SceneNode,
   type VariableCollection,
   type VariableCollectionMode
-} from '@open-pencil/scene-graph'
-import { collectionsBoundIn } from '@open-pencil/scene-graph/variables'
+} from '@open-designer/scene-graph'
+import { collectionsBoundIn } from '@open-designer/scene-graph/variables'
 
 import { MIXED, type MixedValue } from '#vue/controls/node-props/use'
 

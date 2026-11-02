@@ -2,7 +2,7 @@
 import { compact } from 'es-toolkit'
 import { computed, ref } from 'vue'
 
-import { useCloudPortalMessages } from '@open-pencil/vue/i18n'
+import { useCloudPortalMessages } from '@open-designer/vue/i18n'
 
 import { portalForm } from '@/components/cloud-portal/ui'
 import AppConfirmationDialog from '@/components/ui/dialog/AppConfirmationDialog.vue'

@@ -2,7 +2,9 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": ["main"],
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:default",
     "core:window:allow-destroy",
@@ -23,58 +25,157 @@
     {
       "identifier": "fs:scope",
       "deny": [
-        { "path": "$HOME/Library/LaunchAgents" },
-        { "path": "$HOME/Library/LaunchAgents/**" },
-        { "path": "$DATA/Microsoft/Windows/Start Menu/Programs/Startup" },
-        { "path": "$DATA/Microsoft/Windows/Start Menu/Programs/Startup/**" },
-        { "path": "$DOCUMENT/PowerShell" },
-        { "path": "$DOCUMENT/PowerShell/**" },
-        { "path": "$DOCUMENT/WindowsPowerShell" },
-        { "path": "$DOCUMENT/WindowsPowerShell/**" },
-        { "path": "/usr/local" },
-        { "path": "/usr/local/**" },
-        { "path": "/opt/homebrew" },
-        { "path": "/opt/homebrew/**" },
-        { "path": "$HOME/bin" },
-        { "path": "$HOME/bin/**" },
-        { "path": "$HOME/n" },
-        { "path": "$HOME/n/**" },
-        { "path": "$DATA/npm" },
-        { "path": "$DATA/npm/**" },
-        { "path": "$DATA/nvm" },
-        { "path": "$DATA/nvm/**" },
-        { "path": "$DATA/fnm" },
-        { "path": "$DATA/fnm/**" },
-        { "path": "$LOCALDATA/Volta" },
-        { "path": "$LOCALDATA/Volta/**" },
-        { "path": "$LOCALDATA/Programs" },
-        { "path": "$LOCALDATA/Programs/**" },
-        { "path": "$LOCALDATA/Microsoft/WindowsApps" },
-        { "path": "$LOCALDATA/Microsoft/WindowsApps/**" },
-        { "path": "$HOME/scoop" },
-        { "path": "$HOME/scoop/**" }
+        {
+          "path": "$HOME/Library/LaunchAgents"
+        },
+        {
+          "path": "$HOME/Library/LaunchAgents/**"
+        },
+        {
+          "path": "$DATA/Microsoft/Windows/Start Menu/Programs/Startup"
+        },
+        {
+          "path": "$DATA/Microsoft/Windows/Start Menu/Programs/Startup/**"
+        },
+        {
+          "path": "$DOCUMENT/PowerShell"
+        },
+        {
+          "path": "$DOCUMENT/PowerShell/**"
+        },
+        {
+          "path": "$DOCUMENT/WindowsPowerShell"
+        },
+        {
+          "path": "$DOCUMENT/WindowsPowerShell/**"
+        },
+        {
+          "path": "/usr/local"
+        },
+        {
+          "path": "/usr/local/**"
+        },
+        {
+          "path": "/opt/homebrew"
+        },
+        {
+          "path": "/opt/homebrew/**"
+        },
+        {
+          "path": "$HOME/bin"
+        },
+        {
+          "path": "$HOME/bin/**"
+        },
+        {
+          "path": "$HOME/n"
+        },
+        {
+          "path": "$HOME/n/**"
+        },
+        {
+          "path": "$DATA/npm"
+        },
+        {
+          "path": "$DATA/npm/**"
+        },
+        {
+          "path": "$DATA/nvm"
+        },
+        {
+          "path": "$DATA/nvm/**"
+        },
+        {
+          "path": "$DATA/fnm"
+        },
+        {
+          "path": "$DATA/fnm/**"
+        },
+        {
+          "path": "$LOCALDATA/Volta"
+        },
+        {
+          "path": "$LOCALDATA/Volta/**"
+        },
+        {
+          "path": "$LOCALDATA/Programs"
+        },
+        {
+          "path": "$LOCALDATA/Programs/**"
+        },
+        {
+          "path": "$LOCALDATA/Microsoft/WindowsApps"
+        },
+        {
+          "path": "$LOCALDATA/Microsoft/WindowsApps/**"
+        },
+        {
+          "path": "$HOME/scoop"
+        },
+        {
+          "path": "$HOME/scoop/**"
+        }
       ]
     },
     {
       "identifier": "fs:allow-read-file",
-      "allow": [{ "path": "**" }, { "path": "$APPLOCALDATA/**" }]
+      "allow": [
+        {
+          "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-stat",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-lstat",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-open",
-      "allow": [{ "path": "**" }],
+      "allow": [
+        {
+          "path": "**"
+        }
+      ],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        {
+          "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        }
       ]
     },
     "fs:allow-fstat",
@@ -83,63 +184,191 @@
     {
       "identifier": "fs:allow-read-text-file",
       "allow": [
-        { "path": "$HOME/.pi/agent/settings.json" },
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        {
+          "path": "$HOME/.pi/agent/settings.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
+        }
       ]
     },
     {
       "identifier": "fs:allow-write-file",
-      "allow": [{ "path": "**" }, { "path": "$APPLOCALDATA/**" }],
+      "allow": [
+        {
+          "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
+        }
+      ],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        {
+          "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        }
       ]
     },
     {
       "identifier": "fs:allow-exists",
       "allow": [
-        { "path": "$HOME/.pi/agent/auth.json" },
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        {
+          "path": "$HOME/.pi/agent/auth.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
+        }
       ]
     },
     {
       "identifier": "fs:allow-mkdir",
-      "allow": [{ "path": "**" }, { "path": "$APPLOCALDATA/**" }]
+      "allow": [
+        {
+          "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
+        }
+      ]
     },
     {
       "identifier": "fs:allow-remove",
-      "allow": [{ "path": "**" }, { "path": "$APPLOCALDATA/**" }],
+      "allow": [
+        {
+          "path": "**"
+        },
+        {
+          "path": "$APPLOCALDATA/**"
+        }
+      ],
       "deny": [
-        { "path": "$HOME/Library/Application Support/OpenPencil/mcp.json" },
-        { "path": "$LOCALDATA/OpenPencil/mcp.json" },
-        { "path": "$RUNTIME/openpencil/mcp.json" },
-        { "path": "$HOME/.openpencil/mcp.json" }
+        {
+          "path": "$HOME/Library/Application Support/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenDesigner/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.opendesigner/mcp.json"
+        },
+        {
+          "path": "$HOME/.openpencil/mcp.json"
+        },
+        {
+          "path": "$HOME/Library/Application Support/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$LOCALDATA/OpenPencil/mcp.json"
+        },
+        {
+          "path": "$RUNTIME/openpencil/mcp.json"
+        }
       ]
     },
     {
       "identifier": "fs:allow-watch",
-      "allow": [{ "path": "**" }]
+      "allow": [
+        {
+          "path": "**"
+        }
+      ]
     },
     "fs:allow-unwatch",
     {
       "identifier": "shell:allow-spawn",
       "allow": [
-        { "name": "claude-agent-acp", "cmd": "claude-agent-acp", "args": false },
+        {
+          "name": "claude-agent-acp",
+          "cmd": "claude-agent-acp",
+          "args": false
+        },
         {
           "name": "claude-agent-acp-sign-in",
           "cmd": "claude-agent-acp",
-          "args": ["--cli", "auth", "login", "--claudeai"]
+          "args": [
+            "--cli",
+            "auth",
+            "login",
+            "--claudeai"
+          ]
         },
-        { "name": "codex-acp", "cmd": "codex-acp", "args": false },
-        { "name": "gemini", "cmd": "gemini", "args": ["--acp"] },
+        {
+          "name": "codex-acp",
+          "cmd": "codex-acp",
+          "args": false
+        },
+        {
+          "name": "gemini",
+          "cmd": "gemini",
+          "args": [
+            "--acp"
+          ]
+        },
         {
           "name": "npm",
           "cmd": "npm",
@@ -147,7 +376,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -159,21 +388,71 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
-        { "name": "openpencil-mcp-http", "cmd": "openpencil-mcp-http", "args": false },
-        { "name": "openpencil-harness", "cmd": "openpencil-harness", "args": false },
-        { "name": "cmd-claude-agent-acp", "cmd": "cmd", "args": ["/c", "claude-agent-acp"] },
+        {
+          "name": "opendesigner-mcp-http",
+          "cmd": "opendesigner-mcp-http",
+          "args": false
+        },
+        {
+          "name": "openpencil-mcp-http",
+          "cmd": "openpencil-mcp-http",
+          "args": false
+        },
+        {
+          "name": "opendesigner-harness",
+          "cmd": "opendesigner-harness",
+          "args": false
+        },
+        {
+          "name": "cmd-claude-agent-acp",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "claude-agent-acp"
+          ]
+        },
         {
           "name": "cmd-claude-agent-acp-sign-in",
           "cmd": "cmd",
-          "args": ["/c", "claude-agent-acp", "--cli", "auth", "login", "--claudeai"]
+          "args": [
+            "/c",
+            "claude-agent-acp",
+            "--cli",
+            "auth",
+            "login",
+            "--claudeai"
+          ]
         },
-        { "name": "cmd-codex-acp", "cmd": "cmd", "args": ["/c", "codex-acp"] },
-        { "name": "cmd-gemini", "cmd": "cmd", "args": ["/c", "gemini", "--acp"] },
+        {
+          "name": "cmd-codex-acp",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "codex-acp"
+          ]
+        },
+        {
+          "name": "cmd-openpencil-mcp-http",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "openpencil-mcp-http"
+          ]
+        },
+        {
+          "name": "cmd-gemini",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "gemini",
+            "--acp"
+          ]
+        },
         {
           "name": "cmd-npm",
           "cmd": "cmd",
@@ -183,7 +462,7 @@
             "install",
             "--global",
             {
-              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
+              "validator": "^(@agentclientprotocol/(claude-agent-acp|codex-acp)|@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?)$"
             },
             "--registry=https://registry.npmjs.org"
           ]
@@ -197,13 +476,27 @@
             "add",
             "--global",
             {
-              "validator": "^@open-pencil/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
+              "validator": "^@open-designer/(mcp|harness)@[0-9]+\\.[0-9]+\\.[0-9]+(-beta\\.[1-9][0-9]*)?$"
             },
             "--registry=https://registry.npmjs.org"
           ]
         },
-        { "name": "cmd-openpencil-mcp-http", "cmd": "cmd", "args": ["/c", "openpencil-mcp-http"] },
-        { "name": "cmd-openpencil-harness", "cmd": "cmd", "args": ["/c", "openpencil-harness"] }
+        {
+          "name": "cmd-opendesigner-mcp-http",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "opendesigner-mcp-http"
+          ]
+        },
+        {
+          "name": "cmd-opendesigner-harness",
+          "cmd": "cmd",
+          "args": [
+            "/c",
+            "opendesigner-harness"
+          ]
+        }
       ]
     },
     "shell:allow-stdin-write",

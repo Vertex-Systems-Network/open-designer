@@ -11,9 +11,9 @@ import {
   type ImportSkipReason,
   type ModeTarget,
   type TokenImportOptions
-} from '@open-pencil/core/io/formats/design-tokens'
-import { isLibraryCollection } from '@open-pencil/scene-graph'
-import { useI18n } from '@open-pencil/vue/i18n'
+} from '@open-designer/core/io/formats/design-tokens'
+import { isLibraryCollection } from '@open-designer/scene-graph'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import { notificationMessages } from '@/app/i18n/notifications'

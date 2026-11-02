@@ -1,5 +1,5 @@
-import type { Editor, EditorState } from '@open-pencil/core'
-import { prefetchFigmaSchema } from '@open-pencil/core/clipboard'
+import type { Editor, EditorState } from '@open-designer/core'
+import { prefetchFigmaSchema } from '@open-designer/core/clipboard'
 
 import { createDocumentViewportActions, downloadBlob } from '@/app/document/io/browser'
 import { createDOMOpenActions } from '@/app/document/io/dom'

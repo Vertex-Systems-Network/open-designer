@@ -6,10 +6,10 @@ import {
   type VariableCollectionMode,
   type VariableType,
   type VariableValue
-} from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import { BLACK } from '@open-pencil/scene-graph/constants'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import { BLACK } from '@open-designer/scene-graph/constants'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import type { PenDocument, PenNumber, PenVariable, PenVariableScalar } from './schema'
 

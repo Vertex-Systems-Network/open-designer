@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useI18n } from '@open-pencil/vue/i18n'
-import { inputNumberValue } from '@open-pencil/vue/shared/dom-events'
+import { useI18n } from '@open-designer/vue/i18n'
+import { inputNumberValue } from '@open-designer/vue/shared/dom-events'
 
 import { useColorPickerPanelContext } from '@/components/color-picker-panel/context'
 

@@ -1,2 +1,2 @@
-- `@open-pencil/core/io/formats/svg` no longer exports `vectorNetworkToSVGPaths`; import it from `@open-pencil/scene-graph/vector-network`.
-- `createDesignJSXRenderer` from `@open-pencil/design-jsx` takes a `vectorBounds(network)` service, which measures a `<Vector>`'s path; `@open-pencil/core/design-jsx` provides it.
+- `@open-designer/core/io/formats/svg` no longer exports `vectorNetworkToSVGPaths`; import it from `@open-designer/scene-graph/vector-network`.
+- `createDesignJSXRenderer` from `@open-designer/design-jsx` takes a `vectorBounds(network)` service, which measures a `<Vector>`'s path; `@open-designer/core/design-jsx` provides it.

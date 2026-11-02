@@ -1,20 +1,20 @@
 import { readFile, realpath } from 'node:fs/promises'
 import { dirname, resolve, sep } from 'node:path'
 
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { BUILTIN_IO_FORMATS, IORegistry } from '@open-pencil/core/io'
-import { populateAllFigPages, populateFigPage } from '@open-pencil/core/io/formats/fig'
-import { headlessHTMLReader } from '@open-pencil/core/io/formats/html/import'
-import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { BUILTIN_IO_FORMATS, IORegistry } from '@open-designer/core/io'
+import { populateAllFigPages, populateFigPage } from '@open-designer/core/io/formats/fig'
+import { headlessHTMLReader } from '@open-designer/core/io/formats/html/import'
+import { initCanvasKit } from '@open-designer/core/io/formats/raster'
 import {
   computeAllLayouts,
   installTextMeasurer,
   sizeAutoResizingText
-} from '@open-pencil/core/layout'
-import { writeFileAtomic } from '@open-pencil/core/node/fs'
-import { prepareGraphFonts, type DocumentFontStatus } from '@open-pencil/core/text'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { collectSceneMutation } from '@open-pencil/scene-graph/mutation-impact'
+} from '@open-designer/core/layout'
+import { writeFileAtomic } from '@open-designer/core/node/fs'
+import { prepareGraphFonts, type DocumentFontStatus } from '@open-designer/core/text'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { collectSceneMutation } from '@open-designer/scene-graph/mutation-impact'
 
 import { printError } from '#cli/format'
 

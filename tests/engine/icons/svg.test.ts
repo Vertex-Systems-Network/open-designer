@@ -83,7 +83,9 @@ describe('SVG XML parsing', () => {
 
   test('preserves a nearly closed arc when scaling a path down', () => {
     const [path] = scalePathInfos(
-      extractPaths('<path d="M12 3A9 9 0 1 1 11.99 3ZM12 7V12L15 14" fill="none" stroke="black" stroke-width="2.5"/>'),
+      extractPaths(
+        '<path d="M12 3A9 9 0 1 1 11.99 3ZM12 7V12L15 14" fill="none" stroke="black" stroke-width="2.5"/>'
+      ),
       0.5,
       0.5
     )

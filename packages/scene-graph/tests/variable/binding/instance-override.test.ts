@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { getInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { getInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
 function pageId(graph: SceneGraph): string {
   return graph.getPages()[0].id
 }

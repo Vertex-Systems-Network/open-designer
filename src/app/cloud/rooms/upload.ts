@@ -1,6 +1,6 @@
 import * as v from 'valibot'
 
-import { CloudAPIError } from '@open-pencil/cloud/client'
+import { CloudAPIError } from '@open-designer/cloud/client'
 
 import type { CollabAction } from '@/app/collab/transport/types'
 import type { EditorStore } from '@/app/editor/session'

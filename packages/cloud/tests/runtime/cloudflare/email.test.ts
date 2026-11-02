@@ -13,7 +13,7 @@ const envelope = {
   subject: 'Welcome',
   html: '<p>Welcome</p>',
   text: 'Welcome',
-  headers: { 'X-OpenPencil-Delivery-ID': 'delivery-id' }
+  headers: { 'X-OpenDesigner-Delivery-ID': 'delivery-id' }
 }
 
 function failingWith(code?: string): CloudflareEmailBinding {

@@ -7,12 +7,12 @@ import {
   deserializeLibraryRevision,
   encodeStoredLibraryRevision,
   storedLibraryRevisionSchema
-} from '@open-pencil/core/library'
-import { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/core/library'
+import { SceneGraph } from '@open-designer/scene-graph'
 import {
   getInstanceOverride,
   setInstanceOverride
-} from '@open-pencil/scene-graph/instances/overrides'
+} from '@open-designer/scene-graph/instances/overrides'
 
 describe('stored library revisions', () => {
   test('keep values shaped like the tags they are stored with', async () => {
@@ -25,7 +25,7 @@ describe('stored library revisions', () => {
     })
     const instance = graph.createInstance(icon.id, button.id)
     if (!instance) throw new Error('Expected the icon instance')
-    const values = [{ $bytes: 'AQID' }, { $openPencilType: 'openpencil/map', entries: [] }]
+    const values = [{ $bytes: 'AQID' }, { $openPencilType: 'opendesigner/map', entries: [] }]
     for (const [index, value] of values.entries())
       setInstanceOverride(
         instance.instanceOverrides,

@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test'
 
 import { compact } from 'es-toolkit/array'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { createSVGNodes } from '@open-pencil/core/io/formats/svg'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { createSVGNodes } from '@open-designer/core/io/formats/svg'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 
 /**
  * Each tree is what Figma 126 built from the same markup, pasted as text and through

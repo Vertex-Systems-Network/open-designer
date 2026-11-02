@@ -5,7 +5,7 @@ description: Reaktywne oznaczenia widoku mobilnego i komputerowego dla własnego
 
 # useViewportKind
 
-`useViewportKind()` zwraca uproszczoną klasyfikację rozmiaru widoku używaną przez responsywny interfejs OpenPencil.
+`useViewportKind()` zwraca uproszczoną klasyfikację rozmiaru widoku używaną przez responsywny interfejs OpenDesigner.
 
 Użyj composable, jeśli wystarczy rozróżnienie widoku mobilnego i komputerowego bez bezpośredniej konfiguracji `useBreakpoints()`.
 

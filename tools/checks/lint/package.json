@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/lint-tools",
+  "name": "@open-designer/lint-tools",
   "private": true,
   "type": "module",
   "imports": {
@@ -13,6 +13,6 @@
     "es-toolkit": "^1.52.0"
   },
   "devDependencies": {
-    "@open-pencil/package-artifacts-tools": "workspace:*"
+    "@open-designer/package-artifacts-tools": "workspace:*"
   }
 }

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { StyleRun, TextCase } from '@open-pencil/scene-graph'
-import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
+import type { StyleRun, TextCase } from '@open-designer/scene-graph'
+import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
 
 import { shownCharacters, shownText, shownTextSlice } from '#core/text/case'
 

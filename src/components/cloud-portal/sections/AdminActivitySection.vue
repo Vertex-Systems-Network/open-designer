@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import * as v from 'valibot'
 
-import type { CloudAdminAuditFilter } from '@open-pencil/cloud/contract'
-import { useCloudPortalMessages, useI18n } from '@open-pencil/vue/i18n'
+import type { CloudAdminAuditFilter } from '@open-designer/cloud/contract'
+import { useCloudPortalMessages, useI18n } from '@open-designer/vue/i18n'
 
 import { usePortal } from '@/app/cloud-portal/context'
 import type { PortalListRequest } from '@/app/cloud-portal/list'

@@ -9,7 +9,7 @@ precedence = "override"
 SPDX-FileCopyrightText = "2026 Danila Poyarkov and OpenPencil contributors"
 SPDX-License-Identifier = "MIT"
 
-# OpenPencil Cloud's server, relay, and administration, and the pages it serves for signing in,
+# OpenDesigner Cloud's server, relay, and administration, and the pages it serves for signing in,
 # account security, and administration.
 [[annotations]]
 path = [

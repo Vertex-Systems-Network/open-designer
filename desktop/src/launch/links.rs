@@ -14,7 +14,7 @@ pub struct DeepLinkJoin {
     pub room: String,
 }
 
-/// An OpenPencil Cloud invitation or a document shared by link, from
+/// An OpenDesigner Cloud invitation or a document shared by link, from
 /// `openpencil://cloud?url=<link>#<secret>`: the web link on its server, `/<invitations|share>/<id>`,
 /// with its secret in the deep link's fragment. The server is the web link's origin.
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize)]
@@ -64,7 +64,7 @@ fn is_room_id(room: &str) -> bool {
 }
 
 pub fn parse_deep_link(url: &Url) -> Result<DeepLink, DeepLinkError> {
-    // openpencil://<action>?…  → host is the action.
+    // Both openpencil:// and opendesigner:// links use the action as their host.
     match url.host_str().unwrap_or("") {
         "open" => parse_open_url(url).map(DeepLink::Open),
         "join" => parse_join_url(url).map(DeepLink::Join),

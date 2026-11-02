@@ -1,7 +1,7 @@
 {
-  "name": "@open-pencil/emit",
+  "name": "@open-designer/emit",
   "version": "0.16.0",
-  "description": "How OpenPencil exporters emit source: JavaScript, TypeScript, and JSX built as ESTree and printed with esrap.",
+  "description": "How OpenDesigner exporters emit source: JavaScript, TypeScript, and JSX built as ESTree and printed with esrap.",
   "license": "MIT",
   "repository": {
     "type": "git",

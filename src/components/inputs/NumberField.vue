@@ -1,11 +1,11 @@
 <script lang="ts">
 import type { VNode } from 'vue'
 
-import type { NumberExpressionError } from '@open-pencil/vue/controls/number-expression'
+import type { NumberExpressionError } from '@open-designer/vue/controls/number-expression'
 import type {
   NumberFieldEditPolicy,
   NumberFieldSlotProps
-} from '@open-pencil/vue/primitives/NumberField'
+} from '@open-designer/vue/primitives/NumberField'
 
 import type { ComponentUI } from '@/components/ui/types'
 import type { NumberFieldTheme } from '@/theme/input/number-field'
@@ -43,12 +43,12 @@ export interface NumberFieldSlots {
 import { tv } from 'tailwind-variants'
 import { computed, normalizeClass, useAttrs } from 'vue'
 
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useI18n } from '@open-designer/vue/i18n'
 import {
   NumberFieldRoot,
   NumberFieldInput,
   NumberFieldValue
-} from '@open-pencil/vue/primitives/NumberField'
+} from '@open-designer/vue/primitives/NumberField'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import theme from '@/theme/input/number-field'

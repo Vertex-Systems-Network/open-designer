@@ -1,9 +1,9 @@
 import * as v from 'valibot'
 
-import type { VectorNetwork } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import { parseSVGPath } from '@open-pencil/scene-graph/parse-path'
-import { transformVectorNetwork } from '@open-pencil/scene-graph/vector-network'
+import type { VectorNetwork } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
+import { transformVectorNetwork } from '@open-designer/scene-graph/vector-network'
 
 import { defineTool, nodeSummary, positionInputs, toolNumber } from '#core/tools/schema'
 import { parseVectorNetworkJSON } from '#core/tools/vector/network'

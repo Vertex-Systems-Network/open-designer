@@ -1,8 +1,8 @@
 import {
   DEFAULT_FIG_COMPRESSION,
   type FigCompression
-} from '@open-pencil/scene-graph/fig-compression'
-import { OPEN_PENCIL_PLUGIN_DATA, withPluginData } from '@open-pencil/scene-graph/plugin-data'
+} from '@open-designer/scene-graph/fig-compression'
+import { OPEN_DESIGNER_PLUGIN_DATA, withPluginData } from '@open-designer/scene-graph/plugin-data'
 
 import { figCompressionOf } from '#core/io/formats/fig/compression'
 
@@ -25,7 +25,7 @@ export function createFigCompressionActions(ctx: EditorContext) {
       ctx.graph.updateNode(rootId, {
         pluginData: withPluginData(
           root.pluginData,
-          OPEN_PENCIL_PLUGIN_DATA.figCompression,
+          OPEN_DESIGNER_PLUGIN_DATA.figCompression,
           value === DEFAULT_FIG_COMPRESSION ? undefined : value
         )
       })

@@ -2,10 +2,10 @@ import { describe, expect, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { percentLength } from '@open-pencil/scene-graph/text'
-import { createConnector, connectorSublayers, freeEndpoint } from '@open-pencil/scene-graph/connectors'
-import { createSticky, stickySublayers } from '@open-pencil/scene-graph/generated'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { percentLength } from '@open-designer/scene-graph/text'
+import { createConnector, connectorSublayers, freeEndpoint } from '@open-designer/scene-graph/connectors'
+import { createSticky, stickySublayers } from '@open-designer/scene-graph/generated'
 
 import { connectorLabelPlaceholderNode, stickyPlaceholderNode } from '#core/canvas/text/placeholder'
 

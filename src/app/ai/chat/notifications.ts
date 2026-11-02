@@ -1,7 +1,7 @@
 import type { UIMessage } from 'ai'
 import type { RootContent } from 'mdast'
 
-import { aiMessages } from '@open-pencil/vue/i18n'
+import { aiMessages } from '@open-designer/vue/i18n'
 
 import { showChatPanel } from '@/app/ai/chat/panel'
 import type { EditorStore } from '@/app/editor/session'

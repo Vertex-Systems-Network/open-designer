@@ -2,8 +2,8 @@ import { expect, test } from 'bun:test'
 
 import { toolModelMessageSchema } from 'ai'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { evalCode } from '#core/tools/analyze/eval'
 

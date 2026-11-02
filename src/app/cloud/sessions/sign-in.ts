@@ -2,8 +2,8 @@ import { useSessionStorage } from '@vueuse/core'
 import { withoutFragment } from 'ufo'
 import { ref } from 'vue'
 
-import { cloudSignInURL, type CloudSocialProvider } from '@open-pencil/cloud/client'
-import { cloudServerOrigin, type CloudDiscovery } from '@open-pencil/cloud/contract'
+import { cloudSignInURL, type CloudSocialProvider } from '@open-designer/cloud/client'
+import { cloudServerOrigin, type CloudDiscovery } from '@open-designer/cloud/contract'
 
 import { IS_BROWSER, IS_TAURI } from '@/constants'
 

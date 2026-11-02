@@ -7,10 +7,10 @@ import {
   type ImageScaleMode,
   type SceneNode,
   type Stroke
-} from '@open-pencil/scene-graph'
-import { TRANSPARENT } from '@open-pencil/scene-graph/constants'
-import { parseCSSAlignSelf, parseCSSNumber, parseCSSShadows } from '@open-pencil/scene-graph/css'
-import { computeImageHash } from '@open-pencil/scene-graph/images'
+} from '@open-designer/scene-graph'
+import { TRANSPARENT } from '@open-designer/scene-graph/constants'
+import { parseCSSAlignSelf, parseCSSNumber, parseCSSShadows } from '@open-designer/scene-graph/css'
+import { computeImageHash } from '@open-designer/scene-graph/images'
 
 import type { DesignDocument, DesignElement, DesignNode, DesignStyleDeclaration } from '../types'
 import { colorToFillFromCSS, colorToStrokeFromCSS, mergedStyle, pickStyle } from './css-values'
@@ -33,7 +33,7 @@ import {
   type CSSCharacterStyle
 } from './text'
 
-const DOM_CSS_PLUGIN_ID = 'open-pencil-dom-css'
+const DOM_CSS_PLUGIN_ID = 'open-designer-dom-css'
 const IMAGE_SOURCE_URL_KEY = 'image-source-url'
 
 export interface DesignDocumentToSceneGraphOptions {

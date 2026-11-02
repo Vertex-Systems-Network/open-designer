@@ -5,8 +5,8 @@ import {
   pollCloudDeviceToken,
   requestCloudDeviceAuthorization,
   type CloudFetch
-} from '@open-pencil/cloud/client'
-import type { CloudDiscovery } from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/client'
+import type { CloudDiscovery } from '@open-designer/cloud/contract'
 
 import { openExternalLink } from '@/app/shell/ui'
 

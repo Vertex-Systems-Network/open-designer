@@ -1,6 +1,6 @@
 ---
 title: Seleccionar y transformar
-description: Seleccionar, mover, redimensionar, rotar, duplicar y ordenar objetos en OpenPencil.
+description: Seleccionar, mover, redimensionar, rotar, duplicar y ordenar objetos en OpenDesigner.
 ---
 
 # Seleccionar y transformar

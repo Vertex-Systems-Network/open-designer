@@ -1,7 +1,7 @@
-import type { Editor } from '@open-pencil/core'
-import { nearestPointOnNetwork, regionAtPoint, vectorHandleParts } from '@open-pencil/core/vector'
-import type { VectorRegion, VectorSegment, VectorVertex } from '@open-pencil/scene-graph'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { Editor } from '@open-designer/core'
+import { nearestPointOnNetwork, regionAtPoint, vectorHandleParts } from '@open-designer/core/vector'
+import type { VectorRegion, VectorSegment, VectorVertex } from '@open-designer/scene-graph'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 export type NodeEditState = {
   nodeId: string

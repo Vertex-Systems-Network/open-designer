@@ -1,6 +1,6 @@
-import { Frame, Instance, Text, linearGradient, type TreeNode } from '@open-pencil/design-jsx'
-import { createComponentPropertyId } from '@open-pencil/scene-graph/components'
-import { createSlotProperty, updateSlotProperty } from '@open-pencil/scene-graph/slots'
+import { Frame, Instance, Text, linearGradient, type TreeNode } from '@open-designer/design-jsx'
+import { createComponentPropertyId } from '@open-designer/scene-graph/components'
+import { createSlotProperty, updateSlotProperty } from '@open-designer/scene-graph/slots'
 
 import { slotRow } from '../chrome'
 import { Icon } from '../elements'

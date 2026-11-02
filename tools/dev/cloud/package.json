@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/cloud-tools",
+  "name": "@open-designer/cloud-tools",
   "private": true,
   "type": "module",
   "imports": {
@@ -9,9 +9,9 @@
     "test": "bun test tests"
   },
   "dependencies": {
-    "@open-pencil/cloud": "workspace:*",
-    "@open-pencil/package-artifacts-tools": "workspace:*",
-    "@open-pencil/scene-graph": "workspace:*",
+    "@open-designer/cloud": "workspace:*",
+    "@open-designer/package-artifacts-tools": "workspace:*",
+    "@open-designer/scene-graph": "workspace:*",
     "smol-toml": "^1.8.0"
   }
 }

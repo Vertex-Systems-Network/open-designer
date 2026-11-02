@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { isLayerRef, isMode, isVariable } from '@open-pencil/design-jsx'
+import { isLayerRef, isMode, isVariable } from '@open-designer/design-jsx'
 
 import { convertDesignJSXRoots } from '@/app/code/sandbox/convert'
 import { sandboxDocument } from '@/app/code/sandbox/document'
@@ -52,11 +52,11 @@ describe('Design JSX sandbox output', () => {
 
   test('rejects empty output and malformed elements before rendering', () => {
     expect(() => validateDesignJSXOutput(undefined, limits)).toThrow(
-      'must return an OpenPencil element'
+      'must return an OpenDesigner element'
     )
-    expect(() => validateDesignJSXOutput([], limits)).toThrow('must return an OpenPencil element')
+    expect(() => validateDesignJSXOutput([], limits)).toThrow('must return an OpenDesigner element')
     expect(() => convertDesignJSXRoots([{ type: 'frame', props: {}, children: null }])).toThrow(
-      'must return an OpenPencil element'
+      'must return an OpenDesigner element'
     )
   })
 
@@ -92,7 +92,7 @@ describe('Design JSX sandbox output', () => {
 
   test('counts container and primitive data toward the output limit', () => {
     const tiny = resolveDesignJSXValidationLimits({ outputBytes: 1 })
-    expect(() => validateDesignJSXOutput([], tiny)).toThrow('must return an OpenPencil element')
+    expect(() => validateDesignJSXOutput([], tiny)).toThrow('must return an OpenDesigner element')
     expect(() => validateDesignJSXOutput(true, tiny)).toThrow('too large')
     expect(() => validateDesignJSXOutput(1, tiny)).toThrow('too large')
     expect(() => validateDesignJSXOutput(frame(), tiny)).toThrow('too large')
@@ -207,7 +207,7 @@ return __h(Frame, { fill: t.Page, mode: dark }, __h(Button.Root, null), 'Hi', fa
     expect(run('none', 'const frame = __h(Frame, null)')).toEqual({
       id: 'none',
       ok: false,
-      error: 'Design JSX must return an OpenPencil element.'
+      error: 'Design JSX must return an OpenDesigner element.'
     })
     expect(run('date', 'return __h(Frame, { when: new Date(0) })')).toEqual({
       id: 'date',

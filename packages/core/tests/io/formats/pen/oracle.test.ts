@@ -11,18 +11,18 @@ import {
   createIconSetsProvider,
   createMaterialSymbolsProvider,
   MATERIAL_SYMBOLS_PREFIXES
-} from '@open-pencil/core/icons'
-import { IORegistry, penFormat } from '@open-pencil/core/io'
+} from '@open-designer/core/icons'
+import { IORegistry, penFormat } from '@open-designer/core/io'
 import {
   comparePNGs,
   createCanvasKitRasterCodec,
   headlessRenderNodes,
   initCanvasKit
-} from '@open-pencil/core/io/formats/raster'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { fontManager, prepareGraphFonts, WEB_FONT_PROVIDER_IDS } from '@open-pencil/core/text'
-import { parsePenDocument } from '@open-pencil/pen'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/core/io/formats/raster'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { fontManager, prepareGraphFonts, WEB_FONT_PROVIDER_IDS } from '@open-designer/core/text'
+import { parsePenDocument } from '@open-designer/pen'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 // pen.dev's own exports of every frame in probes.pen, recorded with the fonts and icons they draw
 // by `bun tools/generate/visual-oracles/src/cli.ts compare pen`.

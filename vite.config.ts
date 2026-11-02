@@ -8,12 +8,12 @@ import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import { defineConfig, loadEnv } from 'vite'
 
-import { ensureBrandAssets } from '@open-pencil/brand-tools'
-import { ensureDemoDocument } from '@open-pencil/demo-tools'
+import { ensureBrandAssets } from '@open-designer/brand-tools'
+import { ensureDemoDocument } from '@open-designer/demo-tools'
 
 import packageJson from './package.json'
 import { viteBuildTarget } from './src/app/shell/support/baseline'
-import { createOpenPencilAliases } from './vite/aliases'
+import { createOpenDesignerAliases } from './vite/aliases'
 import {
   localAutomationRoute,
   localAutomationToken,
@@ -39,26 +39,26 @@ export default defineConfig(async ({ command, mode }) => {
   // which serves it under /admin behind Cloudflare Access.
   const metrics = mode === 'metrics'
   const env = loadEnv(mode, __dirname, 'VITE_')
-  // `VITE_OPENPENCIL_CLOUD=off` builds the editor without OpenPencil Cloud.
-  const cloud = env.VITE_OPENPENCIL_CLOUD !== 'off'
+  // `VITE_OPENDESIGNER_CLOUD=off` builds the editor without OpenDesigner Cloud.
+  const cloud = env.VITE_OPENDESIGNER_CLOUD !== 'off'
   // Agents automate the editor's own development server; a Cloud site, built or served, has none.
   const automation = !metrics && !cloudSite
   await Promise.all([ensureBrandAssets(['web']), metrics ? undefined : ensureDemoDocument()])
   return {
     resolve: {
-      alias: createOpenPencilAliases(__dirname, { cloud })
+      alias: createOpenDesignerAliases(__dirname, { cloud })
     },
     define: {
-      __OPENPENCIL_APP_VERSION__: JSON.stringify(packageJson.version),
-      __OPENPENCIL_CLOUD_SITE__: JSON.stringify(cloudSite),
-      __OPENPENCIL_OFFICIAL_CLOUD_URL__: JSON.stringify(
-        env.VITE_OPENPENCIL_OFFICIAL_CLOUD_URL ?? null
+      __OPENDESIGNER_APP_VERSION__: JSON.stringify(packageJson.version),
+      __OPENDESIGNER_CLOUD_SITE__: JSON.stringify(cloudSite),
+      __OPENDESIGNER_OFFICIAL_CLOUD_URL__: JSON.stringify(
+        env.VITE_OPENDESIGNER_OFFICIAL_CLOUD_URL ?? null
       ),
-      __OPENPENCIL_LOCAL_AUTOMATION_TOKEN__: JSON.stringify(
+      __OPENDESIGNER_LOCAL_AUTOMATION_TOKEN__: JSON.stringify(
         automation ? localAutomationToken(command) : null
       ),
-      __OPENPENCIL_LOCAL_AUTOMATION_URL__: JSON.stringify(automationRoute.browserURL),
-      __OPENPENCIL_LOCAL_AUTOMATION_HTTP_URL__: JSON.stringify(
+      __OPENDESIGNER_LOCAL_AUTOMATION_URL__: JSON.stringify(automationRoute.browserURL),
+      __OPENDESIGNER_LOCAL_AUTOMATION_HTTP_URL__: JSON.stringify(
         automationRoute.browserURL.replace(/^ws/, 'http')
       )
     },

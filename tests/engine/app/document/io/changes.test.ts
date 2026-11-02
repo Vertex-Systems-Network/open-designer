@@ -2,12 +2,12 @@ import { expect, test } from 'bun:test'
 
 import { computed, effectScope } from 'vue'
 
-import { createEditor } from '@open-pencil/core'
-import { exportFigFile, parseFigFile, populateFigPage } from '@open-pencil/core/io/formats/fig'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { fontManager } from '@open-pencil/core/text'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { createEditor } from '@open-designer/core'
+import { exportFigFile, parseFigFile, populateFigPage } from '@open-designer/core/io/formats/fig'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { fontManager } from '@open-designer/core/text'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { createDocumentChanges } from '@/app/document/io/changes'
 

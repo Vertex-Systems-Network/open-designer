@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph, type Stroke } from '@open-pencil/scene-graph'
+import { SceneGraph, type Stroke } from '@open-designer/scene-graph'
 import {
   attachedConnectors,
   boundEndpoint,
@@ -10,8 +10,8 @@ import {
   createConnector,
   freeEndpoint,
   layoutConnector
-} from '@open-pencil/scene-graph/connectors'
-import { BLACK } from '@open-pencil/scene-graph/constants'
+} from '@open-designer/scene-graph/connectors'
+import { BLACK } from '@open-designer/scene-graph/constants'
 
 function boxes() {
   const graph = new SceneGraph()

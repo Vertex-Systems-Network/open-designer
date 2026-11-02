@@ -1,6 +1,6 @@
 import { useEventListener } from '@vueuse/core'
 
-import { extractImageFilesFromClipboard } from '@open-pencil/vue/canvas/drop'
+import { extractImageFilesFromClipboard } from '@open-designer/vue/canvas/drop'
 
 import type { EditorStore } from '@/app/editor/active-store'
 import { isDesignClipboardHTML } from '@/app/editor/clipboard/html'

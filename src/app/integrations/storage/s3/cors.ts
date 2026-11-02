@@ -3,7 +3,7 @@ import { compact } from 'es-toolkit/array'
 
 import { IS_BROWSER, WEB_APP_ORIGIN } from '@/constants'
 
-/** Origins OpenPencil may run from when calling S3 from the browser. */
+/** Origins OpenDesigner may run from when calling S3 from the browser. */
 export const CLOUD_CORS_STATIC_ORIGINS = [
   // Exact production origin — providers without partial-wildcard support
   // (e.g. R2) need it verbatim even when CORS is configured from dev.
@@ -14,7 +14,7 @@ export const CLOUD_CORS_STATIC_ORIGINS = [
   // providers still get an exact match for wherever the app is running when
   // CORS is applied.
   'https://*.openpencil.dev',
-  'https://*.openpencil-app.pages.dev',
+  'https://*.opendesigner-app.pages.dev',
   'http://localhost:*',
   'http://127.0.0.1:*'
 ] as const

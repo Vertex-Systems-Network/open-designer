@@ -1,5 +1,5 @@
-import type { AttachModifiers, MovePlace, Tool } from '@open-pencil/core'
-import type { HandlePosition } from '@open-pencil/core/geometry'
+import type { AttachModifiers, MovePlace, Tool } from '@open-designer/core'
+import type { HandlePosition } from '@open-designer/core/geometry'
 import type {
   DerivedTextGlyph,
   GeometryPath,
@@ -8,9 +8,9 @@ import type {
   Stroke,
   TextPathData,
   VectorNetwork
-} from '@open-pencil/scene-graph'
-import type { Rect, Vector } from '@open-pencil/scene-graph/primitives'
-import type { ResizeSnapshot } from '@open-pencil/scene-graph/resize'
+} from '@open-designer/scene-graph'
+import type { Rect, Vector } from '@open-designer/scene-graph/primitives'
+import type { ResizeSnapshot } from '@open-designer/scene-graph/resize'
 
 import type { FlowDrag } from '#vue/shared/input/flow-reorder'
 import type { LayerSizing } from '#vue/shared/input/resize/sizing'

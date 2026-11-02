@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { isGeneratedFrame } from '@open-pencil/scene-graph/generated'
-import { LAYOUT_CONTAINER_TYPES } from '@open-pencil/vue/controls/selection-layout'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { LayoutControlsRoot } from '@open-pencil/vue/primitives/LayoutControls'
+import { isGeneratedFrame } from '@open-designer/scene-graph/generated'
+import { LAYOUT_CONTAINER_TYPES } from '@open-designer/vue/controls/selection-layout'
+import { useI18n } from '@open-designer/vue/i18n'
+import { LayoutControlsRoot } from '@open-designer/vue/primitives/LayoutControls'
 
 import ClipContentControl from '@/components/properties/layout/ClipContentControl.vue'
 import FlexControls from '@/components/properties/layout/flex/FlexControls.vue'

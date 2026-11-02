@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { LAYOUT_AFFECTING_KEYS } from '@open-pencil/scene-graph/fields'
+import { LAYOUT_AFFECTING_KEYS } from '@open-designer/scene-graph/fields'
 
 describe('LAYOUT_AFFECTING_KEYS membership', () => {
   test('contains all direct transform properties', () => {

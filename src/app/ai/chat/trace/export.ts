@@ -11,7 +11,7 @@ import { downloadBlob } from '@/app/document/io/browser'
 
 import type { TraceAsset, TraceStore } from './types'
 
-export const CHAT_TRACE_FORMAT = 'openpencil-chat-trace'
+export const CHAT_TRACE_FORMAT = 'opendesigner-chat-trace'
 export const CHAT_TRACE_VERSION = 2
 
 /**

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph, type CommentReply, type CommentThread } from '@open-pencil/scene-graph'
-import { readComments, writeComments } from '@open-pencil/scene-graph/comments'
+import { SceneGraph, type CommentReply, type CommentThread } from '@open-designer/scene-graph'
+import { readComments, writeComments } from '@open-designer/scene-graph/comments'
 
 import { openRoomSession, type RoomSession } from '@/app/collab/session'
 import { createEditorStore, type EditorStore } from '@/app/editor/session'

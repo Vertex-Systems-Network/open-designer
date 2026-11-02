@@ -11,7 +11,7 @@ async function selectPathText(editing: boolean) {
   await editor.canvas.waitForRender()
   return editor.page.evaluate((edit) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const nodes = [...store.graph.getAllNodes()]
     for (const artwork of nodes.filter((node) => node.name === 'back' || node.name === 'ArnoIcon'))
       store.graph.updateNode(artwork.id, { visible: false })

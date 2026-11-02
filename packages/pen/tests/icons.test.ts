@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { PenNode } from '@open-pencil/pen'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { withIconTint } from '@open-pencil/scene-graph/icons'
+import type { PenNode } from '@open-designer/pen'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { withIconTint } from '@open-designer/scene-graph/icons'
 import {
   hasInstanceOverride,
   instanceMainComponent,
   syncInstance
-} from '@open-pencil/scene-graph/instances'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/instances'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { expectDefined, getNodeOrThrow } from './helpers/assert'
 import { parseDocument } from './helpers/document'

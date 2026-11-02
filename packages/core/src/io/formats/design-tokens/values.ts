@@ -1,7 +1,7 @@
-import { variableUnit } from '@open-pencil/dom-css/export'
-import type { TokenUnit, Variable } from '@open-pencil/scene-graph'
-import { colorToHex } from '@open-pencil/scene-graph/color'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import { variableUnit } from '@open-designer/dom-css/export'
+import type { TokenUnit, Variable } from '@open-designer/scene-graph'
+import { colorToHex } from '@open-designer/scene-graph/color'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import type { DesignTokenType } from './types'
 

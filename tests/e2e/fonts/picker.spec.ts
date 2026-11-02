@@ -10,7 +10,7 @@ async function openTypographyForText(page: Page) {
 
   return page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const id = store.createShape('TEXT', 120, 120, 240, 40)
     store.updateNode(id, { text: 'Font picker smoke' })
     store.select([id])
@@ -39,9 +39,9 @@ test('font picker selects local fonts without browser web-font access', async ({
           style: 'Regular'
         },
         {
-          family: 'OpenPencil Local Font',
-          fullName: 'OpenPencil Local Font Regular',
-          postscriptName: 'OpenPencilLocalFont-Regular',
+          family: 'OpenDesigner Local Font',
+          fullName: 'OpenDesigner Local Font Regular',
+          postscriptName: 'OpenDesignerLocalFont-Regular',
           style: 'Regular'
         }
       ]
@@ -50,14 +50,14 @@ test('font picker selects local fonts without browser web-font access', async ({
 
   const textId = await openTypographyForText(page)
   await openFontPicker(page)
-  await searchFonts(page, 'OpenPencil Local Font')
+  await searchFonts(page, 'OpenDesigner Local Font')
 
   await expect(
-    page.getByTestId('font-picker-item').filter({ hasText: 'OpenPencil Local Font' })
+    page.getByTestId('font-picker-item').filter({ hasText: 'OpenDesigner Local Font' })
   ).toBeVisible()
-  await page.getByTestId('font-picker-item').filter({ hasText: 'OpenPencil Local Font' }).click()
+  await page.getByTestId('font-picker-item').filter({ hasText: 'OpenDesigner Local Font' }).click()
 
-  await expect(page.getByTestId('font-picker-trigger')).toContainText('OpenPencil Local Font')
+  await expect(page.getByTestId('font-picker-trigger')).toContainText('OpenDesigner Local Font')
   await expect
     .poll(async () =>
       page.evaluate((id) => {
@@ -66,7 +66,7 @@ test('font picker selects local fonts without browser web-font access', async ({
         return node?.type === 'TEXT' ? node.fontFamily : null
       }, textId)
     )
-    .toBe('OpenPencil Local Font')
+    .toBe('OpenDesigner Local Font')
   expect(fonts.counts.metadata).toBe(0)
 })
 
@@ -86,7 +86,7 @@ test('font picker keeps bundled fonts when local and web fonts are unavailable',
     page.getByTestId('font-picker-item').filter({ hasText: /^Interbundled$/ })
   ).toBeVisible()
   await expect(
-    page.getByTestId('font-picker-item').filter({ hasText: 'OpenPencil Google Font' })
+    page.getByTestId('font-picker-item').filter({ hasText: 'OpenDesigner Google Font' })
   ).toHaveCount(0)
   expect(fonts.counts.metadata).toBe(0)
 })
@@ -110,7 +110,7 @@ test('font picker keeps bundled fonts when local font permission is rejected', a
     page.getByTestId('font-picker-item').filter({ hasText: /^Interbundled$/ })
   ).toBeVisible()
   await expect(
-    page.getByTestId('font-picker-item').filter({ hasText: 'OpenPencil Google Font' })
+    page.getByTestId('font-picker-item').filter({ hasText: 'OpenDesigner Google Font' })
   ).toHaveCount(0)
   expect(fonts.counts.metadata).toBe(0)
 })

@@ -1,6 +1,6 @@
 import { uniq } from 'es-toolkit/array'
 
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { REKA_ELEMENTS } from './behaviours'
 import { elementBindings, elementProps, elementSchema } from './elements'
@@ -131,7 +131,7 @@ async function renderJSX<Artwork>(
 
 /**
  * A Design JSX renderer bound to an engine. Rendering needs `services` for icons, inline
- * SVG, and layout; OpenPencil's engine provides them through `@open-pencil/core/design-jsx`.
+ * SVG, and layout; OpenDesigner's engine provides them through `@open-designer/core/design-jsx`.
  */
 export function createDesignJSXRenderer<Artwork>(services: DesignJSXServices<Artwork>) {
   return {

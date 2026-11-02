@@ -1,8 +1,8 @@
 import { useFileDialog } from '@vueuse/core'
 import { computed, onBeforeUnmount, ref, type Ref } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import { isSVGFile } from '@open-pencil/scene-graph/images'
+import type { Editor } from '@open-designer/core'
+import { isSVGFile } from '@open-designer/scene-graph/images'
 
 import {
   createImagePreviewURL,

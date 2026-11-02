@@ -1,5 +1,5 @@
-import type { HandlePosition } from '@open-pencil/core/geometry'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { HandlePosition } from '@open-designer/core/geometry'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 /** `value` at least `min` long, keeping the direction it was dragged in. */
 function atLeast(value: number, min: number): number {

@@ -10,7 +10,7 @@ description: Проверка цветов, типографики, интерв
 ## Цвета
 
 ```sh
-openpencil analyze colors design.fig
+opendesigner analyze colors design.fig
 ```
 
 Команда находит все цвета, считает количество использований и строит гистограмму:
@@ -25,7 +25,7 @@ openpencil analyze colors design.fig
 ## Типографика
 
 ```sh
-openpencil analyze typography design.fig
+opendesigner analyze typography design.fig
 ```
 
 Результат содержит сочетания семейства, размера и начертания шрифта и количество использований каждого сочетания. Так можно найти случайные стили текста, которые стоит объединить.
@@ -33,7 +33,7 @@ openpencil analyze typography design.fig
 ## Интервалы
 
 ```sh
-openpencil analyze spacing design.fig
+opendesigner analyze spacing design.fig
 ```
 
 Команда проверяет интервалы и внутренние отступы во фреймах с автоматической компоновкой. Например, она помогает заметить случайный интервал `13px` среди значений шкалы `8/16/24`.
@@ -41,7 +41,7 @@ openpencil analyze spacing design.fig
 ## Повторяющиеся структуры
 
 ```sh
-openpencil analyze clusters design.fig
+opendesigner analyze clusters design.fig
 ```
 
 Команда находит повторяющиеся структуры объектов, которые могут стать компонентами:
@@ -59,7 +59,7 @@ openpencil analyze clusters design.fig
 Все подкоманды `analyze` поддерживают `--json`:
 
 ```sh
-openpencil analyze colors design.fig --json
+opendesigner analyze colors design.fig --json
 ```
 
 Результат можно передать `jq`, использовать в проверках CI или сценариях, контролирующих допустимое количество токенов дизайна.

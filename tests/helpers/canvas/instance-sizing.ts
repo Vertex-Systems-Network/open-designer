@@ -1,6 +1,6 @@
-import { renderTree } from '@open-pencil/core/design-jsx'
-import { Component, Frame, Instance, Text, property } from '@open-pencil/design-jsx'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import { renderTree } from '@open-designer/core/design-jsx'
+import { Component, Frame, Instance, Text, property } from '@open-designer/design-jsx'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 export async function createInstanceSizingScene(graph: SceneGraph, parentId: string) {
   const library = graph.addPage('Sizing component')

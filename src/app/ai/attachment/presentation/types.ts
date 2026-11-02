@@ -1,5 +1,5 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode } from '@open-designer/scene-graph'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import type { ImageAttachmentMediaType } from '@/app/ai/attachment/image/types'
 

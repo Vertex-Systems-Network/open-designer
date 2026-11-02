@@ -1,8 +1,8 @@
 import * as v from 'valibot'
 
-import { behaviourSpecSchema } from '@open-pencil/scene-graph/behaviours'
+import { behaviourSpecSchema } from '@open-designer/scene-graph/behaviours'
 
-import { OpenPencilAPI } from '#core/openpencil-api'
+import { OpenDesignerAPI } from '#core/opendesigner-api'
 import { defineTool, toolFailure } from '#core/tools/schema'
 
 export const setBehaviour = defineTool({
@@ -27,9 +27,9 @@ export const setBehaviour = defineTool({
   }),
   execute: (figma, { id, behaviour }) => {
     try {
-      const openpencil = new OpenPencilAPI(figma)
-      if (behaviour) return openpencil.setBehaviour(id, behaviour).toJSON()
-      openpencil.getBehaviour(id)?.remove()
+      const opendesigner = new OpenDesignerAPI(figma)
+      if (behaviour) return opendesigner.setBehaviour(id, behaviour).toJSON()
+      opendesigner.getBehaviour(id)?.remove()
       return { ok: true }
     } catch (error) {
       return toolFailure(error)
@@ -48,7 +48,7 @@ export const createSlot = defineTool({
   }),
   execute: (figma, { id }) => {
     try {
-      return { slot: new OpenPencilAPI(figma).createSlot(id) }
+      return { slot: new OpenDesignerAPI(figma).createSlot(id) }
     } catch (error) {
       return toolFailure(error)
     }
@@ -66,10 +66,10 @@ export const getBehaviour = defineTool({
     id: v.optional(v.pipe(v.string(), v.description('Component, set, or variant ID')))
   }),
   execute: (figma, { id }) => {
-    const openpencil = new OpenPencilAPI(figma)
-    if (!id) return { kinds: openpencil.behaviourKinds }
+    const opendesigner = new OpenDesignerAPI(figma)
+    if (!id) return { kinds: opendesigner.behaviourKinds }
     try {
-      return openpencil.getBehaviour(id)?.toJSON() ?? { behaviour: null }
+      return opendesigner.getBehaviour(id)?.toJSON() ?? { behaviour: null }
     } catch (error) {
       return toolFailure(error)
     }

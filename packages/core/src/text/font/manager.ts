@@ -2,14 +2,14 @@
 
 import type { CanvasKit, TypefaceFontProvider } from 'canvaskit-wasm'
 
-import type { FontVariation, SceneGraph } from '@open-pencil/scene-graph'
+import type { FontVariation, SceneGraph } from '@open-designer/scene-graph'
 import {
   faceLoadKey,
   namesWeight,
   normalizeFontFamily,
   parseFontStyle,
   styleToWeight
-} from '@open-pencil/scene-graph/font-style'
+} from '@open-designer/scene-graph/font-style'
 
 import { DEFAULT_FONT_FAMILY, IS_BROWSER } from '#core/constants'
 import { fontFallbackEntry, type FontFallbackScript } from '#core/text/fallbacks'
@@ -38,8 +38,8 @@ import {
   type FontAxis,
   type NamedInstance
 } from '#core/text/font/variation'
-import { collectGraphFontKeys } from '#core/text/requirements/collect'
 import { sfntFont } from '#core/text/font/woff2'
+import { collectGraphFontKeys } from '#core/text/requirements/collect'
 import { normalizedCoverageText, WebFontResolver } from '#core/text/web-font/resolver'
 import type { WebFontFetch, WebFontProviderId } from '#core/text/web-font/resolver'
 
@@ -164,7 +164,7 @@ export class FontManager {
     this.hostFontRequests.clear()
   }
 
-  /** Lets a host that bundles `@open-pencil/core/assets` itself say where each file ended up. */
+  /** Lets a host that bundles `@open-designer/core/assets` itself say where each file ended up. */
   setBundledFontLocator(locate: BundledFontLocator | null): void {
     this.bundled.setLocator(locate)
   }

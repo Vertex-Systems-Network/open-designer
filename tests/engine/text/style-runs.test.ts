@@ -10,8 +10,8 @@ import {
   toggleBoldInRange,
   toggleDecorationInRange,
   toggleItalicInRange
-} from '@open-pencil/core/text'
-import type { StyleRun } from '@open-pencil/scene-graph'
+} from '@open-designer/core/text'
+import type { StyleRun } from '@open-designer/scene-graph'
 
 describe('getStyleAt', () => {
   test('returns style within run', () => {

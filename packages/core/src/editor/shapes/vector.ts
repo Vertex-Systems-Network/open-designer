@@ -1,7 +1,7 @@
-import type { SceneNode, VectorNetwork } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import { transformVectorNetwork } from '@open-pencil/scene-graph/vector-network'
+import type { SceneNode, VectorNetwork } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
+import { transformVectorNetwork } from '@open-designer/scene-graph/vector-network'
 
 import type { EditorContext } from '#core/editor/types'
 import { computeAccurateBounds } from '#core/vector'

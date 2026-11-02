@@ -3,11 +3,11 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 import { buildDemoGraph, measuringRenderer } from '#demo/build'
 import { CHAPTERS, sectionName } from '#demo/document/chapters/names'
 
-import { exportFigFile, readFigFile, populateAllFigPages } from '@open-pencil/core/io/formats/fig'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { missingBindings, readBehaviour } from '@open-pencil/scene-graph/behaviours'
-import { readShaderPaints } from '@open-pencil/scene-graph/shaders'
-import { instanceSlotFrames, ownsSlotContent } from '@open-pencil/scene-graph/slots'
+import { exportFigFile, readFigFile, populateAllFigPages } from '@open-designer/core/io/formats/fig'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { missingBindings, readBehaviour } from '@open-designer/scene-graph/behaviours'
+import { readShaderPaints } from '@open-designer/scene-graph/shaders'
+import { instanceSlotFrames, ownsSlotContent } from '@open-designer/scene-graph/slots'
 
 let graph: SceneGraph
 

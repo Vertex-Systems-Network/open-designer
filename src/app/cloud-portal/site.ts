@@ -5,8 +5,8 @@ import {
   createCloudPortalClient,
   discoverCloud,
   type CloudPortalClient
-} from '@open-pencil/cloud/client'
-import { parseCloudLinkPath, type CloudAccountStatus } from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/client'
+import { parseCloudLinkPath, type CloudAccountStatus } from '@open-designer/cloud/contract'
 
 /**
  * A Cloud server serves the editor to signed-in people and, where the server allows the local

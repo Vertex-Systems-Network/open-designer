@@ -1,5 +1,5 @@
-import type { RenderResult, TreeNode } from '@open-pencil/design-jsx'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { RenderResult, TreeNode } from '@open-designer/design-jsx'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import {
   finishRenderPlacement,

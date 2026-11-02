@@ -1,4 +1,4 @@
-import type { Fill, StyleRun, TextParagraphStyle } from '@open-pencil/scene-graph'
+import type { Fill, StyleRun, TextParagraphStyle } from '@open-designer/scene-graph'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 import listGlyphs from '#tests/fixtures/list-saved-glyphs.json' with { type: 'json' }

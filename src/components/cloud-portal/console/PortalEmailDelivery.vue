@@ -2,8 +2,8 @@
 import { createColumnHelper } from '@tanstack/vue-table'
 import { computed, h } from 'vue'
 
-import type { CloudAdminEmailFilter } from '@open-pencil/cloud/contract'
-import { useCloudPortalMessages } from '@open-pencil/vue/i18n'
+import type { CloudAdminEmailFilter } from '@open-designer/cloud/contract'
+import { useCloudPortalMessages } from '@open-designer/vue/i18n'
 
 import {
   usePortalList,

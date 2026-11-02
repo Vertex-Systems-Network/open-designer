@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/vue3-vite'
 import { sumBy } from 'es-toolkit'
 import { computed, ref } from 'vue'
 
-import type { MetricsSnapshot } from '@open-pencil/feedback/contract'
+import type { MetricsSnapshot } from '@open-designer/feedback/contract'
 
 import { utcDayOfTimestamp } from '@/app/metrics/days'
 import { presetRange } from '@/app/metrics/range'

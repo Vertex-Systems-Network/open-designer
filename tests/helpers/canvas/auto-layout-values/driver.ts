@@ -11,7 +11,7 @@ export function autoLayoutValuesDriver(page: () => Page) {
     build() {
       return page().evaluate(async (view) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const fixtureURL = '/tests/helpers/canvas/auto-layout-values/scene.ts'
         const scene: typeof ValueScene = await import(fixtureURL)
         const row = scene.createAutoLayoutValueScene(store.graph, store.state.currentPageId)

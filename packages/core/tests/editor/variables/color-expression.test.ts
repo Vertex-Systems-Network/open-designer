@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { createEditor } from '@open-designer/core'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { resolveFillColor } from '#core/canvas/renderer/colors'
 import {

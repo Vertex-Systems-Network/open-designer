@@ -262,14 +262,14 @@ const noFunctionAliasImports = {
   }
 } satisfies RuleDefinition
 
-const noDirectOpenPencilBrowserStore = {
+const noDirectOpenDesignerBrowserStore = {
   meta: {
     docs: {
       description: 'Disallow direct window.openPencil.store access'
     }
   },
   create(context) {
-    function isOpenPencilMember(node: TSESTree.Expression): boolean {
+    function isOpenDesignerMember(node: TSESTree.Expression): boolean {
       return (
         node?.type === 'MemberExpression' &&
         staticPropertyName(node.property) === 'openPencil' &&
@@ -281,7 +281,7 @@ const noDirectOpenPencilBrowserStore = {
     return {
       MemberExpression(node) {
         if (staticPropertyName(node.property) !== 'store') return
-        if (!isOpenPencilMember(node.object)) return
+        if (!isOpenDesignerMember(node.object)) return
         context.report({
           node,
           message:
@@ -292,21 +292,21 @@ const noDirectOpenPencilBrowserStore = {
   }
 } satisfies RuleDefinition
 
-const noDirectOpenPencilWindowInternals = {
+const noDirectOpenDesignerWindowInternals = {
   meta: {
     docs: {
-      description: 'Disallow direct access to private OpenPencil window internals'
+      description: 'Disallow direct access to private OpenDesigner window internals'
     }
   },
   create(context) {
     return {
       MemberExpression(node) {
         const name = staticPropertyName(node.property)
-        if (!name?.startsWith('__OPEN_PENCIL')) return
+        if (!name?.startsWith('__OPEN_DESIGNER')) return
         context.report({
           node,
           message:
-            'Do not access window.__OPEN_PENCIL* directly. Use src/app/browser-bridge.ts or tests/helpers/store.ts instead.'
+            'Do not access window.__OPEN_DESIGNER* directly. Use src/app/browser-bridge.ts or tests/helpers/store.ts instead.'
         })
       }
     }
@@ -366,8 +366,8 @@ export {
   noComponentRootSiblingFolder,
   noUselessPassThroughWrappers,
   noFunctionAliasImports,
-  noDirectOpenPencilBrowserStore,
-  noDirectOpenPencilWindowInternals,
+  noDirectOpenDesignerBrowserStore,
+  noDirectOpenDesignerWindowInternals,
   noBunGlobalsInCli,
   noTopLevelPrefixedTestFiles,
   noSiblingDomainPrefixedFiles

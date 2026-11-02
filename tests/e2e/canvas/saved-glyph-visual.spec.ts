@@ -1,4 +1,4 @@
-import type { Fill, StyleRun } from '@open-pencil/scene-graph'
+import type { Fill, StyleRun } from '@open-designer/scene-graph'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 import styledGlyphs from '#tests/fixtures/styled-saved-glyphs.json' with { type: 'json' }
@@ -231,7 +231,7 @@ test('saved emoji glyphs draw the emoji, not their placeholder, in their own col
 })
 
 /**
- * Emoji typed in OpenPencil have no saved glyphs: the layout gives each Figma's 1 em square
+ * Emoji typed in OpenDesigner have no saved glyphs: the layout gives each Figma's 1 em square
  * through the emoji metrics font, and the emoji's image is drawn there in its own colours.
  * A character a text font has, such as ©, stays text.
  */

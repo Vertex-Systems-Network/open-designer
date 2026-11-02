@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/fig",
+  "name": "@open-designer/fig",
   "version": "0.16.0",
   "license": "MIT",
   "repository": {
@@ -69,7 +69,7 @@
     "typescript": "npm:@typescript/typescript6@^6.0.2"
   },
   "peerDependencies": {
-    "@open-pencil/kiwi": "workspace:*",
-    "@open-pencil/scene-graph": "workspace:*"
+    "@open-designer/kiwi": "workspace:*",
+    "@open-designer/scene-graph": "workspace:*"
   }
 }

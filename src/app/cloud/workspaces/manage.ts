@@ -1,7 +1,7 @@
 import { computed, ref, shallowRef } from 'vue'
 
-import { CloudAPIError } from '@open-pencil/cloud/client'
-import type { WorkspaceMembers, WorkspaceRole } from '@open-pencil/cloud/contract'
+import { CloudAPIError } from '@open-designer/cloud/client'
+import type { WorkspaceMembers, WorkspaceRole } from '@open-designer/cloud/contract'
 
 import { homeLocation } from '@/app/home/location'
 

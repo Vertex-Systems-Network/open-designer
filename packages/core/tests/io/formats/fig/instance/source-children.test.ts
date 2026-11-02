@@ -2,17 +2,17 @@ import { beforeAll, expect, test } from 'bun:test'
 
 import { guid } from '#core-tests/helpers/fig/guid'
 
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
 import {
   interpretComponent,
   interpretInstance,
   linkInstanceSourceChildren,
   mapInstanceSourceChildren,
   materializeInstance
-} from '@open-pencil/fig/instance-overrides'
-import { initCodec, type NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/fig/instance-overrides'
+import { initCodec, type NodeChange } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { registerTestFont } from '#core-tests/helpers/figma-api'
 

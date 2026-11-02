@@ -1,16 +1,16 @@
 import { describe, expect, test } from 'bun:test'
 
-import { OpenPencilAPI } from '@open-pencil/core/openpencil-api'
+import { OpenDesignerAPI } from '@open-designer/core/opendesigner-api'
 import {
   createEditor,
   EDIT_VIEW,
   executeAtomicTool,
   type EditorProfileInputs
-} from '@open-pencil/core'
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { ALL_TOOLS, type ToolDef } from '@open-pencil/core/tools'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { UndoManager } from '@open-pencil/scene-graph/undo'
+} from '@open-designer/core'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { ALL_TOOLS, type ToolDef } from '@open-designer/core/tools'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { UndoManager } from '@open-designer/scene-graph/undo'
 
 function setup() {
   const graph = new SceneGraph()
@@ -80,7 +80,7 @@ describe('atomic agent tools', () => {
     const variable = figma.variables.createVariable('Brand', collection, 'COLOR')
     variable.setValueForMode(collection.defaultModeId, { r: 1, g: 0, b: 0, a: 1 })
     tool('set_fill').execute(figma, { id: rectangle.id, color: '#ff0000' })
-    new OpenPencilAPI(figma).bindVariable(rectangle.id, 'fills/0/color', variable)
+    new OpenDesignerAPI(figma).bindVariable(rectangle.id, 'fills/0/color', variable)
     const page = figma.createPage()
     figma.currentPage = page
     executeAtomicTool(editor, figma, tool('set_variable'), {

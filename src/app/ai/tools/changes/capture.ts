@@ -5,9 +5,9 @@ import {
   graphFromDocumentChange,
   isEmptyDocumentChange,
   type DocumentChange
-} from '@open-pencil/core'
-import { diffPageLayersJSX } from '@open-pencil/core/tools'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+} from '@open-designer/core'
+import { diffPageLayersJSX } from '@open-designer/core/tools'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { changePreviewSize } from '@/app/ai/chat/preferences'
 import type { EditorStore } from '@/app/editor/active-store'

@@ -16,7 +16,7 @@ export default {
     'type-enum': [
       2,
       'always',
-      ['feat', 'fix', 'refactor', 'perf', 'docs', 'test', 'build', 'ci', 'chore']
+      ['feat', 'fix', 'refactor', 'perf', 'docs', 'test', 'build', 'ci', 'chore', 'style', 'lint']
     ],
     // Product names such as MCP, DOM/CSS, and Kiwi retain their casing.
     'subject-case': [0],

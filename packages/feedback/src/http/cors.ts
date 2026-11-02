@@ -14,7 +14,7 @@ export const ALLOWED_ORIGINS = [
   'http://localhost:1420'
 ]
 
-export const allowOpenPencilOrigins = cors({
+export const allowOpenDesignerOrigins = cors({
   origin: ALLOWED_ORIGINS,
   allowMethods: ['POST'],
   allowHeaders: ['Content-Type'],

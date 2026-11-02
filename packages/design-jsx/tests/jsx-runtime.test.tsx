@@ -1,4 +1,4 @@
-/** @jsxImportSource @open-pencil/design-jsx */
+/** @jsxImportSource @open-designer/design-jsx */
 import { describe, expect, test } from 'bun:test'
 
 import { Frame, Paragraph, Span, Text, solid, type TreeNode } from '#design-jsx/index'

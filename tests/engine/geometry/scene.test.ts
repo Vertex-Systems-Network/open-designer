@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import { SceneGraph } from '@open-designer/scene-graph'
+import Matrix from '@open-designer/scene-graph/matrix'
 
 import { createSceneGeometry, nodeOrientationMatrix } from '#core/geometry'
 

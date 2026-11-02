@@ -1,5 +1,5 @@
-import type { Vector } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { Vector } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import type { InstanceOccurrence } from './occurrence/types'
 import { uniformScaleOf } from './types'

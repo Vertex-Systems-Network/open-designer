@@ -1,11 +1,11 @@
 import { expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { createFigDocumentSession } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { recordInstanceOverride } from '@open-pencil/scene-graph/instances'
+import { createEditor } from '@open-designer/core'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { createFigDocumentSession } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { recordInstanceOverride } from '@open-designer/scene-graph/instances'
 
 test('a deleted source node stays deleted across resume and remains undoable', async () => {
   await initCodec()

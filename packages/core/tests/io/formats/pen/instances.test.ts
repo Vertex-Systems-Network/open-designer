@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { layoutAuthoredNodes } from '@open-pencil/core/layout'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { parsePenFile, type PenDocument, type PenNode } from '@open-pencil/pen'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { layoutAuthoredNodes } from '@open-designer/core/layout'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { parsePenFile, type PenDocument, type PenNode } from '@open-designer/pen'
 
 const button: PenNode = {
   id: 'button',

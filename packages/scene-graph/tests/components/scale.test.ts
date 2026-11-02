@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { rescaleNodeTree } from '@open-pencil/scene-graph/scaling'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { rescaleNodeTree } from '@open-designer/scene-graph/scaling'
 
 import { expectDefined } from '../helpers/assert'
 

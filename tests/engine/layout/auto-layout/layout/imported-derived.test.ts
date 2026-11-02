@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { getAbsolutePositionFull } from '@open-pencil/scene-graph/coordinate'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { getAbsolutePositionFull } from '@open-designer/scene-graph/coordinate'
 
 describe('imported auto-layout bounds', () => {
   test('preserves direct imported line geometry inside imported parents', () => {

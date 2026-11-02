@@ -8,10 +8,10 @@
  */
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
+import { SceneGraph } from '@open-designer/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
 
 import { exportFigFile } from '#core/io/formats/fig/export'
 import { parseFigFile } from '#core/io/formats/fig/read'

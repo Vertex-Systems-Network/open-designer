@@ -20,7 +20,7 @@ export default defineConfig({
     moduleSideEffects: false
   },
   deps: {
-    neverBundle: ['@open-pencil/scene-graph', /^@open-pencil\/scene-graph\//, 'node:fs/promises'],
+    neverBundle: ['@open-designer/scene-graph', /^@open-designer\/scene-graph\//, 'node:fs/promises'],
     onlyBundle: false
   },
   outputOptions: {

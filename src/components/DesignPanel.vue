@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { getNodeEditCapability } from '@open-pencil/core'
-import { layerResizes, layerStrokesAndEffects } from '@open-pencil/scene-graph/generated'
-import { readIcon } from '@open-pencil/scene-graph/icons'
-import { useEditorCommands } from '@open-pencil/vue/editor/commands'
-import { useSelectionState } from '@open-pencil/vue/editor/selection-state'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { useSceneComputed } from '@open-pencil/vue/internal/scene-computed'
+import { getNodeEditCapability } from '@open-designer/core'
+import { layerResizes, layerStrokesAndEffects } from '@open-designer/scene-graph/generated'
+import { readIcon } from '@open-designer/scene-graph/icons'
+import { useEditorCommands } from '@open-designer/vue/editor/commands'
+import { useSelectionState } from '@open-designer/vue/editor/selection-state'
+import { useI18n } from '@open-designer/vue/i18n'
+import { useSceneComputed } from '@open-designer/vue/internal/scene-computed'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import { openVariablesDialog } from '@/app/editor/tokens/dialog'

@@ -5,15 +5,15 @@ import type {
   VectorSegment,
   VectorVertex,
   WindingRule
-} from '@open-pencil/scene-graph'
-import { parsePluginVectorPath } from '@open-pencil/scene-graph/parse-path'
+} from '@open-designer/scene-graph'
+import { parsePluginVectorPath } from '@open-designer/scene-graph/parse-path'
 import {
   mergeVectorNetworks,
   normalizeVectorNetwork,
   transformVectorNetwork,
   validateVectorNetwork,
   vectorNetworkPaths
-} from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/vector-network'
 
 import {
   graph,

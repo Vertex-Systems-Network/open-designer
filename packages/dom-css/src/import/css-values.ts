@@ -1,5 +1,5 @@
-import type { Fill, Stroke } from '@open-pencil/scene-graph'
-import { parseCSSColor, parseCSSNumber } from '@open-pencil/scene-graph/css'
+import type { Fill, Stroke } from '@open-designer/scene-graph'
+import { parseCSSColor, parseCSSNumber } from '@open-designer/scene-graph/css'
 
 import type { DesignStyleDeclaration } from '../types'
 

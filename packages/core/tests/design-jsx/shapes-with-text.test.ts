@@ -2,10 +2,10 @@ import { describe, expect, test } from 'bun:test'
 
 import { getNodeOrThrow } from '#core-tests/helpers/assert'
 
-import { renderJSX } from '@open-pencil/core/design-jsx'
-import { sceneNodeToJSX } from '@open-pencil/design-jsx'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { shapeWithTextLabel } from '@open-pencil/scene-graph/generated'
+import { renderJSX } from '@open-designer/core/design-jsx'
+import { sceneNodeToJSX } from '@open-designer/design-jsx'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { shapeWithTextLabel } from '@open-designer/scene-graph/generated'
 
 const BOARD = `
   <Frame name="Board" w={900} h={400}>

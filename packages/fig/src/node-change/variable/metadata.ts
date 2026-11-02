@@ -1,4 +1,4 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import {
   CODE_SYNTAX_PLATFORMS,
   VARIABLE_SCOPES,
@@ -7,11 +7,11 @@ import {
   type Variable,
   type VariableCollection,
   type VariableScope
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 
 import { extractPluginData, mergePluginData } from '../plugin-data'
 
-const LOCAL_LIBRARY_PLUGIN_ID = 'open-pencil.internal'
+const LOCAL_LIBRARY_PLUGIN_ID = 'open-designer.internal'
 const LOCAL_LIBRARY_PLUGIN_KEY = 'converted-library-asset'
 const LOCAL_LIBRARY_MARKER: PluginDataEntry = {
   pluginId: LOCAL_LIBRARY_PLUGIN_ID,

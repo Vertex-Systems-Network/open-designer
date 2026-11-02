@@ -1,5 +1,5 @@
-import type { Editor } from '@open-pencil/core'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { Editor } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 type TextClipboardOptions = {
   store: Editor

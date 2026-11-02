@@ -1,8 +1,8 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 
-import { SkiaRenderer } from '@open-pencil/core/canvas'
-import { initCanvasKit } from '@open-pencil/core/io/formats/raster'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { SkiaRenderer } from '@open-designer/core/canvas'
+import { initCanvasKit } from '@open-designer/core/io/formats/raster'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { isolatesInnerShadows } from '#core/canvas/shadows'
 

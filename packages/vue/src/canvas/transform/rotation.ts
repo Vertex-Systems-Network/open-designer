@@ -1,7 +1,7 @@
-import type { Editor } from '@open-pencil/core'
-import { ROTATION_SNAP_DEGREES } from '@open-pencil/core/constants'
-import { createSceneGeometry } from '@open-pencil/core/geometry'
-import { layerRotates } from '@open-pencil/scene-graph/generated'
+import type { Editor } from '@open-designer/core'
+import { ROTATION_SNAP_DEGREES } from '@open-designer/core/constants'
+import { createSceneGeometry } from '@open-designer/core/geometry'
+import { layerRotates } from '@open-designer/scene-graph/generated'
 
 import {
   hitTestCornerRotationByMatrix,

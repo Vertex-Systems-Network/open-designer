@@ -2,8 +2,8 @@ import { beforeAll, expect, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { pixelLength } from '@open-pencil/scene-graph/text'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { pixelLength } from '@open-designer/scene-graph/text'
 
 import { withPDFTextLayout } from '#core/io/formats/pdf/prepare'
 import { renderNodesToSVG } from '#core/io/formats/svg'

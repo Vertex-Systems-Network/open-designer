@@ -1,4 +1,4 @@
-import { JSX_REFERENCE } from '@open-pencil/design-jsx'
+import { JSX_REFERENCE } from '@open-designer/design-jsx'
 
 import codegen from './codegen.md?raw'
 

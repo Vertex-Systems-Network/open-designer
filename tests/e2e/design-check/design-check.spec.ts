@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 
@@ -25,7 +25,7 @@ function buildScene(page: Page): Promise<Scene> {
   return page.evaluate(
     ({ card, close }) => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenPencil store not initialized')
+      if (!store) throw new Error('OpenDesigner store not initialized')
       store.state.zoom = 1
       store.state.panX = 0
       store.state.panY = 0
@@ -197,7 +197,7 @@ test('A suggestion applies to its row only', async () => {
   const scene = await buildScene(editor.page)
   const noteId = await editor.page.evaluate((cardId) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     return store.graph.createNode('TEXT', cardId, {
       name: 'Footnote',
       x: 24,
@@ -308,7 +308,7 @@ test('Issues off screen are pinned to the canvas edge and lead to the nearest mo
   const panX = -1000
   await editor.page.evaluate((x) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     store.state.panX = x
     store.requestRender()
   }, panX)
@@ -339,7 +339,7 @@ test('Other pages are checked for the page list and the Document scope', async (
   await buildScene(editor.page)
   const cartCaptionId = await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const checkout = store.graph.addPage('Checkout')
     const cart = store.graph.createNode('FRAME', checkout.id, {
       name: 'Cart',
@@ -423,7 +423,7 @@ const NOTE = { columns: 6, gapX: 100, gapY: 50, width: 40, height: 10, left: 40,
 function addNotes(page: Page): Promise<string[]> {
   return page.evaluate((note) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     store.state.zoom = 1
     store.state.panX = 0
     store.state.panY = 0

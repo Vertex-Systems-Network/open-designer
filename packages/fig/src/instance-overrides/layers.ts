@@ -1,5 +1,5 @@
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 import type { InstanceAssignmentDiagnostic } from './occurrence/types'
 import { symbolOverridesOf, type ComponentPropAssignment } from './types'

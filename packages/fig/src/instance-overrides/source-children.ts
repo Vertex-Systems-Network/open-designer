@@ -1,5 +1,5 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { setInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
 
 import type { MaterializedInstance } from './materialize-instance'
 import { occurrences } from './occurrence/path'

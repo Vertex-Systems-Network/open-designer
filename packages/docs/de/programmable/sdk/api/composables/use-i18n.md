@@ -1,6 +1,6 @@
 ---
 title: useI18n
-description: Lokalisierte Labels von OpenPencil lesen und das aktive SDK locale ändern.
+description: Lokalisierte Labels von OpenDesigner lesen und das aktive SDK locale ändern.
 ---
 
 # useI18n
@@ -12,7 +12,7 @@ Das composable stellt Labels für Menüs, Commands, Tools, Panels, Pages und Dia
 ## Verwendung
 
 ```ts
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useI18n } from '@open-designer/vue/i18n'
 
 const { menu, commands, panels, locale, availableLocales, localeLabels, setLocale } = useI18n()
 ```
@@ -34,7 +34,7 @@ const { menu, commands, panels, locale, availableLocales, localeLabels, setLocal
 
 ```vue
 <script setup lang="ts">
-import { useI18n } from '@open-pencil/vue/i18n'
+import { useI18n } from '@open-designer/vue/i18n'
 
 const { menu, locale, availableLocales, localeLabels, setLocale } = useI18n()
 </script>

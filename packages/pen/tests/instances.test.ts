@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { PenNode } from '@open-pencil/pen'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { hasInstanceOverride, syncInstance } from '@open-pencil/scene-graph/instances'
+import type { PenNode } from '@open-designer/pen'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { hasInstanceOverride, syncInstance } from '@open-designer/scene-graph/instances'
 
 import { expectDefined, getNodeOrThrow } from './helpers/assert'
 import { parseDocument } from './helpers/document'

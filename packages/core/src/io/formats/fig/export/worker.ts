@@ -1,5 +1,5 @@
-import { compressFigDataSync } from '@open-pencil/fig'
-import { loadFigDataCompressor, type FigFileKind } from '@open-pencil/kiwi/fig/container'
+import { compressFigDataSync } from '@open-designer/fig'
+import { loadFigDataCompressor, type FigFileKind } from '@open-designer/kiwi/fig/container'
 
 interface CompressMessage {
   schemaDeflated: Uint8Array

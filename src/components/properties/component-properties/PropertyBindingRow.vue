@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ComponentBinding } from '@open-pencil/vue/controls/component-props'
-import { usePanelMessages } from '@open-pencil/vue/i18n'
+import type { ComponentBinding } from '@open-designer/vue/controls/component-props'
+import { usePanelMessages } from '@open-designer/vue/i18n'
 
 import { sceneNodeIcon } from '@/components/icons'
 import AppButton from '@/components/ui/button/AppButton.vue'

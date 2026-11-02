@@ -11,8 +11,8 @@ import {
   type CSSStyleRuleLike
 } from '@acemir/cssom'
 
-import { tryParseColor } from '@open-pencil/scene-graph/color'
-import { parseCSSNumber, splitCSSValue } from '@open-pencil/scene-graph/css'
+import { tryParseColor } from '@open-designer/scene-graph/color'
+import { parseCSSNumber, splitCSSValue } from '@open-designer/scene-graph/css'
 
 interface HeadlessCSSRule {
   selector: string

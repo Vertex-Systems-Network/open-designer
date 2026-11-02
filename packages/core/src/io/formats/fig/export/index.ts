@@ -1,16 +1,16 @@
-import { compressFigDataSync, renameFigArchive } from '@open-pencil/fig'
+import { compressFigDataSync, renameFigArchive } from '@open-designer/fig'
 import {
   nameImagesForFigma,
   placeSlotContent,
   type FigNodeChangeExportRuntime,
   sceneNodeToKiwi
-} from '@open-pencil/fig/node-change'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { loadFigDataCompressor, type FigFileKind } from '@open-pencil/kiwi/fig/container'
-import type { DocumentKind, SceneGraph } from '@open-pencil/scene-graph'
-import { fractionalPosition } from '@open-pencil/scene-graph/order-keys'
-import type { GUID } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/fig/node-change'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { loadFigDataCompressor, type FigFileKind } from '@open-designer/kiwi/fig/container'
+import type { DocumentKind, SceneGraph } from '@open-designer/scene-graph'
+import { fractionalPosition } from '@open-designer/scene-graph/order-keys'
+import type { GUID } from '@open-designer/scene-graph/primitives'
 
 import { withFigExportRuntime } from '#core/canvas/text/shape'
 import { IS_BROWSER } from '#core/constants'

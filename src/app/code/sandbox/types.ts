@@ -1,4 +1,4 @@
-import type { DesignJSXProgram } from '@open-pencil/design-jsx'
+import type { DesignJSXProgram } from '@open-designer/design-jsx'
 
 import type { DesignJSXValidationLimits } from '@/app/code/sandbox/schema'
 

@@ -12,11 +12,11 @@ import {
   watch
 } from 'vue'
 
-import { resolveEditorProfile } from '@open-pencil/core'
-import { JSX_REFERENCE } from '@open-pencil/design-jsx'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { useEditorEvent } from '@open-pencil/vue/editor/events'
-import { useI18n } from '@open-pencil/vue/i18n'
+import { resolveEditorProfile } from '@open-designer/core'
+import { JSX_REFERENCE } from '@open-designer/design-jsx'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { useEditorEvent } from '@open-designer/vue/editor/events'
+import { useI18n } from '@open-designer/vue/i18n'
 
 import {
   commitDOMCodeSession,

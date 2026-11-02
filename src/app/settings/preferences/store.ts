@@ -2,8 +2,8 @@ import { useLocalStorage } from '@vueuse/core'
 import { uniq } from 'es-toolkit'
 import * as v from 'valibot'
 
-import { DEFAULT_SNAPPING_PREFERENCES, type SnappingPreferences } from '@open-pencil/core'
-import { COMMENT_SORTS, type CommentSort } from '@open-pencil/scene-graph/comments'
+import { DEFAULT_SNAPPING_PREFERENCES, type SnappingPreferences } from '@open-designer/core'
+import { COMMENT_SORTS, type CommentSort } from '@open-designer/scene-graph/comments'
 
 import { DEFAULT_AGENT_STEPS, resolveAgentStepLimit } from '@/app/ai/reply/step-limit'
 import {
@@ -71,7 +71,7 @@ export interface SharingPreferences {
 export const AI_SETUP_STATES = ['pending', 'done'] as const
 export type AISetupState = (typeof AI_SETUP_STATES)[number]
 
-/** Which events send a system notification while OpenPencil is out of view. */
+/** Which events send a system notification while OpenDesigner is out of view. */
 export interface NotificationPreferences {
   /** An agent waits on a permission request. */
   agentNeedsInput: boolean

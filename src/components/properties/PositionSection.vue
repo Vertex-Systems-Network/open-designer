@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useEditorCommands } from '@open-pencil/vue/editor/commands'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { PositionControlsRoot } from '@open-pencil/vue/primitives/PositionControls'
+import { useEditorCommands } from '@open-designer/vue/editor/commands'
+import { useI18n } from '@open-designer/vue/i18n'
+import { PositionControlsRoot } from '@open-designer/vue/primitives/PositionControls'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import NumberField from '@/components/inputs/NumberField.vue'

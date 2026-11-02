@@ -1,5 +1,5 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import type { useOkHCL } from '@open-pencil/vue/controls/okhcl'
+import type { SceneNode } from '@open-designer/scene-graph'
+import type { useOkHCL } from '@open-designer/vue/controls/okhcl'
 
 type OkhclControls = ReturnType<typeof useOkHCL>
 type ColorFieldFormat = Parameters<OkhclControls['setFillFieldFormat']>[2]

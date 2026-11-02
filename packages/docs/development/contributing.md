@@ -8,7 +8,7 @@ See [Architecture](/development/architecture) for the system overview and [Testi
 
 ```sh
 bun install
-bun run dev:portless # Editor at https://open-pencil.localhost
+bun run dev:portless # Editor at https://open-designer.localhost
 bun run docs:dev     # Docs at localhost:5173
 ```
 

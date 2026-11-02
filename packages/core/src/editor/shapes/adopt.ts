@@ -1,6 +1,6 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getAxisAlignedBoundsInParent } from '@open-pencil/scene-graph/coordinate'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getAxisAlignedBoundsInParent } from '@open-designer/scene-graph/coordinate'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import type { EditorContext } from '#core/editor/types'
 

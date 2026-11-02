@@ -2,9 +2,9 @@
 
 ## Файлы Figma
 
-OpenPencil открывает и сохраняет `.fig` без предварительного преобразования. Импорт и экспорт используют бинарный кодек Kiwi из формата Figma: 194 определения схемы и около 390 полей для каждого объекта. Для сохранения нажмите <kbd>⌘</kbd><kbd>S</kbd>, для сохранения под новым именем — <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd>.
+OpenDesigner открывает и сохраняет `.fig` без предварительного преобразования. Импорт и экспорт используют бинарный кодек Kiwi из формата Figma: 194 определения схемы и около 390 полей для каждого объекта. Для сохранения нажмите <kbd>⌘</kbd><kbd>S</kbd>, для сохранения под новым именем — <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd>.
 
-**Копирование между Figma и OpenPencil:** скопируйте объекты в одном редакторе и вставьте в другом. Сохраняются заливки, обводки, автоматическая компоновка, текст, эффекты, радиусы углов и векторные сети. Обмен работает в обе стороны.
+**Копирование между Figma и OpenDesigner:** скопируйте объекты в одном редакторе и вставьте в другом. Сохраняются заливки, обводки, автоматическая компоновка, текст, эффекты, радиусы углов и векторные сети. Обмен работает в обе стороны.
 
 ## Рисование и редактирование
 
@@ -33,7 +33,7 @@ OpenPencil открывает и сохраняет `.fig` без предвар
 
 ## Отрисовка
 
-OpenPencil использует Skia через CanvasKit WASM — тот же графический движок, что и Figma:
+OpenDesigner использует Skia через CanvasKit WASM — тот же графический движок, что и Figma:
 
 - линейные, радиальные, угловые и ромбические градиенты;
 - заливки изображениями с разными режимами масштабирования;
@@ -64,7 +64,7 @@ OpenPencil использует Skia через CanvasKit WASM — тот же �
 - **Копировать как:** текст, SVG, PNG или JSX через контекстное меню.
 
 ```sh
-openpencil export design.fig -f jsx --style tailwind
+opendesigner export design.fig -f jsx --style tailwind
 ```
 
 ## Чат с ИИ
@@ -80,7 +80,7 @@ openpencil export design.fig -f jsx --style tailwind
 Claude Code, Cursor, Windsurf и другие клиенты MCP могут читать и изменять `.fig` без интерфейса. Доступно более 90 инструментов и два транспорта: stdio и HTTP.
 
 ```sh
-npm install -g @open-pencil/mcp
+npm install -g @open-designer/mcp
 ```
 
 Полный список находится в [справочнике инструментов MCP](/programmable/mcp-server).
@@ -88,17 +88,17 @@ npm install -g @open-pencil/mcp
 ## CLI
 
 ```sh
-openpencil tree design.fig              # Дерево объектов
-openpencil find design.fig --type TEXT  # Поиск
-openpencil export design.fig -f png     # Экспорт
-openpencil analyze colors design.fig    # Анализ цветов
-openpencil analyze clusters design.fig  # Повторяющиеся структуры
-openpencil eval design.fig -c "..."     # Figma Plugin API
+opendesigner tree design.fig              # Дерево объектов
+opendesigner find design.fig --type TEXT  # Поиск
+opendesigner export design.fig -f png     # Экспорт
+opendesigner analyze colors design.fig    # Анализ цветов
+opendesigner analyze clusters design.fig  # Повторяющиеся структуры
+opendesigner eval design.fig -c "..."     # Figma Plugin API
 ```
 
 Если настольное приложение запущено, файл можно не указывать: CLI подключится по RPC к открытому документу.
 
-Все команды поддерживают `--json`. Установка: `npm install -g @open-pencil/cli` или `bun add -g @open-pencil/cli`.
+Все команды поддерживают `--json`. Установка: `npm install -g @open-designer/cli` или `bun add -g @open-designer/cli`.
 
 ## Совместная работа
 
@@ -118,9 +118,9 @@ openpencil eval design.fig -c "..."     # Figma Plugin API
 **Веб-приложение:** [app.openpencil.dev](https://app.openpencil.dev), установка как PWA и интерфейс для сенсорных экранов.
 
 ```sh
-brew install --cask openpencil
+brew install --cask opendesigner
 ```
 
 ## Резервная загрузка Google Fonts
 
-Если нужного шрифта нет на компьютере, OpenPencil автоматически загружает его из Google Fonts. При открытии `.fig` с незнакомыми шрифтами вручную устанавливать их не нужно.
+Если нужного шрифта нет на компьютере, OpenDesigner автоматически загружает его из Google Fonts. При открытии `.fig` с незнакомыми шрифтами вручную устанавливать их не нужно.

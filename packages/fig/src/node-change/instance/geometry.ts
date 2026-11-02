@@ -1,10 +1,10 @@
 import type { DerivedSymbolOverride } from '#fig/instance-overrides/types'
 
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { findInstanceAncestor } from '@open-pencil/scene-graph/instances'
-import { copiedComponentLayerId } from '@open-pencil/scene-graph/instances/overrides'
-import { ownsSlotContent } from '@open-pencil/scene-graph/slots'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { findInstanceAncestor } from '@open-designer/scene-graph/instances'
+import { copiedComponentLayerId } from '@open-designer/scene-graph/instances/overrides'
+import { ownsSlotContent } from '@open-designer/scene-graph/slots'
 
 type ResolveGuid = (id: string) => GUID | undefined
 

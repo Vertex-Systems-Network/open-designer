@@ -64,10 +64,12 @@ export class PostgresRateLimitStore implements Store {
     await this.database
       .updateTable('apiRateLimit')
       .set((expression) => ({
-        requestCount: expression.fn('greatest', [
-          expression('requestCount', '-', 1),
-          expression.val(0)
-        ])
+        requestCount: expression
+          .case()
+          .when('requestCount', '>', 0)
+          .then(expression('requestCount', '-', 1))
+          .else(0)
+          .end()
       }))
       .where('keyHash', '=', this.hash(key))
       .execute()

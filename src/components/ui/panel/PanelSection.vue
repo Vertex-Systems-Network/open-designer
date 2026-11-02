@@ -32,7 +32,7 @@ import {
   PropertySectionHeader,
   PropertySectionRoot,
   PropertySectionTitle
-} from '@open-pencil/vue/primitives/PropertySection'
+} from '@open-designer/vue/primitives/PropertySection'
 
 import theme from '@/theme/panel/section'
 

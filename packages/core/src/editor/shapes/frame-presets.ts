@@ -1,9 +1,9 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   collectResizeDescendants,
   computeConstrainedResizeChanges,
   type ResizeSnapshot
-} from '@open-pencil/scene-graph/resize'
+} from '@open-designer/scene-graph/resize'
 
 import type { EditorContext } from '#core/editor/types'
 

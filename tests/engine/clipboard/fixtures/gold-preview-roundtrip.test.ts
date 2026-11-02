@@ -3,14 +3,14 @@ import { readFileSync } from 'node:fs'
 
 import {
   buildFigmaClipboardHTML,
-  buildOpenPencilClipboardHTML,
+  buildOpenDesignerClipboardHTML,
   importClipboardNodes,
-  parseOpenPencilClipboard
-} from '@open-pencil/core/clipboard'
-import { readFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigmaClipboard } from '@open-pencil/fig/clipboard'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { type SceneNode, SceneGraph } from '@open-pencil/scene-graph'
+  parseOpenDesignerClipboard
+} from '@open-designer/core/clipboard'
+import { readFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigmaClipboard } from '@open-designer/fig/clipboard'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { type SceneNode, SceneGraph } from '@open-designer/scene-graph'
 
 import { expectDefined } from '#tests/helpers/assert'
 import { heavy, HEAVY_TEST_TIMEOUT_MS } from '#tests/helpers/test-utils'
@@ -42,10 +42,10 @@ heavy('gold-preview.fig clipboard roundtrip', () => {
     { timeout: HEAVY_TEST_TIMEOUT_MS }
   )
 
-  it('OpenPencil format: zero property differences', () => {
-    const html = buildOpenPencilClipboardHTML(topLevelNodes, graph)
-    const parsed = parseOpenPencilClipboard(html)
-    const clipboard = expectDefined(parsed, 'OpenPencil clipboard')
+  it('OpenDesigner format: zero property differences', () => {
+    const html = buildOpenDesignerClipboardHTML(topLevelNodes, graph)
+    const parsed = parseOpenDesignerClipboard(html)
+    const clipboard = expectDefined(parsed, 'OpenDesigner clipboard')
 
     const origAll = flatten(graph, pageId)
 
@@ -76,8 +76,8 @@ heavy('gold-preview.fig clipboard roundtrip', () => {
     expect(diffs).toBe(0)
   })
 
-  it('OpenPencil format: compressed data is under 1MB', () => {
-    const html = buildOpenPencilClipboardHTML(topLevelNodes, graph)
+  it('OpenDesigner format: compressed data is under 1MB', () => {
+    const html = buildOpenDesignerClipboardHTML(topLevelNodes, graph)
     expect(html.length).toBeLessThan(5 * 1024 * 1024)
   })
 

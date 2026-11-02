@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'bun:test'
 
-import { createEditor, opacityFromBuffer } from '@open-pencil/core'
+import { createEditor, opacityFromBuffer } from '@open-designer/core'
 
 import { getNodeOrThrow } from '../helpers/assert'
 

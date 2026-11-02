@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 
-import type { ExportSetting } from '@open-pencil/scene-graph'
+import type { ExportSetting } from '@open-designer/scene-graph'
 
 import { expectInViewport } from '#tests/e2e/fixtures'
 import { CanvasHelper } from '#tests/helpers/canvas'
@@ -37,7 +37,7 @@ async function createRectangles(count: number, settings: ExportSetting[][] = [])
   const ids = await page.evaluate(
     ({ count: nodeCount, settingsByNode }) => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenPencil store not initialized')
+      if (!store) throw new Error('OpenDesigner store not initialized')
       for (const node of store.graph.getChildren(store.state.currentPageId)) {
         store.graph.deleteNode(node.id)
       }
@@ -66,7 +66,7 @@ async function createRectangles(count: number, settings: ExportSetting[][] = [])
 async function selectedExportSettings() {
   return page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     return [...store.state.selectedIds].map((id) => store.graph.getNode(id)?.exportSettings ?? [])
   })
 }
@@ -187,7 +187,7 @@ async function forceBlobDownload() {
 async function createExportableRect(settings: ExportSetting[]) {
   await page.evaluate((nodeSettings) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     for (const node of store.graph.getChildren(store.state.currentPageId)) {
       store.graph.deleteNode(node.id)
     }

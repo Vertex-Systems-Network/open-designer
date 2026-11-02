@@ -10,9 +10,9 @@ CLI pozwala analizować dokumenty projektu bez uruchamiania edytora. Te same pol
 ::: tip Instalacja
 
 ```sh
-npm install -g @open-pencil/cli
+npm install -g @open-designer/cli
 # albo
-bun add -g @open-pencil/cli
+bun add -g @open-designer/cli
 ```
 
 :::
@@ -22,13 +22,13 @@ bun add -g @open-pencil/cli
 Liczba stron i obiektów, używane czcionki oraz rozmiar pliku:
 
 ```sh
-openpencil info design.fig
+opendesigner info design.fig
 ```
 
 ## Drzewo obiektów
 
 ```sh
-openpencil tree design.fig
+opendesigner tree design.fig
 ```
 
 ## Wyszukiwanie obiektów
@@ -36,13 +36,13 @@ openpencil tree design.fig
 Według typu:
 
 ```sh
-openpencil find design.fig --type TEXT
+opendesigner find design.fig --type TEXT
 ```
 
 Według nazwy:
 
 ```sh
-openpencil find design.fig --name "Button"
+opendesigner find design.fig --name "Button"
 ```
 
 ## Zapytania XPath
@@ -50,17 +50,17 @@ openpencil find design.fig --name "Button"
 Selektory XPath wyszukują obiekty według typu, atrybutów i położenia w drzewie:
 
 ```sh
-openpencil query design.fig "//FRAME"
+opendesigner query design.fig "//FRAME"
 ```
 
 ```sh
-openpencil query design.fig "//TEXT"                    # Wszystkie obiekty tekstowe
-openpencil query design.fig "//COMPONENT"               # Wszystkie komponenty
-openpencil query design.fig "//INSTANCE"                # Wszystkie egzemplarze
-openpencil query design.fig "//FRAME[@width < 300]"     # Ramki węższe niż 300 px
-openpencil query design.fig "//*[@cornerRadius > 0]"    # Obiekty z zaokrąglonymi narożnikami
-openpencil query design.fig "//*[@visible = false]"     # Ukryte obiekty
-openpencil query design.fig "//SECTION//TEXT"            # Tekst wewnątrz sekcji
+opendesigner query design.fig "//TEXT"                    # Wszystkie obiekty tekstowe
+opendesigner query design.fig "//COMPONENT"               # Wszystkie komponenty
+opendesigner query design.fig "//INSTANCE"                # Wszystkie egzemplarze
+opendesigner query design.fig "//FRAME[@width < 300]"     # Ramki węższe niż 300 px
+opendesigner query design.fig "//*[@cornerRadius > 0]"    # Obiekty z zaokrąglonymi narożnikami
+opendesigner query design.fig "//*[@visible = false]"     # Ukryte obiekty
+opendesigner query design.fig "//SECTION//TEXT"            # Tekst wewnątrz sekcji
 ```
 
 Nazwy dostępnych atrybutów, takie jak `fontSize`, `layoutMode` i `strokeWeight`, pozostają zgodne z API.
@@ -68,14 +68,14 @@ Nazwy dostępnych atrybutów, takie jak `fontSize`, `layoutMode` i `strokeWeight
 ## Właściwości obiektu
 
 ```sh
-openpencil node design.fig --id 1:23
+opendesigner node design.fig --id 1:23
 ```
 
 ## Strony i zmienne
 
 ```sh
-openpencil pages design.fig
-openpencil variables design.fig
+opendesigner pages design.fig
+opendesigner variables design.fig
 ```
 
 ## Praca z otwartą aplikacją
@@ -83,24 +83,24 @@ openpencil variables design.fig
 Jeśli aplikacja komputerowa jest uruchomiona, nie podawaj ścieżki pliku. CLI połączy się przez RPC z otwartym dokumentem:
 
 ```sh
-openpencil documents list
-openpencil tree
-openpencil tree --document-id tab-123 --page-id 0:1
-openpencil eval --document-id tab-123 --page-id 0:1 -c "..."
+opendesigner documents list
+opendesigner tree
+opendesigner tree --document-id tab-123 --page-id 0:1
+opendesigner eval --document-id tab-123 --page-id 0:1 -c "..."
 ```
 
-W procesach automatycznych najpierw wywołaj `openpencil documents list --json`, a potem jawnie przekazuj `--document-id` i `--page-id`. Otwieranie, zapisywanie, przełączanie i zamykanie dokumentów, cofanie zmian, ustawienia i wywoływanie dowolnych narzędzi edytora opisuje [Controlling the App](/programmable/cli/app-control).
+W procesach automatycznych najpierw wywołaj `opendesigner documents list --json`, a potem jawnie przekazuj `--document-id` i `--page-id`. Otwieranie, zapisywanie, przełączanie i zamykanie dokumentów, cofanie zmian, ustawienia i wywoływanie dowolnych narzędzi edytora opisuje [Controlling the App](/programmable/cli/app-control).
 
 ## Kontrola jakości
 
 Sprawdzanie nazw, układu, struktury i dostępności:
 
 ```sh
-openpencil lint design.fig
-openpencil lint design.pen --preset strict
-openpencil lint design.fig --rule color-contrast
-openpencil lint design.fig --list-rules
-openpencil lint design.fig --fix -o fixed.fig
+opendesigner lint design.fig
+opendesigner lint design.pen --preset strict
+opendesigner lint design.fig --rule color-contrast
+opendesigner lint design.fig --list-rules
+opendesigner lint design.fig --fix -o fixed.fig
 ```
 
 Wyjście `--json` zawiera dla każdego komunikatu dane `fix` i `suggestions`. Opcja `--fix` stosuje bezpieczne poprawki — wiąże kolory z pasującą zmienną koloru i zaokrągla geometrię do pełnych pikseli — a wynik zapisuje w pliku `.fig` podanym w `-o`.

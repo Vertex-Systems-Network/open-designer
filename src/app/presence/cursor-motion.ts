@@ -1,5 +1,5 @@
-import type { PresenceCursor } from '@open-pencil/core/canvas'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { PresenceCursor } from '@open-designer/core/canvas'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import type { EditorStore } from '@/app/editor/active-store'
 import { animationsEnabled } from '@/app/shell/motion'

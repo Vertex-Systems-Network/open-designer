@@ -1,8 +1,8 @@
 import type { Page } from '@playwright/test'
 
-import type { RenderPlacementInput } from '@open-pencil/core/design-jsx'
-import type { Fill } from '@open-pencil/scene-graph'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { RenderPlacementInput } from '@open-designer/core/design-jsx'
+import type { Fill } from '@open-designer/scene-graph'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 export type PlacementScenario =
   | 'nested-fill'

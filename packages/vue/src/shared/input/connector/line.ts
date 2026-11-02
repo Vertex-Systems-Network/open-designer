@@ -1,9 +1,9 @@
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 import {
   CONNECTOR_SEGMENT_HANDLE,
   connectorRouteHandles,
   connectorScreenLabel
-} from '@open-pencil/core/geometry'
+} from '@open-designer/core/geometry'
 
 import { MOVE_CURSOR, buildResizeCursor } from '#vue/shared/input/geometry'
 import type { DragState } from '#vue/shared/input/types'

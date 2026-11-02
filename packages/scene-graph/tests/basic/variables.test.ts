@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { resolvedValueBindings } from '@open-pencil/scene-graph/variables'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { resolvedValueBindings } from '@open-designer/scene-graph/variables'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 describe('Variables', () => {
   function pageId(graph: SceneGraph): string {

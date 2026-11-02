@@ -1,12 +1,12 @@
-import type { EditorState, ResumedPath } from '@open-pencil/core'
+import type { EditorState, ResumedPath } from '@open-designer/core'
 import type {
   SceneNode,
   VectorNetwork,
   VectorSegment,
   VectorVertex
-} from '@open-pencil/scene-graph'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
-import { cloneVectorNetwork } from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph'
+import type { Vector } from '@open-designer/scene-graph/primitives'
+import { cloneVectorNetwork } from '@open-designer/scene-graph/vector-network'
 
 export type PenState = EditorState
 type PenStateInit = NonNullable<EditorState['penState']>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from 'vue'
 
-import { PlayIslands, useCanvasInput } from '@open-pencil/vue/canvas'
-import { useCanvasIssueMarkers } from '@open-pencil/vue/canvas/issues'
-import { useCanvas } from '@open-pencil/vue/canvas/surface'
-import { useTextEdit } from '@open-pencil/vue/canvas/text-edit'
-import { toolCursor } from '@open-pencil/vue/editor/tool-cursor'
+import { PlayIslands, useCanvasInput } from '@open-designer/vue/canvas'
+import { useCanvasIssueMarkers } from '@open-designer/vue/canvas/issues'
+import { useCanvas } from '@open-designer/vue/canvas/surface'
+import { useTextEdit } from '@open-designer/vue/canvas/text-edit'
+import { toolCursor } from '@open-designer/vue/editor/tool-cursor'
 
 import { useEditorStore } from '@/app/editor/active-store'
 import { useFollowView } from '@/app/presence/follow-view'

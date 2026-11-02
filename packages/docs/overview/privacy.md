@@ -1,10 +1,10 @@
 ---
 title: Privacy and Usage Stats
-description: What OpenPencil sends over the network, why it sends anonymous usage stats, and how to turn every part of it off.
+description: What OpenDesigner sends over the network, why it sends anonymous usage stats, and how to turn every part of it off.
 ---
 
 <script setup>
-import { describeBuildFields, describePingFields, describeUsageEvents } from '@open-pencil/feedback/contract'
+import { describeBuildFields, describePingFields, describeUsageEvents } from '@open-designer/feedback/contract'
 
 const columns = [
   { key: 'name', label: 'Field', kind: 'code' },
@@ -34,7 +34,7 @@ const events = describeUsageEvents()
 
 ## Why we collect anything
 
-OpenPencil is built by a small team. We need to know which platforms, file formats, and features people use so we can decide what to build next. We also need to show that OpenPencil is used, because that is what keeps the project funded. A count of active installs and a picture of which features matter answer both questions without knowing anything about you or your work.
+OpenDesigner is built by a small team. We need to know which platforms, file formats, and features people use so we can decide what to build next. We also need to show that OpenDesigner is used, because that is what keeps the project funded. A count of active installs and a picture of which features matter answer both questions without knowing anything about you or your work.
 
 ## The daily ping
 
@@ -54,7 +54,7 @@ The ping is on by default. Turn it off in **Settings → Privacy**.
 
 ## Usage stats
 
-Usage stats are off until you agree. OpenPencil asks once, in a small prompt that appears after the welcome screen on first launch, or on a later launch if you have not answered, with two equal choices: **No thanks** and **Share stats**. Nothing is selected for you, and you can change your answer later in **Settings → Privacy**.
+Usage stats are off until you agree. OpenDesigner asks once, in a small prompt that appears after the welcome screen on first launch, or on a later launch if you have not answered, with two equal choices: **No thanks** and **Share stats**. Nothing is selected for you, and you can change your answer later in **Settings → Privacy**.
 
 When you agree, the app creates a random install ID on your device. It is not linked to an account, an email address, or anything else about you. Usage events are sent with it, together with the build fields above (<code>{{ buildFields }}</code>). When you stop sharing, the app deletes the ID; agreeing again creates a new one.
 
@@ -71,21 +71,21 @@ Accepted events go to [PostHog](https://posthog.com), a product analytics servic
 ## Turning it all off
 
 - **Settings → Privacy** has a switch for the ping and one for usage stats.
-- In the desktop app, starting OpenPencil with `OPENPENCIL_TELEMETRY=0` or `DO_NOT_TRACK=1` in its environment turns off both.
+- In the desktop app, starting OpenDesigner with `OPENDESIGNER_TELEMETRY=0` or `DO_NOT_TRACK=1` in its environment turns off both.
 - Only official releases send anything. Development servers, self-built apps, and forks send nothing, because the switch that enables sending is set only when we build a release.
 
 ## Cloud waitlist
 
-If you join the OpenPencil Cloud waitlist on this site, we store your email address and the optional note you add. We send one email to confirm the address and write again only when Cloud is ready for you. Addresses that are not confirmed are deleted after seven days, and every email has a link that removes yours.
+If you join the OpenDesigner Cloud waitlist on this site, we store your email address and the optional note you add. We send one email to confirm the address and write again only when Cloud is ready for you. Addresses that are not confirmed are deleted after seven days, and every email has a link that removes yours.
 
 ## Other network requests
 
-OpenPencil is local-first, but some features reach the network. The desktop app checks for updates on its own; everything else below connects only when you use that feature, and only to the service named.
+OpenDesigner is local-first, but some features reach the network. The desktop app checks for updates on its own; everything else below connects only when you use that feature, and only to the service named.
 
 | Feature                 | Where it connects                                                                                                                                                                                       |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Update checks (desktop) | GitHub Releases, for the latest version number                                                                                                                                                          |
-| AI chat and image tools | The provider you configure, with your own key; the model list comes from models.dev. With **OpenPencil Cloud** as the provider, the AI service your Cloud server names, with a token for your workspace |
+| AI chat and image tools | The provider you configure, with your own key; the model list comes from models.dev. With **OpenDesigner Cloud** as the provider, the AI service your Cloud server names, with a token for your workspace |
 | Collaboration rooms     | Other people in the room directly; public brokers introduce peers, and a TURN relay carries traffic when a direct connection is not possible                                                            |
 | Cloud storage           | The storage provider you configure                                                                                                                                                                      |
 | Fonts                   | Google Fonts, which can supply a font a document uses that is not installed                                                                                                                             |

@@ -15,7 +15,7 @@ export function pasteFigmaClipboard(
   return page.evaluate(
     async ({ markup, margin, region }) => {
       const store = window.openPencil?.getStore?.()
-      if (!store) throw new Error('OpenPencil store not initialized')
+      if (!store) throw new Error('OpenDesigner store not initialized')
       await store.pasteFromHTML(markup)
       store.clearSelection()
       const layers = store.graph.getChildren(store.state.currentPageId)

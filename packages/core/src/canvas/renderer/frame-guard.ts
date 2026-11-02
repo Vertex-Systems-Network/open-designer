@@ -34,9 +34,32 @@ function errorMessages(error: unknown, seen = new Set<unknown>()): string[] {
   if (error == null || seen.has(error)) return []
   seen.add(error)
   if (error instanceof AggregateError)
-    return [...errorMessages(error.message, seen), ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()]
+    return [
+      ...errorMessages(error.message, seen),
+      ...Array.from(error.errors, (nested) => errorMessages(nested, seen)).flat()
+    ]
   if (error instanceof Error) return [error.message, ...errorMessages(error.cause, seen)]
-  return [String(error)]
+  if (typeof error === 'string') return [error]
+  if (typeof error === 'object') {
+    try {
+      const toString = Reflect.get(error, 'toString')
+      if (typeof toString === 'function' && toString !== Object.prototype.toString) {
+        const message = Reflect.apply(toString, error, [])
+        if (typeof message === 'string' && message !== '[object Object]') return [message]
+      }
+    } catch {
+      return [Object.prototype.toString.call(error)]
+    }
+    return [Object.prototype.toString.call(error)]
+  }
+  if (
+    typeof error === 'number' ||
+    typeof error === 'boolean' ||
+    typeof error === 'bigint' ||
+    typeof error === 'symbol'
+  )
+    return [String(error)]
+  return [Object.prototype.toString.call(error)]
 }
 
 function isFatalCorruption(error: unknown): boolean {

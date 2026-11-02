@@ -1,19 +1,19 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import { TRANSFORM_FIELDS as NODE_TRANSFORM_FIELDS } from '@open-pencil/scene-graph/fields'
-import { findInstanceAncestor, recordInstanceOverride } from '@open-pencil/scene-graph/instances'
-import { recapturedAspectRatio } from '@open-pencil/scene-graph/layout'
-import type { Mat3 } from '@open-pencil/scene-graph/matrix'
-import { FITTED_CONTAINER_TYPES } from '@open-pencil/scene-graph/node-defaults'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import { TRANSFORM_FIELDS as NODE_TRANSFORM_FIELDS } from '@open-designer/scene-graph/fields'
+import { findInstanceAncestor, recordInstanceOverride } from '@open-designer/scene-graph/instances'
+import { recapturedAspectRatio } from '@open-designer/scene-graph/layout'
+import type { Mat3 } from '@open-designer/scene-graph/matrix'
+import { FITTED_CONTAINER_TYPES } from '@open-designer/scene-graph/node-defaults'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 import {
   computeConstrainedResizeChanges,
   createResizeSnapshot,
   scaledGeometryChanges,
   type ResizeSnapshot
-} from '@open-pencil/scene-graph/resize'
-import { rescaleNodeTree } from '@open-pencil/scene-graph/scaling'
-import { slotPropertyId } from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/resize'
+import { rescaleNodeTree } from '@open-designer/scene-graph/scaling'
+import { slotPropertyId } from '@open-designer/scene-graph/slots'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import {

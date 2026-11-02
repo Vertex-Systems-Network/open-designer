@@ -1,13 +1,13 @@
 import type { Canvas, Image, Paint, Shader } from 'canvaskit-wasm'
 
-import type { SceneNode, SceneGraph, Fill } from '@open-pencil/scene-graph'
-import { invertGradientTransform } from '@open-pencil/scene-graph/gradient'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Color, Rect, Vector } from '@open-pencil/scene-graph/primitives'
+import type { SceneNode, SceneGraph, Fill } from '@open-designer/scene-graph'
+import { invertGradientTransform } from '@open-designer/scene-graph/gradient'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Color, Rect, Vector } from '@open-designer/scene-graph/primitives'
 
 import { setPaintBlendMode } from './blend'
 import { makeDiamondGradient } from './gradients/diamond'
-import { previewEdge } from './images/previews'
+import { viewportPreviewEdge } from './images/previews'
 import type { SkiaRenderer } from './renderer'
 import { drawOutline, withNodeOutline } from './shapes'
 
@@ -440,8 +440,8 @@ export function applyImageFill(
   const live = r.liveImages.get(hash)
   if (live?.surface === r.surface) return setImageShader(r, fill, node, live.image, paint)
   const preview = r.viewportImageRendering
-    ? // eslint-disable-next-line open-pencil/no-zoom-in-scene-drawing -- picks the preview resolution, not a size; preview mode draws the scene uncached on every frame.
-      r.imagePreviews.get(graph, hash, previewEdge(node, r.zoom, r.dpr))
+    ? // oxlint-ignore-next-line -- This chooses preview resolution; it does not size cached scene drawing.
+      r.imagePreviews.get(graph, hash, viewportPreviewEdge(node, r, r.dpr))
     : undefined
   if (r.viewportImageRendering && !preview) return false
   const key = preview?.key ?? hash

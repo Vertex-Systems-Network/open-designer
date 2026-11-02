@@ -4,10 +4,10 @@ import { computed, useAttrs } from 'vue'
 import {
   useNumberBindingProvider,
   type BindingTarget
-} from '@open-pencil/vue/controls/binding-provider'
-import type { NumberBindingPath } from '@open-pencil/vue/controls/number-variable-binding'
-import { useI18n } from '@open-pencil/vue/i18n'
-import { BindableValueRoot } from '@open-pencil/vue/primitives/BindableValue'
+} from '@open-designer/vue/controls/binding-provider'
+import type { NumberBindingPath } from '@open-designer/vue/controls/number-variable-binding'
+import { useI18n } from '@open-designer/vue/i18n'
+import { BindableValueRoot } from '@open-designer/vue/primitives/BindableValue'
 
 import NumberField from '@/components/inputs/NumberField.vue'
 import VariableBindingPicker from '@/components/properties/binding/VariableBindingPicker.vue'

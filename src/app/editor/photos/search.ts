@@ -1,7 +1,7 @@
 import { useLocalStorage, watchDebounced } from '@vueuse/core'
 import { computed, ref, shallowRef, watch } from 'vue'
 
-import { getStockPhotoProvider, type StockPhotoResult } from '@open-pencil/core/tools'
+import { getStockPhotoProvider, type StockPhotoResult } from '@open-designer/core/tools'
 
 import { pexelsKeyStatus, unsplashKeyStatus } from '@/app/settings/credentials/media'
 
@@ -18,7 +18,7 @@ export const PHOTO_SERVICES: readonly {
     id: 'unsplash',
     name: 'Unsplash',
     keyURL: 'https://unsplash.com/oauth/applications',
-    siteURL: 'https://unsplash.com/?utm_source=openpencil&utm_medium=referral'
+    siteURL: 'https://unsplash.com/?utm_source=opendesigner&utm_medium=referral'
   },
   {
     id: 'pexels',

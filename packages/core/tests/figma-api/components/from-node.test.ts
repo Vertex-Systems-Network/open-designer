@@ -3,9 +3,9 @@ import { describe, expect, test } from 'bun:test'
 import { expectFills } from '#core-tests/helpers/assert'
 import { createAPI, createStackHost } from '#core-tests/helpers/figma-api'
 
-import type { FigmaNodeProxy } from '@open-pencil/core/figma-api'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { OpenPencilAPI } from '@open-pencil/core/openpencil-api'
+import type { FigmaNodeProxy } from '@open-designer/core/figma-api'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { OpenDesignerAPI } from '@open-designer/core/opendesigner-api'
 
 describe('createComponentFromNode', () => {
   test('converts frame to component', () => {
@@ -38,7 +38,7 @@ describe('createComponentFromNode', () => {
     frame.name = 'Card'
     frame.resize(200, 50)
     frame.cornerRadius = 8
-    new OpenPencilAPI(api).bindVariable(frame, 'cornerRadius', variable)
+    new OpenDesignerAPI(api).bindVariable(frame, 'cornerRadius', variable)
     api.graph.updateNode(frame.id, {
       variableModes: { [collection.id]: collection.defaultModeId }
     })

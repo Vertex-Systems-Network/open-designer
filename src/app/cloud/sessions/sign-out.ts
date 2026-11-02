@@ -1,5 +1,5 @@
-import { signOutFromCloud } from '@open-pencil/cloud/client'
-import type { CloudDiscovery } from '@open-pencil/cloud/contract'
+import { signOutFromCloud } from '@open-designer/cloud/client'
+import type { CloudDiscovery } from '@open-designer/cloud/contract'
 
 import { leaveAfterSignOut } from '@/app/cloud-portal/site'
 import { IS_CLOUD_SITE } from '@/constants'

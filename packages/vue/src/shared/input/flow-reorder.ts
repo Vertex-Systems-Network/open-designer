@@ -1,7 +1,7 @@
-import type { Editor, MovePlace } from '@open-pencil/core'
-import { createSceneGeometry } from '@open-pencil/core/geometry'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { resolveNodeLayoutDirection } from '@open-pencil/scene-graph/text/direction'
+import type { Editor, MovePlace } from '@open-designer/core'
+import { createSceneGeometry } from '@open-designer/core/geometry'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { resolveNodeLayoutDirection } from '@open-designer/scene-graph/text/direction'
 
 /**
  * Layers dragged along their own auto layout flow, as one block: the selected layers of one

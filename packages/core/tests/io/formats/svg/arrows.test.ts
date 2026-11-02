@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test'
 
 import { expectDefined } from '#core-tests/helpers/assert'
 
-import { renderNodesToSVG } from '@open-pencil/core/io/formats/svg'
-import { SceneGraph, type SceneNode, type Stroke, type StrokeCap } from '@open-pencil/scene-graph'
-import { createConnector, freeEndpoint } from '@open-pencil/scene-graph/connectors'
+import { renderNodesToSVG } from '@open-designer/core/io/formats/svg'
+import { SceneGraph, type SceneNode, type Stroke, type StrokeCap } from '@open-designer/scene-graph'
+import { createConnector, freeEndpoint } from '@open-designer/scene-graph/connectors'
 
 const black = (weight: number, cap?: StrokeCap): Stroke => ({
   type: 'SOLID',

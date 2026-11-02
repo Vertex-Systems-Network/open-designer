@@ -1,11 +1,11 @@
 import * as v from 'valibot'
 
-import { parseColor } from '@open-pencil/scene-graph/color'
+import { parseColor } from '@open-designer/scene-graph/color'
 
 import type { FigmaAPI, FigmaNodeProxy } from '#core/figma-api'
 import type { FigmaFontName, FigmaFontNameInput } from '#core/figma-api/fonts/names'
 import type { FigmaVariationSettings } from '#core/figma-api/fonts/variations'
-import { OpenPencilAPI } from '#core/openpencil-api'
+import { OpenDesignerAPI } from '#core/opendesigner-api'
 import { collectNodeFontFaces } from '#core/text/requirements/collect'
 import {
   toolNumber,
@@ -253,7 +253,7 @@ export const setTextProperties = defineTool({
       updated.push('textAutoResize')
     }
     if (args.direction !== undefined) {
-      new OpenPencilAPI(figma).setTextDirection(node, args.direction)
+      new OpenDesignerAPI(figma).setTextDirection(node, args.direction)
       updated.push('textDirection')
     }
     if (args.text_decoration !== undefined) {

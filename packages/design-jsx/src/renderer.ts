@@ -1,8 +1,8 @@
 import { omitBy } from 'es-toolkit/object'
 
-import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-pencil/scene-graph'
-import { parseColor } from '@open-pencil/scene-graph/color'
-import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
+import type { NodeType, SceneGraph, SceneNode, VariableModeMap } from '@open-designer/scene-graph'
+import { parseColor } from '@open-designer/scene-graph/color'
+import { setInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
 
 import type { RekaScope } from './behaviours'
 import { renderRekaNode } from './behaviours/render'
@@ -283,6 +283,14 @@ function renderSVGNode<Artwork>(
   return placeArtwork(services, graph, artwork, props, size, parentId)
 }
 
+function tryDecodeComponentName(value: string): string | undefined {
+  try {
+    return decodeURIComponent(value)
+  } catch {
+    return undefined
+  }
+}
+
 function findComponentByName(graph: SceneGraph, name: string): SceneNode | undefined {
   for (const node of graph.getAllNodes()) {
     if (node.type === 'COMPONENT' && node.name === name) return node
@@ -446,19 +454,16 @@ function applyInstanceOverrides(
       child = instance
       for (const part of pathMatch[1].split('.')) {
         const index = Number(part)
-        const childId = Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
+        const childId: string | undefined =
+          Number.isInteger(index) && index >= 0 ? child.childIds[index] : undefined
         child = childId ? graph.getNode(childId) : undefined
         if (!child) break
       }
     } else {
       child = findDescendantByName(target)
       if (!child) {
-        try {
-          const decodedName = decodeURIComponent(target)
-          child = findDescendantByName(decodedName)
-        } catch {
-          // Keep the literal name when it is not valid percent-encoding.
-        }
+        const decodedName = tryDecodeComponentName(target)
+        if (decodedName) child = findDescendantByName(decodedName)
       }
     }
     if (!child) continue

@@ -2,9 +2,9 @@
 import { SelectRoot, SelectTrigger } from 'reka-ui'
 import { computed, ref } from 'vue'
 
-import { useI18n } from '@open-pencil/vue/i18n'
-import { useRetainedPopup } from '@open-pencil/vue/lifecycle/retention'
-import { useLayoutControlsContext } from '@open-pencil/vue/primitives/LayoutControls'
+import { useI18n } from '@open-designer/vue/i18n'
+import { useRetainedPopup } from '@open-designer/vue/lifecycle/retention'
+import { useLayoutControlsContext } from '@open-designer/vue/primitives/LayoutControls'
 
 import VariableNumberField from '@/components/properties/VariableNumberField.vue'
 import AppSelectContent from '@/components/ui/select/AppSelectContent.vue'

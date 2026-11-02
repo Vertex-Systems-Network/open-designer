@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test'
 
-import { createEditor, type Editor } from '@open-pencil/core'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import { createEditor, type Editor } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { finishPencilDrag, handlePencilDragMove, startPencilInput } from '#vue/canvas/pencil/input'
 

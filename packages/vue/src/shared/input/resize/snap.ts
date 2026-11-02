@@ -1,8 +1,8 @@
-import type { Editor } from '@open-pencil/core'
-import type { HandlePosition } from '@open-pencil/core/geometry'
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { Editor } from '@open-designer/core'
+import type { HandlePosition } from '@open-designer/core/geometry'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { getAxisAlignedWorldBounds, getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import { explicitSnapTargets } from '#vue/shared/input/explicit-snap-targets'
 import {

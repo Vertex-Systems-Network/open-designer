@@ -1,16 +1,16 @@
 /* eslint-disable max-lines -- scene dispatch stays together while shape domains live in sibling modules */
 import type { Canvas, Path } from 'canvaskit-wasm'
 
-import { type SceneNode, type SceneGraph, type Fill } from '@open-pencil/scene-graph'
+import { type SceneNode, type SceneGraph, type Fill } from '@open-designer/scene-graph'
 import {
   arrowCapOverflow,
   collectArrowEndpoints,
   hasTrimmedShaft,
   trimArrowShafts
-} from '@open-pencil/scene-graph/arrow-caps'
-import Matrix from '@open-pencil/scene-graph/matrix'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { textLinesOverflow } from '@open-pencil/scene-graph/text'
+} from '@open-designer/scene-graph/arrow-caps'
+import Matrix from '@open-designer/scene-graph/matrix'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { textLinesOverflow } from '@open-designer/scene-graph/text'
 
 import { createSceneGeometry, nodeOrientationMatrix, projectedNode } from '#core/geometry'
 import { shownText } from '#core/text/case'

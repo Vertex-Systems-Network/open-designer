@@ -4,8 +4,8 @@ import { describe, test, expect } from 'bun:test'
 
 import type { CanvasKit, TypefaceFontProvider } from 'canvaskit-wasm'
 
-import { fontManager, isVariableFont, FontManager } from '@open-pencil/core/text'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { fontManager, isVariableFont, FontManager } from '@open-designer/core/text'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { expectDefined } from '#tests/helpers/assert'
 import { fetchStub } from '#tests/helpers/fetch'

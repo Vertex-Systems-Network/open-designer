@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'bun:test'
 
-import { DrawCallCounter } from '@open-pencil/core/profiler'
+import { DrawCallCounter } from '@open-designer/core/profiler'
 
 import { asDouble } from '#tests/helpers/doubles'
 

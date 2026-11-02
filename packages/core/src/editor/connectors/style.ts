@@ -3,7 +3,7 @@ import type {
   ConnectorLineType,
   SceneNode,
   StrokeCap
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 import {
   CONNECTOR_STROKE_WEIGHT,
   CONNECTOR_THICK_STROKE_WEIGHT,
@@ -11,8 +11,8 @@ import {
   connectorSublayers,
   layoutConnector,
   type ConnectorLineStyle
-} from '@open-pencil/scene-graph/connectors'
-import { figJamColor, type FigJamColorName } from '@open-pencil/scene-graph/figjam'
+} from '@open-designer/scene-graph/connectors'
+import { figJamColor, type FigJamColorName } from '@open-designer/scene-graph/figjam'
 
 import { recordSubtreeEdit } from '#core/editor/components/slots/history'
 import type { NodeActions } from '#core/editor/nodes'

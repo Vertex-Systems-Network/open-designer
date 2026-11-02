@@ -9,8 +9,9 @@ pub fn webview_version() -> Option<String> {
     tauri::webview_version().ok()
 }
 
-/// Whether the environment turns off pings and usage stats: `OPENPENCIL_TELEMETRY` set to
-/// `0`, `false`, or `no`, or `DO_NOT_TRACK` set to anything but `0` or `false`.
+/// Whether the environment turns off pings and usage stats: `OPENDESIGNER_TELEMETRY` set to
+/// `0`, `false`, or `no`, or `DO_NOT_TRACK` set to anything but `0` or `false`. Legacy
+/// `OPENPENCIL_TELEMETRY` remains supported for existing installations.
 #[tauri::command]
 pub fn sharing_disabled_by_env() -> bool {
     let is_off = |name: &str, off: &[&str]| {
@@ -26,5 +27,7 @@ pub fn sharing_disabled_by_env() -> bool {
             )
         })
         .unwrap_or(false);
-    is_off("OPENPENCIL_TELEMETRY", &["0", "false", "no"]) || do_not_track
+    (is_off("OPENDESIGNER_TELEMETRY", &["0", "false", "no"])
+        || is_off("OPENPENCIL_TELEMETRY", &["0", "false", "no"]))
+        || do_not_track
 }

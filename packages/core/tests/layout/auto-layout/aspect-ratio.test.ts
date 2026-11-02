@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
 import { FigmaAPI } from '#core/figma-api'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 
 // Sizes recorded from Figma with locked layers in fixed auto layout frames, no padding or gap.
 function row(graph: SceneGraph, overrides: Partial<SceneNode> = {}) {

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 /** Probes and drivers for layers on the current page. */
 export function layerDriver(page: () => Page) {
@@ -9,7 +9,7 @@ export function layerDriver(page: () => Page) {
     screenCenter(name: string): Promise<Vector> {
       return page().evaluate((layerName) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const layer = store.graph
           .getChildren(store.state.currentPageId)
           .find((node) => node.name === layerName)
@@ -34,7 +34,7 @@ export function layerDriver(page: () => Page) {
       return page().evaluate(
         ({ frameName, mode, names }) => {
           const store = window.openPencil?.getStore?.()
-          if (!store) throw new Error('OpenPencil store not initialized')
+          if (!store) throw new Error('OpenDesigner store not initialized')
           const frame = store.graph.createNode('FRAME', store.state.currentPageId, {
             name: frameName,
             layoutMode: mode,
@@ -62,7 +62,7 @@ export function layerDriver(page: () => Page) {
       return page().evaluate(
         ({ frameName, childCount }) => {
           const store = window.openPencil?.getStore?.()
-          if (!store) throw new Error('OpenPencil store not initialized')
+          if (!store) throw new Error('OpenDesigner store not initialized')
           const frame = store.graph.createNode('FRAME', store.state.currentPageId, {
             name: frameName,
             width: 400,
@@ -85,7 +85,7 @@ export function layerDriver(page: () => Page) {
     select(ids: readonly string[]): Promise<void> {
       return page().evaluate((layerIds) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.select([...layerIds])
       }, ids)
     },
@@ -94,7 +94,7 @@ export function layerDriver(page: () => Page) {
     clearSelection(): Promise<void> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.clearSelection()
       })
     }

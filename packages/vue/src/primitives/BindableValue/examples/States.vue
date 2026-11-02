@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import type { Variable } from '@open-pencil/scene-graph'
+import type { Variable } from '@open-designer/scene-graph'
 
 import type {
   BindingProvider,

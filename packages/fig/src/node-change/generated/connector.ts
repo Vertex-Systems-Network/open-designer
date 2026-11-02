@@ -1,8 +1,8 @@
 import { pick } from 'es-toolkit'
 
-import type { GUID } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { guidToString, isUnsetGuid, UNSET_GUID } from '@open-pencil/kiwi/fig/guid'
+import type { GUID } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { guidToString, isUnsetGuid, UNSET_GUID } from '@open-designer/kiwi/fig/guid'
 import type {
   ConnectorControlPoint,
   ConnectorEndpoint,
@@ -12,13 +12,13 @@ import type {
   SceneGraph,
   SceneNode,
   StrokeCap
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 import {
   buildConnectorSublayers,
   connectorRouteEnds,
   connectorSublayers
-} from '@open-pencil/scene-graph/connectors'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/connectors'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import { nodeChangeToProps } from '../convert'
 import { createFillPaints, createStrokePaints } from '../export/context'

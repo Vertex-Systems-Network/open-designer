@@ -1,9 +1,9 @@
 import { describe, expect, setDefaultTimeout, test } from 'bun:test'
 
-import { parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { materializeDocument } from '@open-pencil/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import { parseFigFile } from '@open-designer/core/io/formats/fig'
+import { materializeDocument } from '@open-designer/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import { expectDefined } from '#tests/helpers/assert'
 import { sharedGoldPreviewFixture } from '#tests/helpers/fig/fixtures'

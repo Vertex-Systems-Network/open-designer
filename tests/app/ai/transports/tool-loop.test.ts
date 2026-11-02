@@ -5,8 +5,8 @@ import { simulateReadableStream } from 'ai'
 import { MockLanguageModelV4 } from 'ai/test'
 import * as v from 'valibot'
 
-import type { AIProviderID } from '@open-pencil/core/constants'
-import { FigmaAPI } from '@open-pencil/core/figma-api'
+import type { AIProviderID } from '@open-designer/core/constants'
+import { FigmaAPI } from '@open-designer/core/figma-api'
 
 import { createRunRecorder } from '@/app/ai/chat/trace/recorder'
 import type { ThinkingLevel } from '@/app/ai/models/types'

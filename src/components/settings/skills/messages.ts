@@ -1,4 +1,4 @@
-import { useAIMessages } from '@open-pencil/vue/i18n'
+import { useAIMessages } from '@open-designer/vue/i18n'
 
 import { MAX_SKILL_DESCRIPTION_LENGTH, MAX_SKILL_NAME_LENGTH } from '@/app/ai/skills/parse'
 import type { SkillUploadFailure } from '@/app/ai/skills/sources/uploaded'

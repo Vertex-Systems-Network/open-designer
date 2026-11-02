@@ -64,7 +64,7 @@ export async function createTestService() {
     EMAIL_FROM: 'hello@openpencil.dev',
     GITHUB_TOKEN: 'github-token',
     CLOUDFLARE_ANALYTICS_TOKEN: 'cloudflare-token',
-    ACCESS_TEAM_DOMAIN: 'https://openpencil.cloudflareaccess.com',
+    ACCESS_TEAM_DOMAIN: 'https://opendesigner.cloudflareaccess.com',
     ACCESS_AUD: 'admin-audience',
     POSTHOG_PERSONAL_KEY: 'phx_test',
     // The built dashboard page as the asset binding serves it, at its file path only.

@@ -2,9 +2,9 @@
 
 ## Archivos de Figma
 
-OpenPencil abre y guarda archivos `.fig` directamente. La importación y exportación usan el mismo códec binario Kiwi que Figma: 194 definiciones de esquema y unos 390 campos por objeto. Guardar: <kbd>⌘</kbd><kbd>S</kbd>. Guardar como: <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd>.
+OpenDesigner abre y guarda archivos `.fig` directamente. La importación y exportación usan el mismo códec binario Kiwi que Figma: 194 definiciones de esquema y unos 390 campos por objeto. Guardar: <kbd>⌘</kbd><kbd>S</kbd>. Guardar como: <kbd>⇧</kbd><kbd>⌘</kbd><kbd>S</kbd>.
 
-**Copiar y pegar con Figma:** selecciona objetos en Figma, pulsa <kbd>⌘</kbd><kbd>C</kbd>, cambia a OpenPencil y usa <kbd>⌘</kbd><kbd>V</kbd>. Los rellenos, contornos, la disposición automática, el texto, los efectos, los radios de esquina y las redes vectoriales se conservan en ambas direcciones.
+**Copiar y pegar con Figma:** selecciona objetos en Figma, pulsa <kbd>⌘</kbd><kbd>C</kbd>, cambia a OpenDesigner y usa <kbd>⌘</kbd><kbd>V</kbd>. Los rellenos, contornos, la disposición automática, el texto, los efectos, los radios de esquina y las redes vectoriales se conservan en ambas direcciones.
 
 ## Dibujo y edición
 
@@ -33,7 +33,7 @@ Las pestañas Diseño, Código, IA y Revisar se adaptan a la selección:
 
 ## Renderizado
 
-OpenPencil usa Skia mediante CanvasKit WASM, el mismo motor gráfico de Figma:
+OpenDesigner usa Skia mediante CanvasKit WASM, el mismo motor gráfico de Figma:
 
 - degradados lineales, radiales, angulares y diamante;
 - rellenos de imagen con varios modos de escala;
@@ -60,7 +60,7 @@ Puedes crear, eliminar y renombrar páginas; cada una conserva su posición y es
 - **Copiar como:** texto, SVG, PNG o JSX desde el menú contextual.
 
 ```sh
-openpencil export design.fig -f jsx --style tailwind
+opendesigner export design.fig -f jsx --style tailwind
 ```
 
 ## Chat con AI
@@ -74,7 +74,7 @@ Las llamadas a herramientas aparecen en una cronología plegable. Para verificar
 Claude Code, Cursor, Windsurf y otros clientes MCP pueden leer y modificar archivos `.fig` con más de 90 herramientas. Están disponibles stdio y HTTP.
 
 ```sh
-npm install -g @open-pencil/mcp
+npm install -g @open-designer/mcp
 ```
 
 ## CLI
@@ -82,15 +82,15 @@ npm install -g @open-pencil/mcp
 La CLI examina, exporta y analiza archivos `.fig`:
 
 ```sh
-openpencil tree design.fig              # Árbol del documento
-openpencil find design.fig --type TEXT  # Búsqueda
-openpencil export design.fig -f png     # Exportación
-openpencil analyze colors design.fig    # Análisis de colores
-openpencil analyze clusters design.fig  # Estructuras repetidas
-openpencil eval design.fig -c "..."     # Figma Plugin API
+opendesigner tree design.fig              # Árbol del documento
+opendesigner find design.fig --type TEXT  # Búsqueda
+opendesigner export design.fig -f png     # Exportación
+opendesigner analyze colors design.fig    # Análisis de colores
+opendesigner analyze clusters design.fig  # Estructuras repetidas
+opendesigner eval design.fig -c "..."     # Figma Plugin API
 ```
 
-Todos los comandos admiten `--json`. Instalación: `npm install -g @open-pencil/cli` o `bun add -g @open-pencil/cli`.
+Todos los comandos admiten `--json`. Instalación: `npm install -g @open-designer/cli` o `bun add -g @open-designer/cli`.
 
 ## Colaboración en tiempo real
 
@@ -104,4 +104,4 @@ La colaboración funciona directamente entre participantes mediante WebRTC y no 
 
 ## Carga alternativa desde Google Fonts
 
-Si una fuente no está disponible localmente, OpenPencil la descarga automáticamente desde Google Fonts. No hace falta instalarla manualmente.
+Si una fuente no está disponible localmente, OpenDesigner la descarga automáticamente desde Google Fonts. No hace falta instalarla manualmente.

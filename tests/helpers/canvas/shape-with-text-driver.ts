@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import type { ShapeWithTextType } from '@open-pencil/scene-graph/shape-with-text'
+import type { ShapeWithTextType } from '@open-designer/scene-graph/shape-with-text'
 
 import { toolbarToolTestId } from '#tests/helpers/test-ids'
 
@@ -47,7 +47,7 @@ export function shapeWithTextDriver(page: () => Page) {
     place(shapes: readonly ShapeWithTextSetup[]) {
       return page().evaluate((setups) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const solid = ([r, g, b]: readonly [number, number, number]) => ({
           type: 'SOLID' as const,
           color: { r, g, b, a: 1 },
@@ -87,7 +87,7 @@ export function shapeWithTextDriver(page: () => Page) {
     showOrigin() {
       return page().evaluate((origin) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         store.state.zoom = 1
         store.state.panX = origin
         store.state.panY = origin
@@ -104,7 +104,7 @@ export function shapeWithTextDriver(page: () => Page) {
     shapes(): Promise<ShapeWithTextState[]> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const hex = (paint?: { color: { r: number; g: number; b: number } }) =>
           paint
             ? '#' +
@@ -145,7 +145,7 @@ export function shapeWithTextDriver(page: () => Page) {
     focus() {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         return {
           tool: store.state.activeTool,
           selected: [...store.state.selectedIds],

@@ -12,8 +12,8 @@
     "types": ["@cloudflare/workers-types"],
     "paths": {
       "#feedback/*": ["./src/*"],
-      "@open-pencil/scene-graph/random": ["../scene-graph/src/random.ts"],
-      "@open-pencil/cloud/email": ["../cloud/src/email/index.ts"],
+      "@open-designer/scene-graph/random": ["../scene-graph/src/random.ts"],
+      "@open-designer/cloud/email": ["../cloud/src/email/index.ts"],
       "#cloud/*": ["../cloud/src/*"]
     }
   },

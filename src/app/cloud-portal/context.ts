@@ -5,8 +5,8 @@ import {
   createCloudPortalClient,
   discoverCloud,
   type CloudPortalClient
-} from '@open-pencil/cloud/client'
-import type { CloudAccountStatus, CloudDiscovery } from '@open-pencil/cloud/contract'
+} from '@open-designer/cloud/client'
+import type { CloudAccountStatus, CloudDiscovery } from '@open-designer/cloud/contract'
 
 import { createPortalAuth, type PortalAuth } from './auth'
 

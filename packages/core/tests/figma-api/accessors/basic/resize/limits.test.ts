@@ -2,9 +2,9 @@ import { beforeAll, describe, expect, test } from 'bun:test'
 
 import { registerTestFont } from '#core-tests/helpers/figma-api'
 
-import { FigmaAPI, type FigmaNodeProxy } from '@open-pencil/core/figma-api'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { hasInstanceOverride } from '@open-pencil/scene-graph/instances'
+import { FigmaAPI, type FigmaNodeProxy } from '@open-designer/core/figma-api'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { hasInstanceOverride } from '@open-designer/scene-graph/instances'
 
 // Text edits need the text's font loaded, as in Figma; this file must not rely on another's.
 beforeAll(() => registerTestFont())

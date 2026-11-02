@@ -5,13 +5,13 @@ import { capturedFigRecordsSchema, readFixture } from '#core-tests/helpers/fig/f
 import { inheritedNestedBindingRecords } from '#core-tests/helpers/fig/nested-binding'
 import * as v from 'valibot'
 
-import { OpenPencilAPI } from '@open-pencil/core/openpencil-api'
-import { createEditor } from '@open-pencil/core'
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { materializeDocument, parseFigBuffer } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { cloneInstanceOverrideState } from '@open-pencil/scene-graph/instances/overrides'
+import { OpenDesignerAPI } from '@open-designer/core/opendesigner-api'
+import { createEditor } from '@open-designer/core'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { materializeDocument, parseFigBuffer } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { cloneInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
 
 /** Only the component-edit measurements this file asserts against are read from the oracle. */
 const authoringOracleSchema = v.looseObject({
@@ -45,11 +45,11 @@ for (const caller of ['editor', 'api'] as const) {
   test(`${caller} authors new root and nested aliases in occurrence-owner units`, async () => {
     const { graph, root, nested } = document()
     const editor = caller === 'editor' ? createEditor({ graph }) : undefined
-    const openpencil = new OpenPencilAPI(new FigmaAPI(graph))
+    const opendesigner = new OpenDesignerAPI(new FigmaAPI(graph))
     const bind = (id: string) =>
       editor
         ? editor.bindVariable(id, 'paddingRight', '293742:7')
-        : openpencil.bindVariable(id, 'paddingRight', { id: '293742:7' })
+        : opendesigner.bindVariable(id, 'paddingRight', { id: '293742:7' })
     bind(nested.id)
     bind(root.id)
     expect(nested.paddingRight).toBe(6)

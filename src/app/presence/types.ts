@@ -1,4 +1,4 @@
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import type { PagePoint } from '@/app/editor/pages/point'
 

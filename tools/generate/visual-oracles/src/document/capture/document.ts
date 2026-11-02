@@ -1,4 +1,4 @@
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import type { SceneOracleNode } from '../scene-oracle'
 import { captureGraphOracle } from './scene'

@@ -1,13 +1,13 @@
 import type { Canvas, Path } from 'canvaskit-wasm'
 
-import type { SceneNode, Stroke, StrokeCap, VectorNetwork } from '@open-pencil/scene-graph'
+import type { SceneNode, Stroke, StrokeCap, VectorNetwork } from '@open-designer/scene-graph'
 import {
   collectArrowEndpoints,
   hasTrimmedShaft,
   lineStrokeEnds,
   trimArrowShafts
-} from '@open-pencil/scene-graph/arrow-caps'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/arrow-caps'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import {

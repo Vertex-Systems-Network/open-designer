@@ -1,8 +1,8 @@
 import { uniqBy } from 'es-toolkit/array'
 import { computed } from 'vue'
 
-import type { ComponentPropertyType } from '@open-pencil/scene-graph'
-import { instanceExposureIssue } from '@open-pencil/scene-graph/components'
+import type { ComponentPropertyType } from '@open-designer/scene-graph'
+import { instanceExposureIssue } from '@open-designer/scene-graph/components'
 
 import { useEditor } from '#vue/editor/context'
 import { useSceneComputed } from '#vue/internal/scene-computed/use'

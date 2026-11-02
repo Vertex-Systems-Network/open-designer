@@ -1,27 +1,29 @@
-# @open-pencil/cloud
+# @open-designer/cloud
 
-Optional, self-hostable OpenPencil Cloud: accounts, workspaces, immutable document revisions in
+Optional, self-hostable OpenDesigner Cloud: accounts, workspaces, immutable document revisions in
 S3-compatible storage, sharing, enrollment, quotas, and transactional email. The editor stays
 local-first and works without it.
 
 ## Subpaths
 
-- `@open-pencil/cloud/contract` — Valibot network contracts and public types.
-- `@open-pencil/cloud/client` — discovery, authentication, device authorization, and the typed client.
-- `@open-pencil/cloud/email` — Vue Email rendering.
-- `@open-pencil/cloud/server` — runtime-neutral Hono routes and services with injected dependencies.
-- `@open-pencil/cloud/runtime/node` — PostgreSQL, S3, SMTP, the HTTP listener, and workers.
+- `@open-designer/cloud/contract` — Valibot network contracts and public types.
+- `@open-designer/cloud/client` — discovery, authentication, device authorization, and the typed client.
+- `@open-designer/cloud/email` — Vue Email rendering.
+- `@open-designer/cloud/server` — runtime-neutral Hono routes and services with injected dependencies.
+- `@open-designer/cloud/runtime/node` — PostgreSQL, S3, SMTP, the HTTP listener, and workers.
+- Cloudflare Workers can use PostgreSQL through Hyperdrive or Turso/libSQL through `TURSO_URL` and
+  `TURSO_AUTH_TOKEN`.
 
 ## Running
 
-The Node runtime reads one deployment TOML file named by `OPENPENCIL_CLOUD_CONFIG` and resolves
+The Node runtime reads one deployment TOML file named by `OPENDESIGNER_CLOUD_CONFIG` and resolves
 secrets from the environment. Start from
-[`deploy/openpencil-cloud.example.toml`](./deploy/openpencil-cloud.example.toml), then build and run
+[`deploy/opendesigner-cloud.example.toml`](./deploy/opendesigner-cloud.example.toml), then build and run
 the server on Node 22 or later, installed from npm or built from a checkout:
 
 ```sh
-npx -p @open-pencil/cloud openpencil-cloud   # openpencil-ai-relay runs the AI relay
-bun --filter @open-pencil/cloud build:standalone && bun --filter @open-pencil/cloud start
+npx -p @open-designer/cloud opendesigner-cloud   # opendesigner-ai-relay runs the AI relay
+bun --filter @open-designer/cloud build:standalone && bun --filter @open-designer/cloud start
 ```
 
 The server migrates the database before it accepts requests. The
@@ -34,5 +36,5 @@ portal, configuration, the editor address, operator commands, and upgrades;
 ## Tests
 
 `bun run test:cloud` from the repository root type-checks the package and runs unit and PGlite
-integration tests. `bun --filter @open-pencil/cloud test:e2e` runs the Docker Compose end-to-end
+integration tests. `bun --filter @open-designer/cloud test:e2e` runs the Docker Compose end-to-end
 suite against PostgreSQL and SeaweedFS.

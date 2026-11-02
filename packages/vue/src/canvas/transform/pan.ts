@@ -1,4 +1,4 @@
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 
 import type { DragPan } from '#vue/shared/input/types'
 

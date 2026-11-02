@@ -53,7 +53,7 @@ export interface LandingMessages {
       /** The entry presented as a feature block of its own. */
       lead: TitledDetail & { features: TitledDetail[] }
       entries: RoadmapEntryMessages[]
-      /** OpenPencil Cloud, after self-hosting, with the waitlist form under it. */
+      /** OpenDesigner Cloud, after self-hosting, with the waitlist form under it. */
       cloud: TitledDetail
     }
     later: { label: string; entries: RoadmapEntryMessages[] }
@@ -65,7 +65,7 @@ export interface LandingMessages {
     lede: string
     features: TitledDetail[]
   }
-  /** The OpenPencil Cloud waitlist form, in the Cloud section and the roadmap. */
+  /** The OpenDesigner Cloud waitlist form, in the Cloud section and the roadmap. */
   waitlist: {
     /** Accessible name of the email field. */
     label: string

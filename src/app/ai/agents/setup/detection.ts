@@ -1,4 +1,4 @@
-import type { ACPAgentDef } from '@open-pencil/core/constants'
+import type { ACPAgentDef } from '@open-designer/core/constants'
 
 import { agentSetupView, type AgentSetupState, type PiSetupState } from './view'
 

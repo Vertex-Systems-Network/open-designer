@@ -1,6 +1,6 @@
 import { filename } from 'pathe/utils'
 
-import type { Editor, EditorState } from '@open-pencil/core'
+import type { Editor, EditorState } from '@open-designer/core'
 
 import { describeDiagnosticError, recordDocumentFailure } from '@/app/diagnostics'
 import { viewDiagnosticsAction } from '@/app/diagnostics/view'

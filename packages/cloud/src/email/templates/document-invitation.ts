@@ -25,7 +25,7 @@ export const DocumentInvitationEmail = defineComponent({
     return () =>
       transactionalEmailLayout({
         preview: `${props.inviterName} invited you to ${props.permissionLabel} a document`,
-        heading: 'OpenPencil invitation',
+        heading: 'OpenDesigner invitation',
         message: `${props.inviterName} invited you to ${props.permissionLabel} “${props.documentName}”.`,
         actionLabel: 'Open document',
         actionURL: props.acceptanceURL,

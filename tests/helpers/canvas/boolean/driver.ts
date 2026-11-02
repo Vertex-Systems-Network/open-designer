@@ -8,7 +8,7 @@ export function booleanStrokeAlignmentDriver(page: () => Page) {
       return page().evaluate(async () => {
         const store = window.openPencil?.getStore?.()
         if (!store) {
-          throw new Error('OpenPencil store not initialized')
+          throw new Error('OpenDesigner store not initialized')
         }
         const sceneURL = '/tests/helpers/canvas/boolean/scene.ts'
         const scenes: typeof BooleanScenes = await import(sceneURL)

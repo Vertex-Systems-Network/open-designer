@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { createDefaultNode } from '@open-pencil/scene-graph/node-defaults'
+import { createDefaultNode } from '@open-designer/scene-graph/node-defaults'
 
 import { isNodeFontLoaded } from '#core/canvas/text'
 import { fontManager } from '#core/text/font/manager'

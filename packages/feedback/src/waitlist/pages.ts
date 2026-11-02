@@ -8,7 +8,7 @@ export function page(title: string, body: string | ReturnType<typeof html>) {
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="robots" content="noindex" />
-        <title>${title} · OpenPencil</title>
+        <title>${title} · OpenDesigner</title>
         <link rel="icon" href="https://openpencil.dev/favicon.ico" />
         <style>
           :root {
@@ -85,7 +85,7 @@ export function page(title: string, body: string | ReturnType<typeof html>) {
             src="https://openpencil.dev/brand/app-icon-1024.png"
             width="44"
             height="44"
-            alt="OpenPencil"
+            alt="OpenDesigner"
           />
           <h1>${title}</h1>
           ${typeof body === 'string' ? html`<p>${body}</p>` : body}

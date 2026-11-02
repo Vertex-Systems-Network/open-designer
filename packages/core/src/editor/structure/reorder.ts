@@ -1,7 +1,7 @@
 import { pick } from 'es-toolkit'
 
-import { TRANSFORM_FIELDS } from '@open-pencil/scene-graph/fields'
-import { createsComponentCycle } from '@open-pencil/scene-graph/instances'
+import { TRANSFORM_FIELDS } from '@open-designer/scene-graph/fields'
+import { createsComponentCycle } from '@open-designer/scene-graph/instances'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import { prepareSlotEdits } from '#core/editor/components/slots'

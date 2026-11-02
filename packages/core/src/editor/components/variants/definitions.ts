@@ -4,8 +4,8 @@ import type {
   ComponentPropertyDefinition,
   ComponentPropertyType,
   SceneGraph
-} from '@open-pencil/scene-graph'
-import { createComponentPropertyId } from '@open-pencil/scene-graph/components'
+} from '@open-designer/scene-graph'
+import { createComponentPropertyId } from '@open-designer/scene-graph/components'
 
 import { assertNodeEditable } from '#core/editor/capabilities'
 import type { EditorContext } from '#core/editor/types'

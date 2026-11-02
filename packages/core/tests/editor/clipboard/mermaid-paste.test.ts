@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { createEditor } from '@open-pencil/core'
-import { getAxisAlignedBoundsInParent } from '@open-pencil/scene-graph/coordinate'
+import { createEditor } from '@open-designer/core'
+import { getAxisAlignedBoundsInParent } from '@open-designer/scene-graph/coordinate'
 
 describe('pasting Mermaid text', () => {
   test('lays the flowchart out centred on the point, selected, as one undo entry', async () => {

@@ -2,8 +2,8 @@ import { describe, expect, test } from 'bun:test'
 
 import { getNodeOrThrow } from '#core-tests/helpers/assert'
 
-import { createEditor } from '@open-pencil/core'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import { createEditor } from '@open-designer/core'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 type Editor = ReturnType<typeof createEditor>
 

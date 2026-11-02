@@ -3,4 +3,4 @@
  * self-built apps, dev servers, and tests send no pings or usage stats.
  */
 export const FEEDBACK_ENABLED =
-  import.meta.env.PROD && import.meta.env.VITE_OPENPENCIL_FEEDBACK === 'on'
+  import.meta.env.PROD && import.meta.env.VITE_OPENDESIGNER_FEEDBACK === 'on'

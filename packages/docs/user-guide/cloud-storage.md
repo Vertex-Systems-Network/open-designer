@@ -5,7 +5,7 @@ description: Keep documents and component libraries in your own S3-compatible bu
 
 # Cloud Storage
 
-OpenPencil can keep documents in a bucket you own on any S3-compatible service: AWS S3, Backblaze B2, Cloudflare R2, MinIO, and others. There is no OpenPencil server in between; the editor talks to your bucket directly with your own access keys.
+OpenDesigner can keep documents in a bucket you own on any S3-compatible service: AWS S3, Backblaze B2, Cloudflare R2, MinIO, and others. There is no OpenDesigner server in between; the editor talks to your bucket directly with your own access keys.
 
 ## Connect a Bucket
 
@@ -26,7 +26,7 @@ Endpoint examples:
 - Cloudflare R2: `https://<account-id>.r2.cloudflarestorage.com`
 - MinIO: `http://localhost:9000`, or wherever your server listens
 
-Select **Test connection** to check the endpoint, keys, and bucket before saving, then **Save**. OpenPencil addresses objects as `{endpoint}/{bucket}/{key}`, so the bucket name never goes into the endpoint.
+Select **Test connection** to check the endpoint, keys, and bucket before saving, then **Save**. OpenDesigner addresses objects as `{endpoint}/{bucket}/{key}`, so the bucket name never goes into the endpoint.
 
 Access keys are kept in the system credential store in the desktop app. In the browser they are encrypted in browser storage, or kept only until you close the session when **Settings → General → Remember API keys on this device** is off.
 
@@ -34,7 +34,7 @@ Access keys are kept in the system credential store in the desktop app. In the b
 
 The browser can only reach a bucket that allows requests from the page's origin, so the web app needs a CORS rule on the bucket. The desktop app sends its requests natively and needs none.
 
-Add a rule like this one, with the origins you open OpenPencil from:
+Add a rule like this one, with the origins you open OpenDesigner from:
 
 ```json
 [
@@ -70,10 +70,10 @@ The bucket can also hold component libraries. In **Assets → Manage libraries**
 
 ## What's in the Bucket
 
-OpenPencil writes only under two prefixes and leaves everything else in the bucket alone:
+OpenDesigner writes only under two prefixes and leaves everything else in the bucket alone:
 
 - `open_pencil_storage/canvases/` — each document as `<id>.fig`, with its name and modification time in `<id>.meta.json`.
-- `open-pencil/libraries/` — each library's `manifest.json` and its published revisions.
+- `open-designer/libraries/` — each library's `manifest.json` and its published revisions.
 
 ## Provider Notes
 

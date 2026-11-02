@@ -1,9 +1,9 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   figJamTextSizeFields,
   figJamTypeface,
   type FigJamTextSize
-} from '@open-pencil/scene-graph/figjam'
+} from '@open-designer/scene-graph/figjam'
 import {
   createSticky,
   DEFAULT_STICKY_COLOR,
@@ -11,9 +11,9 @@ import {
   stickyWidth,
   STICKY_SIZE,
   stickySublayers
-} from '@open-pencil/scene-graph/generated'
-import type { Color, Vector } from '@open-pencil/scene-graph/primitives'
-import { rescaleNodeTree } from '@open-pencil/scene-graph/scaling'
+} from '@open-designer/scene-graph/generated'
+import type { Color, Vector } from '@open-designer/scene-graph/primitives'
+import { rescaleNodeTree } from '@open-designer/scene-graph/scaling'
 
 import { recordSubtreeEdit } from '#core/editor/components/slots/history'
 import type { EditorContext } from '#core/editor/types'

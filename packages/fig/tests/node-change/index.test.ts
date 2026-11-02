@@ -24,13 +24,13 @@ import {
   initCodec,
   type NodeChange,
   type Paint
-} from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { getWorldMatrix } from '@open-pencil/scene-graph/coordinate'
-import TransformMatrix from '@open-pencil/scene-graph/matrix'
-import { percentLength, pixelLength } from '@open-pencil/scene-graph/text'
+} from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { getWorldMatrix } from '@open-designer/scene-graph/coordinate'
+import TransformMatrix from '@open-designer/scene-graph/matrix'
+import { percentLength, pixelLength } from '@open-designer/scene-graph/text'
 
-describe('@open-pencil/fig NodeChange policy', () => {
+describe('@open-designer/fig NodeChange policy', () => {
   test('keeps raw LINE endpoints through reflected parents and exports authored origin pivots', () => {
     const graph = new SceneGraph()
     const parent = graph.createNode('FRAME', graph.getPages()[0].id, {

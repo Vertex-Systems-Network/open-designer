@@ -17,7 +17,7 @@ Tylko udostępnienie umieszcza dokument w pokoju: karta, z której udostępniasz
 
 ## Dołączanie do pokoju
 
-Otwórz odnośnik albo wklej go (lub sam identyfikator pokoju) w polu **Dołącz** w panelu udostępniania lub w **Dołącz do pokoju…** na ekranie startowym. Pokój otwiera się we własnej karcie, więc dokumenty, które masz już otwarte, się nie zmieniają. Na komputerze przeglądarka oferuje też **Otwórz w aplikacji na komputer**, co otwiera pokój w OpenPencil przez odnośnik `openpencil://join`.
+Otwórz odnośnik albo wklej go (lub sam identyfikator pokoju) w polu **Dołącz** w panelu udostępniania lub w **Dołącz do pokoju…** na ekranie startowym. Pokój otwiera się we własnej karcie, więc dokumenty, które masz już otwarte, się nie zmieniają. Na komputerze przeglądarka oferuje też **Otwórz w aplikacji na komputer**, co otwiera pokój w OpenDesigner przez odnośnik `openpencil://join`.
 
 Dołączasz od razu pod wygenerowaną nazwą, na przykład *Teal Fox*. Własną nazwę ustawisz w panelu udostępniania lub w ustawieniach; będzie używana w każdym pokoju.
 
@@ -50,7 +50,7 @@ Stan dokumentu jest synchronizowany przez Yjs CRDT, który automatycznie łączy
 
 Przenoszenie i zmiana kolejności warstw również się scalają. Każda warstwa pamięta każdego rodzica, do którego została przeniesiona, i swoje miejsce wśród rodzeństwa, a każdy uczestnik wyznacza z tej historii to samo drzewo warstw ([CRDT drzewa Evana Wallace’a](https://madebyevan.com/algos/crdt-mutable-tree-hierarchy/)). Przeniesienia, zmiany kolejności i nowe warstwy od różnych osób są stosowane; jeśli dwie osoby jednocześnie przeniosą tę samą warstwę, u wszystkich wygrywa to samo przeniesienie. Gdy równoczesne przeniesienia umieściłyby dwie warstwy jedna w drugiej, późniejsze przeniesienie jest cofane, a warstwa, której nowy rodzic został w międzyczasie usunięty, wraca na swoje miejsce.
 
-Wszyscy w pokoju potrzebują wersji OpenPencil, która zapisuje drzewo warstw w ten sam sposób; wersje zapisujące je inaczej nie widzą nawzajem swoich pokojów.
+Wszyscy w pokoju potrzebują wersji OpenDesigner, która zapisuje drzewo warstw w ten sam sposób; wersje zapisujące je inaczej nie widzą nawzajem swoich pokojów.
 
 IndexedDB przechowuje stan lokalny: po odświeżeniu strony automatycznie wracasz do pokoju z tym samym stanem.
 

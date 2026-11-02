@@ -1,8 +1,8 @@
-import { COMMANDS } from '@open-pencil/cli/commands'
-import { ALL_TOOLS, isToolExposed } from '@open-pencil/core/tools'
+import { COMMANDS } from '@open-designer/cli/commands'
+import { ALL_TOOLS, isToolExposed } from '@open-designer/core/tools'
 
 export interface LandingStats {
-  /** Top-level `openpencil` commands, in alphabetical order. */
+  /** Top-level `opendesigner` commands, in alphabetical order. */
   cliCommands: string[]
   /** Tools the MCP server exposes. */
   mcpTools: number

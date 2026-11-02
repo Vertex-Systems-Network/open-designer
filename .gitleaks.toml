@@ -1,4 +1,4 @@
-title = "OpenPencil Gitleaks configuration"
+title = "OpenDesigner Gitleaks configuration"
 
 [extend]
 useDefault = true

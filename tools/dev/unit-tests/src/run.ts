@@ -1,5 +1,7 @@
 #!/usr/bin/env bun
 
+import { resolve } from 'node:path'
+
 import { listHeavyUnitTests, listUnitTests, type UnitTestGroup, unitTestGroupNames } from './shards'
 
 /**
@@ -17,6 +19,8 @@ const ownArgs = separator === -1 ? process.argv.slice(2) : process.argv.slice(2,
 const bunTestArgs = separator === -1 ? [] : process.argv.slice(separator + 1)
 const flags = new Set(ownArgs.filter((arg) => arg.startsWith('--')))
 const group = (ownArgs.find((arg) => !arg.startsWith('--')) ?? 'all') as UnitTestGroup
+const tsconfigArgs =
+  group === 'core' ? ['--tsconfig-override', resolve(process.cwd(), 'tsconfig.json')] : []
 
 if (!unitTestGroupNames().includes(group)) {
   throw new Error(
@@ -42,7 +46,7 @@ if (lightGroups.length === 0 && heavyFiles.length === 0) {
 }
 
 async function runBunTest(files: string[], args: string[]): Promise<number> {
-  const child = Bun.spawn([process.execPath, 'test', ...args, ...files], {
+  const child = Bun.spawn([process.execPath, 'test', ...tsconfigArgs, ...args, ...files], {
     stdio: ['inherit', 'inherit', 'inherit'],
     env: { ...process.env, BUN_HEAVY_TESTS: includeHeavy ? 'true' : 'false' }
   })

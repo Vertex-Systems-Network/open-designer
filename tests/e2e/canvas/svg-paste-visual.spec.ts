@@ -1,5 +1,5 @@
-import { renderNodesToSVG } from '@open-pencil/core/io/formats/svg'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { renderNodesToSVG } from '@open-designer/core/io/formats/svg'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { expect, test, useEditorSetupWithClear } from '#tests/e2e/fixtures'
 
@@ -35,7 +35,7 @@ test('pasted SVG text measures and draws as Figma lays it out', async () => {
   await editor.canvas.pasteSVG(TEXT_SVG, 220, 160)
   const layers = await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     return [...store.graph.getAllNodes()]
       .filter((node) => node.type === 'TEXT')
       .map(({ text, x, width, height }) => ({ text, x, width, height }))

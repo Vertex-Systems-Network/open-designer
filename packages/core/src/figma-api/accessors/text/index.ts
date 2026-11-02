@@ -3,7 +3,7 @@ import type {
   SceneNode,
   TextCase,
   TextParagraphSpacingField
-} from '@open-pencil/scene-graph'
+} from '@open-designer/scene-graph'
 
 import {
   graph,

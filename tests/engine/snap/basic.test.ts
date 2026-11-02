@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test'
 
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { computeSnap, computeSelectionBounds } from '@open-pencil/scene-graph/snap'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { computeSnap, computeSelectionBounds } from '@open-designer/scene-graph/snap'
 
 import { expectDefined } from '#tests/helpers/assert'
 

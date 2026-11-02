@@ -1,5 +1,5 @@
 /**
- * References to things in OpenPencil, written in chat text as Markdown links with the
+ * References to things in OpenDesigner, written in chat text as Markdown links with the
  * `openpencil:` scheme: `[Hero](openpencil://node/12:34)`. People insert them from the
  * composer and the model cites what it touched with them; the chat shows them as chips.
  */

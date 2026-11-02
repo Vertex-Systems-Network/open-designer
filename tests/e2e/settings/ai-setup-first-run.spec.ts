@@ -12,7 +12,7 @@ test('a fresh install offers guided AI setup once and remembers skipping it', as
   // The offer is made while the workspace starts, so it is open once the canvas is ready.
   await new CanvasHelper(page).waitForInit()
   const setup = page.getByTestId('ai-setup-dialog')
-  await expect(setup.getByRole('heading', { name: 'Welcome to OpenPencil' })).toBeVisible()
+  await expect(setup.getByRole('heading', { name: 'Welcome to OpenDesigner' })).toBeVisible()
   await setup.getByRole('button', { name: 'Start designing' }).click()
   await expect(setup).toHaveCount(0)
 
@@ -27,7 +27,7 @@ test('a first visit to the demo offers the welcome without pointing to the tour'
   await page.goto('/demo')
   await waitForDemo(page)
   const setup = page.getByTestId('ai-setup-dialog')
-  await expect(setup.getByRole('heading', { name: 'Welcome to OpenPencil' })).toBeVisible()
+  await expect(setup.getByRole('heading', { name: 'Welcome to OpenDesigner' })).toBeVisible()
   await expect(setup.getByTestId('ai-setup-tour')).toHaveCount(0)
 })
 

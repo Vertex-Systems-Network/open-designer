@@ -11,7 +11,7 @@ import {
   cssTokenProperty,
   cssValueTokens,
   type CSSValueTokenKind
-} from '@open-pencil/dom-css/export'
+} from '@open-designer/dom-css/export'
 
 import { nodeText, tokenBefore, type SyntaxNode } from './syntax'
 import type { ExpressionDialect, ReferenceCompletion } from './types'

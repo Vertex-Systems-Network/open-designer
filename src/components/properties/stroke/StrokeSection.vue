@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
-import type { Fill, SceneNode, Stroke } from '@open-pencil/scene-graph'
-import { colorToHexRaw } from '@open-pencil/scene-graph/color'
-import { SIDE_STROKE_TYPES } from '@open-pencil/scene-graph/node-defaults'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { useColorBindingProvider } from '@open-pencil/vue/controls/binding-provider'
-import { applySolidStrokeColor, applyStrokePaint } from '@open-pencil/vue/controls/color-model'
-import { MIXED, useNodeProps } from '@open-pencil/vue/controls/node-props'
-import { useOkHCL } from '@open-pencil/vue/controls/okhcl'
-import { useStrokeControls } from '@open-pencil/vue/controls/stroke'
-import { useI18n } from '@open-pencil/vue/i18n'
+import type { Fill, SceneNode, Stroke } from '@open-designer/scene-graph'
+import { colorToHexRaw } from '@open-designer/scene-graph/color'
+import { SIDE_STROKE_TYPES } from '@open-designer/scene-graph/node-defaults'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { useColorBindingProvider } from '@open-designer/vue/controls/binding-provider'
+import { applySolidStrokeColor, applyStrokePaint } from '@open-designer/vue/controls/color-model'
+import { MIXED, useNodeProps } from '@open-designer/vue/controls/node-props'
+import { useOkHCL } from '@open-designer/vue/controls/okhcl'
+import { useStrokeControls } from '@open-designer/vue/controls/stroke'
+import { useI18n } from '@open-designer/vue/i18n'
 import {
   BindableValueRoot,
   type BindableValueActions
-} from '@open-pencil/vue/primitives/BindableValue'
+} from '@open-designer/vue/primitives/BindableValue'
 
 import FillPicker from '@/components/fill-picker/FillPicker.vue'
 import NumberField from '@/components/inputs/NumberField.vue'

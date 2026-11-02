@@ -1,8 +1,8 @@
 import type { Ref } from 'vue'
 
-import type { Editor } from '@open-pencil/core'
-import { BLACK } from '@open-pencil/core/constants'
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { Editor } from '@open-designer/core'
+import { BLACK } from '@open-designer/core/constants'
+import type { SceneNode } from '@open-designer/scene-graph'
 import {
   getFillOkHCL,
   getStrokeOkHCL,
@@ -12,7 +12,7 @@ import {
   setNodeStrokeOkHCL,
   type OkHCLColor,
   type OkHCLColorSpace
-} from '@open-pencil/scene-graph/color'
+} from '@open-designer/scene-graph/color'
 
 import type { ColorFieldFormat } from '#vue/controls/color-model/types'
 

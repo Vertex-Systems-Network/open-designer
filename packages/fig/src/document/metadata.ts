@@ -1,6 +1,6 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph } from '@open-pencil/scene-graph'
-import { OPEN_PENCIL_PLUGIN_DATA } from '@open-pencil/scene-graph/plugin-data'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import type { SceneGraph } from '@open-designer/scene-graph'
+import { OPEN_DESIGNER_PLUGIN_DATA } from '@open-designer/scene-graph/plugin-data'
 
 import { readNodeChangePluginData } from '../node-change/plugin-data'
 
@@ -16,6 +16,6 @@ export function applyDocumentMetadata(graph: SceneGraph, document: NodeChange | 
     })) ?? []
   root.source.fig.rawNodeFields.strokeJoin = document.strokeJoin
   root.source.fig.rawNodeFields.strokeWeight = document.strokeWeight
-  const bindings = readNodeChangePluginData(document, OPEN_PENCIL_PLUGIN_DATA.enabledLibraries)
+  const bindings = readNodeChangePluginData(document, OPEN_DESIGNER_PLUGIN_DATA.enabledLibraries)
   for (const binding of bindings ?? []) graph.enabledLibraries.set(binding.libraryId, binding)
 }

@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import type { LayoutGrid } from '@open-pencil/scene-graph'
+import type { LayoutGrid } from '@open-designer/scene-graph'
 
 /** Builds frames with layout guides and a rectangle, selects them, and reads their guides back. */
 export function layoutGuidesDriver(page: () => Page) {
@@ -9,7 +9,7 @@ export function layoutGuidesDriver(page: () => Page) {
     build(guides: LayoutGrid[][]) {
       return page().evaluate((guides) => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const frames = guides.map((layoutGrids, index) => {
           const id = store.createShape('FRAME', 100 + index * 260, 100, 200, 150)
           store.updateNode(id, { layoutGrids })

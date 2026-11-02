@@ -1,5 +1,5 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
-import { labelledConnector } from '@open-pencil/scene-graph/connectors'
+import type { SceneNode } from '@open-designer/scene-graph'
+import { labelledConnector } from '@open-designer/scene-graph/connectors'
 
 import type { EditorContext } from '#core/editor/types'
 import { measureTextForLayout } from '#core/layout/text-measurement'

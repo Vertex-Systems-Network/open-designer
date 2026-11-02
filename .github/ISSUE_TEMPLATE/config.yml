@@ -5,7 +5,7 @@ contact_links:
     about: Usage and setup questions get answered in Discussions Q&A.
   - name: Chat on Discord
     url: https://discord.gg/4wXc9fuZfm
-    about: Talk to maintainers and other users in the OpenPencil Community server.
+    about: Talk to maintainers and other users in the OpenDesigner Community server.
   - name: Report a security vulnerability
     url: https://github.com/open-pencil/open-pencil/security/advisories/new
     about: Please report security vulnerabilities privately instead of opening a public issue.

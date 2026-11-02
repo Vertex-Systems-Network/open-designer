@@ -1,10 +1,10 @@
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 import {
   createSceneGeometry,
   pressesTinyLayer,
   selectionHandleRect
-} from '@open-pencil/core/geometry'
-import type { SceneNode } from '@open-pencil/scene-graph'
+} from '@open-designer/core/geometry'
+import type { SceneNode } from '@open-designer/scene-graph'
 
 import type { HitTestFns } from '#vue/shared/input/select'
 

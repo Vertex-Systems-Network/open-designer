@@ -1,9 +1,9 @@
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 import {
   hitTestIssueMarkers,
   hitTestStatusLabels,
   type SkiaRenderer
-} from '@open-pencil/core/canvas'
+} from '@open-designer/core/canvas'
 
 import { useViewportKind } from '#vue/editor/viewport-kind/use'
 

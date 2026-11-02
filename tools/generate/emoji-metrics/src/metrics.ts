@@ -6,7 +6,7 @@ import type { FontTables } from './sfnt'
 export const EMOJI_METRICS_FAMILY = 'OpenPencil Emoji Metrics'
 
 /** Its file among Core's bundled fonts. */
-export const EMOJI_METRICS_ASSET = 'OpenPencilEmojiMetrics-Regular.ttf'
+export const EMOJI_METRICS_ASSET = 'OpenDesignerEmojiMetrics-Regular.ttf'
 
 /** Tables carried over unchanged: how emoji sequences join, and the font's basic metadata. */
 const KEPT_TABLES = ['GSUB', 'OS/2', 'post'] as const

@@ -1,5 +1,5 @@
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 import { componentDependencies } from '../document/component/dependencies'
 import { linkComponentPropertyValues } from '../document/component/values'

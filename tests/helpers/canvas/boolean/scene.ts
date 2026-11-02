@@ -1,4 +1,4 @@
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { SceneGraph } from '@open-designer/scene-graph'
 
 const STROKE_VARIANTS = [
   { align: 'INSIDE', cornerRadius: 0 },

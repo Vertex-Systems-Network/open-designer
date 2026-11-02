@@ -1,8 +1,8 @@
 import { basename } from 'pathe'
 import { filename } from 'pathe/utils'
 
-import { DOCUMENT_EXTENSIONS } from '@open-pencil/core/io'
-import type { DocumentKind } from '@open-pencil/scene-graph'
+import { DOCUMENT_EXTENSIONS } from '@open-designer/core/io'
+import type { DocumentKind } from '@open-designer/scene-graph'
 
 /** Whether a file is a Figma archive: a design's `.fig` or a FigJam board's `.jam`. */
 export function isFigArchiveName(name: string): boolean {

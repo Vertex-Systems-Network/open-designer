@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 
-import { exportFigFile, parseFigFile } from '@open-pencil/core/io/formats/fig'
-import { parseFigBuffer, patchFigArchive } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
+import { parseFigBuffer, patchFigArchive } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 test('color expressions survive fresh export, import, editing and patched export', async () => {
   await initCodec()

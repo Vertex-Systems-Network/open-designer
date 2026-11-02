@@ -3,10 +3,10 @@ import { describe, expect, test } from 'bun:test'
 import { getNodeOrThrow } from '#core-tests/helpers/assert'
 import { fromUint8Array, toUint8Array } from 'js-base64'
 
-import type { IconData, IconProvider } from '@open-pencil/core/icons'
-import { IORegistry, penFormat } from '@open-pencil/core/io'
-import { readIcon, type IconOptions } from '@open-pencil/scene-graph/icons'
-import { parseSVGPath } from '@open-pencil/scene-graph/parse-path'
+import type { IconData, IconProvider } from '@open-designer/core/icons'
+import { IORegistry, penFormat } from '@open-designer/core/io'
+import { readIcon, type IconOptions } from '@open-designer/scene-graph/icons'
+import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
 
 // A 2 × 1 PNG.
 const PNG = toUint8Array(

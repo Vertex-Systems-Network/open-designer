@@ -3,25 +3,25 @@ export { tryStartResize } from '#vue/shared/input/resize/start'
 import { isEqual } from 'es-toolkit'
 import { toRaw } from 'vue'
 
-import { resizedPathTextGlyphs, type Editor } from '@open-pencil/core'
-import { computeAllLayouts } from '@open-pencil/core/layout'
-import { calibratePathTextLayout, reflowPathTextGlyphs } from '@open-pencil/core/text'
-import type { SceneNode, DerivedTextGlyph, TextPathData } from '@open-pencil/scene-graph'
-import { copyDerivedGlyphs, copyGeometryPaths, copyStrokes } from '@open-pencil/scene-graph/copy'
-import { findInstanceAncestor, recordInstanceOverride } from '@open-pencil/scene-graph/instances'
+import { resizedPathTextGlyphs, type Editor } from '@open-designer/core'
+import { computeAllLayouts } from '@open-designer/core/layout'
+import { calibratePathTextLayout, reflowPathTextGlyphs } from '@open-designer/core/text'
+import type { SceneNode, DerivedTextGlyph, TextPathData } from '@open-designer/scene-graph'
+import { copyDerivedGlyphs, copyGeometryPaths, copyStrokes } from '@open-designer/scene-graph/copy'
+import { findInstanceAncestor, recordInstanceOverride } from '@open-designer/scene-graph/instances'
 import {
   cloneInstanceOverrideState,
   type InstanceOverrideState
-} from '@open-pencil/scene-graph/instances/overrides'
-import { recapturedAspectRatio } from '@open-pencil/scene-graph/layout'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/instances/overrides'
+import { recapturedAspectRatio } from '@open-designer/scene-graph/layout'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 import {
   computeConstrainedResizeChanges,
   scaledGeometryChanges,
   type ResizeSnapshot
-} from '@open-pencil/scene-graph/resize'
-import { markSourceFieldsEdited } from '@open-pencil/scene-graph/source-metadata'
-import { cloneVectorNetwork } from '@open-pencil/scene-graph/vector-network'
+} from '@open-designer/scene-graph/resize'
+import { markSourceFieldsEdited } from '@open-designer/scene-graph/source-metadata'
+import { cloneVectorNetwork } from '@open-designer/scene-graph/vector-network'
 
 import { calculateResizeRect } from '#vue/shared/input/resize/rect'
 import { draggedSizing, layerSizing } from '#vue/shared/input/resize/sizing'

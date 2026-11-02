@@ -1,7 +1,7 @@
 import { uniq } from 'es-toolkit'
 
-import type { ShapedTextGlyph } from '@open-pencil/fig/node-change'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { ShapedTextGlyph } from '@open-designer/fig/node-change'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { characterFace } from '#core/canvas/text/placed'
 import { withTextShaper } from '#core/canvas/text/shape'

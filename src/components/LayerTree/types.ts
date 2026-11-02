@@ -1,4 +1,4 @@
-import type { LayerDragInstruction } from '@open-pencil/vue/primitives/LayerTree'
+import type { LayerDragInstruction } from '@open-designer/vue/primitives/LayerTree'
 
 export interface LayerTreeItemActions {
   select: (additive: boolean) => void

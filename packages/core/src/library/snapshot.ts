@@ -1,7 +1,7 @@
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { cloneNodeProps } from '@open-pencil/scene-graph/copy'
-import { standardStyleName } from '@open-pencil/scene-graph/font-style'
-import { contentPluginData } from '@open-pencil/scene-graph/plugin-data'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { cloneNodeProps } from '@open-designer/scene-graph/copy'
+import { standardStyleName } from '@open-designer/scene-graph/font-style'
+import { contentPluginData } from '@open-designer/scene-graph/plugin-data'
 
 import { existingAssetKey } from './asset-keys'
 import { remapCopiedReferences } from './copied-references'

@@ -16,7 +16,7 @@ export function textOverflowDriver(page: () => Page) {
     show(): Promise<TextOverflowState[]> {
       return page().evaluate(() => {
         const store = window.openPencil?.getStore?.()
-        if (!store) throw new Error('OpenPencil store not initialized')
+        if (!store) throw new Error('OpenDesigner store not initialized')
         const pageId = store.state.currentPageId
         const boxFill = [
           {

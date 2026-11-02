@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ComponentPropertyType } from '@open-pencil/scene-graph'
+import type { ComponentPropertyType } from '@open-designer/scene-graph'
 const { kind } = defineProps<{ kind: ComponentPropertyType }>()
 </script>
 <template>

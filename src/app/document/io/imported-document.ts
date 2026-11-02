@@ -1,5 +1,5 @@
-import { createEditor, type Editor } from '@open-pencil/core'
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import { createEditor, type Editor } from '@open-designer/core'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import { loadFont } from '@/app/editor/fonts'
 import type { EditorPreparationHandle as DocumentLoadSession } from '@/app/editor/preparation/types'

@@ -1,5 +1,5 @@
 {
-  "name": "@open-pencil/tools",
+  "name": "@open-designer/tools",
   "private": true,
   "type": "module",
   "devDependencies": {

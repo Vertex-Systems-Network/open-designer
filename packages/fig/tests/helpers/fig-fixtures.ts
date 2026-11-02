@@ -10,7 +10,7 @@ import {
   getSchemaBytes,
   initCodec,
   type NodeChange
-} from '@open-pencil/kiwi/fig/codec'
+} from '@open-designer/kiwi/fig/codec'
 
 import { FIXTURES } from './paths'
 

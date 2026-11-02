@@ -3,7 +3,7 @@ import {
   ChannelSliderRoot,
   ChannelSliderThumb,
   ChannelSliderTrack
-} from '@open-pencil/vue/primitives/ChannelSlider'
+} from '@open-designer/vue/primitives/ChannelSlider'
 
 import type { ColorSliderUI } from '@/components/color-picker-panel/ui'
 import { useColorSliderUI } from '@/components/color-picker-panel/ui'

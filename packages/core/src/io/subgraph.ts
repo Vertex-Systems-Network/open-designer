@@ -1,6 +1,6 @@
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { styleRunReferences } from '@open-pencil/scene-graph/text'
-import { variableValueReferences } from '@open-pencil/scene-graph/variables'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { styleRunReferences } from '@open-designer/scene-graph/text'
+import { variableValueReferences } from '@open-designer/scene-graph/variables'
 
 import type { ExportTarget } from './types'
 

@@ -7,7 +7,7 @@ import Components from 'unplugin-vue-components/vite'
 import type { Alias, Plugin, PluginOption } from 'vite'
 
 import rootManifest from '../package.json' with { type: 'json' }
-import { createOpenPencilAliases } from './aliases.ts'
+import { createOpenDesignerAliases } from './aliases.ts'
 import { inlineScriptPlugin } from './inline-script.ts'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
@@ -25,7 +25,7 @@ const RAW_TEXT_EXTENSIONS = ['.md', '.kiwi']
  */
 function appRawText(): Plugin {
   return {
-    name: 'open-pencil-app-raw-text',
+    name: 'open-designer-app-raw-text',
     enforce: 'pre',
     async resolveId(source, importer) {
       if (!importer || !RAW_TEXT_EXTENSIONS.some((extension) => source.endsWith(extension))) {
@@ -63,13 +63,13 @@ export function appSourceConfig(): AppSourceConfig {
         find: /^#app-public\//,
         replacement: `${fileURLToPath(new URL('../public/', import.meta.url))}`
       },
-      ...createOpenPencilAliases(REPO_ROOT)
+      ...createOpenDesignerAliases(REPO_ROOT)
     ],
     define: {
-      __OPENPENCIL_APP_VERSION__: JSON.stringify(rootManifest.version),
-      __OPENPENCIL_LOCAL_AUTOMATION_TOKEN__: JSON.stringify(''),
-      __OPENPENCIL_LOCAL_AUTOMATION_URL__: JSON.stringify(''),
-      __OPENPENCIL_LOCAL_AUTOMATION_HTTP_URL__: JSON.stringify('')
+      __OPENDESIGNER_APP_VERSION__: JSON.stringify(rootManifest.version),
+      __OPENDESIGNER_LOCAL_AUTOMATION_TOKEN__: JSON.stringify(''),
+      __OPENDESIGNER_LOCAL_AUTOMATION_URL__: JSON.stringify(''),
+      __OPENDESIGNER_LOCAL_AUTOMATION_HTTP_URL__: JSON.stringify('')
     },
     plugins: [
       appRawText(),

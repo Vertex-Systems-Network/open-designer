@@ -7,7 +7,7 @@ const editor = useEditorSetupWithClear('/?test')
 async function createSection() {
   return editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const section = store.graph.createNode('SECTION', store.state.currentPageId, {
       name: 'Checkout',
       x: 120,
@@ -34,7 +34,7 @@ async function createSection() {
 function statusOf(id: string) {
   return editor.page.evaluate((nodeId) => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     return store.graph.getNode(nodeId)?.status ?? null
   }, id)
 }

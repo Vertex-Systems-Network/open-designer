@@ -1,4 +1,4 @@
-import { AI_PROVIDERS } from '@open-pencil/core/constants'
+import { AI_PROVIDERS } from '@open-designer/core/constants'
 
 import type {
   AIModelConnection,

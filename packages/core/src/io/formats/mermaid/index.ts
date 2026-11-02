@@ -1,5 +1,5 @@
-import { parseFlowchart } from '@open-pencil/mermaid'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { parseFlowchart } from '@open-designer/mermaid'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 import { addFlowchart } from './layers'
 

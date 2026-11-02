@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'bun:test'
 
-import type { Editor } from '@open-pencil/core'
+import type { Editor } from '@open-designer/core'
 
 import { createMoveHarness, type MoveHarness } from './harness'
 

@@ -1,5 +1,5 @@
-import type { DesignDocument, DesignElement, DesignNode } from '@open-pencil/dom-css'
-import { colorToCSS } from '@open-pencil/scene-graph/color'
+import type { DesignDocument, DesignElement, DesignNode } from '@open-designer/dom-css'
+import { colorToCSS } from '@open-designer/scene-graph/color'
 
 export function findTextElement(nodes: DesignNode[]): DesignElement | undefined {
   for (const node of nodes) {
@@ -33,14 +33,14 @@ export const simpleCardDocument: DesignDocument = {
       type: 'element',
       tagName: 'div',
       attrs: { class: 'card', 'data-id': 'node-1' },
-      children: [{ type: 'text', text: 'OpenPencil' }]
+      children: [{ type: 'text', text: 'OpenDesigner' }]
     }
   ]
 }
 
 export const cssCardHTML = `
   <article class="card">
-    <h1 class="title">OpenPencil</h1>
+    <h1 class="title">OpenDesigner</h1>
     <p class="description">Design with code-shaped CSS.</p>
   </article>
 `
@@ -98,7 +98,7 @@ export const computedCardDocument: DesignDocument = {
             'font-weight': '700',
             'line-height': '32px'
           },
-          children: [{ type: 'text', text: 'OpenPencil' }]
+          children: [{ type: 'text', text: 'OpenDesigner' }]
         }
       ]
     }
@@ -134,7 +134,7 @@ export const tailwindButtonClasses = [
 export const fixtureMatrixHTML = `
   <section class="fixture-shell">
     <nav class="navbar">
-      <span class="brand">OpenPencil</span>
+      <span class="brand">OpenDesigner</span>
       <div class="nav-actions">
         <span class="nav-item">Docs</span>
         <span class="badge">Beta</span>

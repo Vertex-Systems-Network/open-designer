@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'bun:test'
 
-import type { ConnectorLabelPosition } from '@open-pencil/scene-graph'
+import type { ConnectorLabelPosition } from '@open-designer/scene-graph'
 import {
   connectorLabelPositionAt,
   placeConnectorLabel,
   routeConnector,
   type ConnectorRouteEnd
-} from '@open-pencil/scene-graph/connectors'
+} from '@open-designer/scene-graph/connectors'
 
 /**
  * Labels FigJam placed on 2026-10-23 after they were dragged, on connectors from a 160 px shape at

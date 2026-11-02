@@ -6,9 +6,9 @@ import {
   cloudDesktopLinkURL,
   parseCloudLinkPath,
   type CloudLinkKind
-} from '@open-pencil/cloud/contract'
-import { useViewportKind } from '@open-pencil/vue/editor/viewport-kind'
-import { cloudMessages } from '@open-pencil/vue/i18n'
+} from '@open-designer/cloud/contract'
+import { useViewportKind } from '@open-designer/vue/editor/viewport-kind'
+import { cloudMessages } from '@open-designer/vue/i18n'
 
 import { toast } from '@/app/shell/ui'
 import { isTauri } from '@/app/tauri/env'

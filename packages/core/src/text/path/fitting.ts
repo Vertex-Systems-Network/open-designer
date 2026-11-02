@@ -1,5 +1,5 @@
-import type { DerivedTextGlyph, TextPathData } from '@open-pencil/scene-graph'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+import type { DerivedTextGlyph, TextPathData } from '@open-designer/scene-graph'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import { sampleTextPath } from './sampling'
 

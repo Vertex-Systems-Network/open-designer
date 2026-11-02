@@ -42,7 +42,7 @@ async function readDesktopEnvironment(): Promise<boolean> {
 }
 
 /**
- * `OPENPENCIL_TELEMETRY=0` or `DO_NOT_TRACK` in the desktop app's environment turns sharing off.
+ * `OPENDESIGNER_TELEMETRY=0` or `DO_NOT_TRACK` in the desktop app's environment turns sharing off.
  * A check that fails or does not answer counts as off, so nothing is sent against the person's wish.
  */
 export function sharingDisabledByEnvironment(): Promise<boolean> {

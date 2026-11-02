@@ -1,9 +1,9 @@
 import { parseFragment, type DefaultTreeAdapterTypes } from 'parse5'
 
-import type { CharacterStyleOverride, StyleRun } from '@open-pencil/scene-graph'
-import { tryParseColor } from '@open-pencil/scene-graph/color'
-import { parseCSSFontFamily } from '@open-pencil/scene-graph/css'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+import type { CharacterStyleOverride, StyleRun } from '@open-designer/scene-graph'
+import { tryParseColor } from '@open-designer/scene-graph/color'
+import { parseCSSFontFamily } from '@open-designer/scene-graph/css'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 /** How a stretch of a label looks: the cell's style, as tags inside the label change it. */
 export interface LabelFormat {

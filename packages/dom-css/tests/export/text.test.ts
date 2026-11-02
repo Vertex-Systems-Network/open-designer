@@ -7,7 +7,7 @@ import {
   sceneNodesToTailwindJSXWithLayers
 } from '#dom-css/export/tailwind-jsx'
 
-import { SceneGraph, type Fill, type TextParagraphStyle } from '@open-pencil/scene-graph'
+import { SceneGraph, type Fill, type TextParagraphStyle } from '@open-designer/scene-graph'
 
 const RED: Fill = {
   type: 'SOLID',

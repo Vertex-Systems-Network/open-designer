@@ -1,17 +1,17 @@
 import { unzipSync, zipSync, type Unzipped, type Zippable } from 'fflate'
 import * as v from 'valibot'
 
-import type { FigPageManifestEntry } from '@open-pencil/kiwi/fig'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import type { FigPageManifestEntry } from '@open-designer/kiwi/fig'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import {
   buildFigKiwi,
   parseFigKiwiChunks,
   type FigDataCompressor,
   type FigFileKind
-} from '@open-pencil/kiwi/fig/container'
-import { decodeFigKiwiCanvas, parseFigKiwiContainer } from '@open-pencil/kiwi/fig/parse'
-import type { HeaderFields } from '@open-pencil/kiwi/schema-runtime'
-import type { Color, Rect, Size } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/kiwi/fig/container'
+import { decodeFigKiwiCanvas, parseFigKiwiContainer } from '@open-designer/kiwi/fig/parse'
+import type { HeaderFields } from '@open-designer/kiwi/schema-runtime'
+import type { Color, Rect, Size } from '@open-designer/scene-graph/primitives'
 
 import { figArchiveMetaSchema, type FigArchiveMetaJSON } from './schema'
 import { isPNG } from './thumbnail'

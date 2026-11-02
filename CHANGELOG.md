@@ -4,29 +4,29 @@
 
 ## 0.16.0 — 2026-10-14
 
-OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can follow, slots, component properties, and components that behave like real controls in Preview, plus shader fills, a Lint tab, variable modes on layers, a pencil tool, and Vue and React code in the Code tab. `.fig` files open and save much closer to Figma, saving only what an edit changed, and selection, pasting, auto layout, text, and trackpad navigation follow Figma. The desktop app needs macOS 13 or later, and `openpencil-mcp` must be updated together with the app.
+OpenDesigner 0.16 adds comments, shared rooms with voice calls and agents you can follow, slots, component properties, and components that behave like real controls in Preview, plus shader fills, a Lint tab, variable modes on layers, a pencil tool, and Vue and React code in the Code tab. `.fig` files open and save much closer to Figma, saving only what an edit changed, and selection, pasting, auto layout, text, and trackpad navigation follow Figma. The desktop app needs macOS 13 or later, and `opendesigner-mcp` must be updated together with the app.
 
 ### Breaking changes
 
 - The desktop app requires macOS 13 or later; the web app supports Chrome 111, Edge 111, Firefox 128, and Safari 16.4 or later.
 - Shared rooms record the layer tree in a new format, so people on this version and on earlier versions can no longer join each other's rooms. A room this browser saved with an earlier version converts when you open it again.
-- Update `openpencil-mcp` together with the app: the app renders `render` JSX itself and no longer accepts the pre-rendered tree earlier versions send. AI and MCP tools reject arguments they do not declare: `defineTool` from `@open-pencil/core/tools` takes a `v.strictObject` input. `close_file` fails on unsaved changes unless `unsaved` is `"save"` or `"discard"`, and `diff_create` and `diff_show` patches list JSX attributes such as `-rounded={8}`, with `diff_show` taking `attributes` instead of a JSON `props` object, so patches in the old format no longer apply. `openpencil documents` is now a command group: list open documents with `openpencil documents list`.
+- Update `opendesigner-mcp` together with the app: the app renders `render` JSX itself and no longer accepts the pre-rendered tree earlier versions send. AI and MCP tools reject arguments they do not declare: `defineTool` from `@open-designer/core/tools` takes a `v.strictObject` input. `close_file` fails on unsaved changes unless `unsaved` is `"save"` or `"discard"`, and `diff_create` and `diff_show` patches list JSX attributes such as `-rounded={8}`, with `diff_show` taking `attributes` instead of a JSON `props` object, so patches in the old format no longer apply. `opendesigner documents` is now a command group: list open documents with `opendesigner documents list`.
 - `design_to_tokens` writes CSS custom properties named from each variable's code syntax or Tailwind namespace: its `tailwind` format is a Tailwind v4 `@theme`, the `json` format is removed, aliases stay `var()` references, and non-default modes go under their condition (`[data-theme="dark"]` by default).
-- A paint's `gradientTransform` follows Figma's convention everywhere, so gradients made in OpenPencil before this release draw differently. Build gradients with `linearGradientTransform` and `ellipticalGradientTransform` from the new `@open-pencil/scene-graph/gradient`, where `isGradientFill` and `GradientFillType` moved from `@open-pencil/core/geometry`; `linearGradientEndpoints` is removed.
-- `.fig` files store colour-variable bindings in Figma's `colorVar`. A paint bound through the old `colorVariableBinding` field, which only OpenPencil wrote, reopens unbound. `VariableBinding`, `colorVariableBinding`, `encodeNodeChangeWithVariables`, `encodePaintWithVariableBinding`, and `encodeVarint` are removed from `@open-pencil/core` and `@open-pencil/core/kiwi`.
-- `computeImageHash` from `@open-pencil/core` and `@open-pencil/scene-graph` returns the hex SHA-1 of the bytes, the name Figma gives an image, instead of an OpenPencil-only hash of the same length. New images are stored under that name, so `.fig` files and the Figma clipboard carry it as it is; images in documents saved before keep their names.
+- A paint's `gradientTransform` follows Figma's convention everywhere, so gradients made in OpenDesigner before this release draw differently. Build gradients with `linearGradientTransform` and `ellipticalGradientTransform` from the new `@open-designer/scene-graph/gradient`, where `isGradientFill` and `GradientFillType` moved from `@open-designer/core/geometry`; `linearGradientEndpoints` is removed.
+- `.fig` files store colour-variable bindings in Figma's `colorVar`. A paint bound through the old `colorVariableBinding` field, which only OpenDesigner wrote, reopens unbound. `VariableBinding`, `colorVariableBinding`, `encodeNodeChangeWithVariables`, `encodePaintWithVariableBinding`, and `encodeVarint` are removed from `@open-designer/core` and `@open-designer/core/kiwi`.
+- `computeImageHash` from `@open-designer/core` and `@open-designer/scene-graph` returns the hex SHA-1 of the bytes, the name Figma gives an image, instead of an OpenDesigner-only hash of the same length. New images are stored under that name, so `.fig` files and the Figma clipboard carry it as it is; images in documents saved before keep their names.
 - In scripts, a text node's `fontSize`, `fontName`, `fontWeight`, `fills`, `letterSpacing`, `lineHeight`, `textDecoration`, `textCase`, `textStyleId`, and `fillStyleId` read `figma.mixed` while its characters differ, as in Figma, and setting one restyles every character. `fills` is typed `readonly Fill[] | symbol`, so scripts that index it narrow it first.
-- Design JSX moved from `@open-pencil/core` to the new `@open-pencil/design-jsx` package. Import elements, helpers, variables, `JSX_REFERENCE`, `buildComponent`, `sceneNodeToJSX`, and `selectionToJSX` from there; `@open-pencil/core` and `@open-pencil/core/design-jsx` keep only `renderJSX` and `renderTree`, `renderTreeNode` is removed in favor of `renderTree`, and the `@open-pencil/core/io/formats/jsx` subpath is gone.
-- JSX export writes only OpenPencil JSX: `JSXFormat` and `JSXExportOptions` are removed, and Tailwind JSX comes from `sceneNodesToTailwindJSX(graph, nodeIds)` in `@open-pencil/dom-css` or `@open-pencil/dom-css/export`. `@open-pencil/dom-css` no longer requires `@open-pencil/core`, and `exportHTMLBundle` takes a font resolver in `fonts` instead of `'assets'`; build one on `exportWebFontFaceAssets` from `@open-pencil/core/text/web-font/assets` to keep font files in standalone exports.
-- Shared primitives moved to `@open-pencil/scene-graph`: color conversion and management to `/color`, text and layout direction to `/text-direction`, `randomHex`, `randomInt`, and `randomIndex` to `/random`, `fractionalPosition` to `/order-keys`, and `@open-pencil/scene-graph/layout-guides` is now `/layout`. `@open-pencil/core/bytes` is removed in favor of `js-base64`; the `@open-pencil/core` root exports are unchanged.
+- Design JSX moved from `@open-designer/core` to the new `@open-designer/design-jsx` package. Import elements, helpers, variables, `JSX_REFERENCE`, `buildComponent`, `sceneNodeToJSX`, and `selectionToJSX` from there; `@open-designer/core` and `@open-designer/core/design-jsx` keep only `renderJSX` and `renderTree`, `renderTreeNode` is removed in favor of `renderTree`, and the `@open-designer/core/io/formats/jsx` subpath is gone.
+- JSX export writes only OpenDesigner JSX: `JSXFormat` and `JSXExportOptions` are removed, and Tailwind JSX comes from `sceneNodesToTailwindJSX(graph, nodeIds)` in `@open-designer/dom-css` or `@open-designer/dom-css/export`. `@open-designer/dom-css` no longer requires `@open-designer/core`, and `exportHTMLBundle` takes a font resolver in `fonts` instead of `'assets'`; build one on `exportWebFontFaceAssets` from `@open-designer/core/text/web-font/assets` to keep font files in standalone exports.
+- Shared primitives moved to `@open-designer/scene-graph`: color conversion and management to `/color`, text and layout direction to `/text-direction`, `randomHex`, `randomInt`, and `randomIndex` to `/random`, `fractionalPosition` to `/order-keys`, and `@open-designer/scene-graph/layout-guides` is now `/layout`. `@open-designer/core/bytes` is removed in favor of `js-base64`; the `@open-designer/core` root exports are unchanged.
 - `SceneNode` has new required keys `textParagraphs`, `listSpacing`, `paragraphSpacing`, `paragraphIndent`, `hangingList`, `targetAspectRatio`, `isExposedInstance`, `strokeWeight`, `strokeAlign`, and `booleanOperation` (which may be `undefined`), so code that builds `SceneNode` objects itself must include them. `Stroke` extends `Fill`, so every stroke states a paint `type`, usually `'SOLID'`.
-- `SceneNode.primaryAxisSizing` and `counterAxisSizing` are `AxisSizingMode` (`'FIXED' | 'HUG'`): fill is stored on the child, as `layoutGrow` and `layoutAlignSelf: 'STRETCH'`, as Figma stores it. Read and change per-axis sizing with `layoutSizing`, `layoutSizingOptions`, and `layoutSizingUpdates` from `@open-pencil/scene-graph`.
-- `.fig` reading moved to one reader. `importNodeChanges` and `importClipboardNodes` are replaced by `parseFigFile` and `parseFigmaClipboard`, `populateLazyFigImportRoots` and `populateAllLazyFigImportRoots` by `populateFigPage` and `populateAllFigPages` from `@open-pencil/core/io/formats/fig`, and `populateAndApplyOverrides` by `interpretInstance` with `materializeInstance`; `assertFigPackageReady()` is gone and `FIG_PACKAGE_STATUS` reads `document-reader`. `.fig` export takes text shaping from a runtime: `buildDerivedTextDataV4` is removed, `sceneNodeToKiwi` needs the `runtime` that `withFigExportRuntime(graph, canvasKit, write)` passes to its callback, and `FigNodeChangeExportRuntime` takes `shapeText(node)` instead of `getGlyphOutlineMetrics`.
-- OpenPencil's plugin-data keys are defined once in `OPEN_PENCIL_PLUGIN_DATA` from `@open-pencil/scene-graph` and read or replaced with `readPluginData` and `withPluginData`. `@open-pencil/fig/node-change` drops `OPEN_PENCIL_PLUGIN_ID` (now in `@open-pencil/scene-graph`), the `*_PLUGIN_KEY` constants, `upsertPluginData`, `removePluginData`, and `getOpenPencilPluginValue` in favor of `readNodeChangePluginData`; `SourceLibraryPublication` moved to `@open-pencil/scene-graph` and `SOURCE_LIBRARY_PUBLICATION_PLUGIN_KEY` is gone.
+- `SceneNode.primaryAxisSizing` and `counterAxisSizing` are `AxisSizingMode` (`'FIXED' | 'HUG'`): fill is stored on the child, as `layoutGrow` and `layoutAlignSelf: 'STRETCH'`, as Figma stores it. Read and change per-axis sizing with `layoutSizing`, `layoutSizingOptions`, and `layoutSizingUpdates` from `@open-designer/scene-graph`.
+- `.fig` reading moved to one reader. `importNodeChanges` and `importClipboardNodes` are replaced by `parseFigFile` and `parseFigmaClipboard`, `populateLazyFigImportRoots` and `populateAllLazyFigImportRoots` by `populateFigPage` and `populateAllFigPages` from `@open-designer/core/io/formats/fig`, and `populateAndApplyOverrides` by `interpretInstance` with `materializeInstance`; `assertFigPackageReady()` is gone and `FIG_PACKAGE_STATUS` reads `document-reader`. `.fig` export takes text shaping from a runtime: `buildDerivedTextDataV4` is removed, `sceneNodeToKiwi` needs the `runtime` that `withFigExportRuntime(graph, canvasKit, write)` passes to its callback, and `FigNodeChangeExportRuntime` takes `shapeText(node)` instead of `getGlyphOutlineMetrics`.
+- OpenDesigner's plugin-data keys are defined once in `OPEN_DESIGNER_PLUGIN_DATA` from `@open-designer/scene-graph` and read or replaced with `readPluginData` and `withPluginData`. `@open-designer/fig/node-change` drops `OPEN_DESIGNER_PLUGIN_ID` (now in `@open-designer/scene-graph`), the `*_PLUGIN_KEY` constants, `upsertPluginData`, `removePluginData`, and `getOpenDesignerPluginValue` in favor of `readNodeChangePluginData`; `SourceLibraryPublication` moved to `@open-designer/scene-graph` and `SOURCE_LIBRARY_PUBLICATION_PLUGIN_KEY` is gone.
 - Every process mints layer, variable, and collection IDs in a random session, so `generateId()` no longer starts at `0:1` in the CLI, MCP, or scripts. Code that needs fixed IDs calls `setIdSession`, which now returns the previous session, or passes the `SceneGraph` its own generator (#770).
 - Editor state gains required `canvasVersion`, which the canvas redraws on (call `requestRender()` instead of bumping `sceneVersion`), `shapeHandleHover`, and `selectionTheme`, which replaces `RulerTheme.label`. `remoteCursors` is now `presenceCursors` (`PresenceCursor[]`, each with a `kind` of `'person'` or `'agent'`), and the `Tool` type, `EDITOR_TOOLS`, and `TOOL_SHORTCUTS` include `'COMMENT'` on <kbd>C</kbd>.
-- Canvas and constants APIs changed: `SceneGraph.hitTestFrame` is now `hitTestDropTarget`, `adoptNodesIntoSection` is now `adoptCoveredLayers`, and `SkiaRenderer.hitTestFrameTitle` no longer takes selected IDs. `SkiaRenderer.buildParagraph` returns a `TextLayout` that draws with `draw(canvas, x, y)`. `AUTO_LAYOUT_BREAK_THRESHOLD`, `CORNER_ROTATE_ZONE`, `getDefaultCanvasBgColor`, and `CANVAS_BG_COLOR_DARK` are removed: the selection's resize and rotation zones are `TRANSFORM_ZONE` and `transformZoneAt` in `@open-pencil/core/geometry`, which also owns the `HandlePosition` and `CornerPosition` types, `SECTION_DEFAULT_FILL` is replaced by `SECTION_DEFAULT_FILLS`, and new pages use `PAGE_DEFAULT_BACKGROUNDS`, both keyed by interface theme. Icons come from an `IconProvider`: `fetchIcon`, `fetchIcons`, `searchIcons`, `searchIconsBatch`, and `clearIconCache` are replaced by the default `iconify` provider, `createIconifyProvider()`, and `placeIcon`, and `VectorizedPath` from `@open-pencil/core/vector` replaces `clipNetworks` with `clips`.
-- `@open-pencil/vue` composables act on the whole selection: `useStrokeControls` and `useEffectsControls` no longer take a node, `useTypography` edits every selected text layer and its `weights` (also the `TypographyControlsRoot` slot prop) is a computed list of the families' weights, read with `.value`, and `usePosition` reports `x`, `y`, and `rotation` as Figma's panel does. `useCanvasInput` returns `autoLayoutValueEdit` with `updateAutoLayoutValueEdit`, `commitAutoLayoutValueEdit`, and `cancelAutoLayoutValueEdit` in place of the padding-only `autoLayoutPaddingEdit` and its functions; the edit names its `field` (a padding or `itemSpacing`), and `autoLayoutValueAnchor` places its editor. `useVariables().collections` returns copies and `addVariable` returns the new ID; `useVariablesEditor`, `useVariablesTable`, `useVariablesDialogState`, and the `@tanstack/vue-table` dependency are removed. `useFlatReorderDrag` takes `operations` and `onCombine`, and the `updates` messages replace the system update dialog strings with the Software Update window's.
+- Canvas and constants APIs changed: `SceneGraph.hitTestFrame` is now `hitTestDropTarget`, `adoptNodesIntoSection` is now `adoptCoveredLayers`, and `SkiaRenderer.hitTestFrameTitle` no longer takes selected IDs. `SkiaRenderer.buildParagraph` returns a `TextLayout` that draws with `draw(canvas, x, y)`. `AUTO_LAYOUT_BREAK_THRESHOLD`, `CORNER_ROTATE_ZONE`, `getDefaultCanvasBgColor`, and `CANVAS_BG_COLOR_DARK` are removed: the selection's resize and rotation zones are `TRANSFORM_ZONE` and `transformZoneAt` in `@open-designer/core/geometry`, which also owns the `HandlePosition` and `CornerPosition` types, `SECTION_DEFAULT_FILL` is replaced by `SECTION_DEFAULT_FILLS`, and new pages use `PAGE_DEFAULT_BACKGROUNDS`, both keyed by interface theme. Icons come from an `IconProvider`: `fetchIcon`, `fetchIcons`, `searchIcons`, `searchIconsBatch`, and `clearIconCache` are replaced by the default `iconify` provider, `createIconifyProvider()`, and `placeIcon`, and `VectorizedPath` from `@open-designer/core/vector` replaces `clipNetworks` with `clips`.
+- `@open-designer/vue` composables act on the whole selection: `useStrokeControls` and `useEffectsControls` no longer take a node, `useTypography` edits every selected text layer and its `weights` (also the `TypographyControlsRoot` slot prop) is a computed list of the families' weights, read with `.value`, and `usePosition` reports `x`, `y`, and `rotation` as Figma's panel does. `useCanvasInput` returns `autoLayoutValueEdit` with `updateAutoLayoutValueEdit`, `commitAutoLayoutValueEdit`, and `cancelAutoLayoutValueEdit` in place of the padding-only `autoLayoutPaddingEdit` and its functions; the edit names its `field` (a padding or `itemSpacing`), and `autoLayoutValueAnchor` places its editor. `useVariables().collections` returns copies and `addVariable` returns the new ID; `useVariablesEditor`, `useVariablesTable`, `useVariablesDialogState`, and the `@tanstack/vue-table` dependency are removed. `useFlatReorderDrag` takes `operations` and `onCombine`, and the `updates` messages replace the system update dialog strings with the Software Update window's.
 
 ### Added
 
@@ -48,25 +48,25 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Figma's navigation keys move through layers and the document: Enter selects children, or opens a selected vector's path for editing, Shift+Enter or \ selects the parent, Tab and Shift+Tab select siblings, N and Shift+N zoom to the next or previous frame, Page Down and Page Up switch pages, and Shift+0 zooms to 100%.
 - Rearrange auto layout as in Figma: drag several layers along a row or column as one block, move a layer one slot with the arrow keys, take it out with **Ignore auto layout**, and see the layout's children outlined on hover.
 - Edit several layers at once: a multi-selection gets Layout, Typography, corner radius, and stroke sections, plus **Selection colors**, which recolours a colour everywhere it is used. The layout guides of several frames list and edit together while they match, and Add gives each frame one new guide.
-- Check designs in the new Lint tab: issues are grouped by rule, marked on the canvas and in the Layers panel, and many have one-click fixes such as binding colours to matching variables. `openpencil lint --fix` and the `lint` and `lint_fix` tools apply the same fixes outside the app.
+- Check designs in the new Lint tab: issues are grouped by rule, marked on the canvas and in the Layers panel, and many have one-click fixes such as binding colours to matching variables. `opendesigner lint --fix` and the `lint` and `lint_fix` tools apply the same fixes outside the app.
 - Edit variables in a redesigned variables dialog: collections and groups in a sidebar, search across names and values, inline editing, drag to reorder, multi-select, CSS names and expressions, per-mode conditions written in plain words, and a live stylesheet preview. Collections copied from a library are marked, with a warning on variables Figma won't show.
-- Import and export variables, text styles, and effect styles as W3C design tokens, in the shape Figma imports, from the variables dialog, by dropping `.tokens`, `.tokens.json`, or `.resolver.json` files on the editor, with `openpencil tokens --format dtcg`, and with the `import_design_tokens` tool. Copy variables as CSS or a Tailwind v4 theme, or print them with `openpencil tokens`.
+- Import and export variables, text styles, and effect styles as W3C design tokens, in the shape Figma imports, from the variables dialog, by dropping `.tokens`, `.tokens.json`, or `.resolver.json` files on the editor, with `opendesigner tokens --format dtcg`, and with the `import_design_tokens` tool. Copy variables as CSS or a Tailwind v4 theme, or print them with `opendesigner tokens`.
 - Insert icons from Iconify's open-source sets with an icon picker in the toolbar, Object menu, and command palette. Placed icons keep their name, so the Icon section can swap or recolour them, and exports write them as icons.
 - See the selection as a Vue or React component in the Code tab, styled with CSS or Tailwind, and see which layer the cursor's element draws, with design issues underlined in the code.
-- Export components to Storybook with `openpencil export -f storybook`: one story file per component for React, Vue, or HTML, with variant controls, and with `--framework vue` or `--framework react`, working Reka UI or Radix UI components (#727). Export HTML and Tailwind JSX from the app and the CLI (`-f tailwind-jsx`), with vector shapes as inline SVG, and choose PPTX in the Export panel.
-- Open a `.fig`, `.pen`, or other supported document by dragging it onto the window, paste SVG markup copied as text, such as Figma's Copy as SVG, and open HTML files in CLI commands such as `openpencil tree` and `openpencil convert`.
-- Save the open document to cloud storage with **File → Save to storage…**; the tab stays bound to the stored copy, so Save and auto-save write to the bucket. A new Cloud Storage guide covers setup, and Settings → Cloud storage offers the OpenPencil Cloud waitlist.
+- Export components to Storybook with `opendesigner export -f storybook`: one story file per component for React, Vue, or HTML, with variant controls, and with `--framework vue` or `--framework react`, working Reka UI or Radix UI components (#727). Export HTML and Tailwind JSX from the app and the CLI (`-f tailwind-jsx`), with vector shapes as inline SVG, and choose PPTX in the Export panel.
+- Open a `.fig`, `.pen`, or other supported document by dragging it onto the window, paste SVG markup copied as text, such as Figma's Copy as SVG, and open HTML files in CLI commands such as `opendesigner tree` and `opendesigner convert`.
+- Save the open document to cloud storage with **File → Save to storage…**; the tab stays bound to the stored copy, so Save and auto-save write to the bucket. A new Cloud Storage guide covers setup, and Settings → Cloud storage offers the OpenDesigner Cloud waitlist.
 - Set up AI in a few steps with guided setup: on first launch, pick a coding agent on this computer, an API account, or a local server. The desktop app installs or updates agents, adapters, the MCP server, and the Harness companion with one click, through Bun when Bun installed them, tests each connection, and proposes models; where npm's global folder needs administrator rights, setup says so and offers the `sudo` command, Bun, or a prompt for your agent. The MCP server and Harness companion print their version with `--version`; sign in to OpenRouter instead of pasting a key.
 - Choose how much an AI model thinks for each message, from Off to Extra high, attach images by dropping them on the chat, and watch designs appear on the canvas while direct providers stream JSX.
 - Review and undo AI edits from the chat: each tool call shows a summary, its input and output, and a before-and-after image with a JSX diff. Revert a reply's edits, restore them, regenerate the last reply, retry a failed message, or edit and resend it; undoing an edit tells the AI on the next message. The conversation menu saves a chat's trace as a JSON file, with every message, reasoning step, tool call, and request.
-- Control the running app from the CLI and MCP: `openpencil documents`, `undo`, `redo`, and `settings`, the matching MCP tools, `openpencil tool list`, `describe`, and `call` to run any MCP tool from the shell, and `openpencil diff` with the `diff_visual` and `diff_apply` tools to compare and replay changes. Share only the selected layers with MCP clients from **Settings → MCP → Local server** or `OPENPENCIL_MCP_SCOPE=selection`.
+- Control the running app from the CLI and MCP: `opendesigner documents`, `undo`, `redo`, and `settings`, the matching MCP tools, `opendesigner tool list`, `describe`, and `call` to run any MCP tool from the shell, and `opendesigner diff` with the `diff_visual` and `diff_apply` tools to compare and replay changes. Share only the selected layers with MCP clients from **Settings → MCP → Local server** or `OPENDESIGNER_MCP_SCOPE=selection`.
 - Diagnose failures from **Settings → Diagnostics**: errors, failed AI chats, and broken tool calls are recorded with scrubbed messages and stacks, filterable, copyable with the app version, and saved as a JSON file.
 - Choose an accent color in **Settings → General → Appearance**, and customize the toolbar in **Settings → Toolbar** or from its right-click menu: hide, reorder, and regroup tools on desktop and mobile.
-- Official builds send one anonymous ping a day, with the app version, operating system, architecture, desktop or web, and whether usage stats are shared, and no ID; turn it off in Settings → Privacy or with `OPENPENCIL_TELEMETRY=0` or `DO_NOT_TRACK=1` in the desktop app's environment. Usage stats (launches, file formats opened and exported, and which AI provider answered) are sent only after you agree in a one-time prompt after the welcome screen. The [privacy page](https://openpencil.dev/overview/privacy) lists every field.
-- Use more of the Figma plugin API: `instance.swapComponent()`, `detachInstance()`, `figma.getNodeByIdAsync()`, `getMainComponentAsync()`, and an instance's `overrides` with `resetOverrides()`. OpenPencil's own `openpencil` script global adds comments and controls.
-- Write design JSX with more of the document: `visible`, `locked`, `constraints`, `italic`, full stroke props, and component properties set by name on `<Instance>` (#750). JSX export writes them back with every fill, effect, mask, and variable binding, and TSX can use `@open-pencil/design-jsx` as its JSX import source.
-- New SDK entry points: pass an ID generator to `new SceneGraph()`, place pasted content with `resolvePasteTarget` from `@open-pencil/core/editor`, compute Flatten and Outline stroke with `flattenNodesToVectorProps` and `outlineStrokeNodesToVectorProps` from `@open-pencil/core/canvas`, import `designDocumentToSceneGraph` from `@open-pencil/dom-css/scene-graph` in browser builds, and tell `FontManager.setBundledFontLocator()` where a bundler put the fonts from the new `@open-pencil/core/assets` export.
-- New npm packages: `@open-pencil/design-jsx` for writing and exporting design JSX, and `@open-pencil/emit`, which it and the exporters use to print source code.
+- Official builds send one anonymous ping a day, with the app version, operating system, architecture, desktop or web, and whether usage stats are shared, and no ID; turn it off in Settings → Privacy or with `OPENDESIGNER_TELEMETRY=0` or `DO_NOT_TRACK=1` in the desktop app's environment. Usage stats (launches, file formats opened and exported, and which AI provider answered) are sent only after you agree in a one-time prompt after the welcome screen. The [privacy page](https://openpencil.dev/overview/privacy) lists every field.
+- Use more of the Figma plugin API: `instance.swapComponent()`, `detachInstance()`, `figma.getNodeByIdAsync()`, `getMainComponentAsync()`, and an instance's `overrides` with `resetOverrides()`. OpenDesigner's own `opendesigner` script global adds comments and controls.
+- Write design JSX with more of the document: `visible`, `locked`, `constraints`, `italic`, full stroke props, and component properties set by name on `<Instance>` (#750). JSX export writes them back with every fill, effect, mask, and variable binding, and TSX can use `@open-designer/design-jsx` as its JSX import source.
+- New SDK entry points: pass an ID generator to `new SceneGraph()`, place pasted content with `resolvePasteTarget` from `@open-designer/core/editor`, compute Flatten and Outline stroke with `flattenNodesToVectorProps` and `outlineStrokeNodesToVectorProps` from `@open-designer/core/canvas`, import `designDocumentToSceneGraph` from `@open-designer/dom-css/scene-graph` in browser builds, and tell `FontManager.setBundledFontLocator()` where a bundler put the fonts from the new `@open-designer/core/assets` export.
+- New npm packages: `@open-designer/design-jsx` for writing and exporting design JSX, and `@open-designer/emit`, which it and the exporters use to print source code.
 - openpencil.dev opens on live editor demos of design, AI, code export, the CLI, the SDK, and collaboration, in every docs language, with a short roadmap, and a download page offers the installer for the visitor's system and lists every installer with Homebrew and the web app.
 
 ### Changed
@@ -85,7 +85,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Import SVG as editable layers, as pasting into Figma does: groups, one vector per shape, text layers, and clip path groups instead of one merged vector (#734).
 - The plugin API follows Figma inside instances: it refuses to move, rotate, constrain, or mask a layer an instance takes from its component, or to change a vector's path there, with Figma's errors, while slot content stays editable, and setting a layer to the value it already has makes no override. `setProperties` switches an instance's variant, alongside its other properties, and fails without changing anything when no variant has the values; `resize` places a frame's layers by their constraints while `resizeWithoutConstraints` leaves them; a new frame or component hugs along its main axis once auto layout is on, and `resize` fixes a hugging auto layout frame's size.
 - Popovers, menus, selects, and pickers share one look and motion, selects open over their field, every section adds and removes items with + and −, and variables, styles, and swap components come from one searchable list. Menus taller than the window scroll.
-- **Settings…** (<kbd>⌘</kbd><kbd>,</kbd>) is in the **OpenPencil** menu on macOS and at the end of the **File** menu elsewhere, instead of under **View → Preferences**.
+- **Settings…** (<kbd>⌘</kbd><kbd>,</kbd>) is in the **OpenDesigner** menu on macOS and at the end of the **File** menu elsewhere, instead of under **View → Preferences**.
 - The demo at `/demo` is a tour of one player card in eight chapters stacked on one canvas, each showing one thing with a numbered card that says what to try and draws the piece of the app to click: preview, the artwork slot, the controls' behaviours, the theme's modes, shader fills, the Code tab, Lint on a card with planted issues, and sharing and opening your own files. It opens instantly, built ahead of time, on the first chapter, and follows the app's light or dark theme. The welcome dialog on first launch offers it next to AI setup, and **File → Open the Tour** opens it any time.
 - The desktop app shows updates in a Software Update window with formatted release notes and cancellable download progress (#743). On macOS and Linux you choose when to restart, and restarting asks about unsaved documents first.
 - Design lint reports far fewer false positives, checks touch targets against WCAG 2.2 AA in the Recommended preset, asks 3:1 contrast of large text as WCAG AA does, and reports unbound colours and off-scale spacing as suggestions.
@@ -94,7 +94,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Settings → MCP shows the local server in the desktop app and WebMCP in the browser, where each works, and Tool access lists the local server's tools while it is stopped.
 - Invalid tool arguments from the AI chat, CLI, or WebMCP name the tool and list every problem with its location.
 - Run Pi with the providers and default model you signed in to in the Pi CLI, and see what to fix when its Harness companion or MCP server is missing or out of date. Codex install instructions point at `@agentclientprotocol/codex-acp`, which replaces `@zed-industries/codex-acp`.
-- `get_selection` returns the selected layers with their direct children by default and takes a `depth`, and `openpencil eval` prints the value of a script's last expression.
+- `get_selection` returns the selected layers with their direct children by default and takes a `depth`, and `opendesigner eval` prints the value of a script's last expression.
 - Opening a share link opens the room in its own tab, so an open document is never changed, and leaving a room keeps its file as a local copy.
 - Text in both themes meets the WCAG AA contrast ratio of 4.5:1.
 - The Linux AppImage no longer bundles `xdg-open` and relies on the system's `xdg-utils`.
@@ -103,9 +103,9 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 - Instances follow their component as in Figma: style overrides from `.fig` files survive component edits, every field an instance does not override follows the component, restructured component layers move their instance copies with overrides, and properties set on nested instances show and stay set when pages load on their own (#849). Resizing an instance no longer turns its layers' sizes into overrides, copies that size themselves to their content keep their size through component edits and reopen at their saved size, and a path edited in a component reaches its instances, scaled with each copy.
 - Save `.fig` files that open correctly in Figma: overrides beyond text and fill colour, exposed nested instances, slot content, blend modes, bound variable values, variable metadata, fill-sizing, ordering keys, and stable layer IDs (#890). An opened `.fig` stays unchanged until edited, saves before its first edit, and saves variable-only edits.
-- Saving an opened `.fig` file writes only what an edit changed in a layer or variable and keeps the rest as Figma saved it, including data OpenPencil does not model, an instance's library link and saved overrides, and text's letter spacing in percent and font names. A variable's new value reaches every layer that uses it, through an alias too, variables that alias library variables still point at the library, and a collection's modes keep their order in Figma.
-- Shared and library styles survive `.fig` files: the properties panel shows the styles layers use in opened files, styles made in OpenPencil save as styles and reopen, layers that use a library style keep it in Figma, and a style an instance has cleared stays cleared.
-- Figma shows images in `.fig` files OpenPencil writes, stored under the SHA-1 of their bytes, the only name Figma reads. Instances pasted into Figma keep their names and no longer carry their component's library identity, and fill and stroke bindings to variables made in OpenPencil survive the paste as remote variables.
+- Saving an opened `.fig` file writes only what an edit changed in a layer or variable and keeps the rest as Figma saved it, including data OpenDesigner does not model, an instance's library link and saved overrides, and text's letter spacing in percent and font names. A variable's new value reaches every layer that uses it, through an alias too, variables that alias library variables still point at the library, and a collection's modes keep their order in Figma.
+- Shared and library styles survive `.fig` files: the properties panel shows the styles layers use in opened files, styles made in OpenDesigner save as styles and reopen, layers that use a library style keep it in Figma, and a style an instance has cleared stays cleared.
+- Figma shows images in `.fig` files OpenDesigner writes, stored under the SHA-1 of their bytes, the only name Figma reads. Instances pasted into Figma keep their names and no longer carry their component's library identity, and fill and stroke bindings to variables made in OpenDesigner survive the paste as remote variables.
 - Importing design tokens adds them to the file's own collections, never to a collection copied from a library, where Figma did not show them.
 - `.fig` files whose text content is bound to a number or boolean variable open instead of failing with "Unsupported variable expression STRINGIFY", and saving keeps the binding (#1110). Rounded points in imported vectors keep their own corner radius and join, layout guides save, show as columns or rows, and draw an Auto count as Figma does, and a file's thumbnail shows its page's own background.
 - Showing or hiding a layer of an instance that a boolean component property drives sets the property, as in Figma, so every layer it drives follows.
@@ -118,13 +118,13 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - The pen tool redoes a path with its points, fill, and stroke, Escape keeps the path drawn so far, and the distance for closing a path no longer changes with zoom. Path editing closes when its vector is deleted or another document opens, and editing a vector's points no longer leaks memory.
 - Dragging a layer down the layers panel drops it where the line shows, and moving a layer into a frame or group from the panel keeps it where it's drawn on the canvas.
 - Opening a page also loads the pages holding the component sets its instances use, so the variant picker can switch to any variant of a set kept on a page not opened yet.
-- Import HTML and CSS laid out as a browser lays it out, with correct shadows, borders, and `box-sizing`, in `openpencil import`, the app, and the Code tab's preview (#788).
+- Import HTML and CSS laid out as a browser lays it out, with correct shadows, borders, and `box-sizing`, in `opendesigner import`, the app, and the Code tab's preview (#788).
 - Import SVG files with an XML declaration or a byte-order mark, `fill-opacity`, `stroke-opacity`, open filled subpaths, and stroke caps and joins that survive saving. SVG export, and the drawings built on it, draw a vector's open strokes beside its filled regions.
 - Design JSX lays out `justifyContent`, `alignItems`, grid `repeat()` tracks, fill sizes in grids, and `box-shadow` lists as written, applies props it used to ignore, reports bad gradient arguments, warns about ignored paint and effect options (#736), and keeps line breaks when exporting multi-line text.
 - HTML export keeps grid layouts, rotation, every shadow and blur, flex grow, right-to-left direction, sections, and the positions of layers outside auto layout, declares `box-sizing: border-box`, and names a JPEG, GIF, or WebP image fill by its own type.
-- The plugin API reads and writes `lineHeight`, `letterSpacing`, effects, paints, page backgrounds, `layoutGrids`, and `componentPropertyReferences` in Figma's shapes, updates geometry and text size immediately, and refuses invalid sizing and component cycles as Figma does (#786). `openpencil eval -o` saves a script's edits laid out, and CLI `eval` and tools measure text in the document they edit; `@open-pencil/core/figma-api` exports `flushPendingLayout` for hosts that save scripts' results.
+- The plugin API reads and writes `lineHeight`, `letterSpacing`, effects, paints, page backgrounds, `layoutGrids`, and `componentPropertyReferences` in Figma's shapes, updates geometry and text size immediately, and refuses invalid sizing and component cycles as Figma does (#786). `opendesigner eval -o` saves a script's edits laid out, and CLI `eval` and tools measure text in the document they edit; `@open-designer/core/figma-api` exports `flushPendingLayout` for hosts that save scripts' results.
 - AI, MCP, and CLI tools reject arguments they do not take (#977), keep variable bindings through stdio `render` (#830), size groups and booleans to their contents (#738), work on pages other than the one on screen, run XPath queries under Node (#787), judge text contrast by its WCAG ratio (#735), and report failed saves as errors.
-- AI chat replies stop cleanly, survive switching pages, accept `eval` results of any shape, use a newly saved API key right away, and keep your message when the chat cannot start. In the desktop app, replies stream and keep going past 30 seconds, a request that cannot reach the provider is retried, and scrolling back to the bottom resumes following. Pi chats start with OpenPencil's MCP tools on Node 22.15 or later, resume cleanly, and stop a reply without losing the session.
+- AI chat replies stop cleanly, survive switching pages, accept `eval` results of any shape, use a newly saved API key right away, and keep your message when the chat cannot start. In the desktop app, replies stream and keep going past 30 seconds, a request that cannot reach the provider is retried, and scrolling back to the bottom resumes following. Pi chats start with OpenDesigner's MCP tools on Node 22.15 or later, resume cleanly, and stop a reply without losing the session.
 - In the desktop app, Select All, Undo, and Redo typed in a text field such as the chat input act on the field instead of the canvas, and other canvas shortcuts no longer reach the canvas from a text field.
 - Shared rooms keep one consistent layer tree when people move, reorder, or add layers at the same time (#888, #889).
 - Storage keeps working: browser storage saves after Safari suspends a tab, in Private Browsing, and for documents over 127 MiB; crash recovery and autosave run after edits instead of on redraws, which froze Safari; S3 storage works with servers that answer range reads with `200`, such as `rclone serve s3`; and when saved credentials are paused, the home screen offers **Retry access**.
@@ -133,7 +133,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Picking an OkHCL colour no longer overwrites a layer's other plugin data, including other plugins' data and its export settings.
 - Warnings and errors show in the theme's colors: library update and diagnostics warnings, errors on the home screen and when renaming layers, publishing a library or authoring variants, and chat errors, copy confirmations, and error toasts in the light theme.
 - Smaller fixes: layers keep their place when moved into or out of a rotated or flipped parent (#737), the Vue SDK's `CanvasSurface` starts, `.pen` text sizes from its font, whole-step number field drags, ⌘Z after nudges, ⇧-resizing, Paste here in transformed frames, zooming to a fixed level, the font picker's starting position and search order, section and frame titles, tab and menubar overflow, the mobile file menu's labels, tooltips, full hex and opacity values, component set borders at every zoom, the caret in empty text, imported page backgrounds, `.fig` thumbnails in recent files, the canvas context menu closing on a quick second right-click, model pickers in Settings → Models closing while the editor slides in, and screen reader labels.
-- Ship the MIT license text in every npm package, with READMEs for `@open-pencil/core`, `@open-pencil/cli`, and `@open-pencil/mcp`.
+- Ship the MIT license text in every npm package, with READMEs for `@open-designer/core`, `@open-designer/cli`, and `@open-designer/mcp`.
 
 ### Performance
 
@@ -170,14 +170,14 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Store colours edited in the colour picker in the document's colour profile, and convert them on the way to the display, so a Display-P3 document no longer looks different on an sRGB display than on a wide-gamut one.
 - Keep Display-P3 documents rendering correctly in wide gamut where the browser supports it and in sRGB elsewhere, fixing the black rectangles and incorrect blend colours, with a dismissible notice when wide gamut is unavailable.
 - Classify MCP `open_file` and `close_file` operations as read-only hints, and close opened document tabs through the new `close_file` tool with the usual unsaved-change prompt.
-- Let the desktop app use an MCP server you started yourself by allowing the app's own origin by default, instead of requiring `OPENPENCIL_MCP_CORS_ORIGIN`.
-- Explain why the local MCP server did not start — a missing `@open-pencil/mcp` install, a denied command, an early exit, or an unreachable address — with translated guidance, and find a globally installed server when the desktop app is launched from the system shell.
+- Let the desktop app use an MCP server you started yourself by allowing the app's own origin by default, instead of requiring `OPENDESIGNER_MCP_CORS_ORIGIN`.
+- Explain why the local MCP server did not start — a missing `@open-designer/mcp` install, a denied command, an early exit, or an unreachable address — with translated guidance, and find a globally installed server when the desktop app is launched from the system shell.
 - Animate the AI chat tool-call disclosure, which expanded and collapsed without motion because its animation classes were misspelled.
 - Mark unsaved documents and ask whether to save before closing a tab, the desktop window, or the application, rather than relying on recovery alone.
 - Defer AI provider connections and system credential reads until you send a message or use a connected feature, so opening documents and browsing chat history no longer trigger unexpected credential prompts.
 - Save and recover documents whose text uses disabled numeric, fraction, or small-caps OpenType features, which previously failed to write a `.fig` file.
 - Update instance text properties on the canvas while typing, with grouped undo for rapid edits.
-- Point Homebrew installation instructions to the official `openpencil` cask and document separate CLI installation.
+- Point Homebrew installation instructions to the official `opendesigner` cask and document separate CLI installation.
 - Reach the custom model option in the model picker for providers with large model catalogs instead of requiring a search for it.
 
 ### Performance
@@ -216,7 +216,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Show temporary Figma-style distance measurements between selected and Option/Alt-hovered layers (#491).
 - Edit Design JSX and HTML/CSS previews in CodeMirror, with theme-aware highlighting, Tailwind viewing, completion, diagnostics, bounded execution, and session-level undo (#130).
 - Set provider-specific reasoning effort on supported AI model profiles (#454).
-- Show unavailable or substituted document fonts with affected-layer selection and retry actions, and expose font fidelity through the Figma API, MCP, and `openpencil fonts [file] --json`. Choose `warn`, `strict`, or `allow` font-substitution policies for file-backed CLI raster and PDF exports with `--font-policy` (#503, #625).
+- Show unavailable or substituted document fonts with affected-layer selection and retry actions, and expose font fidelity through the Figma API, MCP, and `opendesigner fonts [file] --json`. Choose `warn`, `strict`, or `allow` font-substitution policies for file-backed CLI raster and PDF exports with `--font-policy` (#503, #625).
 - Add reusable remote MCP connections for ACP agents, with Streamable HTTP endpoints and credential-backed bearer tokens.
 - Author and manage multidimensional component variants and published component libraries, including revision previews, linked-instance updates, stable library identities, offline catalogs, storage-backed catalogs, and read-only library definitions (#239).
 - Recover unsaved and pathless documents locally, including after closing their tabs, with options to disable recovery and restore or discard retained snapshots (#487, #505, #574).
@@ -225,11 +225,11 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Changed
 
-- Refresh the OpenPencil mark across the editor, documentation, browser tabs, installed web apps, and desktop icons, with small-size and dark-background adaptations.
+- Refresh the OpenDesigner mark across the editor, documentation, browser tabs, installed web apps, and desktop icons, with small-size and dark-background adaptations.
 - Explore editable component, typography, and paint comparisons in the demo, with the original examples preserved on a reference page.
 - Use compact desktop Home search actions with consistent responsive layout and control sizing.
 - Keep pixel-grid rounding invisible while showing alignment guides only for real geometry, objects, and canvas/layout guides.
-- Embed images when copying selections into Figma, and preserve geometry, text sizing, component links, variables, modes, and shared styles when pasting within OpenPencil.
+- Embed images when copying selections into Figma, and preserve geometry, text sizing, component links, variables, modes, and shared styles when pasting within OpenDesigner.
 - Choose the app theme and whether animations follow the system or stay off under Appearance in General Settings, with live updates and persistent preferences.
 - Simplify property panels with fill and stroke style pickers in section headers, concise effect style rows, and collapsed equal corner fields when all four share a variable. Preserve applied and missing styles and remove the redundant Dimensions heading for text layers.
 - Open variable pickers below their trigger when space permits, flipping above near the viewport edge.
@@ -270,7 +270,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Use the user's home directory as the default MCP file root on Windows, avoiding the caller's unreliable working directory.
 - Open legacy raw `.fig` files that store the Kiwi document and thumbnail without a ZIP wrapper (#582).
 - Preserve a frame's auto-layout HUG sizing, variable bindings, and variable modes when converting it into a component through the Figma API or automation (#595).
-- Run `openpencil import` on Node so npm-installed CLI users no longer encounter `Bun is not defined` (#575).
+- Run `opendesigner import` on Node so npm-installed CLI users no longer encounter `Bun is not defined` (#575).
 - Generate recent-file previews from the conventional `Cover` page without modifying the source file.
 - Resolve Vue SDK semantic test selectors correctly in non-browser runtimes (#397).
 - Commit vector vertex and Bézier-handle edits when the pointer is released and keep transformed vector-edit overlays aligned (#586).
@@ -324,7 +324,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Breaking changes
 
-- **Core SDK:** Import scene graph types, geometry, coordinate, matrix, snapping, undo, and path helpers from `@open-pencil/scene-graph`; import `.pen` parsing from `@open-pencil/pen`; import synchronous Kiwi decompression from `@open-pencil/kiwi` instead of the `@open-pencil/core` compatibility barrel; use uppercase acronym casing in exported identifiers, including `JSONObject`, `JSONArray`, `JSONValue`, `RPCCommand`, and `executeRPCCommand`; and use the renamed tool exports `importSVG`, `exportSVG`, `exportPDF`, `getJSX`, `diffJSX`, and `setPexelsAPIKey`.
+- **Core SDK:** Import scene graph types, geometry, coordinate, matrix, snapping, undo, and path helpers from `@open-designer/scene-graph`; import `.pen` parsing from `@open-designer/pen`; import synchronous Kiwi decompression from `@open-designer/kiwi` instead of the `@open-designer/core` compatibility barrel; use uppercase acronym casing in exported identifiers, including `JSONObject`, `JSONArray`, `JSONValue`, `RPCCommand`, and `executeRPCCommand`; and use the renamed tool exports `importSVG`, `exportSVG`, `exportPDF`, `getJSX`, `diffJSX`, and `setPexelsAPIKey`.
 - **Vue SDK:** Replace the removed color-picker model helpers with `useColorModel()`; replace the deprecated `FillPickerRoot` and `useFillPicker()` APIs with `FillRoot`, `FillSwatch`, `useFill()`, and a consumer-owned popover; rename `FontPickerUi` to `FontPickerUI`; and remove the exported `testId` prop helper types in favor of semantic component anatomy.
 - **CLI and MCP SDKs:** Use uppercase acronym casing in exported identifiers, including `AppTargetCLIArgs`, `appTargetRPCArgs`, `loadRPCData`, `prepareDocumentForRPC`, `RPCSender`, `createBrowserRPCBridge`, `createMCPSessionManager`, and `createStdioRPCBridge`.
 
@@ -355,7 +355,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Author richer Design JSX with components, instances, variables, gradients, structured fills, shadows, blur effects, masks, and inline SVG vectors.
 - Build custom property panels and document workspaces with new Vue SDK number fields, bindable values, property sections, responsive grids, segmented controls, property lists, color models, fill controls, gradient primitives, and the headless `useDocumentWorkspace()` composable.
 - Use `useColorModel()` in the Vue SDK for extensible color formats and shared RGB, HSL, HSB, and OkHCL channel behavior.
-- Add dedicated SceneGraph, Pen, Kiwi, Fig, and DOM/CSS packages with documented public entry points for building on OpenPencil.
+- Add dedicated SceneGraph, Pen, Kiwi, Fig, and DOM/CSS packages with documented public entry points for building on OpenDesigner.
 
 ### Changed
 
@@ -419,29 +419,29 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Changed
 
-- Update the Homebrew install command to use the published `openpencil` cask.
+- Update the Homebrew install command to use the published `opendesigner` cask.
 
 ### Fixed
 
-- Fix the published MCP package so global installs include the `openpencil-mcp` and `openpencil-mcp-http` launchers required by desktop app integrations.
+- Fix the published MCP package so global installs include the `opendesigner-mcp` and `opendesigner-mcp-http` launchers required by desktop app integrations.
 
 ## 0.13.1 — 2026-05-29
 
 ### Fixed
 
-- Fix the npm package contents for the CLI so Bun installs include the built `openpencil` binary and runtime bundle.
+- Fix the npm package contents for the CLI so Bun installs include the built `opendesigner` binary and runtime bundle.
 
 ## 0.13.0 — 2026-05-29
 
 ### Fixed
 
-- Fix the published CLI package so Bun global installs run the built `openpencil` binary instead of raw TypeScript sources.
+- Fix the published CLI package so Bun global installs run the built `opendesigner` binary instead of raw TypeScript sources.
 
 - Greatly improve importing Figma `.fig` files with complex component systems: badges, avatars, icons, links, input fields, lists, date pickers, nested instances, component swaps, and variant properties now open much closer to their original Figma appearance.
 - Fix missing or white content in imported `.fig` files caused by unresolved Figma variable bindings, including image/avatar badges, icon colors, text colors, and variable-backed component overrides.
 - Preserve more Figma document details when opening and saving `.fig` files, including internal component pages, component ordering, page metadata, canvas backgrounds, text layout, glyph rendering, vector geometry, effects, shadows, and instance overrides.
 - Keep user edits after opening an imported `.fig` file: changing size, position, fills, text, or layout now wins over preserved Figma round-trip data when the document is saved again.
-- Fix `.fig` exports so files reopened in Figma or OpenPencil keep their pages, components, instances, text wrapping, icons, avatars, and preview thumbnail intact.
+- Fix `.fig` exports so files reopened in Figma or OpenDesigner keep their pages, components, instances, text wrapping, icons, avatars, and preview thumbnail intact.
 - Fix live canvas updates during move/resize/edit previews so visible scene changes repaint immediately.
 - Fix accidental duplicate creation when Alt-clicking without dragging.
 - Fix MCP startup in the browser.
@@ -474,8 +474,8 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Fixed
 
-- Route Claude Code stdio MCP requests through the live OpenPencil app connection, including immediate disconnected errors when no document is connected.
-- Keep MCP disconnected guidance focused on starting OpenPencil and opening a document.
+- Route Claude Code stdio MCP requests through the live OpenDesigner app connection, including immediate disconnected errors when no document is connected.
+- Keep MCP disconnected guidance focused on starting OpenDesigner and opening a document.
 - Improve agent-rendered JSX compatibility with Figma-style text, alignment, and rotation aliases; strip HTML comments; and report unsupported props from render tools.
 - Load exact text font styles after MCP and AI tool mutations so newly created bold/weighted text renders immediately.
 - Include text style fields in MCP `get_node` output so agents can verify generated text accurately.
@@ -485,7 +485,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Fixed
 
-- Fix `.fig` round-trips for OpenPencil component sets and variable bindings, and recompute imported layouts after opening documents.
+- Fix `.fig` round-trips for OpenDesigner component sets and variable bindings, and recompute imported layouts after opening documents.
 - Report desktop/MCP package version mismatches explicitly and include package-manager-aware install guidance from the MCP server.
 - Support scoped MCP `save_file({ path })` workflows while keeping file saving in the desktop app.
 - Use native Tauri path handling for save parent directories so Unicode and Windows paths are handled correctly.
@@ -499,7 +499,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Assets panel — browse, search, and insert document components directly from the left sidebar.
 - Component variants — switch instance variants from the right inspector; default variant respects property definitions.
 - Figma library metadata — component keys, source libraries, version IDs, descriptions, and docs links are preserved on import/export.
-- Desktop file associations — double-click `.fig` or `.pen` files in Finder/Explorer to open them in OpenPencil.
+- Desktop file associations — double-click `.fig` or `.pen` files in Finder/Explorer to open them in OpenDesigner.
 - Auto-update — startup update checks and a Check for Updates menu item on desktop.
 - Light theme with theme-aware canvas rulers.
 - PDF export — available in the export panel, CLI (`--format pdf`), and MCP.
@@ -549,8 +549,8 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Fix section drawing and color input forwarding in the property panel.
 - Fix asset insertion coordinates inside entered containers.
 - Fix MCP stdio handshake and eval return values.
-- Fix `@open-pencil/vue` npm imports referencing an unexported core subpath.
-- Fix Figma clipboard text compatibility — pasted OpenPencil text keeps editable fixed bounds, line wrapping, baselines, glyph offsets, and Figma edit-mode layout.
+- Fix `@open-designer/vue` npm imports referencing an unexported core subpath.
+- Fix Figma clipboard text compatibility — pasted OpenDesigner text keeps editable fixed bounds, line wrapping, baselines, glyph offsets, and Figma edit-mode layout.
 - Fix local font matching so requested upright and weighted faces do not fall back to italic or regular faces.
 - Fix CanvasKit paragraph rendering to preserve requested text weights and slants.
 - Fix nested text editing interactions — drill double-click enters nested text edit mode, and clicking another text node switches edit targets while editing.
@@ -579,7 +579,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Added
 
-- Add stdio transport for MCP server — `openpencil-mcp` now works as a proper stdio MCP server for Claude Code, Cursor, etc. HTTP server available as `openpencil-mcp-http`.
+- Add stdio transport for MCP server — `opendesigner-mcp` now works as a proper stdio MCP server for Claude Code, Cursor, etc. HTTP server available as `opendesigner-mcp-http`.
 - Default canvas background to dark when system prefers dark color scheme.
 - Add `list_available_fonts` MCP tool for font discovery.
 - Copy node ID / XPath from context menu; CLI selection command.
@@ -587,7 +587,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - JSX renderer: `position="absolute"`, `top`, `left` props for absolute children inside auto-layout containers.
 - MCP server sends `notifications/tools/list_changed` when the desktop app connects or disconnects.
 - Headless text measurement via opentype.js per-glyph advance widths — no CanvasKit needed.
-- Add `open_file` and `new_document` MCP tools with `OPENPENCIL_MCP_ROOT` path scoping.
+- Add `open_file` and `new_document` MCP tools with `OPENDESIGNER_MCP_ROOT` path scoping.
 - Optional `path` param on `export_image`, `export_svg`, `get_jsx` — write output to disk instead of returning base64/string.
 - Multi-root JSX support — multiple top-level elements auto-wrapped in a fragment.
 - `Component` and `Instance` tag aliases in JSX renderer.
@@ -616,7 +616,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Show "Create Instance" instead of "Create Component" in context menu when a component is selected.
 - Fix headless layout: use stored .fig dimensions instead of rough text size estimates (26K → 11K mismatches on material3.fig).
 - Fix `--help` output with huge vertical gaps between commands — remove inline examples from query description.
-- Fix `openpencil-mcp` npm package missing `dist/stdio.js` — explicitly list entry points in tsconfig.
+- Fix `opendesigner-mcp` npm package missing `dist/stdio.js` — explicitly list entry points in tsconfig.
 - Show toast when MCP server fails to start instead of silently swallowing the error.
 - Fix provider settings popover not appearing — tooltip wrapper broke floating-ui positioning.
 - Fix `set_font_range` producing invalid style runs that crash `.fig` export — use `applyStyleToRange`, apply color and fontWeight from style name.
@@ -627,7 +627,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Fixed
 
-- Switch `@open-pencil/core` build from `tsgo` + `fix-esm-import-path` to `tsdown` — fixes bare directory imports that broke Node.js and Bun consumers.
+- Switch `@open-designer/core` build from `tsgo` + `fix-esm-import-path` to `tsdown` — fixes bare directory imports that broke Node.js and Bun consumers.
 
 ## 0.11.5 — 2026-04-08
 
@@ -640,7 +640,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Fixed
 
-- Fix `@open-pencil/core` published package containing stale import paths from before the domain module restructuring — CLI and MCP installs from npm now resolve correctly.
+- Fix `@open-designer/core` published package containing stale import paths from before the domain module restructuring — CLI and MCP installs from npm now resolve correctly.
 - Add `save_file` MCP tool for saving the current document to disk.
 - Clipboard text export now writes richer v4 `derivedTextData` payloads with glyph outlines for better paste fidelity.
 
@@ -665,16 +665,16 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 - Stabilize npm publishing with isolated temp publish directories instead of mutating tracked package manifests in CI.
 - Strip build-time scripts and dev dependencies from generated publish manifests so tarballs pack from verified artifacts only.
-- Fix `@open-pencil/mcp` release packaging so the published npm tarball includes its built `dist/` CLI and server entrypoints deterministically.
-- Fix `@open-pencil/core` release build configuration so CI publish jobs include Node and Bun ambient types when compiling package artifacts.
+- Fix `@open-designer/mcp` release packaging so the published npm tarball includes its built `dist/` CLI and server entrypoints deterministically.
+- Fix `@open-designer/core` release build configuration so CI publish jobs include Node and Bun ambient types when compiling package artifacts.
 
 ## 0.11.1 — 2026-03-30
 
 ### Fixed
 
 - Fix npm publishing pipeline to publish packed tarballs instead of raw package folders.
-- Attempt to fix `@open-pencil/mcp` npm package contents so the published CLI includes its built `dist/` entrypoints.
-- Fix `@open-pencil/vue` npm package metadata and build output so the published package resolves from `dist/` while local workspace development keeps using source aliases.
+- Attempt to fix `@open-designer/mcp` npm package contents so the published CLI includes its built `dist/` entrypoints.
+- Fix `@open-designer/vue` npm package metadata and build output so the published package resolves from `dist/` while local workspace development keeps using source aliases.
 
 ## 0.11.0 — 2026-03-30
 
@@ -687,7 +687,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Layer panel click syncs canvas scope automatically.
 - Vue SDK internationalization primitives — `useI18n()`, locale detection, persisted locale selection, lazy-loaded locale JSON files, and exported locale metadata for custom editor shells.
 - Vue SDK docs and public API audit — documented advanced exports (`useOkHCL()`, variables helpers, viewport and locale APIs), aligned docs with the actual `provideEditor()` injection model, and expanded release-ready SDK guidance.
-- npm release pipeline now publishes `@open-pencil/core`, `@open-pencil/cli`, `@open-pencil/mcp`, and `@open-pencil/vue` together on version tags.
+- npm release pipeline now publishes `@open-designer/core`, `@open-designer/cli`, `@open-designer/mcp`, and `@open-designer/vue` together on version tags.
 - App language picker in the menu bar — switch UI locale without reloading.
 - Added a vector curve editor and improved drawing experience with the pen tool.
 - Resume pen drawing from existing open path endpoints — click an endpoint to continue the curve.
@@ -695,7 +695,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Align selected anchor points relative to each other in vector edit mode — the standard alignment buttons in the position panel now operate on selected vertices when 2 or more are selected.
 - Unified core IO format registry — `.fig` is now modeled as the native document format alongside shared export adapters for PNG, JPG, WEBP, SVG, and JSX.
 - Export selection or current page as `.fig` from the app export UI and app menu.
-- New CLI commands: `open-pencil convert` for document conversion, `open-pencil formats` to inspect readable/writable/exportable formats, and `open-pencil lint` for design consistency, structure, and accessibility checks.
+- New CLI commands: `open-designer convert` for document conversion, `open-designer formats` to inspect readable/writable/exportable formats, and `open-designer lint` for design consistency, structure, and accessibility checks.
 - CLI export now supports `.fig` output and routes PNG/JPG/WEBP/SVG/JSX/`.fig` through the shared IO layer.
 - `Open…` now supports `.pen` Pencil documents through the shared document reader pipeline while keeping `.fig` as the native save format.
 - Display‑P3 document color space pipeline — documents now default to Display‑P3, `.fig` import/export preserves document color profiles, the live canvas requests P3 surfaces with sRGB fallback, and raster/SVG export paths accept explicit color-space targets.
@@ -723,7 +723,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - TEXT nodes now default to a solid black fill — previously exported with no fill, making text invisible when opened in Figma.
 - Fix save crash when COLOR variable is missing alpha channel.
 - Fix console error spam on deployed web app from automation WebSocket reconnect loop.
-- Fix headless CLI font fallback — bundled Inter font now ships with `@open-pencil/core` and loads without a web server.
+- Fix headless CLI font fallback — bundled Inter font now ships with `@open-designer/core` and loads without a web server.
 - Locked nodes now block move, resize, rotate, and delete on canvas.
 - Locked containers block double-click enter.
 - Marquee selection skips locked and hidden nodes.
@@ -802,8 +802,8 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Added
 
-- XPath query command — `open-pencil query design.fig "//FRAME[@width < 300]"` to find nodes by type, attributes, and tree structure using XPath selectors.
-- CSS Grid layout mode — select a frame, click the grid icon in the auto layout toolbar to switch from flex to grid. Configure column/row tracks (fr, fixed px, auto), column and row gaps, and per-side padding. Powered by a [Yoga fork](https://github.com/open-pencil/yoga/tree/grid) with cherry-picked CSS Grid PRs from upstream.
+- XPath query command — `open-designer query design.fig "//FRAME[@width < 300]"` to find nodes by type, attributes, and tree structure using XPath selectors.
+- CSS Grid layout mode — select a frame, click the grid icon in the auto layout toolbar to switch from flex to grid. Configure column/row tracks (fr, fixed px, auto), column and row gaps, and per-side padding. Powered by a [Yoga fork](https://github.com/open-designer/yoga/tree/grid) with cherry-picked CSS Grid PRs from upstream.
 - JSX and Tailwind CSS export for grid layouts — `grid grid-cols-N`, `gap-x-*`/`gap-y-*`, child `col-start-*`/`row-start-*`/`col-span-*`/`row-span-*`.
 - Multi-provider AI support — connect to Anthropic, OpenAI, Google AI, or any OpenAI-compatible endpoint directly, in addition to OpenRouter. Per-provider API key storage, provider settings popover, automatic migration from single OpenRouter key.
 - Anthropic-compatible provider for custom API endpoints.
@@ -863,12 +863,12 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 ### Added
 
 - Mobile layout & PWA — responsive editor with touch-optimized toolbar, swipeable bottom drawer (layers/properties/design/code), HUD overlay, and installable PWA with icons and service worker.
-- Tailwind CSS v4 JSX export — export selections as HTML with Tailwind utility classes (`<div className="flex gap-4 p-3">`) from the Code panel, CLI (`bun open-pencil export --format jsx --style tailwind`), or programmatically via `sceneNodeToJSX(id, graph, 'tailwind')`. Supports layout, sizing, colors, border radius, opacity, rotation, overflow, shadows, blur, and typography. Uses v4 spacing semantics (px/4 multiplier) with automatic fallback to arbitrary values.
-- Code panel format toggle — switch between OpenPencil (custom components) and Tailwind (HTML + utility classes) output.
-- Homebrew tap — `brew install open-pencil/tap/open-pencil` for macOS (arm64 + x64), auto-updated on each release.
+- Tailwind CSS v4 JSX export — export selections as HTML with Tailwind utility classes (`<div className="flex gap-4 p-3">`) from the Code panel, CLI (`bun open-designer export --format jsx --style tailwind`), or programmatically via `sceneNodeToJSX(id, graph, 'tailwind')`. Supports layout, sizing, colors, border radius, opacity, rotation, overflow, shadows, blur, and typography. Uses v4 spacing semantics (px/4 multiplier) with automatic fallback to arbitrary values.
+- Code panel format toggle — switch between OpenDesigner (custom components) and Tailwind (HTML + utility classes) output.
+- Homebrew tap — `brew install open-designer/tap/open-designer` for macOS (arm64 + x64), auto-updated on each release.
 - Double-click to rename layers — inline rename in layer panel, shared `useInlineRename` composable.
 - New AI/MCP tools: `analyze_colors`, `analyze_typography`, `analyze_spacing`, `analyze_clusters`, `diff_create`, `diff_show`, `get_components`, `get_current_page`, `arrange`, `node_to_component`.
-- CLI-to-app RPC bridge — all CLI commands work against the running app when no file is specified. Start the app, then run `bun open-pencil tree` to inspect the live document.
+- CLI-to-app RPC bridge — all CLI commands work against the running app when no file is specified. Start the app, then run `bun open-designer tree` to inspect the live document.
 - VitePress docs site — user guide, reference, architecture, and development docs at openpencil.dev with 6 locales (en, de, fr, es, it, pl), SEO (OG tags, hreflang, JSON-LD, sitemap), and dark theme.
 
 ### Changed
@@ -899,7 +899,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 - Fix `ALL_TOOLS` registry missing newer tools (`analyzeColors`, `diffCreate`, `exportImage`, `arrangeNodes`).
 - Fix `renderJSX` typo in tool definitions (`renderJsx` → `renderJSX`).
 - Fix all oxlint warnings and tsgo errors — replace `!` non-null assertions in `use-collab.ts` with local const captures.
-- Fix broken test imports — stale `../../src/engine/` paths updated to `@open-pencil/core`.
+- Fix broken test imports — stale `../../src/engine/` paths updated to `@open-designer/core`.
 - Fix flaky E2E tests: layers panel navigates to `/demo`, zoom-to-fit test zooms in first, snapshot rendering stabilized with `workers: 1` and `colorScheme: dark`.
 - Fix bogus .fig import mappings for `expanded` and `strokeMiterLimit` fields.
 - Fix PWA manifest error in dev mode, handle invalid font data gracefully.
@@ -911,7 +911,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Added
 
-- SVG export — export selections as SVG from the export panel, context menu, CLI (`bun open-pencil export --format svg`), or MCP/AI tools (`export_svg`). Supports rectangles, ellipses, lines, stars, polygons, vectors, text with style runs, gradients, image fills, effects, blend modes, clip paths, and nested groups (#46).
+- SVG export — export selections as SVG from the export panel, context menu, CLI (`bun open-designer export --format svg`), or MCP/AI tools (`export_svg`). Supports rectangles, ellipses, lines, stars, polygons, vectors, text with style runs, gradients, image fills, effects, blend modes, clip paths, and nested groups (#46).
 - Copy/Paste as submenu in context menu — Copy as text, Copy as SVG, Copy as PNG (⇧⌘C), Copy as JSX.
 - Stroke align (Inside/Center/Outside) with clip-based rendering matching Figma behavior.
 - Individual stroke weights per side (Top/Right/Bottom/Left) with side selector dropdown.
@@ -1040,7 +1040,7 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 - Extract shared color constants (`BLACK`, `TRANSPARENT`, `DEFAULT_SHADOW_COLOR`) — replaces 8 inline literals across core.
 - Extract shared `NodeContextMenuContent` component to avoid menu duplication.
-- Fix `@open-pencil/core` dep in MCP package: `workspace:*` for local dev (pnpm resolves at publish time).
+- Fix `@open-designer/core` dep in MCP package: `workspace:*` for local dev (pnpm resolves at publish time).
 - Replace store thunks with a late-binding proxy.
 
 - Clipboard roundtrip tests: encode to Figma Kiwi binary → decode → verify.
@@ -1100,21 +1100,21 @@ OpenPencil 0.16 adds comments, shared rooms with voice calls and agents you can 
 
 ### Added
 
-- MCP server (`@open-pencil/mcp`) — 29 tools for headless .fig editing via stdio (Claude Code, Cursor, Windsurf) or HTTP (Hono + Streamable HTTP with sessions).
-- `openpencil-mcp` and `openpencil-mcp-http` binaries — install globally via `bun add -g @open-pencil/mcp`.
+- MCP server (`@open-designer/mcp`) — 29 tools for headless .fig editing via stdio (Claude Code, Cursor, Windsurf) or HTTP (Hono + Streamable HTTP with sessions).
+- `opendesigner-mcp` and `opendesigner-mcp-http` binaries — install globally via `bun add -g @open-designer/mcp`.
 
 ### Changed
 
-- All packages emit JS via tsgo + fix-esm-import-path — `@open-pencil/core` and `@open-pencil/mcp` work on Node.js without Bun.
+- All packages emit JS via tsgo + fix-esm-import-path — `@open-designer/core` and `@open-designer/mcp` work on Node.js without Bun.
 - Core package exports: `bun` condition → src (dev), `import` condition → dist (npm consumers).
-- `@open-pencil/mcp` added to CI publish workflow.
+- `@open-designer/mcp` added to CI publish workflow.
 
 ## 0.3.2 — 2026-03-02
 
 ### Changed
 
 - Visual regression tests for SkPicture cache: hover on/off cycle, multiple cycles, mouse hover, scene change + hover.
-- Type `window.__OPEN_PENCIL_STORE__` globally, remove ad-hoc casts from tests.
+- Type `window.__OPEN_DESIGNER_STORE__` globally, remove ad-hoc casts from tests.
 
 ### Performance
 
@@ -1215,7 +1215,7 @@ First public alpha. The editor is functional but not production-ready.
 
 - .fig file import via Kiwi binary codec (194 definitions, ~390 fields).
 - .fig file export with Kiwi encoding, Zstd compression, thumbnail generation.
-- Figma clipboard: copy/paste between OpenPencil and Figma.
+- Figma clipboard: copy/paste between OpenDesigner and Figma.
 - Round-trip fidelity for supported node types.
 
 - Built-in AI chat in properties panel (⌘J).

@@ -1,6 +1,6 @@
-/** Fixed OpenPencil namespace inside a shared storage backend. */
+/** Fixed OpenDesigner namespace inside a shared storage backend. */
 export const STORAGE_NAMESPACE = 'open_pencil_storage'
-export const STORAGE_NAMESPACE_MARKER = `${STORAGE_NAMESPACE}/.openpencil-namespace`
+export const STORAGE_NAMESPACE_MARKER = `${STORAGE_NAMESPACE}/.opendesigner-namespace`
 export const STORAGE_DOCUMENTS_PREFIX = `${STORAGE_NAMESPACE}/canvases/`
 
 export function documentFigKey(documentId: string): string {
@@ -19,6 +19,6 @@ export function documentIdFromFigKey(key: string): string | null {
 }
 
 export const NAMESPACE_MARKER_BODY = JSON.stringify({
-  app: 'open-pencil',
+  app: 'open-designer',
   version: 1
 })

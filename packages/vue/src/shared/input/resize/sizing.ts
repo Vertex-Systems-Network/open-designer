@@ -1,12 +1,12 @@
 import { pick } from 'es-toolkit'
 
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   layoutSizing,
   layoutSizingUpdates,
   type LayoutSizingAxis
-} from '@open-pencil/scene-graph/layout'
-import type { Rect } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/layout'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 const SIZING_FIELDS = [
   'primaryAxisSizing',

@@ -1,7 +1,7 @@
 import { Align, type Node as YogaNode } from 'yoga-layout'
 
-import type { LayoutSizing, SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { layoutSizing } from '@open-pencil/scene-graph/layout'
+import type { LayoutSizing, SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { layoutSizing } from '@open-designer/scene-graph/layout'
 
 type Axis = 'width' | 'height'
 

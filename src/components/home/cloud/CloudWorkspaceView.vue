@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { useCloudMessages, useCommonMessages, useFileMessages } from '@open-pencil/vue/i18n'
+import { useCloudMessages, useCommonMessages, useFileMessages } from '@open-designer/vue/i18n'
 
 import { formatStorageBytes } from '@/app/storage/format-bytes'
 import DocumentEntry from '@/components/home/document/DocumentEntry.vue'

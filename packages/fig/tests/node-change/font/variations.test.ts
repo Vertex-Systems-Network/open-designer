@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
 
-import { nodeChangeToProps, sceneNodeToKiwi } from '@open-pencil/fig/node-change'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { nodeChangeToProps, sceneNodeToKiwi } from '@open-designer/fig/node-change'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 const OPSZ = 0x6f70737a
 

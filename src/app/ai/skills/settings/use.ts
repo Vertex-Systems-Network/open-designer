@@ -1,6 +1,6 @@
 import { computed, ref, shallowRef, watch } from 'vue'
 
-import { IS_TAURI } from '@open-pencil/core/constants'
+import { IS_TAURI } from '@open-designer/core/constants'
 
 import {
   enabledSkills,
@@ -93,7 +93,7 @@ export function useSkillsSettings() {
       )
     // Uploads, the document's folders, then the user's: the order a repeated name resolves in.
     return [
-      source('openpencil', null),
+      source('opendesigner', null),
       ...projectSkillsFolders.value.map(({ path, location }) =>
         group(
           {

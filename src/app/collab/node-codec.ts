@@ -1,20 +1,20 @@
 import { isPlainObject, omit } from 'es-toolkit'
 import * as v from 'valibot'
 
-import type { Fill, GeometryPath, SceneNode, SourceMetadata } from '@open-pencil/scene-graph'
-import { copyFills } from '@open-pencil/scene-graph/copy'
+import type { Fill, GeometryPath, SceneNode, SourceMetadata } from '@open-designer/scene-graph'
+import { copyFills } from '@open-designer/scene-graph/copy'
 import {
   deserializeInstanceOverrideState,
   serializeInstanceOverrideState
-} from '@open-pencil/scene-graph/instances/overrides'
-import { createDefaultSourceMetadata } from '@open-pencil/scene-graph/node-defaults'
-import { fillSchema } from '@open-pencil/scene-graph/paints'
+} from '@open-designer/scene-graph/instances/overrides'
+import { createDefaultSourceMetadata } from '@open-designer/scene-graph/node-defaults'
+import { fillSchema } from '@open-designer/scene-graph/paints'
 import {
   matrixSchema,
   vectorSchema,
   type Matrix,
   type Vector
-} from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/primitives'
 
 import { ORDER_KEY_FIELD, PAGE_FIELD, PARENTS_FIELD } from '@/app/collab/shared-tree/fields'
 

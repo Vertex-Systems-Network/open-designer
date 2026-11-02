@@ -1,5 +1,5 @@
-import { FigmaAPI, MAX_IMAGE_FETCH_BYTES } from '@open-pencil/core/figma-api'
-import { createCanvasKitRasterCodec } from '@open-pencil/core/io/formats/raster'
+import { FigmaAPI, MAX_IMAGE_FETCH_BYTES } from '@open-designer/core/figma-api'
+import { createCanvasKitRasterCodec } from '@open-designer/core/io/formats/raster'
 
 import { renderAutomationImage } from '@/app/automation/bridge/export-handlers'
 import type { EditorStore } from '@/app/editor/active-store'
@@ -37,11 +37,11 @@ export function makeFigmaFromStore(
     zoom: store.state.zoom
   }
   if (pageId === store.state.currentPageId) {
-    api.setViewportFitHandler((nodes) => {
+    api._setViewportFitHandler((nodes) => {
       if (pageId !== store.state.currentPageId || api.currentPageId !== store.state.currentPageId) {
         return false
       }
-      if (nodes.length === 0) return
+      if (nodes.length === 0) return false
       let minX = Number.POSITIVE_INFINITY
       let minY = Number.POSITIVE_INFINITY
       let maxX = Number.NEGATIVE_INFINITY

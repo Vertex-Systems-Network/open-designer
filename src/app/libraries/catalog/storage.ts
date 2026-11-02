@@ -8,18 +8,18 @@ import {
   storedLibraryLatestManifestSchema,
   storedLibraryRevisionSchema,
   validateLibraryRevision
-} from '@open-pencil/core/library'
+} from '@open-designer/core/library'
 import type {
   ComponentLibraryRevision,
   LibraryCatalog,
   LibrarySummary,
   PublishLibraryInput,
   StoredLibraryLatestManifest
-} from '@open-pencil/core/library'
+} from '@open-designer/core/library'
 
 import type { LibraryObjectStore } from '@/app/integrations/storage'
 
-const PREFIX = 'open-pencil/libraries'
+const PREFIX = 'open-designer/libraries'
 const textDecoder = new TextDecoder()
 const textEncoder = new TextEncoder()
 

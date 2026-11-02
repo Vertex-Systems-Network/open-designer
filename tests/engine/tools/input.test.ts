@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'bun:test'
 
-// eslint-disable-next-line open-pencil/no-mixed-case-acronym-identifiers -- Upstream export spelling.
+// eslint-disable-next-line open-designer/no-mixed-case-acronym-identifiers -- Upstream export spelling.
 import { toStandardJsonSchema as toStandardJSONSchema } from '@valibot/to-json-schema'
 import * as v from 'valibot'
 
-import { toolNumber } from '@open-pencil/core/tools'
+import { toolNumber } from '@open-designer/core/tools'
 
 import { getTool, setupToolTest } from '#tests/helpers/tools'
 

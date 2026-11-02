@@ -11,7 +11,7 @@ async function canvasBox() {
 async function pencilState() {
   return editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const vectors = store.graph
       .getChildren(store.state.currentPageId)
       .filter((node) => node.type === 'VECTOR')

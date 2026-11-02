@@ -7,7 +7,7 @@ const editor = useEditorSetupWithClear('/?test&no-chrome&no-rulers')
 test('vector edit mode hatches the hovered and the picked region', async () => {
   await editor.page.evaluate(() => {
     const store = window.openPencil?.getStore?.()
-    if (!store) throw new Error('OpenPencil store not initialized')
+    if (!store) throw new Error('OpenDesigner store not initialized')
     const line = (start: number, end: number) => ({
       start,
       end,

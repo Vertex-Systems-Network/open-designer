@@ -16,7 +16,7 @@
     "types": ["bun"],
     "paths": {
       "#drawio/*": ["./src/*"],
-      "@open-pencil/drawio": ["./src/index.ts"]
+      "@open-designer/drawio": ["./src/index.ts"]
     }
   },
   "include": ["src/**/*.ts"],

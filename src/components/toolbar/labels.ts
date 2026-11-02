@@ -1,8 +1,8 @@
 import { computed, type Component } from 'vue'
 import IconSmilePlus from '~icons/lucide/smile-plus'
 
-import type { Tool } from '@open-pencil/core'
-import { useI18n, usePanelMessages } from '@open-pencil/vue/i18n'
+import type { Tool } from '@open-designer/core'
+import { useI18n, usePanelMessages } from '@open-designer/vue/i18n'
 
 import type { ToolbarEntry } from '@/app/editor/toolbar/layout'
 import { toolIcons } from '@/components/icons'

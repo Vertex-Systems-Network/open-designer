@@ -3,14 +3,14 @@ import { expect, test } from 'bun:test'
 import { expectDefined } from '#core-tests/helpers/assert'
 import { capturedFigRecordsSchema, readFixture } from '#core-tests/helpers/fig/fixtures'
 
-import { createEditor } from '@open-pencil/core'
-import { OpenPencilAPI } from '@open-pencil/core/openpencil-api'
-import { FigmaAPI } from '@open-pencil/core/figma-api'
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { materializeDocument, parseFigBuffer } from '@open-pencil/fig'
-import { symbolDataOf } from '@open-pencil/fig/instance-overrides'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
+import { createEditor } from '@open-designer/core'
+import { OpenDesignerAPI } from '@open-designer/core/opendesigner-api'
+import { FigmaAPI } from '@open-designer/core/figma-api'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { materializeDocument, parseFigBuffer } from '@open-designer/fig'
+import { symbolDataOf } from '@open-designer/fig/instance-overrides'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { setInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
 
 const fixture = readFixture('nested-binding-ownership-records.json', capturedFigRecordsSchema)
 
@@ -25,9 +25,9 @@ for (const scale of [0.5, 2]) {
       const root = expectDefined(graph.getNode(expectDefined(sources.get('293733:8'))))
       const nested = expectDefined(graph.getChildren(root.id)[0])
       const api = new FigmaAPI(graph)
-      const openpencil = new OpenPencilAPI(api)
-      openpencil.bindVariable(root.id, 'paddingRight', { id: '293742:7' })
-      openpencil.bindVariable(nested.id, 'paddingRight', { id: '293742:7' })
+      const opendesigner = new OpenDesignerAPI(api)
+      opendesigner.bindVariable(root.id, 'paddingRight', { id: '293742:7' })
+      opendesigner.bindVariable(nested.id, 'paddingRight', { id: '293742:7' })
       if (literalClaim) {
         createEditor({ graph }).updateNodeWithUndo(root.id, { paddingLeft: 12 })
         setInstanceOverride(root.instanceOverrides, root.id, root.id, 'paddingLeft', 12)

@@ -1,9 +1,9 @@
-import type { SceneGraph } from '@open-pencil/scene-graph'
+import type { SceneGraph } from '@open-designer/scene-graph'
 import {
   DEFAULT_FIG_COMPRESSION,
   type FigCompression
-} from '@open-pencil/scene-graph/fig-compression'
-import { OPEN_PENCIL_PLUGIN_DATA, readPluginData } from '@open-pencil/scene-graph/plugin-data'
+} from '@open-designer/scene-graph/fig-compression'
+import { OPEN_DESIGNER_PLUGIN_DATA, readPluginData } from '@open-designer/scene-graph/plugin-data'
 
 /**
  * The zstd level each preset writes at. Reading costs the same at every level; writing does
@@ -20,7 +20,7 @@ export function figCompressionOf(graph: SceneGraph): FigCompression {
   return (
     readPluginData(
       graph.getNode(graph.rootId)?.pluginData,
-      OPEN_PENCIL_PLUGIN_DATA.figCompression
+      OPEN_DESIGNER_PLUGIN_DATA.figCompression
     ) ?? DEFAULT_FIG_COMPRESSION
   )
 }

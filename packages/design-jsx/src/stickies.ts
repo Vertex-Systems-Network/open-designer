@@ -1,13 +1,13 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
-import { colorToHex } from '@open-pencil/scene-graph/color'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
+import { colorToHex } from '@open-designer/scene-graph/color'
 import {
   createSticky,
   isWideSticky,
   STICKY_COLORS,
   stickyScale,
   stickySublayers
-} from '@open-pencil/scene-graph/generated'
-import type { Color } from '@open-pencil/scene-graph/primitives'
+} from '@open-designer/scene-graph/generated'
+import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { figJamTextFields, figJamTextProps } from './figjam-text'
 import { readElementProps, stickyPropsSchema } from './schema'

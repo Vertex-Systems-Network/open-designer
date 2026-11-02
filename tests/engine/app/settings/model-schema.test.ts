@@ -64,7 +64,7 @@ test('Pi may leave the model empty to use the default model set in Pi', () => {
   )
 })
 
-test('OpenPencil Cloud needs a workspace and a model, but no key', () => {
+test('OpenDesigner Cloud needs a workspace and a model, but no key', () => {
   const cloud = { providerKind: 'cloud' as const, intent: 'test' as const }
   expect(errors(cloud, { ...values, modelID: '', cloudWorkspace: '' })).toEqual({
     modelID: ['Required'],

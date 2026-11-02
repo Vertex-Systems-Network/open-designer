@@ -6,8 +6,8 @@ import {
   resolveDocumentBindingReferences
 } from '#fig/document/bindings/references'
 
-import { nodeChangeToProps } from '@open-pencil/fig/node-change'
-import type { NodeChange } from '@open-pencil/kiwi/fig/codec'
+import { nodeChangeToProps } from '@open-designer/fig/node-change'
+import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 
 test('shadowed legacy resource references are not treated as required bindings', () => {
   const diagnostics: unknown[] = []

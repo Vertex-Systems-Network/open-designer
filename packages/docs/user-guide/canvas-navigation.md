@@ -1,6 +1,6 @@
 ---
 title: Canvas Navigation
-description: Panning, zooming, ruler guides, snapping, and distance measurements in OpenPencil.
+description: Panning, zooming, ruler guides, snapping, and distance measurements in OpenDesigner.
 ---
 
 # Canvas Navigation

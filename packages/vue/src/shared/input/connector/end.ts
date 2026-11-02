@@ -1,6 +1,6 @@
-import type { Editor } from '@open-pencil/core'
-import { connectorScreenEnds } from '@open-pencil/core/geometry'
-import type { Vector } from '@open-pencil/scene-graph/primitives'
+import type { Editor } from '@open-designer/core'
+import { connectorScreenEnds } from '@open-designer/core/geometry'
+import type { Vector } from '@open-designer/scene-graph/primitives'
 
 import type { DragState } from '#vue/shared/input/types'
 

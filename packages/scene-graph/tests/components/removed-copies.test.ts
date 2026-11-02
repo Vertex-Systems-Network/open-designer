@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { setInstanceOverride } from '@open-pencil/scene-graph/instances/overrides'
-import { DEFAULT_HISTORY_LIMIT } from '@open-pencil/scene-graph/undo'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { setInstanceOverride } from '@open-designer/scene-graph/instances/overrides'
+import { DEFAULT_HISTORY_LIMIT } from '@open-designer/scene-graph/undo'
 
 /**
  * A List component whose layer A an instance overrides, deleted, then `edits` other edits that

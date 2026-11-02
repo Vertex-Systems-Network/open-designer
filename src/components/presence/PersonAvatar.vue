@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-import { colorToCSS } from '@open-pencil/scene-graph/color'
-import type { Color } from '@open-pencil/scene-graph/primitives'
-import { useCollaborationMessages } from '@open-pencil/vue/i18n'
+import { colorToCSS } from '@open-designer/scene-graph/color'
+import type { Color } from '@open-designer/scene-graph/primitives'
+import { useCollaborationMessages } from '@open-designer/vue/i18n'
 
 import { initials } from '@/app/presence/initials'
 

@@ -1,9 +1,9 @@
 import { expect, test } from 'bun:test'
 
-import { exportFigFile } from '@open-pencil/core/io/formats/fig'
-import { createFigDocumentSession } from '@open-pencil/fig'
-import { initCodec } from '@open-pencil/kiwi/fig/codec'
-import { SceneGraph } from '@open-pencil/scene-graph'
+import { exportFigFile } from '@open-designer/core/io/formats/fig'
+import { createFigDocumentSession } from '@open-designer/fig'
+import { initCodec } from '@open-designer/kiwi/fig/codec'
+import { SceneGraph } from '@open-designer/scene-graph'
 
 for (const mutation of ['delete', 'reorder', 'add'] as const) {
   test(`later loads preserve live ${mutation} of component children`, async () => {

@@ -10,7 +10,7 @@ description: Menümodelle für Application und Canvas aus dem aktuellen Editor s
 ## Verwendung
 
 ```ts
-import { useMenuModel } from '@open-pencil/vue/editor/menu-model'
+import { useMenuModel } from '@open-designer/vue/editor/menu-model'
 
 const { appMenu, canvasMenu, selectionLabelMenu } = useMenuModel()
 ```

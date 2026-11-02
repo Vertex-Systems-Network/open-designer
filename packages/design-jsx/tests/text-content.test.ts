@@ -2,9 +2,9 @@ import { describe, expect, test } from 'bun:test'
 
 import { createDesignJSXRenderer } from '#design-jsx/index'
 
-import { SceneGraph, type SceneNode } from '@open-pencil/scene-graph'
-import { colorToFill } from '@open-pencil/scene-graph/color'
-import { percentLength, pixelLength } from '@open-pencil/scene-graph/text'
+import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { colorToFill } from '@open-designer/scene-graph/color'
+import { percentLength, pixelLength } from '@open-designer/scene-graph/text'
 
 const renderer = createDesignJSXRenderer<never>({
   icon: () => Promise.resolve(null),

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 
-import { SceneGraph } from '@open-pencil/scene-graph'
-import { behaviourFromSpec, behaviourToSpec, guessOnOff } from '@open-pencil/scene-graph/behaviours'
+import { SceneGraph } from '@open-designer/scene-graph'
+import { behaviourFromSpec, behaviourToSpec, guessOnOff } from '@open-designer/scene-graph/behaviours'
 
 /** A switch set with State and Interaction variant properties and a Thumb slot. */
 function switchSet() {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useShapeWithText } from '@open-pencil/vue/controls/shape-with-text'
-import { useShapeMessages } from '@open-pencil/vue/i18n'
+import { useShapeWithText } from '@open-designer/vue/controls/shape-with-text'
+import { useShapeMessages } from '@open-designer/vue/i18n'
 
 import PanelSection from '@/components/ui/panel/PanelSection.vue'
 

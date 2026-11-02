@@ -49,7 +49,7 @@ pub fn open_paths_from_args(args: Vec<String>, cwd: &Path) -> Vec<PathBuf> {
 ))]
 pub fn deep_links_from_args(args: &[String]) -> Vec<url::Url> {
     args.iter()
-        .filter(|arg| arg.starts_with("openpencil://"))
+        .filter(|arg| arg.starts_with("openpencil://") || arg.starts_with("opendesigner://"))
         .filter_map(|arg| url::Url::parse(arg).ok())
         .collect()
 }

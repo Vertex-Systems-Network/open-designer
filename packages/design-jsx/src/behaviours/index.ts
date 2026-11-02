@@ -1,12 +1,12 @@
-import type { SceneGraph, SceneNode } from '@open-pencil/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import {
   behaviourFromSpec,
   withBehaviour,
   type BehaviourKind,
   type BehaviourSpec
-} from '@open-pencil/scene-graph/behaviours'
-import { createComponentPropertyId } from '@open-pencil/scene-graph/components'
-import { createSlotProperty } from '@open-pencil/scene-graph/slots'
+} from '@open-designer/scene-graph/behaviours'
+import { createComponentPropertyId } from '@open-designer/scene-graph/components'
+import { createSlotProperty } from '@open-designer/scene-graph/slots'
 
 import { node, type TreeNode } from '../tree'
 

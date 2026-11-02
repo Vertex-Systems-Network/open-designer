@@ -1,6 +1,6 @@
-import type { SceneNode } from '@open-pencil/scene-graph'
+import type { SceneNode } from '@open-designer/scene-graph'
 
-const REF_SYMBOL = Symbol.for('open-pencil.layer-ref')
+const REF_SYMBOL = Symbol.for('open-designer.layer-ref')
 
 /**
  * A handle on one layer of the JSX: `ref={card}` marks the layer, and an element that refers to
