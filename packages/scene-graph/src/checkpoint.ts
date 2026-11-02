@@ -24,7 +24,8 @@ export function captureGraphCheckpoint(graph: SceneGraph) {
     rootId: graph.rootId,
     figKiwiVersion: graph.figKiwiVersion,
     figSchemaDeflated: graph.figSchemaDeflated,
-    documentColorSpace: graph.documentColorSpace
+    documentColorSpace: graph.documentColorSpace,
+    documentKind: graph.documentKind
   })
   // Atomic property tools cannot edit assets. Retain existing buffers, not copies of every bitmap.
   const images = new Map(graph.images)
@@ -73,6 +74,7 @@ export function captureGraphCheckpoint(graph: SceneGraph) {
       [...images].some(([id, bytes]) => graph.images.get(id) !== bytes) ||
       graph.rootId !== snapshot.rootId ||
       graph.documentColorSpace !== snapshot.documentColorSpace ||
+      graph.documentKind !== snapshot.documentKind ||
       graph.figKiwiVersion !== snapshot.figKiwiVersion ||
       !isEqual(graph.figSchemaDeflated, snapshot.figSchemaDeflated)
     ) {
@@ -93,6 +95,7 @@ export function captureGraphCheckpoint(graph: SceneGraph) {
     graph.figKiwiVersion = snapshot.figKiwiVersion
     graph.figSchemaDeflated = structuredClone(snapshot.figSchemaDeflated)
     graph.documentColorSpace = snapshot.documentColorSpace
+    graph.documentKind = snapshot.documentKind
     graph.clearAbsPosCache()
     // Notify consumers only after the complete hierarchy and indexes have been restored.
     for (const [id, node] of failedNodes) {
@@ -143,6 +146,7 @@ export interface TouchedCheckpoint {
   /** Copies of every variable, as variables have no change report. */
   readonly variables: ReadonlyMap<string, Variable>
   readonly variableCollections: ReadonlyMap<string, VariableCollection>
+  readonly documentKind: SceneGraph['documentKind']
   /** Throws unless the edit only changed properties of existing nodes and variables. */
   assertPropertiesOnly(): void
   /** Stops observing and puts back everything the edit changed, keeping object identities. */
@@ -171,7 +175,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
   })
   // Property edits cannot edit assets. Retain existing buffers, not copies of every bitmap.
   const images = new Map(graph.images)
-  const { rootId, figKiwiVersion, figSchemaDeflated, documentColorSpace } = graph
+  const { rootId, figKiwiVersion, figSchemaDeflated, documentColorSpace, documentKind } = graph
   const nodes = new Map<string, SceneNode>()
   const reported = new Set<string>()
   const created = new Set<string>()
@@ -279,6 +283,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
       [...images].some(([id, bytes]) => graph.images.get(id) !== bytes) ||
       graph.rootId !== rootId ||
       graph.documentColorSpace !== documentColorSpace ||
+      graph.documentKind !== documentKind ||
       graph.figKiwiVersion !== figKiwiVersion ||
       // Every writer assigns a new schema rather than writing into it.
       graph.figSchemaDeflated !== figSchemaDeflated
@@ -334,6 +339,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
     graph.figKiwiVersion = figKiwiVersion
     graph.figSchemaDeflated = figSchemaDeflated
     graph.documentColorSpace = documentColorSpace
+    graph.documentKind = documentKind
     graph.clearAbsPosCache()
     const touched = new Set([
       ...nodes.keys(),
@@ -363,6 +369,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
     reported,
     variables: saved.variables,
     variableCollections: saved.variableCollections,
+    documentKind,
     assertPropertiesOnly,
     restore,
     stop
