@@ -10,6 +10,7 @@ import {
 import type { Mat3 } from '@open-designer/scene-graph/matrix'
 
 import type { SkiaRenderer } from '#core/canvas'
+import { NodePathCaches } from '#core/canvas/paths/cache'
 import { getPageColor } from '#core/figma-api/page-backgrounds'
 import { extractExportGraph, findPageId } from '#core/io/subgraph'
 
@@ -310,24 +311,32 @@ export function renderNodesToImage(
   prepareSelectionRenderGraph(graph, extracted.graph, extracted.pageId, nodeIds)
 
   const quality = options.quality ?? (options.format === 'PNG' ? 100 : 90)
-  // The copy shares its layers' geometry with `graph`, so it draws with what `graph` cached.
-  renderer.nodePaths.useGraph(graph)
-  return renderToSurface(
-    ck,
-    renderer,
-    extracted.graph,
-    extracted.pageId,
-    pixelW,
-    pixelH,
-    options.format,
-    quality,
-    (canvas) => {
-      canvas.clear(ck.TRANSPARENT)
-      canvas.scale(options.scale, options.scale)
-      canvas.translate(-bounds.minX, -bounds.minY)
-    },
-    options.trimTransparent
-  )
+  // The selection is a temporary graph with source node IDs. Isolate its path cache so
+  // rendering it cannot evict the editor's cache or leak selection paths into the next frame.
+  const editorPaths = renderer.nodePaths
+  const exportPaths = new NodePathCaches()
+  renderer.nodePaths = exportPaths
+  try {
+    return renderToSurface(
+      ck,
+      renderer,
+      extracted.graph,
+      extracted.pageId,
+      pixelW,
+      pixelH,
+      options.format,
+      quality,
+      (canvas) => {
+        canvas.clear(ck.TRANSPARENT)
+        canvas.scale(options.scale, options.scale)
+        canvas.translate(-bounds.minX, -bounds.minY)
+      },
+      options.trimTransparent
+    )
+  } finally {
+    exportPaths.clear()
+    renderer.nodePaths = editorPaths
+  }
 }
 
 export interface ThumbnailFrame {
