@@ -18,7 +18,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "dist",
-    "rootDir": "../..",
+    "rootDir": "src",
     "paths": {
       "#core/*": [
         "./src/*"
@@ -28,66 +28,6 @@
       ],
       "@open-designer/core/*": [
         "./src/*"
-      ],
-      "@open-pencil/core": [
-        "./src/index.ts"
-      ],
-      "@open-pencil/core/*": [
-        "./src/*"
-      ],
-      "@open-pencil/scene-graph": [
-        "../scene-graph/src/index.ts"
-      ],
-      "@open-pencil/scene-graph/*": [
-        "../scene-graph/src/*"
-      ],
-      "@open-pencil/fig": [
-        "../fig/src/index.ts"
-      ],
-      "@open-pencil/fig/*": [
-        "../fig/src/*"
-      ],
-      "@open-pencil/design-jsx": [
-        "../design-jsx/src/index.ts"
-      ],
-      "@open-pencil/design-jsx/*": [
-        "../design-jsx/src/*"
-      ],
-      "@open-pencil/kiwi/*": [
-        "../kiwi/src/*"
-      ],
-      "@open-pencil/pen": [
-        "../pen/src/index.ts"
-      ],
-      "@open-pencil/pen/*": [
-        "../pen/src/*"
-      ],
-      "@open-designer/scene-graph": [
-        "../scene-graph/src/index.ts"
-      ],
-      "@open-designer/scene-graph/*": [
-        "../scene-graph/src/*"
-      ],
-      "@open-designer/fig": [
-        "../fig/src/index.ts"
-      ],
-      "@open-designer/fig/*": [
-        "../fig/src/*"
-      ],
-      "@open-designer/design-jsx": [
-        "../design-jsx/src/index.ts"
-      ],
-      "@open-designer/design-jsx/*": [
-        "../design-jsx/src/*"
-      ],
-      "@open-designer/kiwi/*": [
-        "../kiwi/src/*"
-      ],
-      "@open-designer/pen": [
-        "../pen/src/index.ts"
-      ],
-      "@open-designer/pen/*": [
-        "../pen/src/*"
       ]
     }
   },
