@@ -1,1 +1,1 @@
-- On Linux and macOS, `--detach` starts the desktop app in a separate session so the launching terminal can close independently.
+- On Linux, `--detach` starts the desktop app in a separate session so the launching terminal can close independently.
