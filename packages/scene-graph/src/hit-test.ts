@@ -317,9 +317,13 @@ export function hitTestSelectable(
 }
 
 /** Whether a click looks into this container rather than selecting it; see `hitTestSelectable`. */
-export function isOpenContainer(graph: SceneGraph, nodeId: string): boolean {
+export function isOpenContainer(
+  graph: SceneGraph,
+  nodeId: string,
+  framesOpen = true
+): boolean {
   const node = graph.nodes.get(nodeId)
-  return node !== undefined && opensByItself(graph, node)
+  return node !== undefined && opensByItself(graph, node, framesOpen)
 }
 
 /**
@@ -330,11 +334,12 @@ export function hitTestOpenContainer(
   graph: SceneGraph,
   px: number,
   py: number,
-  scopeId: string
+  scopeId: string,
+  framesOpen = true
 ): SceneNode | null {
   const deepest = hitTestChildren(graph, px, py, scopeId, true)
   for (let node: SceneNode | undefined = deepest ?? undefined; node && node.id !== scopeId;) {
-    if (!opensByItself(graph, node) || ownsItsEmptyArea(graph, node)) return null
+    if (!opensByItself(graph, node, framesOpen) || ownsItsEmptyArea(graph, node)) return null
     node = node.parentId ? graph.nodes.get(node.parentId) : undefined
   }
   return deepest
