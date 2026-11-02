@@ -503,6 +503,7 @@ export class SkiaRenderer {
   /** Drops `nodeId`'s cached drawing; `changedKeys`, when known, lets text keep its glyph coverage. */
   invalidateNodePicture(nodeId: string, changedKeys?: readonly (keyof SceneNode)[]): void {
     RendererState.invalidateNodePicture(this, nodeId, changedKeys)
+    this.nodePaths.invalidate(nodeId)
   }
 
   flashNode(nodeId: string): void {

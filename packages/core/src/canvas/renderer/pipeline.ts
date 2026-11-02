@@ -22,6 +22,7 @@ export function renderSceneToCanvas(
   graph: SceneGraph,
   pageId: string
 ): void {
+  r.nodePaths.useGraph(graph)
   r.nodePaths.releaseUncached()
   const prevViewport = r.worldViewport
   const previewMode = r.viewportImageRendering
@@ -308,6 +309,7 @@ function drawFrame(
     panY: r.panY,
     zoom: r.zoom
   })
+  r.nodePaths.useGraph(graph)
   r.syncFontGeneration()
   r.nodePaths.releaseUncached()
   const p = r.profiler

@@ -10,6 +10,7 @@ import {
 import type { Mat3 } from '@open-designer/scene-graph/matrix'
 
 import type { SkiaRenderer } from '#core/canvas'
+import { NodePathCaches } from '#core/canvas/paths/cache'
 import { getPageColor } from '#core/figma-api/page-backgrounds'
 import { extractExportGraph, findPageId } from '#core/io/subgraph'
 
@@ -310,22 +311,32 @@ export function renderNodesToImage(
   prepareSelectionRenderGraph(graph, extracted.graph, extracted.pageId, nodeIds)
 
   const quality = options.quality ?? (options.format === 'PNG' ? 100 : 90)
-  return renderToSurface(
-    ck,
-    renderer,
-    extracted.graph,
-    extracted.pageId,
-    pixelW,
-    pixelH,
-    options.format,
-    quality,
-    (canvas) => {
-      canvas.clear(ck.TRANSPARENT)
-      canvas.scale(options.scale, options.scale)
-      canvas.translate(-bounds.minX, -bounds.minY)
-    },
-    options.trimTransparent
-  )
+  // The selection is a temporary graph with source node IDs. Isolate its path cache so
+  // rendering it cannot evict the editor's cache or leak selection paths into the next frame.
+  const editorPaths = renderer.nodePaths
+  const exportPaths = new NodePathCaches()
+  renderer.nodePaths = exportPaths
+  try {
+    return renderToSurface(
+      ck,
+      renderer,
+      extracted.graph,
+      extracted.pageId,
+      pixelW,
+      pixelH,
+      options.format,
+      quality,
+      (canvas) => {
+        canvas.clear(ck.TRANSPARENT)
+        canvas.scale(options.scale, options.scale)
+        canvas.translate(-bounds.minX, -bounds.minY)
+      },
+      options.trimTransparent
+    )
+  } finally {
+    exportPaths.clear()
+    renderer.nodePaths = editorPaths
+  }
 }
 
 export interface ThumbnailFrame {
@@ -377,6 +388,7 @@ export function renderThumbnail(
   // The page's own background, which the editor's page colour matches only while it is open.
   const background = getPageColor(graph.getNode(pageId))
 
+  renderer.nodePaths.useGraph(graph)
   return renderToSurface(ck, renderer, graph, pageId, pixelW, pixelH, 'PNG', 100, (canvas) => {
     canvas.clear(ck.Color4f(background.r, background.g, background.b, 1))
     canvas.translate(-bounds.minX * scale, -bounds.minY * scale)
@@ -396,6 +408,7 @@ export function drawRegionToImage(
   const pixelW = Math.max(1, Math.round((bounds.maxX - bounds.minX) * scale))
   const pixelH = Math.max(1, Math.round((bounds.maxY - bounds.minY) * scale))
   if (!graph.getNode(pageId) || !Number.isFinite(pixelW * pixelH)) return null
+  renderer.nodePaths.useGraph(graph)
   return renderToSurface(ck, renderer, graph, pageId, pixelW, pixelH, 'PNG', 100, (canvas) => {
     canvas.clear(ck.Color4f(renderer.pageColor.r, renderer.pageColor.g, renderer.pageColor.b, 1))
     canvas.scale(scale, scale)
