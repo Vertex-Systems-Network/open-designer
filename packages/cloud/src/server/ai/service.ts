@@ -53,7 +53,7 @@ export function createAITokenService(options: AITokenServiceOptions) {
       })
         .setProtectedHeader({ alg: AI_SIGNING_ALGORITHM, kid: publicJWK.kid, typ: 'JWT' })
         .setIssuer(options.issuer)
-        .setAudience(CLOUD_AI_TOKEN_AUDIENCE)
+        .setAudience(CLOUD_AI_TOKEN_LEGACY_AUDIENCE)
         .setSubject(actor.userId)
         .setIssuedAt(issuedAt)
         .setExpirationTime(expiresAt)
