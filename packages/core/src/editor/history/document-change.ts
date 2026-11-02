@@ -69,6 +69,7 @@ export interface DocumentChange {
   children: Record<Side, ChildList[]>
   variables: RecordChange<Variable>[]
   collections: RecordChange<VariableCollection>[]
+  documentKind: Record<Side, SceneGraph['documentKind']> | null
 }
 
 /** Layers by id: the live graph's, or those captured before the edit. */
@@ -341,7 +342,8 @@ export function emptyDocumentChange(pageId: string): DocumentChange {
     updated: [],
     children: { before: [], after: [] },
     variables: [],
-    collections: []
+    collections: [],
+    documentKind: null
   }
 }
 
@@ -371,7 +373,11 @@ export function documentChangeFromCheckpoint(
     size: graph.nodes.size
   }
   const ids = [...checkpoint.nodes.keys(), ...created]
-  return buildDocumentChange(graph, pageId, ids, previous, created, records)
+  const change = buildDocumentChange(graph, pageId, ids, previous, created, records)
+  if (checkpoint.documentKind !== graph.documentKind) {
+    change.documentKind = { before: checkpoint.documentKind, after: graph.documentKind }
+  }
+  return change
 }
 
 export function isEmptyDocumentChange(change: DocumentChange): boolean {
@@ -382,7 +388,8 @@ export function isEmptyDocumentChange(change: DocumentChange): boolean {
     change.children.before.length === 0 &&
     change.children.after.length === 0 &&
     change.variables.length === 0 &&
-    change.collections.length === 0
+    change.collections.length === 0 &&
+    change.documentKind === null
   )
 }
 
@@ -397,6 +404,7 @@ export function applyDocumentChange(graph: SceneGraph, change: DocumentChange, s
   const removed = side === 'before' ? change.created : change.deleted
   restoreRecords(graph.variableCollections, change.collections, side)
   restoreRecords(graph.variables, change.variables, side)
+  if (change.documentKind) graph.documentKind = change.documentKind[side]
   graph.preserveSourceMetadataDuring(() => {
     for (const node of restored) {
       const { parentId, childIds: _childIds, ...fields } = structuredClone(node)
