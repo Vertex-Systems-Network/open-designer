@@ -19,16 +19,46 @@ import { createUpdateMapper } from '@/app/ai/agents/acp/events'
 import { spawnACPProcess } from '@/app/ai/agents/acp/process'
 import { linkOwnTools } from '@/app/ai/agents/acp/tools'
 import SYSTEM_PROMPT from '@/app/ai/chat/system-prompt'
+import { attachmentsForMessage } from '@/app/ai/attachment/presentation/store'
 import { endRun, forgetAgentChat, startAgentRun } from '@/app/ai/reply/run'
 import { describeDiagnosticError, recordACPTransportFailure } from '@/app/diagnostics'
 import type { EditorStore } from '@/app/editor/active-store'
 
 type TauriChild = Awaited<ReturnType<typeof spawnACPProcess>>['child']
 
-/** ACP prompt blocks: text plus image attachments when the agent advertises image support. */
-export function promptBlocks(message: UIMessage | undefined, text: string, images: boolean): ContentBlock[] {
+function base64(data: Uint8Array): string {
+  let binary = ''
+  const chunkSize = 0x8000
+  for (let offset = 0; offset < data.length; offset += chunkSize) {
+    binary += String.fromCharCode(...data.subarray(offset, offset + chunkSize))
+  }
+  return btoa(binary)
+}
+
+/** ACP prompt blocks: text plus prepared image attachments when the agent supports them. */
+export async function promptBlocks(
+  message: UIMessage | undefined,
+  text: string,
+  images: boolean
+): Promise<ContentBlock[]> {
   const blocks: ContentBlock[] = [{ type: 'text', text }]
   if (!images) return blocks
+
+  const storedImages = message
+    ? attachmentsForMessage(message.id).value.filter((attachment) => attachment.kind === 'image')
+    : []
+  if (storedImages.length > 0) {
+    for (const image of storedImages) {
+      blocks.push({
+        type: 'image',
+        mimeType: image.mediaType,
+        data: base64(new Uint8Array(await image.preview.arrayBuffer()))
+      })
+    }
+    return blocks
+  }
+
+  // Keep compatibility with messages created by transports that store data URLs in their parts.
   for (const part of message?.parts ?? []) {
     if (part.type !== 'file' || !part.mediaType.startsWith('image/')) continue
     const match = /^data:[^;,]+;base64,(.*)$/.exec(part.url)
@@ -205,6 +235,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
     const { connection, sessionId } = this.session
     const session = this.session
+    const prompt = await promptBlocks(lastUserMessage, promptText, this.imagePrompts)
 
     return new ReadableStream<UIMessageChunk>({
       start: (controller) => {
@@ -250,7 +281,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
         connection
           .prompt({
             sessionId,
-            prompt: promptBlocks(lastUserMessage, promptText, this.imagePrompts)
+            prompt
           })
           // The prompt answers once the agent's turn is over; nothing else ends the reply.
           .then((result) => {
