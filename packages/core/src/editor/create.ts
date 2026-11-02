@@ -383,7 +383,7 @@ export function createEditor(options?: EditorOptions) {
 
   function replaceGraph(newGraph: SceneGraph, options: { preserveHistory?: boolean } = {}) {
     // A graph swap during an active preview keeps committed history, but clears it otherwise.
-    const preserveHistory = options.preserveHistory ?? undo.isBatching
+    const preserveHistory = options.preserveHistory ?? interactiveEdits.size > 0
     nodes.cancelNodePreviews()
     if (preserveHistory) undo.discardBatches()
     _graph = newGraph
