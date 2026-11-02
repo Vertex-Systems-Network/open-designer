@@ -95,7 +95,7 @@ export function recentDocumentKind(document: RecentDocument): DocumentKind {
 }
 
 /** Remembers a file opened or saved on this device, as the kind the opened document is. */
-export function rememberRecentFile(path: string, documentKind: DocumentKind): void {
+export function rememberRecentFile(path: string, documentKind: DocumentKind = 'design'): void {
   remember({
     id: localDocumentId(path),
     kind: 'local',
