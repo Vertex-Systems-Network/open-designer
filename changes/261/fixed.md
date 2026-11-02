@@ -1,0 +1,1 @@
+- Component synchronization preserves explicit text overrides on nested instances while still applying unrelated property updates.
