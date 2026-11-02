@@ -115,6 +115,20 @@ export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<stri
       records.set(sourceId, entry.nodeId)
       if (entry.mainComponentId !== null) instances.push(entry.path)
     }
+    const removed = component.removedSourcePaths ?? []
+    // A deleted instance still owns its nested records as overrides, so only its own archive
+    // record is a removal; descendants beneath either live or deleted instances are not records.
+    for (const entry of removed)
+      if (entry.mainComponentId !== null) instances.push(entry.path)
+    for (const entry of removed) {
+      const sourceId = entry.path.at(-1)
+      if (!sourceId) continue
+      const inInstance = instances.some(
+        (prefix) =>
+          prefix.length < entry.path.length && prefix.every((id, index) => entry.path[index] === id)
+      )
+      if (!inInstance) records.set(sourceId, sourceId)
+    }
   }
   return records
 }
@@ -462,6 +476,9 @@ function materializeReaderInto(
       else if (node.mainComponentId === null) node.children.forEach(collectExisting)
     }
     collectExisting(item.occurrence)
+    // A resumed component may have deleted layers that a later, lazily read definition still
+    // references. Prune those stale nested occurrences before mapping source children.
+    if (edited) reconcileOccurrenceStructure(item.occurrence, graph, components)
     const built = materializeInstance(graph, parentId, item.occurrence, componentIds, {
       blobs,
       sourceChildren: mapInstanceSourceChildren(item.occurrence, components),
@@ -495,14 +512,42 @@ function materializeReaderInto(
     const ordered: string[] = []
     for (const child of occurrence.children) {
       if (edited) reconcileOccurrenceStructure(child, graph, components)
-      if (child.mainComponentId !== null && !sources.has(child.sourceId)) {
+      const existingId = sources.get(child.sourceId)
+      const existing = existingId ? graph.getNode(existingId) : undefined
+      const expectedComponentId =
+        child.mainComponentId === null ? undefined : componentIds.get(child.mainComponentId)
+      const staleSwap =
+        existing?.type === 'INSTANCE' &&
+        expectedComponentId !== undefined &&
+        existing.componentId !== expectedComponentId
+      const obsoleteNodeIds: string[] = []
+      if (staleSwap && existing) {
+        const collect = (id: string): void => {
+          const node = graph.getNode(id)
+          if (!node) return
+          obsoleteNodeIds.push(id)
+          for (const childId of node.childIds) collect(childId)
+        }
+        collect(existing.id)
+      }
+      if (child.mainComponentId !== null && (!existing || staleSwap)) {
         onProgress?.()
         const materialized = materializeInstance(graph, parentId, child, componentIds, {
           blobs,
           sourceChildren: mapInstanceSourceChildren(child, components),
+          existingNodes: staleSwap && existing ? new Map([[child, existing]]) : undefined,
           recordId
         })
         rememberDerivedSizes(materialized.nodes)
+        if (staleSwap) {
+          const obsolete = new Set(obsoleteNodeIds)
+          for (const [sourceId, nodeId] of sources)
+            if (obsolete.has(nodeId)) sources.delete(sourceId)
+          for (const id of obsoleteNodeIds.toReversed())
+            if (id !== existing?.id) graph.deleteNode(id)
+          for (const [nodeOccurrence, node] of materialized.nodes)
+            sources.set(nodeOccurrence.sourceId, node.id)
+        }
         linkInstanceSourceChildren(child, materialized, components)
         if (edited) {
           reconcileLiveComponentEdits(graph, materialized)
