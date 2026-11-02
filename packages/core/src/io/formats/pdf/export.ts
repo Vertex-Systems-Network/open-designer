@@ -99,7 +99,7 @@ async function renderPages(
   const embedding = options.fonts ? planFontEmbedding(options.fonts, options.fallbackFile) : null
   const warnings = new Map<string, SVGExportWarning>()
   const onWarning = (warning: SVGExportWarning) => {
-    const key = `${warning.effect}:${warning.nodeId}`
+    const key = `${warning.effectType}:${warning.nodeId}`
     if (warnings.has(key)) return
     warnings.set(key, warning)
     options.onWarning?.(warning)
