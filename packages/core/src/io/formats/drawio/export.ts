@@ -594,7 +594,7 @@ export function sceneGraphToDrawIO(
 ): DrawIOFile {
   const warnings = new Set<string>()
   const onWarning = (warning: SVGExportWarning) => {
-    const key = `${warning.effect}:${warning.nodeId}`
+    const key = `${warning.effectType}:${warning.nodeId}`
     if (warnings.has(key)) return
     warnings.add(key)
     options.onWarning?.(warning)
