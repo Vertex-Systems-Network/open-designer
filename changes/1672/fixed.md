@@ -1,0 +1,1 @@
+- The native desktop View → Variables… menu now opens the Variables dialog.
