@@ -152,6 +152,12 @@ export function createVariableActions(ctx: EditorContext) {
         version: variable.version,
         isLocal: variable.isLocal
       }))
+    const localVariables = previousVariables.map((variable) => ({
+      ...variable,
+      key: undefined,
+      version: undefined,
+      isLocal: true
+    }))
 
     const apply = (
       collectionLink: typeof previousCollection | null,
@@ -182,14 +188,14 @@ export function createVariableActions(ctx: EditorContext) {
 
     apply(
       null,
-      previousVariables.map((variable) => ({ ...variable, key: undefined, version: undefined, isLocal: true }))
+      localVariables
     )
     ctx.undo.push({
       label: 'Make collection local',
       forward: () =>
         apply(
           null,
-          previousVariables.map((variable) => ({ ...variable, key: undefined, version: undefined, isLocal: true }))
+          localVariables
         ),
       inverse: () => apply(previousCollection, previousVariables)
     })
