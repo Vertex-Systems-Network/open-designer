@@ -474,10 +474,12 @@ export function withStrokeDash(
   phase: number,
   draw: () => void
 ): void {
-  r.strokePaint.setPathEffect(dash.length > 0 ? r.ck.PathEffect.MakeDash([...dash], phase) : null)
+  const effect = dash.length > 0 ? r.ck.PathEffect.MakeDash([...dash], phase) : null
+  r.strokePaint.setPathEffect(effect)
   try {
     draw()
   } finally {
     r.strokePaint.setPathEffect(null)
+    effect?.delete()
   }
 }
