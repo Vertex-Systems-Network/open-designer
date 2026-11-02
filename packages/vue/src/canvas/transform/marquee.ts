@@ -1,4 +1,4 @@
-import type { Editor } from '@open-pencil/core'
+import { resolveEditorProfile, type Editor } from '@open-pencil/core'
 import { getAxisAlignedWorldBounds } from '@open-pencil/scene-graph/coordinate'
 import type { Rect } from '@open-pencil/scene-graph/primitives'
 
@@ -33,7 +33,7 @@ export function handleMarqueeMove(editor: Editor, d: DragMarquee, cx: number, cy
     if (!node.visible || node.locked) continue
     const bounds = getAxisAlignedWorldBounds(node, editor.graph)
     // As in Figma, on the page a frame or section holding layers needs to be fully enclosed.
-    const enclose = !scopeId && editor.graph.isOpenContainer(node.id)
+    const enclose = !scopeId && editor.graph.isOpenContainer(node.id, resolveEditorProfile(editor.state).framesOpen)
     if (enclose ? encloses(marquee, bounds) : intersects(marquee, bounds)) hits.push(node.id)
   }
 
