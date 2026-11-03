@@ -97,7 +97,7 @@ export async function cacheRecentFileCover(
 
 export function clearRecentFileThumbnails(): Promise<void> {
   coverWriteGeneration += 1
-  return Promise.all([...coverWrites.values()]).then(() =>
+  return Promise.all(coverWrites.values()).then(() =>
     removeCachePrefix(RECENT_FILE_THUMBNAIL_CACHE_DIR)
   )
 }
