@@ -97,8 +97,6 @@ function estimateRunTextSize(
   return { width: maxWidth && width > maxWidth ? maxWidth : width, height }
 }
 
-}
-
 export function autoWidthWrapWidth(
   node: Pick<SceneNode, 'minWidth' | 'maxWidth'>
 ): number | undefined {
