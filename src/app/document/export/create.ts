@@ -1,3 +1,5 @@
+import { uniq } from 'es-toolkit/array'
+
 import type { Editor, EditorState } from '@open-designer/core'
 import type { BuiltinIOFormatId, ExportRequest, IORegistry } from '@open-designer/core/io'
 
@@ -72,9 +74,7 @@ export function createDocumentExportActions(
   }
 
   function warnOmittedEffects(files: ExportedFile[]) {
-    const effects = [
-      ...new Set(files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? []))
-    ]
+    const effects = uniq(files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? []))
     if (effects.length > 0) {
       toast.warning(`Export omitted unsupported effects: ${effects.join(', ')}.`)
     }
