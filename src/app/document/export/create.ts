@@ -72,7 +72,11 @@ export function createDocumentExportActions(
   }
 
   function warnOmittedEffects(files: ExportedFile[]) {
-    const effects = [\n      ...new Set(\n        files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? [])\n      )\n    ]
+    const effects = [
+      ...new Set(
+        files.flatMap((file) => file.warnings?.map((warning) => warning.effectType) ?? [])
+      )
+    ]
     if (effects.length > 0) {
       toast.warning(`Export omitted unsupported effects: ${effects.join(', ')}.`)
     }
