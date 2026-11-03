@@ -10,6 +10,7 @@ import type {
 } from '@agentclientprotocol/sdk'
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai'
 import * as v from 'valibot'
+import { fromUint8Array } from 'js-base64'
 
 import type { ACPAgentDef } from '@open-designer/core/constants'
 
@@ -25,15 +26,6 @@ import { describeDiagnosticError, recordACPTransportFailure } from '@/app/diagno
 import type { EditorStore } from '@/app/editor/active-store'
 
 type TauriChild = Awaited<ReturnType<typeof spawnACPProcess>>['child']
-
-function base64(data: Uint8Array): string {
-  let binary = ''
-  const chunkSize = 0x8000
-  for (let offset = 0; offset < data.length; offset += chunkSize) {
-    binary += String.fromCharCode(...data.subarray(offset, offset + chunkSize))
-  }
-  return btoa(binary)
-}
 
 /** ACP prompt blocks: text plus prepared image attachments when the agent supports them. */
 export async function promptBlocks(
@@ -52,7 +44,7 @@ export async function promptBlocks(
       blocks.push({
         type: 'image',
         mimeType: image.mediaType,
-        data: base64(new Uint8Array(await image.preview.arrayBuffer()))
+        data: fromUint8Array(new Uint8Array(await image.preview.arrayBuffer()))
       })
     }
     return blocks
