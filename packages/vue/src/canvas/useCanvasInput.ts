@@ -200,15 +200,23 @@ export function useCanvasInput(
    * fires its double-click event by its own count, which a click shortly before the run shifts.
    */
   let multiClickPressAt = 0
+  let multiClickTargetId: string | null = null
+  let multiClickTargetCount = 0
 
-  /** Only the select tool takes a double-click on its press; a drawing tool keeps its press. */
+  /** Only an unhandled select-tool press on the same target takes a multi-click. */
   function takesMultiClick(e: MouseEvent): boolean {
-    return (
-      e.button === 0 &&
-      editor.state.activeTool === 'SELECT' &&
-      !editor.state.editingTextId &&
-      profile().pointer !== 'pan'
+    if (
+      e.button !== 0 ||
+      editor.state.activeTool !== 'SELECT' ||
+      editor.state.editingTextId ||
+      editor.state.nodeEditState ||
+      profile().pointer === 'pan'
     )
+      return false
+    const { cx, cy, sx, sy } = getCoords(e)
+    const handleCursor = updateHoverCursor(cx, cy, editor, hitFns)
+    const shapeHandle = shapeHandleHoverAt(sx, sy, e.altKey)
+    return handleCursor === null && shapeHandle?.handle == null
   }
 
   function onMultiClickDown(e: MouseEvent, clickCount: number) {
@@ -286,9 +294,17 @@ export function useCanvasInput(
 
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
     const clickCount = recordClick(sx, sy, e.detail)
+    if (e.button === 0) multiClickPressAt = performance.now()
+    const targetId = hitTestInScope(cx, cy, true)?.id ?? null
+    if (clickCount === 1 || targetId !== multiClickTargetId) {
+      multiClickTargetId = targetId
+      multiClickTargetCount = targetId ? 1 : 0
+    } else if (targetId) {
+      multiClickTargetCount++
+    }
     if (clickCount === 1) selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
-    if (clickCount >= 2 && takesMultiClick(e)) {
-      onMultiClickDown(e, clickCount)
+    if (multiClickTargetCount >= 2 && takesMultiClick(e)) {
+      onMultiClickDown(e, multiClickTargetCount)
       return
     }
     pressCanvasTool({ event: e, cx, cy, sx, sy }, toolContext)
