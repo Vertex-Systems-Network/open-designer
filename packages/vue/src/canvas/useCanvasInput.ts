@@ -1,7 +1,8 @@
 import { useEventListener } from '@vueuse/core'
 import { onScopeDispose, ref, watch, type Ref } from 'vue'
 
-import { resolveEditorProfile, type Editor } from '@open-designer/core'
+import { editedGradientLayout, resolveEditorProfile, type Editor } from '@open-designer/core'
+import { hitTestGradientHandles } from '@open-designer/core/geometry'
 import type { SceneNode } from '@open-designer/scene-graph'
 
 import { createAutoLayoutValueEdit } from '#vue/canvas/auto-layout/value-edit'
@@ -216,7 +217,10 @@ export function useCanvasInput(
     const { cx, cy, sx, sy } = getCoords(e)
     const handleCursor = updateHoverCursor(cx, cy, editor, hitFns)
     const shapeHandle = shapeHandleHoverAt(sx, sy, e.altKey)
-    return handleCursor === null && shapeHandle?.handle == null
+    const gradientLayout = editedGradientLayout(editor.graph, editor.state.gradientEdit, editor.state)
+    const gradientHandle =
+      gradientLayout && hitTestGradientHandles(gradientLayout, { x: sx, y: sy })
+    return handleCursor === null && shapeHandle?.handle == null && gradientHandle == null
   }
 
   function onMultiClickDown(e: MouseEvent, clickCount: number) {
