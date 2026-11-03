@@ -2,8 +2,8 @@ import { limitAsync } from 'es-toolkit'
 import { unzipSync, zipSync, type Zippable } from 'fflate'
 
 import type { CloudAPIClient } from '@open-designer/cloud/client'
-import { figArchiveKind, figCanvasKind } from '@open-designer/fig'
 import { CLOUD_IMAGE_NAME_PATTERN, type ObjectUploadTarget } from '@open-designer/cloud/contract'
+import { figArchiveKind, figCanvasKind } from '@open-designer/fig'
 
 import { putCloudObject, type CloudObjectTransfer } from './upload'
 
@@ -29,7 +29,17 @@ export function splitCloudDocument(bytes: Uint8Array): {
 } {
   if (!isZip(bytes)) return { lean: bytes, images: [] }
   const entries = unzipSync(bytes)
-  const canvas = entries['canvas.fig'] ?? entries.canvas ?? Object.entries(entries).filter(([name]) => !name.toLowerCase().endsWith('.png') && !name.toLowerCase().endsWith('.jpg') && !name.toLowerCase().endsWith('.json')).sort((a, b) => b[1].byteLength - a[1].byteLength)[0]?.[1]
+  const canvas =
+    entries['canvas.fig'] ??
+    entries.canvas ??
+    Object.entries(entries)
+      .filter(
+        ([name]) =>
+          !name.toLowerCase().endsWith('.png') &&
+          !name.toLowerCase().endsWith('.jpg') &&
+          !name.toLowerCase().endsWith('.json')
+      )
+      .sort((a, b) => b[1].byteLength - a[1].byteLength)[0]?.[1]
   const kind = canvas ? figCanvasKind(canvas) : null
   const images: CloudDocumentImage[] = []
   const rest: Zippable = {}
