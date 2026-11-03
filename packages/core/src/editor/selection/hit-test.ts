@@ -1,8 +1,8 @@
 import type { SceneNode } from '@open-designer/scene-graph'
 
 import { LAYER_HIT_PAD } from '#core/constants'
-import { resolveEditorProfile } from '#core/editor/views/profile'
 import type { EditorContext } from '#core/editor/types'
+import { resolveEditorProfile } from '#core/editor/views/profile'
 
 export function createSelectionHitTestActions(
   ctx: EditorContext,
@@ -34,12 +34,9 @@ export function createSelectionHitTestActions(
    */
   function selectAtPoint(cx: number, cy: number) {
     const scopeId = ctx.state.enteredContainerId ?? ctx.state.currentPageId
-    const hit = hitTestAtPoint(cx, cy) ?? ctx.graph.hitTestOpenContainer(
-      cx,
-      cy,
-      scopeId,
-      resolveEditorProfile(ctx.state).framesOpen
-    )
+    const hit =
+      hitTestAtPoint(cx, cy) ??
+      ctx.graph.hitTestOpenContainer(cx, cy, scopeId, resolveEditorProfile(ctx.state).framesOpen)
     if (hit) {
       if (!ctx.state.selectedIds.has(hit.id)) select([hit.id])
     } else {
