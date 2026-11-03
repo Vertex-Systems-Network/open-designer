@@ -200,7 +200,7 @@ export class Linter {
   }
 
   private isGeneratedLayer(node: SceneNode): boolean {
-    for (let current: SceneNode | undefined = node; current; ) {
+    for (let current: SceneNode | undefined = node; current;) {
       if (GENERATED_TYPES.has(current.type)) return true
       current = current.parentId ? this.graph?.getNode(current.parentId) : undefined
     }
