@@ -296,13 +296,14 @@ export function useCanvasInput(
     const clickCount = recordClick(sx, sy, e.detail)
     if (e.button === 0) multiClickPressAt = performance.now()
     const targetId = hitTestInScope(cx, cy, true)?.id ?? null
-    if (clickCount === 1 || targetId !== multiClickTargetId) {
+    const targetChanged = clickCount === 1 || targetId !== multiClickTargetId
+    if (targetChanged) {
       multiClickTargetId = targetId
       multiClickTargetCount = targetId ? 1 : 0
+      selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
     } else if (targetId) {
       multiClickTargetCount++
     }
-    if (clickCount === 1) selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
     if (multiClickTargetCount >= 2 && takesMultiClick(e)) {
       onMultiClickDown(e, multiClickTargetCount)
       return
