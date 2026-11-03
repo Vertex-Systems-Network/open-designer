@@ -66,7 +66,7 @@ function estimateRunTextSize(
         ? runs[runIndex]
         : undefined
     const size = run?.style.fontSize ?? fontSize
-    if (text[index] === '\\n') {
+    if (text[index] === '\n') {
       lineWidths.push(lineWidth)
       lineHeights.push(lineHeight)
       lineWidth = 0
