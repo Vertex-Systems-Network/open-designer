@@ -31,7 +31,7 @@ export function startRecoverySession(locks = sessionLocks()): void {
   requestPending = true
   void locks
     .request(SESSION_LOCK_PREFIX + recoverySessionId, () => {
-      if (!sessionActive || generation !== sessionGeneration) return
+      if (!sessionActive || generation !== sessionGeneration) return Promise.resolve()
       markSessionStarted(recoverySessionId)
       return new Promise<void>((resolve) => {
         releaseSessionLock = resolve
