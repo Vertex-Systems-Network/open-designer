@@ -31,7 +31,8 @@ describe('recent documents', () => {
     rememberRecentFile('/tmp/local.fig')
     rememberRecentStorageDocument(
       { providerId: 's3-compatible', documentId: 'remote-1' },
-      'Remote design'
+      'Remote design',
+      'design'
     )
 
     expect(recentFiles.value.map(({ id, kind, name }) => ({ id, kind, name }))).toEqual([
@@ -51,8 +52,8 @@ describe('recent documents', () => {
       containerId: 'workspace-1',
       documentId: 'doc-1'
     }
-    rememberRecentStorageDocument({ ...document, profileId: 'server-a' }, 'On A')
-    rememberRecentStorageDocument({ ...document, profileId: 'server-b' }, 'On B')
+    rememberRecentStorageDocument({ ...document, profileId: 'server-a' }, 'On A', 'design')
+    rememberRecentStorageDocument({ ...document, profileId: 'server-b' }, 'On B', 'design')
 
     expect(recentFiles.value.map(({ id, name }) => ({ id, name }))).toEqual([
       { id: 'storage:opendesigner-cloud:server-b:doc-1', name: 'On B' },
