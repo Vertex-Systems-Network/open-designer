@@ -54,8 +54,7 @@ function estimateRunTextSize(
   maxWidth?: number
 ): { width: number; height: number } {
   let runIndex = 0
-  let lineWidth = 0
-  let lineHeight = Math.ceil(fontSize * 1.4)
+  const line = { width: 0, height: Math.ceil(fontSize * 1.4) }
   const lineWidths: number[] = []
   const lineHeights: number[] = []
   for (let index = 0; index < text.length; index++) {
@@ -65,36 +64,52 @@ function estimateRunTextSize(
       runs[runIndex]?.start <= index && index < runs[runIndex].start + runs[runIndex].length
         ? runs[runIndex]
         : undefined
-    const size = run?.style.fontSize ?? fontSize
-    if (text[index] === '\n') {
-      lineWidths.push(lineWidth)
-      lineHeights.push(lineHeight)
-      lineWidth = 0
-      lineHeight = Math.ceil(fontSize * 1.4)
-      continue
-    }
-    const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing?.value ?? 0
-    const charWidth = Math.max(0, size * GLYPH_WIDTH_FACTOR + spacing)
-    const maxLineWidth = maxWidth && maxWidth > 0 ? maxWidth : undefined
-    if (maxLineWidth && lineWidth > 0 && lineWidth + charWidth > maxLineWidth) {
-      lineWidths.push(lineWidth)
-      lineHeights.push(lineHeight)
-      lineWidth = 0
-      lineHeight = Math.ceil(fontSize * 1.4)
-    }
-    lineWidth += charWidth
-    const lineHeightValue =
-      run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
-    lineHeight = Math.max(
-      lineHeight,
-      lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4)
-    )
+    appendRunCharacter(node, text[index], run, fontSize, maxWidth, line, lineWidths, lineHeights)
   }
-  lineWidths.push(lineWidth)
-  lineHeights.push(lineHeight)
+  lineWidths.push(line.width)
+  lineHeights.push(line.height)
   const width = Math.ceil(Math.max(0, ...lineWidths))
   const height = lineHeights.reduce((total, value) => total + value, 0)
   return { width: maxWidth && width > maxWidth ? maxWidth : width, height }
+}
+
+interface EstimatedLine {
+  width: number
+  height: number
+}
+
+function appendRunCharacter(
+  node: SceneNode,
+  character: string,
+  run: SceneNode['styleRuns'][number] | undefined,
+  fontSize: number,
+  maxWidth: number | undefined,
+  line: EstimatedLine,
+  lineWidths: number[],
+  lineHeights: number[]
+): void {
+  const baseHeight = Math.ceil(fontSize * 1.4)
+  if (character === '\n') {
+    lineWidths.push(line.width)
+    lineHeights.push(line.height)
+    line.width = 0
+    line.height = baseHeight
+    return
+  }
+  const size = run?.style.fontSize ?? fontSize
+  const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing?.value ?? 0
+  const charWidth = Math.max(0, size * GLYPH_WIDTH_FACTOR + spacing)
+  const maxLineWidth = maxWidth && maxWidth > 0 ? maxWidth : undefined
+  if (maxLineWidth && line.width > 0 && line.width + charWidth > maxLineWidth) {
+    lineWidths.push(line.width)
+    lineHeights.push(line.height)
+    line.width = 0
+    line.height = baseHeight
+  }
+  line.width += charWidth
+  const lineHeightValue =
+    run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
+  line.height = Math.max(line.height, lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4))
 }
 
 export function autoWidthWrapWidth(
