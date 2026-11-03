@@ -9,8 +9,15 @@ const NODE_IDENTITY_ERROR = 'Atomic tools must not change node hierarchy or iden
 const VARIABLE_IDENTITY_ERROR = 'Atomic tools must not change variable identity'
 const DOCUMENT_ERROR = 'Atomic tools must not change collections, assets or document metadata'
 
+export interface GraphCheckpoint {
+  readonly nodes: Map<string, SceneNode>
+  readonly variables: Map<string, Variable>
+  assertPropertiesOnly(): void
+  restore(): void
+}
+
 /** Capture rollback state without changing graph or surviving object identities. */
-export function captureGraphCheckpoint(graph: SceneGraph) {
+export function captureGraphCheckpoint(graph: SceneGraph): GraphCheckpoint {
   const nodeRefs = new Map(graph.nodes)
   const variableRefs = new Map(graph.variables)
   const collectionRefs = new Map(graph.variableCollections)
