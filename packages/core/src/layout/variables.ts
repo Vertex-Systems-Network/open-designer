@@ -1,5 +1,8 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
-import { reconcileVariableBindingUpdates, type BindingScope } from '@open-designer/scene-graph/variables'
+import {
+  reconcileVariableBindingUpdates,
+  type BindingScope
+} from '@open-designer/scene-graph/variables'
 
 import { computeLayout, computeSubtreeLayouts } from '#core/layout'
 import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
