@@ -68,12 +68,16 @@ export async function refreshRecoverableSnapshots({
     listRecoverySnapshots(),
     recoverySessionStates()
   ])
-  if (generation !== refreshGeneration || !recoveryEnabled.value) return listed.value
+  if (generation !== refreshGeneration || !isRecoveryEnabled()) return listed.value
 
   const found = recoverableSnapshots(snapshots, sessions, openRecoveryIds())
   if (reportCrash) forgetCrashedSessions(sessions.crashed)
   listed.value = found
   return found
+}
+
+function isRecoveryEnabled(): boolean {
+  return recoveryEnabled.value
 }
 
 function drop(id: string): void {
