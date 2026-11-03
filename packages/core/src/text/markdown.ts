@@ -17,7 +17,7 @@ import {
   trimParagraphStyles
 } from '@open-designer/scene-graph/text'
 
-import { isSupportedHyperlinkUrl } from '#core/figma-api/accessors/text/hyperlink'
+import { isSupportedHyperlinkURL } from '#core/figma-api/accessors/text/hyperlink'
 
 /** The style of the text Markdown is written into, which headings and code are relative to. */
 export type MarkdownBase = Pick<SceneNode, 'fontSize' | 'fontWeight'>
@@ -102,7 +102,7 @@ function phrasing(nodes: readonly PhrasingContent[], style: Style, reading: Read
 }
 
 function linked(style: Style, url: string): Style {
-  return isSupportedHyperlinkUrl(url) ? { ...style, hyperlink: { type: 'URL', value: url } } : style
+  return isSupportedHyperlinkURL(url) ? { ...style, hyperlink: { type: 'URL', value: url } } : style
 }
 
 /** Paragraphs of segments, a hard break inside one starting another of the same style. */
