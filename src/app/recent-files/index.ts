@@ -15,7 +15,9 @@ export {
   type RecentStorageDocument
 } from './store'
 export {
+  cacheRecentFileCover,
   cacheRecentFileThumbnail,
+  clearRecentFileThumbnails,
   loadCachedRecentFileThumbnail,
   loadRecentFileThumbnail
 } from './thumbnails'
