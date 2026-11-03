@@ -29,7 +29,9 @@ export function splitCloudDocument(bytes: Uint8Array): {
 } {
   if (!isZip(bytes)) return { lean: bytes, images: [] }
   const entries = unzipSync(bytes)
-  const canvas = entries['canvas.fig'] ?? entries.canvas ?? Object.entries(entries).filter(([name]) => !name.toLowerCase().endsWith('.png') && !name.toLowerCase().endsWith('.jpg') && !name.toLowerCase().endsWith('.json')).sort((a, b) => b[1].byteLength - a[1].byteLength)[0]?.[1]\n  const kind = canvas ? figCanvasKind(canvas) : null\n  const images: CloudDocumentImage[] = []
+  const canvas = entries['canvas.fig'] ?? entries.canvas ?? Object.entries(entries).filter(([name]) => !name.toLowerCase().endsWith('.png') && !name.toLowerCase().endsWith('.jpg') && !name.toLowerCase().endsWith('.json')).sort((a, b) => b[1].byteLength - a[1].byteLength)[0]?.[1]
+  const kind = canvas ? figCanvasKind(canvas) : null
+  const images: CloudDocumentImage[] = []
   const rest: Zippable = {}
   for (const [path, data] of Object.entries(entries)) {
     const name = path.startsWith(IMAGE_ENTRY_PREFIX) ? path.slice(IMAGE_ENTRY_PREFIX.length) : null
