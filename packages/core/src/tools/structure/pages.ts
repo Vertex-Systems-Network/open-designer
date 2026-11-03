@@ -1,7 +1,6 @@
 import * as v from 'valibot'
 
 import { movePageInGraph } from '#core/editor/pages/move'
-
 import { defineTool } from '#core/tools/schema'
 
 export const movePage = defineTool({
@@ -18,9 +17,9 @@ export const movePage = defineTool({
     )
   }),
   execute: (figma, { page, index }) => {
-    const target = figma.graph.getPages(true).find(
-      (candidate) => candidate.id === page || candidate.name === page
-    )
+    const target = figma.graph
+      .getPages(true)
+      .find((candidate) => candidate.id === page || candidate.name === page)
     if (!target) return { error: `Page "${page}" not found` }
 
     const destination = movePageInGraph(figma.graph, target.id, index, { includeInternal: true })
