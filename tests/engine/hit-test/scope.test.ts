@@ -93,16 +93,22 @@ describe('hitTest — nested groups', () => {
 
   test('click from page scope returns GroupA', () => {
     const { graph, page } = setup()
-    const hit = graph.hitTest(100, 100, page)
+    const hit = graph.hitTest(160, 160, page)
     expect(hit).not.toBeNull()
     expect(expectDefined(hit, 'hit node').name).toBe('GroupA')
   })
 
   test('click with scope=GroupA returns GroupB', () => {
     const { graph, groupA } = setup()
-    const hit = graph.hitTest(150, 150, groupA.id)
+    const hit = graph.hitTest(160, 160, groupA.id)
     expect(hit).not.toBeNull()
     expect(expectDefined(hit, 'hit node').name).toBe('GroupB')
+  })
+
+  test('empty nested group space passes through', () => {
+    const { graph, page, groupA } = setup()
+    expect(graph.hitTest(100, 100, page)).toBeNull()
+    expect(graph.hitTest(150, 150, groupA.id)).toBeNull()
   })
 
   test('click with scope=GroupB returns DeepRect', () => {
