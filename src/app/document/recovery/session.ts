@@ -30,10 +30,10 @@ export function startRecoverySession(locks = sessionLocks()): void {
   const generation = ++sessionGeneration
   requestPending = true
   void locks
-    .request(SESSION_LOCK_PREFIX + recoverySessionId, () => {
-      if (!sessionActive || generation !== sessionGeneration) return Promise.resolve()
+    .request(SESSION_LOCK_PREFIX + recoverySessionId, async () => {
+      if (!sessionActive || generation !== sessionGeneration) return
       markSessionStarted(recoverySessionId)
-      return new Promise<void>((resolve) => {
+      await new Promise<void>((resolve) => {
         releaseSessionLock = resolve
       })
     })
