@@ -7,8 +7,8 @@ export interface AxisAlignedBounds {
 
 /** Returns the smallest axis-aligned box that contains every input box. */
 export function unionBounds(bounds: readonly AxisAlignedBounds[]): AxisAlignedBounds | null {
-  if (bounds.length === 0) return null
-  const first = bounds[0]!
+  const first = bounds.at(0)
+  if (first === undefined) return null
   let minX = first.x
   let minY = first.y
   let maxX = first.x + first.width
