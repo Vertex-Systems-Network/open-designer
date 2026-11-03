@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test } from 'bun:test'
 import { autoLayoutInsertIndex } from '#vue/shared/input/auto-layout'
 import { handleMoveMove, handleMoveUp } from '#vue/shared/input/move/drag'
 import {
-  clickSelectsInside,
+  insideSelectedFrame,
   createSelectionMoveDrag,
   pressesSelection
 } from '#vue/shared/input/select/move'
@@ -168,7 +168,7 @@ describe('pressing inside the selection', () => {
     editor.select([nested.id])
     expect(pressesSelection(child, 130, 130, editor)).toBe(true)
     // A click without dragging still selects the child of a frame.
-    expect(clickSelectsInside(child, editor)).toBe(true)
+    expect(insideSelectedFrame(child, editor)).toBe(true)
   })
 
   test('keeps a selected group child when the group is hit, and a selected group on click', () => {
@@ -179,6 +179,6 @@ describe('pressing inside the selection', () => {
     expect(pressesSelection(group, 20, 20, editor)).toBe(true)
     expect(pressesSelection(group, 120, 120, editor)).toBe(false)
     editor.select([group.id])
-    expect(clickSelectsInside(a, editor)).toBe(false)
+    expect(insideSelectedFrame(a, editor)).toBe(false)
   })
 })
