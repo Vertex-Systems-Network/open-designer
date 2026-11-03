@@ -321,12 +321,7 @@ export function useCanvasInput(
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
     const clickCount = recordClick(sx, sy, e.detail)
     if (e.button === 0) multiClickPressAt = performance.now()
-    const multiClickCount = trackMultiClickTarget(
-      cx,
-      cy,
-      clickCount,
-      selectedIdsBeforeMouseDown
-    )
+    const multiClickCount = trackMultiClickTarget(cx, cy, clickCount, selectedIdsBeforeMouseDown)
     if (multiClickCount >= 2 && takesMultiClick(e)) {
       onMultiClickDown(e, multiClickCount)
       return

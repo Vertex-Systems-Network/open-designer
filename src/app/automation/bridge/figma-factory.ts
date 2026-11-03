@@ -1,5 +1,5 @@
-import { unionBounds } from '@open-designer/core/geometry'
 import { FigmaAPI, MAX_IMAGE_FETCH_BYTES } from '@open-designer/core/figma-api'
+import { unionBounds } from '@open-designer/core/geometry'
 import { createCanvasKitRasterCodec } from '@open-designer/core/io/formats/raster'
 
 import { renderAutomationImage } from '@/app/automation/bridge/export-handlers'

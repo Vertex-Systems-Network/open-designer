@@ -12,9 +12,9 @@ const DOCUMENT_ERROR = 'Atomic tools must not change collections, assets or docu
 function sameVariableIdentity(before: Variable, after: Variable | undefined): boolean {
   return Boolean(
     after &&
-      before.id === after.id &&
-      before.collectionId === after.collectionId &&
-      before.type === after.type
+    before.id === after.id &&
+    before.collectionId === after.collectionId &&
+    before.type === after.type
   )
 }
 

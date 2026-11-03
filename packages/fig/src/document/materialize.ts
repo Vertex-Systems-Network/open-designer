@@ -100,7 +100,10 @@ export interface FigSessionCheckpoint {
  * The layer each archive record became, by record GUID: layers, pages, instances, and the
  * layers inside components down to the instances they nest, whose contents are no records.
  */
-function isNestedInstancePath(path: readonly string[], instances: readonly (readonly string[])[]): boolean {
+function isNestedInstancePath(
+  path: readonly string[],
+  instances: readonly (readonly string[])[]
+): boolean {
   return instances.some(
     (prefix) => prefix.length < path.length && prefix.every((id, index) => path[index] === id)
   )
