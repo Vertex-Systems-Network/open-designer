@@ -1,1 +1,1 @@
-- Typography and fill edits from the design panel now apply to every text character, including characters with existing style overrides.
+- Typography and fill edits made in the design panel now apply to every character, replacing conflicting range overrides.
