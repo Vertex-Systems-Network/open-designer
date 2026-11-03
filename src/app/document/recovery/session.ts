@@ -27,7 +27,8 @@ function startedSessionIds(): string[] {
     const ids: string[] = []
     for (let index = 0; index < storage.length; index++) {
       const key = storage.key(index)
-      if (key?.startsWith(SESSION_STORAGE_PREFIX)) ids.push(key.slice(SESSION_STORAGE_PREFIX.length))
+      if (key?.startsWith(SESSION_STORAGE_PREFIX))
+        ids.push(key.slice(SESSION_STORAGE_PREFIX.length))
     }
     return ids
   } catch {
