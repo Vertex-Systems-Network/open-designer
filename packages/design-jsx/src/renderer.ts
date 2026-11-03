@@ -80,8 +80,9 @@ function rootRenderOrder(graph: SceneGraph, roots: readonly TreeNode[]): number[
   const pending = roots.map((_, index) => index)
   const order: number[] = []
   while (pending.length > 0) {
-    const next = pending.find((index) => dependencies[index].every((owner) => order.includes(owner)))
-      ?? pending[0]
+    const next =
+      pending.find((index) => dependencies[index].every((owner) => order.includes(owner))) ??
+      pending[0]
     order.push(next)
     pending.splice(pending.indexOf(next), 1)
   }
