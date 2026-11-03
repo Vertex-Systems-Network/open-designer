@@ -1,5 +1,9 @@
 import { createCanvasId } from '@/app/storage/id'
-import { forgetSession, markSessionStarted, startedSessionIds } from '@/app/storage/recovery-session'
+import {
+  forgetSession,
+  markSessionStarted,
+  startedSessionIds
+} from '@/app/storage/recovery-session'
 
 /** This window's app session; the recovery copies it writes carry this id. */
 export const recoverySessionId = createCanvasId()
