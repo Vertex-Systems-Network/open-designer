@@ -97,7 +97,7 @@ function appendRunCharacter(
     return
   }
   const size = run?.style.fontSize ?? fontSize
-  const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing?.value ?? 0
+  const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing.value
   const charWidth = Math.max(0, size * GLYPH_WIDTH_FACTOR + spacing)
   const maxLineWidth = maxWidth && maxWidth > 0 ? maxWidth : undefined
   if (maxLineWidth && line.width > 0 && line.width + charWidth > maxLineWidth) {
@@ -111,7 +111,7 @@ function appendRunCharacter(
     run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
   line.height = Math.max(
     line.height,
-    lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4)
+    lineHeightPixels(lineHeightValue ?? null, size) ?? Math.ceil(size * 1.4)
   )
 }
 
