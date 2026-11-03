@@ -5,12 +5,12 @@ import { forgetSession, markSessionStarted, startedSessionIds } from '@/app/stor
 export const recoverySessionId = createCanvasId()
 
 const SESSION_LOCK_PREFIX = 'open-designer:recovery-session:'
+
 type SessionLocks = Pick<LockManager, 'query' | 'request'>
 
 function sessionLocks(): SessionLocks | undefined {
   return typeof navigator === 'undefined' ? undefined : navigator.locks
 }
-
 
 /** Ends the hold on this session's lock; the lock also goes when the window does, however it goes. */
 let releaseSessionLock: (() => void) | null = null
