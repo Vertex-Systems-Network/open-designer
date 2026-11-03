@@ -528,8 +528,15 @@ function materializeReaderInto(
     for (const [nodeOccurrence, node] of nodes) sources.set(nodeOccurrence.sourceId, node.id)
   }
 
-  function isStaleInstanceSwap(existing: SceneNode | undefined, expectedId: string | undefined): boolean {
-    return existing?.type === 'INSTANCE' && expectedId !== undefined && existing.componentId !== expectedId
+  function isStaleInstanceSwap(
+    existing: SceneNode | undefined,
+    expectedId: string | undefined
+  ): boolean {
+    return (
+      existing?.type === 'INSTANCE' &&
+      expectedId !== undefined &&
+      existing.componentId !== expectedId
+    )
   }
 
   function populateChild(child: InstanceOccurrence, parentId: string): void {
