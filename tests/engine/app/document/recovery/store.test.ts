@@ -63,7 +63,12 @@ describe('document recovery store', () => {
   test('memory store owns input and output bytes', async () => {
     const store = createMemoryRecoveryStore()
     const input = new Uint8Array(bytes)
-    await store.write({ id: 'one', sessionId: 'test-session', documentName: 'Draft', figBytes: input })
+    await store.write({
+      id: 'one',
+      sessionId: 'test-session',
+      documentName: 'Draft',
+      figBytes: input
+    })
     input[0] = 99
 
     const first = await store.read('one')
