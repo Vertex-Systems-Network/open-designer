@@ -1,7 +1,7 @@
 import { createLibsqlCloudDatabase } from '#cloud/runtime/libsql/database'
 import { createBetterAuthAdapter, migrateCloudDatabase } from '#cloud/server'
 
-import { loadNodeCloudServerConfig } from './config'
+import { loadNodeCloudServerConfig } from '../config'
 
 const url = process.env.TURSO_URL ?? process.env.DATABASE_URL
 const authToken = process.env.TURSO_AUTH_TOKEN
