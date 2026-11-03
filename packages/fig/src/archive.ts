@@ -70,9 +70,7 @@ function isCanonicalCanvasEntry(name: string): boolean {
 }
 
 /** Read a design or FigJam board kind from a bare canvas header without decoding the document. */
-export function figCanvasKind(bytes: Uint8Array): FigFileKind | null {
-  return figFileKind(bytes)
-}
+export const figCanvasKind = figFileKind
 
 /**
  * Whether a `.fig` or `.jam` archive, or a bare canvas, holds a design or a FigJam board, by its
