@@ -276,8 +276,8 @@ describe('text preparation cache', () => {
         textAutoResize: 'WIDTH_AND_HEIGHT',
         width: 100,
         height: 80,
-        minWidth: null,
-        maxWidth: null,
+        minWidth: 60,
+        maxWidth: 160,
         styleRuns: [{ start: 0, length: 4, style: { fontSize: 24 } }]
       }
       for (const [key, value] of Object.entries(mutations)) {
