@@ -1,57 +1,16 @@
 import { createCanvasId } from '@/app/storage/id'
+import { forgetSession, markSessionStarted, startedSessionIds } from '@/app/storage/recovery-session'
 
 /** This window's app session; the recovery copies it writes carry this id. */
 export const recoverySessionId = createCanvasId()
 
 const SESSION_LOCK_PREFIX = 'open-designer:recovery-session:'
-const SESSION_STORAGE_PREFIX = 'open-designer:recovery-session:'
-
 type SessionLocks = Pick<LockManager, 'query' | 'request'>
 
 function sessionLocks(): SessionLocks | undefined {
   return typeof navigator === 'undefined' ? undefined : navigator.locks
 }
 
-function sessionStorage(): Storage | undefined {
-  try {
-    return typeof localStorage === 'undefined' ? undefined : localStorage
-  } catch {
-    return undefined
-  }
-}
-
-function startedSessionIds(): string[] {
-  const storage = sessionStorage()
-  if (!storage) return []
-  try {
-    const ids: string[] = []
-    for (let index = 0; index < storage.length; index++) {
-      const key = storage.key(index)
-      if (key?.startsWith(SESSION_STORAGE_PREFIX))
-        ids.push(key.slice(SESSION_STORAGE_PREFIX.length))
-    }
-    return ids
-  } catch {
-    // Storage can be disabled or throw in privacy-restricted browser contexts.
-    return []
-  }
-}
-
-function markSessionStarted(id: string): void {
-  try {
-    sessionStorage()?.setItem(SESSION_STORAGE_PREFIX + id, '1')
-  } catch {
-    // A storage failure must not reject the Web Lock callback and orphan its hold.
-  }
-}
-
-function forgetSession(id: string): void {
-  try {
-    sessionStorage()?.removeItem(SESSION_STORAGE_PREFIX + id)
-  } catch {
-    // A storage failure must not prevent the Web Lock from being released.
-  }
-}
 
 /** Ends the hold on this session's lock; the lock also goes when the window does, however it goes. */
 let releaseSessionLock: (() => void) | null = null
