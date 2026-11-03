@@ -119,8 +119,7 @@ export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<stri
     const removed = component.removedSourcePaths ?? []
     // A deleted instance still owns its nested records as overrides, so only its own archive
     // record is a removal; descendants beneath either live or deleted instances are not records.
-    for (const entry of removed)
-      if (entry.mainComponentId !== null) instances.push(entry.path)
+    for (const entry of removed) if (entry.mainComponentId !== null) instances.push(entry.path)
     for (const entry of removed) {
       const sourceId = entry.path.at(-1)
       if (!sourceId) continue
