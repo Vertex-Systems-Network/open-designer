@@ -100,6 +100,12 @@ export interface FigSessionCheckpoint {
  * The layer each archive record became, by record GUID: layers, pages, instances, and the
  * layers inside components down to the instances they nest, whose contents are no records.
  */
+function isNestedInstancePath(path: readonly string[], instances: readonly (readonly string[])[]): boolean {
+  return instances.some(
+    (prefix) => prefix.length < path.length && prefix.every((id, index) => path[index] === id)
+  )
+}
+
 export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<string, string> {
   const records = new Map(checkpoint.sources)
   for (const [componentId, component] of checkpoint.components) {
@@ -108,11 +114,7 @@ export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<stri
     for (const entry of component.nodes) {
       const sourceId = entry.path.at(-1)
       if (!sourceId) continue
-      const inInstance = instances.some(
-        (prefix) =>
-          prefix.length < entry.path.length && prefix.every((id, index) => entry.path[index] === id)
-      )
-      if (inInstance) continue
+      if (isNestedInstancePath(entry.path, instances)) continue
       records.set(sourceId, entry.nodeId)
       if (entry.mainComponentId !== null) instances.push(entry.path)
     }
@@ -123,11 +125,7 @@ export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<stri
     for (const entry of removed) {
       const sourceId = entry.path.at(-1)
       if (!sourceId) continue
-      const inInstance = instances.some(
-        (prefix) =>
-          prefix.length < entry.path.length && prefix.every((id, index) => entry.path[index] === id)
-      )
-      if (!inInstance) records.set(sourceId, sourceId)
+      if (!isNestedInstancePath(entry.path, instances)) records.set(sourceId, sourceId)
     }
   }
   return records

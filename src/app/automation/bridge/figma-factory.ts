@@ -1,3 +1,4 @@
+import { unionBounds } from '@open-designer/core/geometry'
 import { FigmaAPI, MAX_IMAGE_FETCH_BYTES } from '@open-designer/core/figma-api'
 import { createCanvasKitRasterCodec } from '@open-designer/core/io/formats/raster'
 
@@ -42,21 +43,15 @@ export function makeFigmaFromStore(
         return false
       }
       if (nodes.length === 0) return false
-      let minX = Number.POSITIVE_INFINITY
-      let minY = Number.POSITIVE_INFINITY
-      let maxX = Number.NEGATIVE_INFINITY
-      let maxY = Number.NEGATIVE_INFINITY
-      for (const { absoluteBoundingBox: bounds } of nodes) {
-        minX = Math.min(minX, bounds.x)
-        minY = Math.min(minY, bounds.y)
-        maxX = Math.max(maxX, bounds.x + bounds.width)
-        maxY = Math.max(maxY, bounds.y + bounds.height)
-      }
-      store.zoomToBounds(minX, minY, maxX, maxY)
+      const bounds = unionBounds(nodes.map((node) => node.absoluteBoundingBox))
+      if (!bounds) return false
+      const maxX = bounds.x + bounds.width
+      const maxY = bounds.y + bounds.height
+      store.zoomToBounds(bounds.x, bounds.y, maxX, maxY)
       return {
         // zoomToBounds centers the fitted bounds with symmetric padding. Derive center from
         // those bounds so it remains correct before the canvas reports its viewport dimensions.
-        center: { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
+        center: { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 },
         zoom: store.state.zoom
       }
     })

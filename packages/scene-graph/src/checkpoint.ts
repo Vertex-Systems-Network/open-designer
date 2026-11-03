@@ -9,6 +9,15 @@ const NODE_IDENTITY_ERROR = 'Atomic tools must not change node hierarchy or iden
 const VARIABLE_IDENTITY_ERROR = 'Atomic tools must not change variable identity'
 const DOCUMENT_ERROR = 'Atomic tools must not change collections, assets or document metadata'
 
+function sameVariableIdentity(before: Variable, after: Variable | undefined): boolean {
+  return Boolean(
+    after &&
+      before.id === after.id &&
+      before.collectionId === after.collectionId &&
+      before.type === after.type
+  )
+}
+
 export interface GraphCheckpoint {
   readonly nodes: Map<string, SceneNode>
   readonly variables: Map<string, Variable>
@@ -59,13 +68,7 @@ export function captureGraphCheckpoint(graph: SceneGraph): GraphCheckpoint {
     }
     for (const [id, before] of snapshot.variables) {
       const after = graph.variables.get(id)
-      if (
-        !after ||
-        after !== variableRefs.get(id) ||
-        before.id !== after.id ||
-        before.collectionId !== after.collectionId ||
-        before.type !== after.type
-      )
+      if (after !== variableRefs.get(id) || !sameVariableIdentity(before, after))
         throw new Error(VARIABLE_IDENTITY_ERROR)
     }
     assertDocumentUnchanged()
@@ -278,13 +281,7 @@ export function captureTouchedCheckpoint(graph: SceneGraph): TouchedCheckpoint {
     assertNodes()
     for (const [id, before] of saved.variables) {
       const after = graph.variables.get(id)
-      if (
-        !after ||
-        after !== variableRefs.get(id) ||
-        before.id !== after.id ||
-        before.collectionId !== after.collectionId ||
-        before.type !== after.type
-      )
+      if (after !== variableRefs.get(id) || !sameVariableIdentity(before, after))
         throw new Error(VARIABLE_IDENTITY_ERROR)
     }
     if (
