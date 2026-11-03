@@ -9,8 +9,8 @@ import type {
   Usage
 } from '@agentclientprotocol/sdk'
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai'
-import * as v from 'valibot'
 import { fromUint8Array } from 'js-base64'
+import * as v from 'valibot'
 
 import type { ACPAgentDef } from '@open-designer/core/constants'
 
