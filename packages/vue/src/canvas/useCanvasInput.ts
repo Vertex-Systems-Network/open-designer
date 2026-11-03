@@ -217,7 +217,11 @@ export function useCanvasInput(
     const { cx, cy, sx, sy } = getCoords(e)
     const handleCursor = updateHoverCursor(cx, cy, editor, hitFns)
     const shapeHandle = shapeHandleHoverAt(sx, sy, e.altKey)
-    const gradientLayout = editedGradientLayout(editor.graph, editor.state.gradientEdit, editor.state)
+    const gradientLayout = editedGradientLayout(
+      editor.graph,
+      editor.state.gradientEdit,
+      editor.state
+    )
     const gradientHandle =
       gradientLayout && hitTestGradientHandles(gradientLayout, { x: sx, y: sy })
     return handleCursor === null && shapeHandle?.handle == null && gradientHandle == null
