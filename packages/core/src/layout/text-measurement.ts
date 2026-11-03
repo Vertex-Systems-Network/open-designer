@@ -21,9 +21,7 @@ export function estimateTextSize(
   const text = node.text || ''
   const runs = node.styleRuns.toSorted((a, b) => a.start - b.start)
   const hasRunMetrics = runs.some((run) =>
-    ['fontSize', 'lineHeight', 'letterSpacing'].some((field) =>
-      Object.hasOwn(run.style, field)
-    )
+    ['fontSize', 'lineHeight', 'letterSpacing'].some((field) => Object.hasOwn(run.style, field))
   )
 
   // With no renderer, estimate each character using its resolved run size. Binding updates can
@@ -35,13 +33,10 @@ export function estimateTextSize(
     const lineWidths: number[] = []
     const lineHeights: number[] = []
     for (let index = 0; index < text.length; index++) {
-      while (
-        runIndex < runs.length &&
-        runs[runIndex].start + runs[runIndex].length <= index
-      ) runIndex++
+      while (runIndex < runs.length && runs[runIndex].start + runs[runIndex].length <= index)
+        runIndex++
       const run =
-        runs[runIndex]?.start <= index &&
-        index < runs[runIndex].start + runs[runIndex].length
+        runs[runIndex]?.start <= index && index < runs[runIndex].start + runs[runIndex].length
           ? runs[runIndex]
           : undefined
       const size = run?.style.fontSize ?? fontSize
