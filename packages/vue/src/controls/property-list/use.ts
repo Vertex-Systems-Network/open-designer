@@ -54,18 +54,20 @@ export function useEditorPropertyList<K extends PropertyListKey>(propKey: K) {
     return own.length === 0 && !isMixed.value ? items.value : own
   }
 
+  /** A text's fills colour every character, as a layer's own fills do in Figma. */
   function updateArray(node: SceneNode, value: PropertyListItemFor<K>[], label: string) {
-    editor.updateNodeWithUndo(node.id, { [propKey]: value }, label)
+    editor.updateNodeWithUndo(node.id, editor.layerChanges(node.id, { [propKey]: value }), label)
   }
 
   function add(item: PropertyListItemFor<K>) {
     batch.flush()
     const nodes = targetNodes()
-    const label = isMulti.value ? `Set ${propKey}` : `Add ${propKey}`
+    const label = isMulti.value || isMixed.value ? `Set ${propKey}` : `Add ${propKey}`
     const apply = () => {
       for (const node of nodes) {
         const nextItem = structuredClone(item)
-        const next = isMulti.value ? [nextItem] : [...propArray(node), nextItem]
+        // Adding to mixed values replaces them, as Figma's "Click + to replace" does.
+        const next = isMulti.value || isMixed.value ? [nextItem] : [...propArray(node), nextItem]
         updateArray(node, next, label)
       }
     }
