@@ -34,7 +34,7 @@ export function useUndoBatch(undo: UndoManager, beginInteractiveEdit?: () => () 
 
   function ensure(key: string, label: string) {
     if (batchKey === null && undo.isBatching) return
-    if (batchKey !== key) {
+    if (batchKey !== key || !undo.isBatching) {
       flush()
       undo.beginBatch(label)
       endInteraction = beginInteractiveEdit?.()
