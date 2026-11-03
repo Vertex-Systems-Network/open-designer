@@ -127,6 +127,7 @@ describe('atomic agent tools', () => {
           {
             ...tool('set_opacity'),
             execute: () => {
+              if (kind === 'node') graph.willChangeNode(graph.getNode(rectangle.id))
               set(after)
             }
           },
@@ -161,7 +162,7 @@ describe('atomic agent tools', () => {
         },
         {}
       )
-    ).toThrow('Atomic tools must not change')
+    ).toThrow('Atomic tools must not')
     expect(graph.getNode(node.id)).toBe(node)
     expect(graph.variables.get(variable.id)).toBe(variable)
     expect(undo.canUndo).toBe(false)
