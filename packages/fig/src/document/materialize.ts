@@ -505,6 +505,29 @@ function materializeReaderInto(
    * sizes over the sizes Figma derived for instances earlier pages already placed.
    */
   const resync = new Set<string>()
+  function collectObsoleteNodes(rootId: string): string[] {
+    const ids: string[] = []
+    function collect(id: string): void {
+      const node = graph.getNode(id)
+      if (!node) return
+      ids.push(id)
+      for (const childId of node.childIds) collect(childId)
+    }
+    collect(rootId)
+    return ids
+  }
+
+  function discardObsoleteNodes(
+    obsoleteIds: string[],
+    rootId: string | undefined,
+    nodes: ReturnType<typeof materializeInstance>['nodes']
+  ): void {
+    const obsolete = new Set(obsoleteIds)
+    for (const [sourceId, nodeId] of sources) if (obsolete.has(nodeId)) sources.delete(sourceId)
+    for (const id of obsoleteIds.toReversed()) if (id !== rootId) graph.deleteNode(id)
+    for (const [nodeOccurrence, node] of nodes) sources.set(nodeOccurrence.sourceId, node.id)
+  }
+
   function populateChild(child: InstanceOccurrence, parentId: string): void {
     if (edited) reconcileOccurrenceStructure(child, graph, components)
     const existingId = sources.get(child.sourceId)
@@ -515,16 +538,7 @@ function materializeReaderInto(
       existing?.type === 'INSTANCE' &&
       expectedComponentId !== undefined &&
       existing.componentId !== expectedComponentId
-    const obsoleteNodeIds: string[] = []
-    if (staleSwap && existing) {
-      const collect = (id: string): void => {
-        const node = graph.getNode(id)
-        if (!node) return
-        obsoleteNodeIds.push(id)
-        for (const childId of node.childIds) collect(childId)
-      }
-      collect(existing.id)
-    }
+    const obsoleteNodeIds = staleSwap && existing ? collectObsoleteNodes(existing.id) : []
     if (child.mainComponentId !== null && (!existing || staleSwap)) {
       onProgress?.()
       const materialized = materializeInstance(graph, parentId, child, componentIds, {
@@ -534,13 +548,7 @@ function materializeReaderInto(
         recordId
       })
       rememberDerivedSizes(materialized.nodes)
-      if (staleSwap) {
-        const obsolete = new Set(obsoleteNodeIds)
-        for (const [sourceId, nodeId] of sources) if (obsolete.has(nodeId)) sources.delete(sourceId)
-        for (const id of obsoleteNodeIds.toReversed()) if (id !== existing?.id) graph.deleteNode(id)
-        for (const [nodeOccurrence, node] of materialized.nodes)
-          sources.set(nodeOccurrence.sourceId, node.id)
-      }
+      if (staleSwap) discardObsoleteNodes(obsoleteNodeIds, existing?.id, materialized.nodes)
       linkInstanceSourceChildren(child, materialized, components)
       if (edited) {
         reconcileLiveComponentEdits(graph, materialized)
