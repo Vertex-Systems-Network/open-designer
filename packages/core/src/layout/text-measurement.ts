@@ -109,7 +109,10 @@ function appendRunCharacter(
   line.width += charWidth
   const lineHeightValue =
     run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
-  line.height = Math.max(line.height, lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4))
+  line.height = Math.max(
+    line.height,
+    lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4)
+  )
 }
 
 export function autoWidthWrapWidth(
