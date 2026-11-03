@@ -1099,7 +1099,11 @@ function drawsSaved(r: SkiaRenderer, node: SceneNode): boolean {
 function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
   if (!r.fontsLoaded || !r.fontProvider || node.textPathData !== null) return false
   const readiness = r.nodeFontReadiness(node)
-  return readiness !== 'pending' && (readiness !== 'exhausted' || !drawsSaved(r, node)) && mayHoldEmoji(shownText(node))
+  return (
+    readiness !== 'pending' &&
+    (readiness !== 'exhausted' || !drawsSaved(r, node)) &&
+    mayHoldEmoji(shownText(node))
+  )
 }
 
 /**
@@ -1120,7 +1124,9 @@ function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
 }
 
 function drawSavedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): boolean {
-  return drawsSaved(r, node) && canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
+  return (
+    drawsSaved(r, node) && canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
+  )
 }
 
 export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): void {
