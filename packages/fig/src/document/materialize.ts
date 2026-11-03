@@ -528,16 +528,17 @@ function materializeReaderInto(
     for (const [nodeOccurrence, node] of nodes) sources.set(nodeOccurrence.sourceId, node.id)
   }
 
+  function isStaleInstanceSwap(existing: SceneNode | undefined, expectedId: string | undefined): boolean {
+    return existing?.type === 'INSTANCE' && expectedId !== undefined && existing.componentId !== expectedId
+  }
+
   function populateChild(child: InstanceOccurrence, parentId: string): void {
     if (edited) reconcileOccurrenceStructure(child, graph, components)
     const existingId = sources.get(child.sourceId)
     const existing = existingId ? graph.getNode(existingId) : undefined
     const expectedComponentId =
       child.mainComponentId === null ? undefined : componentIds.get(child.mainComponentId)
-    const staleSwap =
-      existing?.type === 'INSTANCE' &&
-      expectedComponentId !== undefined &&
-      existing.componentId !== expectedComponentId
+    const staleSwap = isStaleInstanceSwap(existing, expectedComponentId)
     const obsoleteNodeIds = staleSwap && existing ? collectObsoleteNodes(existing.id) : []
     if (child.mainComponentId !== null && (!existing || staleSwap)) {
       onProgress?.()
