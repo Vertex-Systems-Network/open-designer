@@ -52,6 +52,7 @@ describe('document recovery store', () => {
     const buffer = new Uint8Array([9, 9, 1, 2, 3, 9])
     await store.write({
       id: 'recovery-1',
+      sessionId: 'test-session',
       documentName: 'Agent draft',
       figBytes: buffer.subarray(2, 5)
     })
