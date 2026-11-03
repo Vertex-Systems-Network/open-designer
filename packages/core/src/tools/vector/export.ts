@@ -165,7 +165,8 @@ export const exportPDF = defineTool({
           width: Math.round(page.width),
           height: Math.round(page.height)
         })),
-        ...(result.fonts ? { fonts: result.fonts } : {}),\n        ...(result.warnings ? { warnings: result.warnings } : {})
+        ...(result.fonts ? { fonts: result.fonts } : {}),
+        ...(result.warnings ? { warnings: result.warnings } : {})
       }
     } catch (error) {
       if (error instanceof PDFPlanError) return { error: error.message }
