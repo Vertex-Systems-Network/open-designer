@@ -25,6 +25,7 @@ const noDirectStorageAccess = {
       '/src/app/cache/index.ts',
       '/src/app/settings/credentials/storage.ts',
       '/src/app/settings/theme.ts',
+      '/src/app/storage/recovery-session.ts',
       '/src/app/shell/layout-storage.ts',
       '/src/app/shell/support/chunk-reload-storage.ts',
       '/packages/vue/src/i18n/locale.ts'
