@@ -37,7 +37,7 @@ function createResilientRecoveryStore(primary: RecoveryStore): RecoveryStore {
       const snapshots = await primary.list()
       for (const metadata of snapshots) {
         const snapshot = await primary.read(metadata.id)
-        if (snapshot) await memory.write(snapshot)
+        if (snapshot) await memory.write({ ...snapshot, sessionId: snapshot.sessionId ?? 'legacy' })
       }
     } catch (migrationError) {
       console.warn('[Recovery] Failed to migrate IndexedDB snapshots to memory:', migrationError)
