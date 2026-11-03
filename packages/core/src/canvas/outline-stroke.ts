@@ -6,6 +6,7 @@ import { getNodeLocalMatrix, localTransformFromWorld } from '@open-designer/scen
 import { copyFills } from '@open-designer/scene-graph/copy'
 import Matrix from '@open-designer/scene-graph/matrix'
 import { parseSVGPath } from '@open-designer/scene-graph/parse-path'
+import type { Rect } from '@open-designer/scene-graph/primitives'
 
 import {
   baseShapePath,
@@ -56,12 +57,7 @@ function strokePaints(node: SceneNode): Fill[] {
   )
 }
 
-interface Box {
-  x: number
-  y: number
-  width: number
-  height: number
-}
+type Box = Rect
 
 function boundsOf(paths: readonly Path[]): Box | null {
   let [left, top, right, bottom] = [Infinity, Infinity, -Infinity, -Infinity]

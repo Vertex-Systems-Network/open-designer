@@ -1,5 +1,6 @@
 import type { SceneNode } from '@open-designer/scene-graph'
 import { faceStyleKey } from '@open-designer/scene-graph/font-style'
+import type { Size } from '@open-designer/scene-graph/primitives'
 import { lineHeightPixels } from '@open-designer/scene-graph/text'
 
 import { measureTextWithFont } from '#core/text/font/glyphs'
@@ -73,18 +74,13 @@ function estimateRunTextSize(
   return { width: maxWidth && width > maxWidth ? maxWidth : width, height }
 }
 
-interface EstimatedLine {
-  width: number
-  height: number
-}
-
 function appendRunCharacter(
   node: SceneNode,
   character: string,
   run: SceneNode['styleRuns'][number] | undefined,
   fontSize: number,
   maxWidth: number | undefined,
-  line: EstimatedLine,
+  line: Size,
   lineWidths: number[],
   lineHeights: number[]
 ): void {

@@ -1,9 +1,6 @@
-export interface AxisAlignedBounds {
-  x: number
-  y: number
-  width: number
-  height: number
-}
+import type { Rect } from '@open-designer/scene-graph/primitives'
+
+export type AxisAlignedBounds = Rect
 
 /** Returns the smallest axis-aligned box that contains every input box. */
 export function unionBounds(bounds: readonly AxisAlignedBounds[]): AxisAlignedBounds | null {
