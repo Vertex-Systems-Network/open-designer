@@ -536,10 +536,8 @@ function materializeReaderInto(
       rememberDerivedSizes(materialized.nodes)
       if (staleSwap) {
         const obsolete = new Set(obsoleteNodeIds)
-        for (const [sourceId, nodeId] of sources)
-          if (obsolete.has(nodeId)) sources.delete(sourceId)
-        for (const id of obsoleteNodeIds.toReversed())
-          if (id !== existing?.id) graph.deleteNode(id)
+        for (const [sourceId, nodeId] of sources) if (obsolete.has(nodeId)) sources.delete(sourceId)
+        for (const id of obsoleteNodeIds.toReversed()) if (id !== existing?.id) graph.deleteNode(id)
         for (const [nodeOccurrence, node] of materialized.nodes)
           sources.set(nodeOccurrence.sourceId, node.id)
       }
