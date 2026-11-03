@@ -42,7 +42,10 @@ function renameAdjustments<To extends string, From extends string>(
   adjustments: Partial<Record<From, number>> | undefined
 ): Partial<Record<To, number>> | undefined {
   if (!adjustments) return undefined
-  const renamed = pickBy(mapValues(names, (name) => adjustments[name]), (value) => value !== undefined)
+  const renamed = pickBy(
+    mapValues(names, (name) => adjustments[name]),
+    (value) => value !== undefined
+  )
   return isEmptyObject(renamed) ? undefined : renamed
 }
 
