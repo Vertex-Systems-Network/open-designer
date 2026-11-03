@@ -246,6 +246,24 @@ export function useCanvasInput(
     if (takesMultiClick(e)) onMultiClickDown(e, 2)
   }
 
+  function trackMultiClickTarget(
+    cx: number,
+    cy: number,
+    clickCount: number,
+    selectedIdsBeforeMouseDown: ReadonlySet<string>
+  ): number {
+    const targetId = hitTestInScope(cx, cy, true)?.id ?? null
+    const targetChanged = clickCount === 1 || targetId !== multiClickTargetId
+    if (targetChanged) {
+      multiClickTargetId = targetId
+      multiClickTargetCount = targetId ? 1 : 0
+      selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
+    } else if (targetId) {
+      multiClickTargetCount++
+    }
+    return multiClickTargetCount
+  }
+
   function hoverLayers({ event, cx, cy, sx, sy }: CanvasToolPointer) {
     const guideCursor = profile().edits ? guideInput.updateHover(sx, sy) : null
     cursorOverride.value =
@@ -303,17 +321,14 @@ export function useCanvasInput(
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
     const clickCount = recordClick(sx, sy, e.detail)
     if (e.button === 0) multiClickPressAt = performance.now()
-    const targetId = hitTestInScope(cx, cy, true)?.id ?? null
-    const targetChanged = clickCount === 1 || targetId !== multiClickTargetId
-    if (targetChanged) {
-      multiClickTargetId = targetId
-      multiClickTargetCount = targetId ? 1 : 0
-      selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
-    } else if (targetId) {
-      multiClickTargetCount++
-    }
-    if (multiClickTargetCount >= 2 && takesMultiClick(e)) {
-      onMultiClickDown(e, multiClickTargetCount)
+    const multiClickCount = trackMultiClickTarget(
+      cx,
+      cy,
+      clickCount,
+      selectedIdsBeforeMouseDown
+    )
+    if (multiClickCount >= 2 && takesMultiClick(e)) {
+      onMultiClickDown(e, multiClickCount)
       return
     }
     pressCanvasTool({ event: e, cx, cy, sx, sy }, toolContext)
