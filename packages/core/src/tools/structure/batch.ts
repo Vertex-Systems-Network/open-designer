@@ -170,6 +170,7 @@ export const batchUpdate = defineTool({
             Reflect.set(node, field, value)
           } catch {
             // Read-only targets reject the original write too; they have nothing to restore.
+            continue
           }
         }
       }
