@@ -86,7 +86,6 @@ function lineStroke(node: SceneNode): { weight: number; cap: StrokeCap } {
  * caps, so the stroke it keeps lies where it did (live-verified).
  */
 export function makeLineSegmentPath(r: SkiaRenderer, node: SceneNode): Path {
-  const stroke = node.strokes.find((item) => item.visible)
   const { weight, cap } = lineStroke(node)
   const { from, to } = lineStrokePath(node, weight, cap)
   const length = Math.hypot(to.x - from.x, to.y - from.y)
