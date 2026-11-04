@@ -1,0 +1,1 @@
+- ACP agents expose their available model, reasoning, mode, and configuration controls in the chat composer.

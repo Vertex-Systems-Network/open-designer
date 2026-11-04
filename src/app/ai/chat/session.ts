@@ -158,6 +158,7 @@ export function createChatSessionManager({
     const transport = await createACPTransport(provider, store, ({ model, ...tokens }) =>
       recordModelStepCompleted({ provider, model: model ?? provider, ...tokens }, context)
     )
+    await transport.connect()
     acpTransportInstance = transport
     return transport as ChatTransport<UIMessage>
   }

@@ -2,6 +2,9 @@ import { ClientSideConnection, ndJsonStream, PROTOCOL_VERSION } from '@agentclie
 import type {
   Client,
   Agent,
+  SessionConfigOption,
+  SessionModelState,
+  SessionModeState,
   SessionNotification,
   RequestPermissionRequest,
   RequestPermissionResponse,
@@ -15,6 +18,14 @@ import * as v from 'valibot'
 import type { ACPAgentDef } from '@open-designer/core/constants'
 
 import { parseAuthStatusUpdate } from '@/app/ai/agents/acp/auth/status'
+import {
+  acpActions,
+  acpConnecting,
+  acpState,
+  buildControls,
+  resolveSplitModel
+} from '@/app/ai/agents/acp/catalog'
+import type { ACPControl } from '@/app/ai/agents/acp/catalog'
 import { setAgentCommands } from '@/app/ai/agents/acp/commands'
 import { createUpdateMapper } from '@/app/ai/agents/acp/events'
 import { spawnACPProcess } from '@/app/ai/agents/acp/process'
@@ -174,6 +185,11 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   private destroying = false
   /** The agent while it starts, before it becomes the session, so destroying can stop it. */
   private starting: TauriChild | null = null
+  private controls: ACPControl[] = []
+  private configOptions: SessionConfigOption[] = []
+  private modelState: SessionModelState | null = null
+  private modeState: SessionModeState | null = null
+  private connecting: Promise<ACPSession> | null = null
 
   /** The chat's document, where each reply's run records the edits the agent makes in it. */
   private store: EditorStore | null
@@ -192,6 +208,100 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     this.onUsage = options.onUsage ?? null
   }
 
+  /** Start the agent when selected so its controls are ready before the first message. */
+  async connect(): Promise<void> {
+    await this.ensureSession()
+  }
+
+  private async ensureSession(): Promise<ACPSession> {
+    if (this.session?.dead) this.session = null
+    if (this.session) return this.session
+    if (!this.connecting) {
+      acpConnecting.value = true
+      this.connecting = this.spawnAgent()
+        .then(async (started) => {
+          if (this.destroying) {
+            await started.child.kill().catch(() => undefined)
+            throw new Error('The chat closed while its agent was starting.')
+          }
+          this.session = started
+          this.starting = null
+          this.sentContext = false
+          return started
+        })
+        .finally(() => {
+          this.connecting = null
+          acpConnecting.value = false
+        })
+    }
+    return this.connecting
+  }
+
+  private publish(): void {
+    acpState.value = { agentId: this.agentDef.id, controls: this.controls }
+  }
+
+  private buildCurrentControls(): ACPControl[] {
+    return buildControls({
+      configOptions: this.configOptions,
+      models: this.modelState,
+      modes: this.modeState
+    })
+  }
+
+  private async setControl(control: ACPControl, value: string): Promise<void> {
+    const { connection, sessionId } = await this.ensureSession()
+    if (control.kind === 'config') {
+      const result = await connection.setSessionConfigOption({
+        sessionId,
+        configId: control.id,
+        value
+      })
+      this.configOptions = result.configOptions
+      this.controls = this.buildCurrentControls()
+    } else if (control.kind === 'mode') {
+      await connection.setSessionMode({ sessionId, modeId: value })
+      if (this.modeState) this.modeState = { ...this.modeState, currentModeId: value }
+      this.controls = this.modeState
+        ? this.buildCurrentControls()
+        : this.controls.map((item) => (item === control ? { ...item, current: value } : item))
+    } else {
+      let modelId = value
+      if (control.split) {
+        const resolved = this.modelState && resolveSplitModel(this.modelState, control, value)
+        if (!resolved) throw new Error('That model is not available at this reasoning level.')
+        modelId = resolved
+      }
+      await connection.unstable_setSessionModel({ sessionId, modelId })
+      if (this.modelState) {
+        this.modelState = { ...this.modelState, currentModelId: modelId }
+        this.controls = this.buildCurrentControls()
+      } else {
+        this.controls = this.controls.map((item) =>
+          item === control ? { ...item, current: value } : item
+        )
+      }
+    }
+    this.publish()
+  }
+
+  private handleMeta(update: SessionNotification['update']): void {
+    if (update.sessionUpdate === 'config_option_update') {
+      this.configOptions = update.configOptions
+      this.controls = this.buildCurrentControls()
+      this.publish()
+    } else if (update.sessionUpdate === 'current_mode_update') {
+      if (this.modeState)
+        this.modeState = { ...this.modeState, currentModeId: update.currentModeId }
+      this.controls = this.modeState
+        ? this.buildCurrentControls()
+        : this.controls.map((control) =>
+            control.category === 'mode' ? { ...control, current: update.currentModeId } : control
+          )
+      this.publish()
+    }
+  }
+
   async sendMessages({
     messages,
     abortSignal
@@ -205,29 +315,16 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
         .map((p) => p.text)
         .join('\n') ?? ''
 
-    if (this.session?.dead) {
-      this.session = null
-    }
-
-    if (!this.session) {
-      const started = await this.spawnAgent()
-      // Destroyed between startup and here: the agent is still `starting`, so stop it.
-      if (this.destroying) {
-        await started.child.kill().catch(() => undefined)
-        throw new Error('The chat closed while its agent was starting.')
-      }
-      this.session = started
-      this.starting = null
-      this.sentContext = false
-    }
+    this.session = await this.ensureSession()
 
     const carriesContext = !this.sentContext
     const promptText = carriesContext ? `${SYSTEM_PROMPT}\n\n${text}` : text
     this.sentContext = true
 
+    const prompt = await promptBlocks(lastUserMessage, promptText, this.imagePrompts)
+
     const { connection, sessionId } = this.session
     const session = this.session
-    const prompt = await promptBlocks(lastUserMessage, promptText, this.imagePrompts)
 
     return new ReadableStream<UIMessageChunk>({
       start: (controller) => {
@@ -298,6 +395,8 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
   async destroy(): Promise<void> {
     this.destroying = true
+    acpState.value = null
+    acpActions.value = null
     const starting = this.starting
     this.starting = null
     await starting?.kill().catch(() => undefined)
@@ -332,6 +431,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     // Set once the session exists; the client reads it to record the model the agent names.
     let sessionRef: ACPSession | null = null
     const agentId = this.agentDef.id
+    const onMeta = (update: SessionNotification['update']) => this.handleMeta(update)
     const { agentDef, store } = this
 
     const clientImpl: Client = {
@@ -359,6 +459,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
         if (update.sessionUpdate === 'available_commands_update') {
           setAgentCommands(agentId, update.availableCommands)
         }
+        onMeta(update)
         onUpdate?.(params)
       },
 
@@ -449,6 +550,13 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
       throw error
     }
     onUpdate = null
+
+    this.modelState = sessionResult.models ?? null
+    this.configOptions = sessionResult.configOptions ?? []
+    this.modeState = sessionResult.modes ?? null
+    this.controls = this.buildCurrentControls()
+    this.publish()
+    acpActions.value = { setControl: (control, value) => this.setControl(control, value) }
 
     const session: ACPSession = {
       connection,
