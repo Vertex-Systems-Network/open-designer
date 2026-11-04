@@ -105,6 +105,33 @@ describe('flattenSelected', () => {
     expect([vector?.x, vector?.y, vector?.width, vector?.height]).toEqual([50, 22, 8, 8])
   })
 
+  test('keeps line dashes and arrow caps on one continuous flattened path', async () => {
+    const { editor } = await createEditorWithRenderer()
+    const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
+    const line = editor.graph.createNode('LINE', editor.state.currentPageId, {
+      width: 80,
+      strokes: [
+        {
+          ...solid,
+          weight: 2,
+          cap: 'ARROW_EQUILATERAL' as const,
+          dashPattern: [8, 4]
+        }
+      ]
+    })
+
+    editor.select([line.id])
+    editor.flattenSelected()
+
+    const vector = editor.graph.getNode([...editor.state.selectedIds][0])
+    expect(vector?.type).toBe('VECTOR')
+    expect(vector?.strokes[0]).toMatchObject({
+      cap: 'ARROW_EQUILATERAL',
+      dashPattern: [8, 4]
+    })
+    expect(vector?.vectorNetwork?.segments).toHaveLength(1)
+  })
+
   test('keeps an outside stroke separate from its fill geometry', async () => {
     const { editor } = await createEditorWithRenderer()
     const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
