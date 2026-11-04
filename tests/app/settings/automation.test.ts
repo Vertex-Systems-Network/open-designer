@@ -33,7 +33,8 @@ test('reads appearance from the theme and locale stores alongside app preference
     theme: 'light',
     language: 'de',
     animations: appPreferences.value.appearance.animations,
-    accent: appPreferences.value.appearance.accent
+    accent: appPreferences.value.appearance.accent,
+    interfaceScale: appPreferences.value.appearance.interfaceScale
   })
   expect(settings.editing).toEqual(appPreferences.value.editing)
   expect(settings).not.toHaveProperty('version')
@@ -56,6 +57,13 @@ test('applies a nested partial update and keeps sibling settings', () => {
   expect(after.recovery).toEqual(before.recovery)
   expect(appPreferences.value.chat.maxAgentSteps).toBe(120)
   expect(getAppTheme()).toBe('auto')
+})
+
+test('automation clients can read and update interface size', () => {
+  expect(
+    updateAutomationSettings({ appearance: { interfaceScale: 125 } }).appearance.interfaceScale
+  ).toBe(125)
+  expect(appPreferences.value.appearance.interfaceScale).toBe(125)
 })
 
 test('changes design check settings and lists them', () => {
