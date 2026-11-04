@@ -189,8 +189,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   private configOptions: SessionConfigOption[] = []
   private modelState: SessionModelState | null = null
   private modeState: SessionModeState | null = null
-  private configUpdatedDuringStartup = false
-  private modeUpdatedDuringStartup = false
+  private startupUpdates = new Set<'config' | 'mode'>()
   private publishedActions: ACPSessionActions | null = null
   private connecting: Promise<ACPSession> | null = null
 
@@ -299,12 +298,12 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
   private handleMeta(update: SessionNotification['update']): void {
     if (update.sessionUpdate === 'config_option_update') {
-      if (!this.session) this.configUpdatedDuringStartup = true
+      if (!this.session) this.startupUpdates.add('config')
       this.configOptions = update.configOptions
       this.controls = this.buildCurrentControls()
       this.publish()
     } else if (update.sessionUpdate === 'current_mode_update') {
-      if (!this.session) this.modeUpdatedDuringStartup = true
+      if (!this.session) this.startupUpdates.add('mode')
       if (this.modeState)
         this.modeState = { ...this.modeState, currentModeId: update.currentModeId }
       this.controls = this.modeState
@@ -421,8 +420,6 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   }
 
   private async spawnAgent(): Promise<ACPSession> {
-    this.configUpdatedDuringStartup = false
-    this.modeUpdatedDuringStartup = false
     let process: Awaited<ReturnType<typeof spawnACPProcess>>
     try {
       process = await spawnACPProcess({
@@ -534,8 +531,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
     let sessionResult
     try {
-      this.configUpdatedDuringStartup = false
-      this.modeUpdatedDuringStartup = false
+      this.startupUpdates.clear()
       sessionResult = await untilStopped(
         connection.newSession({
           cwd: this.cwd,
@@ -570,8 +566,8 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     onUpdate = null
 
     this.modelState = sessionResult.models ?? null
-    if (!this.configUpdatedDuringStartup) this.configOptions = sessionResult.configOptions ?? []
-    if (!this.modeUpdatedDuringStartup) this.modeState = sessionResult.modes ?? null
+    if (!this.startupUpdates.has('config')) this.configOptions = sessionResult.configOptions ?? []
+    if (!this.startupUpdates.has('mode')) this.modeState = sessionResult.modes ?? null
     this.controls = this.buildCurrentControls()
     this.publishedActions = { setControl: (control, value) => this.setControl(control, value) }
     acpActions.value = this.publishedActions
