@@ -1,8 +1,8 @@
 import type { SceneGraph } from '@open-designer/scene-graph'
 
+import { extractPageContext } from '#core/io/subgraph'
+
 import { applyDocumentChange, captureDocumentChange, type DocumentChange } from './document-change'
-import { graphFromPageSnapshot } from './snapshot/graph'
-import { snapshotPage } from './snapshot/page'
 
 /**
  * Runs an asynchronous page edit against a private graph copy. A successful edit commits only its
@@ -14,8 +14,13 @@ export async function editOnIsolatedPage<T>(
   pageId: string,
   edit: (draft: SceneGraph) => Promise<T>
 ): Promise<T> {
-  const draft = graphFromPageSnapshot(graph, snapshotPage(graph, pageId))
-  if (!draft) throw new Error(`Page "${pageId}" is no longer available`)
+  const page = graph.getNode(pageId)
+  if (!page || page.type !== 'CANVAS') throw new Error(`Page "${pageId}" is no longer available`)
+  const draft = extractPageContext(graph, pageId, page.childIds)
+  draft.images = new Map(graph.images)
+  draft.variables = structuredClone(graph.variables)
+  draft.variableCollections = structuredClone(graph.variableCollections)
+  draft.enabledLibraries = new Map(graph.enabledLibraries)
   const finish = captureDocumentChange(draft, pageId)
   let result: T
   try {
