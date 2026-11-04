@@ -3,11 +3,12 @@ import { useElementSize, useWindowSize } from '@vueuse/core'
 import { motion } from 'motion-v'
 import type { PanInfo } from 'motion-v'
 import { TabsContent, TabsList, TabsRoot, TabsTrigger } from 'reka-ui'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { useI18n } from '@open-designer/vue/i18n'
 
 import { useEditorStore } from '@/app/editor/active-store'
+import { interfaceScaleFactor } from '@/app/shell/interface-scale'
 import { useMotionTransition } from '@/app/shell/motion/transitions'
 import ChatPanel from '@/components/chat/ChatPanel.vue'
 import {
@@ -35,6 +36,7 @@ const headerRef = ref<HTMLElement | null>(null)
 
 const { height: headerH } = useElementSize(headerRef, { width: 0, height: 56 })
 const { height: windowH } = useWindowSize()
+const hudClearance = computed(() => HUD_TOP * interfaceScaleFactor())
 
 const snap = computed({
   get: (): Snap => store.state.mobileDrawerSnap,
@@ -77,7 +79,7 @@ function toggleTab(tab: DrawerTab) {
 function snapHeight(s: Snap): number {
   switch (s) {
     case 'full':
-      return windowH.value - HUD_TOP
+      return windowH.value - hudClearance.value
     case 'half':
       return Math.round(windowH.value * HALF_FRAC)
     default:
@@ -86,6 +88,11 @@ function snapHeight(s: Snap): number {
 }
 
 const targetHeight = ref(snapHeight(snap.value))
+
+watch([headerH, hudClearance, windowH], () => {
+  if (snap.value === 'closed') targetHeight.value = snapHeight('closed')
+  else if (snap.value === 'full') targetHeight.value = snapHeight('full')
+})
 
 function onPan(_e: PointerEvent, info: PanInfo) {
   const maxHeight = snapHeight('full')
@@ -118,7 +125,7 @@ const drawerTransition = useMotionTransition({
 <template>
   <motion.div
     data-test-id="mobile-drawer"
-    class="fixed inset-x-0 bottom-0 z-30 flex touch-none flex-col rounded-t-3xl bg-panel pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.3)]"
+    class="interface-chrome fixed inset-x-0 bottom-0 z-30 flex touch-none flex-col rounded-t-3xl bg-panel pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.3)]"
     :animate="{ height: `${targetHeight}px` }"
     :transition="drawerTransition"
     @pan="onPan"

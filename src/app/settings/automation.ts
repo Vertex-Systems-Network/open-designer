@@ -12,6 +12,7 @@ import {
   CANVAS_RENDERING_MODES,
   CHANGE_PREVIEW_SIZES,
   DESIGN_CHECK_PRESETS,
+  INTERFACE_SCALES,
   REASONING_DISPLAYS,
   updateDesignCheckPreferences,
   type AppPreferences
@@ -31,6 +32,7 @@ export interface AutomationSettings {
     language: Locale
     animations: AppPreferences['appearance']['animations']
     accent: AppPreferences['appearance']['accent']
+    interfaceScale: AppPreferences['appearance']['interfaceScale']
   }
   editing: AppPreferences['editing']
   rendering: AppPreferences['rendering']
@@ -47,7 +49,8 @@ const automationSettingsPatchSchema = v.strictObject({
       theme: v.optional(v.picklist(APP_THEMES)),
       language: v.optional(v.picklist(AVAILABLE_LOCALES)),
       animations: v.optional(v.picklist(ANIMATION_PREFERENCES)),
-      accent: v.optional(accentPreferenceSchema)
+      accent: v.optional(accentPreferenceSchema),
+      interfaceScale: v.optional(v.picklist(INTERFACE_SCALES))
     })
   ),
   editing: v.optional(
@@ -91,7 +94,8 @@ export function readAutomationSettings(): AutomationSettings {
       theme: getAppTheme(),
       language: locale.get(),
       animations: preferences.appearance.animations,
-      accent: { ...preferences.appearance.accent }
+      accent: { ...preferences.appearance.accent },
+      interfaceScale: preferences.appearance.interfaceScale
     },
     editing: { snapping: { ...preferences.editing.snapping } },
     rendering: { ...preferences.rendering },

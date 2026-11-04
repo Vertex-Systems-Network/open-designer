@@ -5,7 +5,7 @@ import { reactive, ref } from 'vue'
 import { useInlineRename } from '@open-designer/vue/editor/inline-rename'
 import type { LayerNode } from '@open-designer/vue/primitives/LayerTree'
 
-import { LAYER_TREE_ROW_HEIGHT } from '@/components/LayerTree/geometry'
+import { layerTreeGeometry } from '@/components/LayerTree/geometry'
 import LayerTreeNodeRow from '@/components/LayerTree/LayerTreeNodeRow.vue'
 import LayerTreeRenameRow from '@/components/LayerTree/LayerTreeRenameRow.vue'
 import { provideLayerTreeUI } from '@/components/LayerTree/ui'
@@ -34,6 +34,7 @@ const items = reactive<DemoNode[]>(
     ]
   }))
 )
+const { rowHeight, indent } = layerTreeGeometry()
 function resolveNode(id: unknown): DemoNode {
   const node = items
     .flatMap((item) => [item, ...(item.children ?? [])])
@@ -77,7 +78,7 @@ provideLayerTreeUI(() => undefined)
   >
     <TreeVirtualizer
       v-slot="{ item }"
-      :estimate-size="LAYER_TREE_ROW_HEIGHT"
+      :estimate-size="rowHeight"
       :text-content="(node) => node.name"
     >
       <TreeItem
@@ -94,7 +95,7 @@ provideLayerTreeUI(() => undefined)
           v-if="rename.editingId.value === item.value.id"
           :node="resolveNode(item.value.id)"
           :has-children="item.hasChildren"
-          :pad-left="`${(item.level - 1) * 16}px`"
+          :pad-left="`${(item.level - 1) * indent}px`"
           :expanded="isExpanded"
           :actions="{
             select: () => {},
@@ -113,13 +114,13 @@ provideLayerTreeUI(() => undefined)
           :has-children="item.hasChildren"
           :selected="isSelected"
           :expanded="isExpanded"
-          :pad-left="`${(item.level - 1) * 16}px`"
+          :pad-left="`${(item.level - 1) * indent}px`"
           :chrome="{
             focused,
             draggingId: null,
             instruction: null,
             instructionTargetId: null,
-            indent: 16
+            indent
           }"
           :actions="{
             select: () => {},
