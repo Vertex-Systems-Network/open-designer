@@ -12,7 +12,8 @@ import {
   appPreferences,
   DEFAULT_APP_PREFERENCES,
   INTERFACE_SCALES,
-  updateAccentPreference
+  updateAccentPreference,
+  updateStartupUpdateCheck
 } from '@/app/settings/preferences/store'
 import { DEFAULT_THEME } from '@/app/settings/theme'
 import { DEFAULT_ACCENT } from '@/app/shell/accent/palette'
@@ -53,6 +54,11 @@ const languageOptions = availableLocales.map((value) => ({
 
 const defaultAnimations = DEFAULT_APP_PREFERENCES.appearance.animations
 const defaultRecovery = DEFAULT_APP_PREFERENCES.recovery.enabled
+const startupUpdateCheck = computed({
+  get: () => appPreferences.value.updates.checkOnStartup,
+  set: updateStartupUpdateCheck
+})
+const defaultStartupUpdateCheck = DEFAULT_APP_PREFERENCES.updates.checkOnStartup
 const accentModified = computed(
   () => !isEqual(appPreferences.value.appearance.accent, DEFAULT_ACCENT)
 )
@@ -151,6 +157,25 @@ const interfaceScaleOptions = computed(() => {
               { value: 'off', label: settings.animationsOff }
             ]"
             :ui="selectUI"
+          />
+        </SettingsRow>
+      </SettingsGroup>
+    </SettingsSection>
+
+    <SettingsSection>
+      <template #title>{{ settings.updates }}</template>
+      <SettingsGroup>
+        <SettingsRow
+          as="label"
+          :label="settings.checkUpdatesOnStartup"
+          :description="settings.checkUpdatesOnStartupDescription"
+          :modified="startupUpdateCheck !== defaultStartupUpdateCheck"
+          @reset="startupUpdateCheck = defaultStartupUpdateCheck"
+        >
+          <AppSwitch
+            v-model="startupUpdateCheck"
+            :label="settings.checkUpdatesOnStartup"
+            data-test-id="settings-update-check-on-startup"
           />
         </SettingsRow>
       </SettingsGroup>

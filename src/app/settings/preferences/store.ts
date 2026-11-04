@@ -119,6 +119,7 @@ export interface AppPreferences {
   }
   sharing: SharingPreferences
   notifications: NotificationPreferences
+  updates: { checkOnStartup: boolean }
 }
 
 export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
@@ -148,7 +149,8 @@ export const DEFAULT_APP_PREFERENCES: Readonly<AppPreferences> = {
   toolbar: structuredClone(DEFAULT_TOOLBAR_LAYOUT),
   onboarding: { aiSetup: 'pending' },
   sharing: { dailyPing: true, usageStats: 'unset' },
-  notifications: { agentNeedsInput: true, agentFinished: false, agentFailed: false }
+  notifications: { agentNeedsInput: true, agentFinished: false, agentFailed: false },
+  updates: { checkOnStartup: true }
 }
 
 const STORAGE_KEY = 'open-pencil:preferences:v1'
@@ -240,6 +242,9 @@ const appPreferencesSchema = section({
     agentNeedsInput: v.fallback(v.boolean(), defaults.notifications.agentNeedsInput),
     agentFinished: v.fallback(v.boolean(), defaults.notifications.agentFinished),
     agentFailed: v.fallback(v.boolean(), defaults.notifications.agentFailed)
+  }),
+  updates: section({
+    checkOnStartup: v.fallback(v.boolean(), defaults.updates.checkOnStartup)
   })
 })
 
@@ -290,6 +295,10 @@ export function updateNotificationPreferences(changes: Partial<NotificationPrefe
     ...appPreferences.value,
     notifications: { ...appPreferences.value.notifications, ...changes }
   }
+}
+
+export function updateStartupUpdateCheck(checkOnStartup: boolean): void {
+  appPreferences.value = { ...appPreferences.value, updates: { checkOnStartup } }
 }
 
 export function updateCanvasRenderingMode(canvasMode: CanvasRenderingMode): void {

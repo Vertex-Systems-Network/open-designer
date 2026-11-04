@@ -13,6 +13,7 @@ import { startCloud } from '@/app/cloud/integration'
 import { useDocumentCloseProtection } from '@/app/document/close/use'
 import { endRecoverySession, startRecoverySession } from '@/app/document/recovery/session'
 import { useFollowingEditorStore } from '@/app/editor/active-store'
+import { appPreferences } from '@/app/settings/preferences/store'
 import { interfaceScalePreference } from '@/app/shell/interface-scale'
 import { animationsEnabled } from '@/app/shell/motion'
 import { useAppTheme } from '@/app/shell/theme'
@@ -62,7 +63,7 @@ useEventListener(window, 'pageshow', (event) => {
 
 onMounted(() => {
   toast.setupGlobalErrorHandler()
-  scheduleStartupUpdateCheck(updates)
+  scheduleStartupUpdateCheck(updates, () => appPreferences.value.updates.checkOnStartup)
   void kickSyncEngine()
   onUnmounted(
     startCloud({ leaveLinkAddress: () => router.isReady().then(() => router.replace('/')) })
