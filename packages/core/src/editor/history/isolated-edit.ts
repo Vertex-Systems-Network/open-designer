@@ -18,14 +18,13 @@ export async function editOnIsolatedPage<T>(
   if (!draft) throw new Error(`Page "${pageId}" is no longer available`)
   const finish = captureDocumentChange(draft, pageId)
   let result: T
-  let change: DocumentChange
   try {
     result = await edit(draft)
   } catch (error) {
     finish()
     throw error
   }
-  change = finish()
+  const change: DocumentChange = finish()
   applyDocumentChange(graph, mergeConcurrentChildren(graph, change), 'after')
   return result
 }

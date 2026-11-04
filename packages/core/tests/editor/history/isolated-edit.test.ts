@@ -7,8 +7,12 @@ import { editOnIsolatedPage } from '#core/editor/history/isolated-edit'
 function gate() {
   let start!: () => void
   let finish!: () => void
-  const started = new Promise<void>((resolve) => (start = resolve))
-  const waiting = new Promise<void>((resolve) => (finish = resolve))
+  const started = new Promise<void>((resolve) => {
+    start = resolve
+  })
+  const waiting = new Promise<void>((resolve) => {
+    finish = resolve
+  })
   return { started, waiting, start, finish }
 }
 
