@@ -31,7 +31,7 @@ if (process.argv.includes('--help') || process.argv.includes('-h')) {
       `  OPENDESIGNER_MCP_ROOT          Allowed directory for file-scoped tools (default: home directory on Windows, current working directory elsewhere)\n` +
       `  OPENDESIGNER_MCP_EVAL           Set to 1 to enable the eval tool\n` +
       `  OPENDESIGNER_MCP_SESSION_IDLE_TIMEOUT_MS\n` +
-      `                               Close sessions idle this long, in ms (default: 900000;\n` +
+      `                               Close sessions idle this long, in ms (default: 604800000;\n` +
       `                               0 disables). An open GET/SSE stream is not activity.\n` +
       `  OPENDESIGNER_MCP_DISABLED_TOOLS Comma-separated tool names to omit\n` +
       `  OPENDESIGNER_MCP_SCOPE         "selection" to let clients read only the selected layers\n` +
