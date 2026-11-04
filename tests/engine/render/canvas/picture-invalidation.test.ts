@@ -61,14 +61,14 @@ test('path caches are cleared when the renderer switches documents', () => {
 
   useGraphPathCaches(renderer, asDouble<SceneGraph>(firstGraph))
   expect(nodePaths.clear).toHaveBeenCalledTimes(1)
-  expect(renderer.pathCacheGraph).toBe(firstGraph)
+  expect(renderer.pathCacheGraph).toBe(asDouble<SceneGraph>(firstGraph))
 
   useGraphPathCaches(renderer, asDouble<SceneGraph>(firstGraph))
   expect(nodePaths.clear).toHaveBeenCalledTimes(1)
 
   useGraphPathCaches(renderer, asDouble<SceneGraph>(secondGraph))
   expect(nodePaths.clear).toHaveBeenCalledTimes(2)
-  expect(renderer.pathCacheGraph).toBe(secondGraph)
+  expect(renderer.pathCacheGraph).toBe(asDouble<SceneGraph>(secondGraph))
 })
 
 test('node picture invalidation removes the changed node picture and keeps its parent', () => {
