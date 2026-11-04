@@ -1,8 +1,16 @@
 import { expect, mock, test } from 'bun:test'
 
+import type { SceneGraph } from '@open-designer/scene-graph'
+
 import { EffectRasterCache } from '#core/canvas/renderer/effect-raster-cache'
-import { invalidateAllPictures, invalidateNodePicture } from '#core/canvas/renderer/state'
+import {
+  invalidateAllPictures,
+  invalidateNodePicture,
+  useGraphPathCaches
+} from '#core/canvas/renderer/state'
 import { TextPreparationCache } from '#core/canvas/text/preparation/cache'
+
+import { asDouble } from '#tests/helpers/doubles'
 
 import { asRenderer } from './helpers'
 
@@ -43,6 +51,24 @@ test('full picture invalidation resets tiled font-dependent resources', () => {
   expect(backingImage.delete).toHaveBeenCalledTimes(1)
   expect(nodePicture.delete).toHaveBeenCalledTimes(1)
   expect(subtreePicture.delete).toHaveBeenCalledTimes(1)
+})
+
+test('path caches are cleared when the renderer switches documents', () => {
+  const firstGraph = {}
+  const secondGraph = {}
+  const nodePaths = { clear: mock() }
+  const renderer = asRenderer({ nodePaths, pathCacheGraph: null })
+
+  useGraphPathCaches(renderer, asDouble<SceneGraph>(firstGraph))
+  expect(nodePaths.clear).toHaveBeenCalledTimes(1)
+  expect(renderer.pathCacheGraph).toBe(asDouble<SceneGraph>(firstGraph))
+
+  useGraphPathCaches(renderer, asDouble<SceneGraph>(firstGraph))
+  expect(nodePaths.clear).toHaveBeenCalledTimes(1)
+
+  useGraphPathCaches(renderer, asDouble<SceneGraph>(secondGraph))
+  expect(nodePaths.clear).toHaveBeenCalledTimes(2)
+  expect(renderer.pathCacheGraph).toBe(asDouble<SceneGraph>(secondGraph))
 })
 
 test('node picture invalidation removes the changed node picture and keeps its parent', () => {

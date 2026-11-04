@@ -13,7 +13,7 @@ import { emitNavigationTrace } from '#core/profiler'
 import { disposePathCaches } from './lifecycle'
 import { drawChromePass, drawLabelPass, drawOverlayPass } from './overlay-pass'
 import { renderSceneBacking, updateSceneBackingPreviewState } from './retained-backing'
-import { invalidateAllPictures, invalidateScenePicture } from './state'
+import { invalidateAllPictures, invalidateScenePicture, useGraphPathCaches } from './state'
 import { hasTransientPreviews, renderPageWithPreviews } from './transient-previews'
 
 export function renderSceneToCanvas(
@@ -52,6 +52,7 @@ export function renderFromEditorState(
   layer: RenderLayer = 'full',
   interactive = false
 ): boolean {
+  useGraphPathCaches(r, graph)
   const previewMode = r.imagePreviews.enabled && needsImagePreviews(graph)
   if (
     r.imageMemoryGraph !== graph ||

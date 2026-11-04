@@ -1,7 +1,17 @@
-import type { SceneNode } from '@open-designer/scene-graph'
+import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
 import { changesShaping } from '#core/canvas/text/paragraph/inputs'
+
+/** Node IDs are only unique within a graph, so cached paths cannot survive a graph switch. */
+export function useGraphPathCaches(
+  r: Pick<SkiaRenderer, 'nodePaths' | 'pathCacheGraph'>,
+  graph: SceneGraph
+): void {
+  if (r.pathCacheGraph === graph) return
+  r.nodePaths.clear()
+  r.pathCacheGraph = graph
+}
 
 export function invalidateScenePicture(r: SkiaRenderer): void {
   r.scenePicture?.delete()

@@ -1,6 +1,7 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 
 import type { SkiaRenderer } from '#core/canvas/renderer'
+import { useGraphPathCaches } from '#core/canvas/renderer/state'
 import {
   COMPONENT_LABEL_FONT_SIZE,
   DEFAULT_FONT_FAMILY,
@@ -161,6 +162,7 @@ export async function prepareForExport(
   pageId: string,
   nodeIds: string[]
 ): Promise<void> {
+  useGraphPathCaches(r, graph)
   const { computeAllLayouts } = await import('#core/layout')
   await prepareGraphFonts(graph, nodeIds)
   syncFontGeneration(r)

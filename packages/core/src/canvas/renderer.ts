@@ -130,6 +130,8 @@ export class SkiaRenderer {
   fontProvider: TypefaceFontProvider | null = null
   fontsLoaded = false
   fontGeneration = 0
+  /** Graph identity owning the node-ID-keyed path caches. */
+  pathCacheGraph: SceneGraph | null = null
   onFontResolutionSettled:
     | ((snapshot: FontResolutionSnapshot, nodeIds: readonly string[]) => void)
     | undefined
