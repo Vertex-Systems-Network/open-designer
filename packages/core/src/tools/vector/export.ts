@@ -227,7 +227,9 @@ export const exportImage = defineTool({
       format
     })
     if (!data || data.length === 0) {
-      return { error: 'The renderer returned no image for these nodes' }
+      return {
+        error: `The renderer returned no ${format} image for these nodes; ${format} encoding may be unavailable in this environment`
+      }
     }
     const base64 = fromUint8Array(data)
     const mimeMap = { PNG: 'image/png', JPG: 'image/jpeg', WEBP: 'image/webp' } as const

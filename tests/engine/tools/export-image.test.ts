@@ -83,14 +83,20 @@ describe('export_image tool', () => {
     expect(rendered).toBe(false)
   })
 
-  test('tells an empty render apart from nothing visible', async () => {
+  test('reports the requested format when the renderer returns no image', async () => {
     const { figma } = setupToolTest()
     const frame = figma.createFrame()
     frame.resize(40, 30)
     figma.exportImage = async () => null
 
-    const result = await getTool('export_image').execute(figma, { ids: [frame.id] })
+    const result = await getTool('export_image').execute(figma, {
+      ids: [frame.id],
+      format: 'WEBP'
+    })
 
-    expect(result).toEqual({ error: 'The renderer returned no image for these nodes' })
+    expect(result).toEqual({
+      error:
+        'The renderer returned no WEBP image for these nodes; WEBP encoding may be unavailable in this environment'
+    })
   })
 })
