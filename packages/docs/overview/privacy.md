@@ -80,7 +80,7 @@ If you join the OpenDesigner Cloud waitlist on this site, we store your email ad
 
 ## Other network requests
 
-OpenDesigner is local-first, but some features reach the network. The desktop app checks for updates on its own; everything else below connects only when you use that feature, and only to the service named.
+OpenDesigner is local-first, but some features reach the network. The desktop app can check for updates on startup when that preference is enabled; you can also check manually. Everything else below connects only when you use that feature, and only to the service named.
 
 | Feature                 | Where it connects                                                                                                                                                                                       |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

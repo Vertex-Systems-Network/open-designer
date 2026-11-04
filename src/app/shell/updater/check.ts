@@ -29,12 +29,15 @@ export async function checkForAppUpdate(options: UpdateCheckOptions) {
   return updateCheckInFlight
 }
 
-export function scheduleStartupUpdateCheck(messages: Ref<UpdaterMessages>) {
-  if (startupCheckStarted || !isTauri()) return
+export function scheduleStartupUpdateCheck(
+  messages: Ref<UpdaterMessages>,
+  enabled: () => boolean = () => true
+) {
+  if (!enabled() || startupCheckStarted || !isTauri()) return
   startupCheckStarted = true
-  void promiseTimeout(STARTUP_UPDATE_CHECK_DELAY_MS).then(() =>
-    checkForAppUpdate({ silent: true, messages })
-  )
+  void promiseTimeout(STARTUP_UPDATE_CHECK_DELAY_MS).then(() => {
+    return enabled() ? checkForAppUpdate({ silent: true, messages }) : undefined
+  })
 }
 
 // The main window only learns whether an update exists; the Software Update
