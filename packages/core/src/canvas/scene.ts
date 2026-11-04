@@ -1099,7 +1099,8 @@ function drawsLaidOutText(r: SkiaRenderer, node: SceneNode): boolean {
  * over the blank squares the editor's layout gives them.
  */
 function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
-  const saved = drawsSavedText(node)
+  const saved =
+    (node.textPathData !== null || r.nodeFontReadiness(node) !== 'ready') && drawsSavedText(node)
   if (!saved && !drawsLaidOutText(r, node)) return
   canvas.save()
   if (saved) drawSavedEmoji(r, canvas, node)
@@ -1111,8 +1112,15 @@ function drawTextEmoji(r: SkiaRenderer, canvas: Canvas, node: SceneNode): void {
   canvas.restore()
 }
 
-function drawSavedText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): boolean {
-  return canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
+function drawSavedText(
+  r: SkiaRenderer,
+  canvas: Canvas,
+  node: SceneNode,
+  fill?: Fill,
+  fontReadiness: ReturnType<SkiaRenderer['nodeFontReadiness']> = r.nodeFontReadiness(node)
+): boolean {
+  const usesSavedFontFallback = node.textPathData !== null || fontReadiness !== 'ready'
+  return usesSavedFontFallback && canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
 }
 
 export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): void {
@@ -1121,11 +1129,11 @@ export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fil
 
   canvas.save()
 
-  if (drawSavedText(r, canvas, node, fill)) {
+  const fontReadiness = r.nodeFontReadiness(node)
+  if (drawSavedText(r, canvas, node, fill, fontReadiness)) {
     canvas.restore()
     return
   }
-  const fontReadiness = r.nodeFontReadiness(node)
   if (fontReadiness === 'pending') {
     canvas.restore()
     return
