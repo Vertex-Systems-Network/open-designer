@@ -90,15 +90,12 @@ export function regenerateFillGeometry(
   return []
 }
 
-
 /** Encode each network region as a filled-geometry path that the Canvas renderer can draw. */
-export function geometryPathsFromNetwork(
-  network: VectorNetwork,
-  fills: Fill[]
-): GeometryPath[] {
+export function geometryPathsFromNetwork(network: VectorNetwork, fills: Fill[]): GeometryPath[] {
   return network.regions.map((region) => {
     const builder = new GeometryBlobBuilder()
-    for (const loop of region.loops) addLoopToPath(builder, loop, network.segments, network.vertices)
+    for (const loop of region.loops)
+      addLoopToPath(builder, loop, network.segments, network.vertices)
     return {
       windingRule: region.windingRule,
       commandsBlob: builder.toBlob(),

@@ -444,7 +444,6 @@ export function strokeNodeShape(
   }
 }
 
-
 /** Run a visible stroke with its resolved paint state, then clear transient shaders and blending. */
 export function forVisibleStrokes(
   r: SkiaRenderer,
