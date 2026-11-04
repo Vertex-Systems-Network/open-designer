@@ -60,6 +60,9 @@ export function createFileHandlers(files?: AutomationFiles) {
   // Automation never opens the Save dialog: nobody may be there to answer it.
   async function saveWithoutPrompt(store: AutomationTarget['store'], path?: string): Promise<void> {
     const name = store.state.documentName
+    if (path?.toLowerCase().endsWith('.pen')) {
+      throw new Error('save_file writes fig-kiwi files; use a .fig path instead of .pen')
+    }
     if (!path && !store.hasWritableSource()) {
       throw new Error(`"${name}" has not been saved to a file yet; pass a path to save it`)
     }

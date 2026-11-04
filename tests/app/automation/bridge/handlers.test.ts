@@ -370,6 +370,16 @@ describe('close_file and save_file never prompt', () => {
     expect(tab.store.getDocumentFilePath()).toBeNull()
     expect(tab.store.hasWritableSource()).toBe(false)
   })
+
+  test('rejects a .pen path instead of writing a fig-kiwi archive with a misleading extension', async () => {
+    const tab = dirtyTab()
+    await expect(
+      request('save_file', { document_id: tab.id, path: '/tmp/copy.PEN' })
+    ).rejects.toThrow('save_file writes fig-kiwi files; use a .fig path instead of .pen')
+    expect(tab.store.state.documentName).toBe('Untitled')
+    expect(tab.store.getDocumentFilePath()).toBeNull()
+    expect(tab.store.hasUnsavedChanges()).toBe(true)
+  })
 })
 
 describe('file paths in a browser go through the MCP server', () => {
@@ -398,6 +408,16 @@ describe('file paths in a browser go through the MCP server', () => {
     expect(tab.store.hasUnsavedChanges()).toBe(false)
     // Where the document saves next does not change.
     expect(tab.store.hasWritableSource()).toBe(false)
+  })
+
+  test('does not send a fig-kiwi archive to the MCP server with a .pen extension', async () => {
+    const tab = dirtyTab()
+    const fetch = vi.spyOn(globalThis, 'fetch')
+    await expect(
+      requestThroughServer('save_file', { document_id: tab.id, path: '/root/copy.pen' })
+    ).rejects.toThrow('save_file writes fig-kiwi files; use a .fig path instead of .pen')
+    expect(fetch).not.toHaveBeenCalled()
+    expect(tab.store.hasUnsavedChanges()).toBe(true)
   })
 
   test('a copy the server refuses leaves the changes unsaved', async () => {
