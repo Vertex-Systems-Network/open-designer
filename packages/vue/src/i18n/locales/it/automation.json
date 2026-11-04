@@ -86,5 +86,11 @@
   "mcpFailureUnknown": "Impossibile avviare il server MCP",
   "mcpFailureUnknownHint": "Avvialo di nuovo o controlla i dettagli tecnici qui sotto.",
   "mcpFailureDetails": "Dettagli",
-  "mcpFailureCopy": "Copia dettagli"
+  "mcpFailureCopy": "Copia dettagli",
+  "sessionIdleTimeout": "Scadenza sessione",
+  "sessionIdleTimeoutDescription": "Chiudi le sessioni MCP inattive dopo questo intervallo. Scegli Mai per mantenerle fino alla disconnessione del client. Riavvia il server per applicare la modifica.",
+  "sessionTimeout15Minutes": "15 minuti",
+  "sessionTimeoutOneDay": "1 giorno",
+  "sessionTimeoutSevenDays": "7 giorni",
+  "sessionTimeoutNever": "Mai"
 }
