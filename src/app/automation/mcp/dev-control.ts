@@ -13,6 +13,7 @@ export interface DevMCPConfiguration {
   rootDirectory: string
   disabledTools: string[]
   scope: MCPToolScope
+  sessionIdleTimeoutMs: number
 }
 
 function parseScope(value: unknown): MCPToolScope | null {
@@ -43,14 +44,16 @@ export function parseDevMCPConfiguration(value: unknown): DevMCPConfiguration | 
   const rootDirectory = Reflect.get(value, 'rootDirectory')
   const disabledTools = parseDisabledTools(Reflect.get(value, 'disabledTools'))
   const scope = parseScope(Reflect.get(value, 'scope'))
+  const sessionIdleTimeoutMs = Reflect.get(value, 'sessionIdleTimeoutMs')
   if (
     typeof authenticationEnabled !== 'boolean' ||
     typeof rootDirectory !== 'string' ||
     rootDirectory.length > MAX_ROOT_DIRECTORY_LENGTH ||
     !disabledTools ||
-    !scope
+    !scope ||
+    ![0, 900_000, 86_400_000, 604_800_000].includes(sessionIdleTimeoutMs)
   ) {
     return null
   }
-  return { authenticationEnabled, rootDirectory, disabledTools, scope }
+  return { authenticationEnabled, rootDirectory, disabledTools, scope, sessionIdleTimeoutMs }
 }

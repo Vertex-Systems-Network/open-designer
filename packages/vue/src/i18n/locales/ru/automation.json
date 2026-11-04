@@ -86,5 +86,11 @@
   "mcpFailureUnknown": "MCP-сервер не удалось запустить",
   "mcpFailureUnknownHint": "Запустите его снова или посмотрите технические подробности ниже.",
   "mcpFailureDetails": "Подробности",
-  "mcpFailureCopy": "Копировать подробности"
+  "mcpFailureCopy": "Копировать подробности",
+  "sessionIdleTimeout": "Тайм-аут сеанса",
+  "sessionIdleTimeoutDescription": "Закрывать неактивные сеансы MCP по истечении этого времени. Выберите «Никогда», чтобы сохранять их до отключения клиента. Перезапустите сервер, чтобы применить настройку.",
+  "sessionTimeout15Minutes": "15 минут",
+  "sessionTimeoutOneDay": "1 день",
+  "sessionTimeoutSevenDays": "7 дней",
+  "sessionTimeoutNever": "Никогда"
 }

@@ -101,7 +101,7 @@ export interface ServerOptions {
   appAttachTimeoutMs?: number
   /**
    * How long an MCP session may sit without requests before it is closed.
-   * Defaults to 15 minutes; 0 disables expiration. An open GET/SSE stream
+   * Defaults to 7 days; 0 disables expiration. An open GET/SSE stream
    * does not count as activity.
    */
   sessionIdleTimeoutMs?: number

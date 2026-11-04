@@ -86,5 +86,11 @@
   "mcpFailureUnknown": "No se pudo iniciar el servidor MCP",
   "mcpFailureUnknownHint": "Vuelve a iniciarlo o revisa los detalles técnicos de abajo.",
   "mcpFailureDetails": "Detalles",
-  "mcpFailureCopy": "Copiar detalles"
+  "mcpFailureCopy": "Copiar detalles",
+  "sessionIdleTimeout": "Tiempo de espera de la sesión",
+  "sessionIdleTimeoutDescription": "Cierra las sesiones MCP inactivas después de este tiempo. Elige Nunca para mantenerlas hasta que el cliente se desconecte. Reinicia el servidor para aplicar el cambio.",
+  "sessionTimeout15Minutes": "15 minutos",
+  "sessionTimeoutOneDay": "1 día",
+  "sessionTimeoutSevenDays": "7 días",
+  "sessionTimeoutNever": "Nunca"
 }

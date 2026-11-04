@@ -13,6 +13,7 @@ import { restartFixesMCPFailure } from '@/app/automation/mcp/failure'
 import {
   mcpAuthenticationEnabled,
   mcpRootDirectory,
+  mcpSessionIdleTimeoutMs,
   mcpSelectionOnly
 } from '@/app/automation/mcp/preferences'
 import { localMCPAvailable, mcpRuntime } from '@/app/automation/mcp/runtime'
@@ -28,6 +29,7 @@ import AppButton from '@/components/ui/button/AppButton.vue'
 import AppAlert from '@/components/ui/feedback/AppAlert.vue'
 import AppStatus from '@/components/ui/feedback/AppStatus.vue'
 import AppCopyField from '@/components/ui/input/AppCopyField.vue'
+import AppSelect from '@/components/ui/select/AppSelect.vue'
 import AppSwitch from '@/components/ui/toggle/AppSwitch.vue'
 import { DESKTOP_DOWNLOAD_URL, MCP_SERVER_DOCS_URL } from '@/constants'
 
@@ -65,6 +67,12 @@ const statusTone = computed(
     )[mcpRuntime.status]
 )
 const { restart, chooseRootDirectory } = useMCPSettings()
+const sessionIdleTimeoutOptions = computed(() => [
+  { value: 900_000, label: automation.value.sessionTimeout15Minutes },
+  { value: 86_400_000, label: automation.value.sessionTimeoutOneDay },
+  { value: 604_800_000, label: automation.value.sessionTimeoutSevenDays },
+  { value: 0, label: automation.value.sessionTimeoutNever }
+])
 // Checked only while the failure is one an install fixes.
 const serverSetup = useMCPServerSetup(() =>
   Boolean(mcpRuntime.failure && needsMCPInstall(mcpRuntime.failure))
@@ -117,6 +125,17 @@ const serverSetup = useMCPServerSetup(() =>
         </div>
       </SettingsGroup>
       <SettingsGroup>
+        <SettingsRow
+          :label="automation.sessionIdleTimeout"
+          :description="automation.sessionIdleTimeoutDescription"
+        >
+          <AppSelect
+            v-model="mcpSessionIdleTimeoutMs"
+            :options="sessionIdleTimeoutOptions"
+            :label="automation.sessionIdleTimeout"
+            data-test-id="settings-mcp-session-timeout"
+          />
+        </SettingsRow>
         <SettingsRow
           :label="automation.authentication"
           :description="automation.authenticationDescription"
