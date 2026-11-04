@@ -1120,7 +1120,11 @@ function drawSavedText(
   fontReadiness: ReturnType<SkiaRenderer['nodeFontReadiness']> = r.nodeFontReadiness(node)
 ): boolean {
   const usesSavedFontFallback = node.textPathData !== null || fontReadiness !== 'ready'
-  return usesSavedFontFallback && canDrawSavedText(node, fill) && drawDerivedText(r, canvas, node, fill)
+  return (
+    usesSavedFontFallback &&
+    canDrawSavedText(node, fill) &&
+    drawDerivedText(r, canvas, node, fill)
+  )
 }
 
 export function renderText(r: SkiaRenderer, canvas: Canvas, node: SceneNode, fill?: Fill): void {
