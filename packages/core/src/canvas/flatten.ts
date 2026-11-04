@@ -264,10 +264,7 @@ function affineTransform([m00, m01, m02, m10, m11, m12]: Affine) {
 
 function topStroke(node: SceneNode): Pick<SceneNode, StrokeFields> {
   return {
-    strokes:
-      node.type === 'LINE'
-        ? copyStrokes(node.strokes).map((stroke) => ({ ...stroke, dashPattern: [] }))
-        : copyStrokes(node.strokes),
+    strokes: copyStrokes(node.strokes),
     strokeWeight: node.strokeWeight,
     strokeAlign: node.strokeAlign,
     strokeCap: node.strokeCap,
