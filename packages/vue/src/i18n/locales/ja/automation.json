@@ -88,7 +88,7 @@
   "mcpFailureDetails": "詳細",
   "mcpFailureCopy": "詳細をコピー",
   "sessionIdleTimeout": "セッションのタイムアウト",
-  "sessionIdleTimeoutDescription": "この時間が経過すると、非アクティブな MCP セッションを終了します。「無期限」を選ぶと、クライアントが切断するまで維持します。変更を適用するにはサーバーを再起動してください。",
+  "sessionIdleTimeoutDescription": "この時間が経過すると、非アクティブなセッションを終了します。「無期限」を選ぶと、クライアントが切断するまで維持します。変更を適用するにはサーバーを再起動してください。",
   "sessionTimeout15Minutes": "15 分",
   "sessionTimeoutOneDay": "1 日",
   "sessionTimeoutSevenDays": "7 日",
