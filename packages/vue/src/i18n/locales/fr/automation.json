@@ -89,7 +89,7 @@
   "mcpFailureCopy": "Copier les détails",
   "sessionIdleTimeout": "Expiration de session",
   "sessionIdleTimeoutDescription": "Fermez les sessions MCP inactives après cette durée. Choisissez Jamais pour les garder jusqu’à la déconnexion du client. Redémarrez le serveur pour appliquer ce réglage.",
-  "sessionTimeout15Minutes": "15 minutes",
+  "sessionTimeout15Minutes": "15 min",
   "sessionTimeoutOneDay": "1 jour",
   "sessionTimeoutSevenDays": "7 jours",
   "sessionTimeoutNever": "Jamais"
