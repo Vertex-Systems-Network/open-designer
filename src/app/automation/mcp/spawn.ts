@@ -35,6 +35,7 @@ import {
   disabledMCPTools,
   mcpAuthenticationEnabled,
   mcpRootDirectory,
+  mcpSessionIdleTimeoutMs,
   mcpScope
 } from './preferences'
 
@@ -477,7 +478,8 @@ async function configureDevMCP(): Promise<AutomationServerHandle> {
     authenticationEnabled: mcpAuthenticationEnabled.value,
     rootDirectory: mcpRootDirectory.value,
     disabledTools: [...disabledMCPTools.value],
-    scope: mcpScope()
+    scope: mcpScope(),
+    sessionIdleTimeoutMs: mcpSessionIdleTimeoutMs.value
   }
   const response = await fetch(DEV_MCP_RESTART_PATH, {
     method: 'POST',
@@ -560,7 +562,8 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
     // of the pipe closes with it, and the server exits on that.
     OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE: '1',
     OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(disabledMCPTools.value),
-    OPENDESIGNER_MCP_SCOPE: mcpScope()
+    OPENDESIGNER_MCP_SCOPE: mcpScope(),
+    OPENDESIGNER_MCP_SESSION_IDLE_TIMEOUT_MS: String(mcpSessionIdleTimeoutMs.value)
   })
   const command = Command.create(resolved.command, resolved.args, { env: environment })
 
@@ -578,7 +581,9 @@ async function startMCPIfNeeded(timing: MCPStartupTiming): Promise<AutomationSer
       OPENPENCIL_MCP_APP_TIMEOUT_MS: environment.OPENDESIGNER_MCP_APP_TIMEOUT_MS,
       OPENPENCIL_MCP_EXIT_ON_STDIN_CLOSE: environment.OPENDESIGNER_MCP_EXIT_ON_STDIN_CLOSE,
       OPENPENCIL_MCP_DISABLED_TOOLS: environment.OPENDESIGNER_MCP_DISABLED_TOOLS,
-      OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE
+      OPENPENCIL_MCP_SCOPE: environment.OPENDESIGNER_MCP_SCOPE,
+      OPENPENCIL_MCP_SESSION_IDLE_TIMEOUT_MS:
+        environment.OPENDESIGNER_MCP_SESSION_IDLE_TIMEOUT_MS
     }
   }
 
