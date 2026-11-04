@@ -1,0 +1,1 @@
+- A design JSX render, replacement, or diff addition that fails partway now restores the page instead of leaving partial layers behind.
