@@ -165,7 +165,7 @@ function rebaseFills(
   graph: SceneGraph
 ): SceneNode['fills'] {
   const sourceToFlat = multiplyAffine(
-    scaleAffine(1 / box.width, 1 / box.height),
+    scaleAffine(1 / (box.width || 1), 1 / (box.height || 1)),
     multiplyAffine(
       translateAffine(-box.x, -box.y),
       multiplyAffine(matrix, scaleAffine(node.width || 1, node.height || 1))
