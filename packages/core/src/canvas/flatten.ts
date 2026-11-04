@@ -117,7 +117,7 @@ export function flattenNodesToVectorProps(
     const alike = styled.every(({ fills }) => isEqual(fills, styled[0].fills))
     const fillGeometry = networks.flatMap(({ node, matrix, network }) => {
       if (node.type === 'VECTOR' && node.fillGeometry.length > 0) {
-        const fillsForPath = (fills: SceneNode['fills']) =>
+        const fillsForPath = (fills: SceneNode['fills'] | undefined) =>
           rebaseFills(fills?.length ? fills : node.fills, node, matrix, box, renderer, graph)
         const geometry = node.fillGeometry.map((item) => ({
           ...item,
