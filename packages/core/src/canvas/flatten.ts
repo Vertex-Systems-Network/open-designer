@@ -17,6 +17,7 @@ import {
   placedPath,
   windingRuleOf
 } from './boolean'
+import { makeImageFillLocalMatrix } from './fills'
 import type { SkiaRenderer } from './renderer'
 
 /** The stroke a flattened vector takes from its topmost shape. */
@@ -111,13 +112,13 @@ export function flattenNodesToVectorProps(
     const filled = networks.filter(({ network }) => network.regions.length > 0)
     const styled = filled.map(({ node, matrix }) => ({
       node,
-      fills: rebaseFills(node.fills, node, matrix, box)
+      fills: rebaseFills(node.fills, node, matrix, box, renderer, graph)
     }))
     const alike = styled.every(({ fills }) => isEqual(fills, styled[0].fills))
     const fillGeometry = networks.flatMap(({ node, matrix, network }) => {
       if (node.type === 'VECTOR' && node.fillGeometry.length > 0) {
         const fillsForPath = (fills: SceneNode['fills']) =>
-          rebaseFills(fills?.length ? fills : node.fills, node, matrix, box)
+          rebaseFills(fills?.length ? fills : node.fills, node, matrix, box, renderer, graph)
         const geometry = node.fillGeometry.map((item) => ({
           ...item,
           fills: fillsForPath(item.fills)
@@ -132,7 +133,10 @@ export function flattenNodesToVectorProps(
           matrix[5] - box.y
         )
       }
-      return geometryPathsFromNetwork(network, rebaseFills(node.fills, node, matrix, box))
+      return geometryPathsFromNetwork(
+        network,
+        rebaseFills(node.fills, node, matrix, box, renderer, graph)
+      )
     })
     return {
       name: 'Flatten',
@@ -156,7 +160,9 @@ function rebaseFills(
   fills: SceneNode['fills'],
   node: SceneNode,
   matrix: number[],
-  box: Rect
+  box: Rect,
+  renderer: SkiaRenderer,
+  graph: SceneGraph
 ): SceneNode['fills'] {
   const sourceToFlat = multiplyAffine(
     scaleAffine(1 / box.width, 1 / box.height),
@@ -168,18 +174,49 @@ function rebaseFills(
   const flatToSource = invertAffine(sourceToFlat)
   if (!flatToSource) return copyFills(fills)
   return copyFills(fills).map((fill) => {
-    const key = fill.gradientTransform
-      ? 'gradientTransform'
-      : fill.imageTransform
-        ? 'imageTransform'
-        : null
-    if (!key) return fill
-    const transform = fill[key]!
-    const rebased = multiplyAffine(
-      [transform.m00, transform.m01, transform.m02, transform.m10, transform.m11, transform.m12],
-      flatToSource
-    )
-    return { ...fill, [key]: affineTransform(rebased) }
+    if (fill.gradientTransform) {
+      const rebased = multiplyAffine(
+        [
+          fill.gradientTransform.m00,
+          fill.gradientTransform.m01,
+          fill.gradientTransform.m02,
+          fill.gradientTransform.m10,
+          fill.gradientTransform.m11,
+          fill.gradientTransform.m12
+        ],
+        flatToSource
+      )
+      return { ...fill, gradientTransform: affineTransform(rebased) }
+    }
+    if (fill.type !== 'IMAGE' || !fill.imageHash) return fill
+    const bytes = graph.images.get(fill.imageHash)
+    if (!bytes) return fill
+    const image = renderer.ck.MakeImageFromEncoded(bytes)
+    if (!image) return fill
+    try {
+      // Encode the original FILL/FIT/TILE layout as an equivalent CROP transform. Those layout
+      // modes derive their mapping from node bounds and ignore imageTransform, which no longer
+      // describes the source shape once its region has moved into the combined vector.
+      const oldLocalMatrix = makeImageFillLocalMatrix(fill, node, image.width(), image.height())
+      const sourceToFlatPixels = multiplyAffine(translateAffine(-box.x, -box.y), matrix as Affine)
+      const flatToSourcePixels = invertAffine(sourceToFlatPixels)
+      if (!flatToSourcePixels) return fill
+      const destinationToImage = multiplyAffine(flatToSourcePixels, oldLocalMatrix as Affine)
+      const inverseImageTransform = multiplyAffine(
+        scaleAffine(1 / (box.width || 1), 1 / (box.height || 1)),
+        multiplyAffine(destinationToImage, scaleAffine(image.width(), image.height()))
+      )
+      const imageTransform = invertAffine(inverseImageTransform)
+      if (!imageTransform) return fill
+      return {
+        ...fill,
+        imageScaleMode: 'CROP',
+        imageRotation: 0,
+        imageTransform: affineTransform(imageTransform)
+      }
+    } finally {
+      image.delete()
+    }
   })
 }
 
