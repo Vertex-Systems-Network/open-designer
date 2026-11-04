@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import { finishRenderPlacement, resolveRenderPlacement } from '#core/design-jsx/placement'
+import { editOnIsolatedPage } from '#core/editor/history/isolated-edit'
 import { toolNumber, defineTool } from '#core/tools/schema'
 
 export const render = defineTool({
@@ -36,8 +37,11 @@ export const render = defineTool({
     const { renderJSX } = designJSXRenderer(figma.icons)
 
     const placement = resolveRenderPlacement(figma.graph, args, figma.currentPageId)
-    const results = await renderJSX(figma.graph, args.jsx, placement)
-    finishRenderPlacement(figma.graph, results, placement)
+    const results = await editOnIsolatedPage(figma.graph, placement.pageId, async (graph) => {
+      const rendered = await renderJSX(graph, args.jsx, placement)
+      finishRenderPlacement(graph, rendered, placement)
+      return rendered
+    })
     const result = results[0]
 
     const response: {
