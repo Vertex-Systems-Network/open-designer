@@ -25,7 +25,7 @@ import {
   buildControls,
   resolveSplitModel
 } from '@/app/ai/agents/acp/catalog'
-import type { ACPControl } from '@/app/ai/agents/acp/catalog'
+import type { ACPControl, ACPSessionActions } from '@/app/ai/agents/acp/catalog'
 import { setAgentCommands } from '@/app/ai/agents/acp/commands'
 import { createUpdateMapper } from '@/app/ai/agents/acp/events'
 import { spawnACPProcess } from '@/app/ai/agents/acp/process'
@@ -189,6 +189,9 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   private configOptions: SessionConfigOption[] = []
   private modelState: SessionModelState | null = null
   private modeState: SessionModeState | null = null
+  private configUpdatedDuringStartup = false
+  private modeUpdatedDuringStartup = false
+  private publishedActions: ACPSessionActions | null = null
   private connecting: Promise<ACPSession> | null = null
 
   /** The chat's document, where each reply's run records the edits the agent makes in it. */
@@ -241,6 +244,15 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     acpState.value = { agentId: this.agentDef.id, controls: this.controls }
   }
 
+  private clearPublishedControls(): void {
+    if (this.publishedActions && acpActions.value === this.publishedActions) {
+      acpState.value = null
+      acpActions.value = null
+    }
+    this.publishedActions = null
+    this.controls = []
+  }
+
   private buildCurrentControls(): ACPControl[] {
     return buildControls({
       configOptions: this.configOptions,
@@ -287,10 +299,12 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
   private handleMeta(update: SessionNotification['update']): void {
     if (update.sessionUpdate === 'config_option_update') {
+      if (!this.session) this.configUpdatedDuringStartup = true
       this.configOptions = update.configOptions
       this.controls = this.buildCurrentControls()
       this.publish()
     } else if (update.sessionUpdate === 'current_mode_update') {
+      if (!this.session) this.modeUpdatedDuringStartup = true
       if (this.modeState)
         this.modeState = { ...this.modeState, currentModeId: update.currentModeId }
       this.controls = this.modeState
@@ -395,8 +409,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
   async destroy(): Promise<void> {
     this.destroying = true
-    acpState.value = null
-    acpActions.value = null
+    this.clearPublishedControls()
     const starting = this.starting
     this.starting = null
     await starting?.kill().catch(() => undefined)
@@ -408,6 +421,8 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
   }
 
   private async spawnAgent(): Promise<ACPSession> {
+    this.configUpdatedDuringStartup = false
+    this.modeUpdatedDuringStartup = false
     let process: Awaited<ReturnType<typeof spawnACPProcess>>
     try {
       process = await spawnACPProcess({
@@ -419,6 +434,7 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
           if (!this.session) return
           this.session.dead = true
           this.session = null
+          this.clearPublishedControls()
         }
       })
     } catch (e) {
@@ -518,6 +534,8 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
 
     let sessionResult
     try {
+      this.configUpdatedDuringStartup = false
+      this.modeUpdatedDuringStartup = false
       sessionResult = await untilStopped(
         connection.newSession({
           cwd: this.cwd,
@@ -552,11 +570,12 @@ export class ACPChatTransport implements ChatTransport<UIMessage> {
     onUpdate = null
 
     this.modelState = sessionResult.models ?? null
-    this.configOptions = sessionResult.configOptions ?? []
-    this.modeState = sessionResult.modes ?? null
+    if (!this.configUpdatedDuringStartup) this.configOptions = sessionResult.configOptions ?? []
+    if (!this.modeUpdatedDuringStartup) this.modeState = sessionResult.modes ?? null
     this.controls = this.buildCurrentControls()
+    this.publishedActions = { setControl: (control, value) => this.setControl(control, value) }
+    acpActions.value = this.publishedActions
     this.publish()
-    acpActions.value = { setControl: (control, value) => this.setControl(control, value) }
 
     const session: ACPSession = {
       connection,

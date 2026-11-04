@@ -54,16 +54,26 @@ function splitModels(state: SessionModelState): ACPControl[] | null {
   })
   if (!parsed.length || parsed.length !== state.availableModels.length) return null
   const bases = new Map<string, string>()
-  const efforts = new Set<string>()
+  const effortsByBase = new Map<string, Set<string>>()
   for (const { m, base, effort } of parsed) {
+    const efforts = effortsByBase.get(base) ?? new Set<string>()
     efforts.add(effort)
+    effortsByBase.set(base, efforts)
     if (!bases.has(base)) {
       bases.set(base, m.name.replace(/\s*\([^()]*\)\s*$/, '') || base)
     }
   }
+  const efforts = [...(effortsByBase.values().next().value ?? [])]
+  if (
+    [...effortsByBase.values()].some(
+      (available) =>
+        available.size !== efforts.length || efforts.some((effort) => !available.has(effort))
+    )
+  )
+    return null
   const current = EFFORT_ID.exec(state.currentModelId)
   if (!current) return null
-  const sorted = [...efforts].sort((a, b) => {
+  const sorted = efforts.sort((a, b) => {
     const rank = (e: string) => {
       const i = EFFORT_ORDER.indexOf(e)
       return i === -1 ? 99 : i
@@ -104,12 +114,7 @@ export function resolveSplitModel(
   const base = control.split === 'base' ? value : cur[1]
   const effort = control.split === 'effort' ? value : cur[2]
   const exact = `${base}[${effort}]`
-  if (ids.includes(exact)) return exact
-  return (
-    ids.find((id) => id.startsWith(`${base}[medium]`)) ??
-    ids.find((id) => id.startsWith(`${base}[`)) ??
-    null
-  )
+  return ids.includes(exact) ? exact : null
 }
 
 export function buildControls(input: {

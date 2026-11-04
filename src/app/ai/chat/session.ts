@@ -163,6 +163,10 @@ export function createChatSessionManager({
     return transport as ChatTransport<UIMessage>
   }
 
+  async function stopAgentTransports(): Promise<void> {
+    await destroyAgentTransports()
+  }
+
   async function createActiveHarnessTransport(sessionId: string, context: AIDiagnosticContext) {
     await destroyAgentTransports()
     const runtime = await createAIModelRuntime('design')
@@ -268,6 +272,11 @@ export function createChatSessionManager({
       } else {
         transport = await createTransport(store, diagnosticContext)
       }
+      if (providerID.value !== chatProviderID) {
+        await destroyAgentTransports()
+        transportDirty = true
+        return ensureChat(initialMessages, sessionId)
+      }
       const created: Chat<UIMessage> = new Chat<UIMessage>({
         transport: {
           sendMessages: (options) => {
@@ -333,5 +342,13 @@ export function createChatSessionManager({
     markTransportDirty()
   }
 
-  return { ensureChat, resetChat, markTransportDirty, setOverrideTransport, failure, clearFailure }
+  return {
+    ensureChat,
+    resetChat,
+    markTransportDirty,
+    stopAgentTransports,
+    setOverrideTransport,
+    failure,
+    clearFailure
+  }
 }

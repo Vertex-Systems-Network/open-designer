@@ -58,4 +58,27 @@ describe('ACP session controls', () => {
       'mode'
     ])
   })
+
+  test('keeps full model ids when models offer different reasoning levels', () => {
+    const controls = buildControls({
+      models: {
+        currentModelId: 'a[high]',
+        availableModels: [
+          { modelId: 'a[high]', name: 'A (high)' },
+          { modelId: 'b[medium]', name: 'B (medium)' }
+        ]
+      }
+    })
+
+    expect(controls).toMatchObject([
+      {
+        kind: 'model',
+        id: 'model',
+        options: [
+          { value: 'a[high]', label: 'A (high)' },
+          { value: 'b[medium]', label: 'B (medium)' }
+        ]
+      }
+    ])
+  })
 })

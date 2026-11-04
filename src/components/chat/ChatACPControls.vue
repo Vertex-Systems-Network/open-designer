@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { acpActions, acpConnecting, acpState } from '@/app/ai/agents/acp/catalog'
 import type { ACPControl } from '@/app/ai/agents/acp/catalog'
@@ -9,6 +9,7 @@ import AppSelect from '@/components/ui/select/AppSelect.vue'
 import { chatProfileTheme } from './ui'
 
 const ui = chatProfileTheme()
+const changing = ref(false)
 
 // Model first, then reasoning, then mode and the rest.
 const ORDER = { model: 0, thought_level: 1, mode: 2, other: 3 } as const
@@ -23,11 +24,14 @@ function labelOf(control: ACPControl): string {
 }
 
 async function change(control: ACPControl, value: string) {
-  if (value === control.current) return
+  if (changing.value || value === control.current) return
+  changing.value = true
   try {
     await acpActions.value?.setControl(control, value)
   } catch (e) {
     toast.error(e instanceof Error ? e.message : String(e))
+  } finally {
+    changing.value = false
   }
 }
 </script>
@@ -47,6 +51,7 @@ async function change(control: ACPControl, value: string) {
       <template #trigger>
         <button
           type="button"
+          :disabled="changing"
           :class="ui.trigger({ class: 'inline-flex max-w-28 items-center' })"
           :aria-label="control.name"
         >

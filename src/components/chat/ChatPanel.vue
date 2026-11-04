@@ -36,7 +36,15 @@ import ChatRunLocation from '@/components/chat/ChatRunLocation.vue'
 import ChatTranscript from '@/components/chat/ChatTranscript.vue'
 import { useImageDrop } from '@/components/ui/drop/useImageDrop'
 
-const { isConfigured, ensureChat, history, chatFailure, clearChatFailure, providerID } = useAIChat()
+const {
+  isConfigured,
+  ensureChat,
+  history,
+  chatFailure,
+  clearChatFailure,
+  providerID,
+  stopAgentTransports
+} = useAIChat()
 const { ai } = useI18n()
 const dates = useDateFormat()
 const runLocation = useChatRunLocation()
@@ -44,10 +52,14 @@ const runLocation = useChatRunLocation()
 const chat = shallowRef<Chat<UIMessage> | null>(null)
 // Start a selected ACP agent so its controls load before the first prompt.
 watch(
-  providerID,
-  (id) => {
+  () => [providerID.value, history.current.value?.id] as const,
+  ([id], previous) => {
     if (id.startsWith('acp:')) {
       void ensureChat().catch((error) =>
+        toast.error(error instanceof Error ? error.message : String(error))
+      )
+    } else if (previous?.[0].startsWith('acp:')) {
+      void stopAgentTransports().catch((error) =>
         toast.error(error instanceof Error ? error.message : String(error))
       )
     }
