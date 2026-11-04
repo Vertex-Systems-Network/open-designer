@@ -15,7 +15,7 @@ export async function editOnIsolatedPage<T>(
   edit: (draft: SceneGraph) => Promise<T>
 ): Promise<T> {
   const page = graph.getNode(pageId)
-  if (!page || page.type !== 'CANVAS') throw new Error(`Page "${pageId}" is no longer available`)
+  if (page?.type !== 'CANVAS') throw new Error(`Page "${pageId}" is no longer available`)
   const draft = extractPageContext(graph, pageId, page.childIds)
   draft.images = new Map(graph.images)
   draft.variables = structuredClone(graph.variables)
