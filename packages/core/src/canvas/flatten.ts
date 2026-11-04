@@ -157,7 +157,7 @@ export function flattenNodesToVectorProps(
  * with the source-to-flattened mapping and invert it back to the stored convention.
  */
 function rebaseFills(
-  fills: SceneNode['fills'],
+  fills: SceneNode['fills'] | undefined,
   node: SceneNode,
   matrix: number[],
   box: Rect,
@@ -168,12 +168,12 @@ function rebaseFills(
     scaleAffine(1 / (box.width || 1), 1 / (box.height || 1)),
     multiplyAffine(
       translateAffine(-box.x, -box.y),
-      multiplyAffine(matrix, scaleAffine(node.width || 1, node.height || 1))
+      multiplyAffine(matrixAffine(matrix), scaleAffine(node.width || 1, node.height || 1))
     )
   )
   const flatToSource = invertAffine(sourceToFlat)
-  if (!flatToSource) return copyFills(fills)
-  return copyFills(fills).map((fill) => {
+  if (!flatToSource) return copyFills(fills ?? [])
+  return copyFills(fills ?? []).map((fill) => {
     if (fill.gradientTransform) {
       const rebased = multiplyAffine(
         [
@@ -199,7 +199,10 @@ function rebaseFills(
       // modes derive their mapping from node bounds and ignore imageTransform, which no longer
       // describes the source shape once its region has moved into the combined vector.
       const oldLocalMatrix = makeImageFillLocalMatrix(fill, node, image.width(), image.height())
-      const sourceToFlatPixels = multiplyAffine(translateAffine(-box.x, -box.y), matrix as Affine)
+      const sourceToFlatPixels = multiplyAffine(
+        translateAffine(-box.x, -box.y),
+        matrixAffine(matrix)
+      )
       const flatToSourcePixels = invertAffine(sourceToFlatPixels)
       if (flatToSourcePixels) {
         const destinationToImage = multiplyAffine(flatToSourcePixels, oldLocalMatrix as Affine)
@@ -225,6 +228,10 @@ function rebaseFills(
 }
 
 type Affine = [number, number, number, number, number, number]
+
+function matrixAffine(matrix: number[]): Affine {
+  return [matrix[0], matrix[1], matrix[2], matrix[3], matrix[4], matrix[5]]
+}
 
 function multiplyAffine(a: Affine, b: Affine): Affine {
   return [
