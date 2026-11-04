@@ -1,0 +1,1 @@
+- MCP image export errors now identify the requested format when the renderer cannot return encoded image data, including WebP.
