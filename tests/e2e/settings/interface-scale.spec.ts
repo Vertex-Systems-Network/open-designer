@@ -7,12 +7,23 @@ test('interface size scales chrome and persists independently of canvas zoom', a
   const canvas = new CanvasHelper(page)
   await canvas.waitForInit()
 
-  const zoomBefore = await page.evaluate(() => window.openPencil?.getStore?.().state.zoom)
+  const zoomBefore = await page.evaluate(() => {
+    const store = window.openPencil?.getStore?.()
+    Object.assign(window, { __scaleTestRenderer: store?.canvasRenderers[0] })
+    return store?.state.zoom
+  })
   await page.getByTestId('app-settings-trigger').click()
   await page.getByTestId('settings-interface-scale').click()
   await page.getByRole('option', { name: '125%' }).click()
 
   await expect(page.locator('html')).toHaveAttribute('data-interface-scale', '125')
+  await expect(
+    page.evaluate(
+      () =>
+        window.openPencil?.getStore?.().canvasRenderers[0] ===
+        (window as typeof window & { __scaleTestRenderer?: unknown }).__scaleTestRenderer
+    )
+  ).resolves.toBe(true)
   await expect
     .poll(() =>
       page.getByTestId('app-settings-dialog').evaluate((el) => getComputedStyle(el).fontSize)

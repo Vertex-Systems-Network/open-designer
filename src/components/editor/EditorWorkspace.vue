@@ -3,7 +3,7 @@ import { useElementSize } from '@vueuse/core'
 import { clamp } from 'es-toolkit'
 import { SplitterGroup, SplitterPanel, SplitterResizeHandle } from 'reka-ui'
 import { tv } from 'tailwind-variants'
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 
 import { resolveEditorProfile } from '@open-designer/core'
 import { formatShortcut } from '@open-designer/vue/editor/commands'
@@ -46,6 +46,8 @@ provideTabEditorStore(store)
 const { isMobile } = useViewportKind()
 const interfaceScale = computed(interfaceScaleFactor)
 const workspace = useTemplateRef('workspace')
+const layersPanel = useTemplateRef<InstanceType<typeof SplitterPanel> | null>('layersPanel')
+const propertiesPanel = useTemplateRef<InstanceType<typeof SplitterPanel> | null>('propertiesPanel')
 const { width: workspaceWidth } = useElementSize(() => {
   const element: unknown = workspace.value?.$el
   return element instanceof HTMLElement ? element : null
@@ -70,6 +72,12 @@ const leftSize = computed(() =>
 const rightSize = computed(() =>
   clamp(preferredLayout.value[2], sidebarMinimum.value, sidebarMaximum.value)
 )
+watch([leftSize, rightSize], async ([left, right], [previousLeft, previousRight]) => {
+  if (left === previousLeft && right === previousRight) return
+  await nextTick()
+  layersPanel.value?.resize(left)
+  propertiesPanel.value?.resize(right)
+})
 let displayedLayout: number[] = []
 let resizing: { sidebar: 0 | 2; startSize: number } | undefined
 /** How far apart two sizes, in percent, still count as one; the splitter rounds sizes finer. */
@@ -126,7 +134,7 @@ const { pending: roomPending } = useRoomActions()
 
   <SplitterGroup
     v-else-if="!isMobile && showChrome"
-    :key="`${tab.id}-${sidebarMinimum}-${sidebarMaximum}`"
+    :key="tab.id"
     ref="workspace"
     direction="horizontal"
     class="flex-1 overflow-hidden"
@@ -136,6 +144,7 @@ const { pending: roomPending } = useRoomActions()
     <SplitterPanel
       v-if="showPanels"
       id="layers"
+      ref="layersPanel"
       :order="0"
       :default-size="leftSize"
       :min-size="sidebarMinimum"
@@ -187,6 +196,7 @@ const { pending: roomPending } = useRoomActions()
     <SplitterPanel
       v-if="showPanels"
       id="properties"
+      ref="propertiesPanel"
       :order="2"
       :default-size="rightSize"
       :min-size="sidebarMinimum"
