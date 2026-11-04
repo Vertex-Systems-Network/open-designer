@@ -39,7 +39,7 @@ type MCPSessionManagerOptions = {
   onSessionOpened?: (session: MCPAgentSession) => void
   /** Told when a session ends, so the app stops showing its agent. */
   onSessionClosed?: (sessionId: string) => void
-  /** Idle lifetime in ms; 0 disables expiration. Defaults to 15 minutes. */
+  /** Idle lifetime in ms; 0 disables expiration. Defaults to 7 days. */
   sessionIdleTimeoutMs?: number
 }
 
@@ -57,7 +57,7 @@ export function sessionOpener(
     ...(chat && CHAT_ID.test(chat) ? { chat } : {})
   }
 }
-const MCP_SESSION_IDLE_TIMEOUT_MS = 15 * 60_000
+const MCP_SESSION_IDLE_TIMEOUT_MS = 7 * 24 * 60 * 60_000
 const MAX_SWEEP_INTERVAL_MS = 60_000
 // The MCP SDK's close() does not enforce a timeout internally.
 const SESSION_CLOSE_TIMEOUT_MS = 5_000
