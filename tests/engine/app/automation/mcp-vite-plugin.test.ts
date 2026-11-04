@@ -76,7 +76,8 @@ describe('MCP Vite development server', () => {
         authenticationEnabled: true,
         rootDirectory: '/设计',
         disabledTools: [],
-        scope: 'document'
+        scope: 'document',
+        sessionIdleTimeoutMs: 604_800_000
       })
     )
     const split = body.indexOf(Buffer.from('设')) + 1
