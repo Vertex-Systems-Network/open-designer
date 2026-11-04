@@ -93,6 +93,13 @@ export const automationMessageDefaults = {
   useDefaultRoot: 'Use default',
   rootDirectoryDescription:
     'File tools are limited to this folder. Restart the MCP server to apply changes.',
+  sessionIdleTimeout: 'Session timeout',
+  sessionIdleTimeoutDescription:
+    'Close inactive MCP sessions after this time. Choose Never to keep them until the client disconnects. Restart the server to apply changes.',
+  sessionTimeout15Minutes: '15 minutes',
+  sessionTimeoutOneDay: '1 day',
+  sessionTimeoutSevenDays: '7 days',
+  sessionTimeoutNever: 'Never',
   tools: 'Available tools',
   toolsEnabled: params('{enabled} of {total} enabled'),
   enableAllTools: 'Enable all',
