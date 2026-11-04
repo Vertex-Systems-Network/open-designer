@@ -1,0 +1,1 @@
+- Automation file saves reject `.pen` paths when the output contains a fig-kiwi archive.
