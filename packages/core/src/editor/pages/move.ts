@@ -28,7 +28,6 @@ export function movePageInGraph(
   if (nextIndex === currentIndex) return currentIndex
 
   const rootChildren = graph.getChildren(rootId)
-  const currentRootIndex = rootChildren.findIndex((child) => child.id === pageId)
   const remainingChildren = rootChildren.filter((child) => child.id !== pageId)
   const remainingPages = remainingChildren.filter(
     (child) => child.type === 'CANVAS' && (includeInternal || !child.internalOnly)

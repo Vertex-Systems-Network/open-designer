@@ -42,7 +42,10 @@ function renameAdjustments<To extends string, From extends string>(
   adjustments: Partial<Record<From, number>> | undefined
 ): Partial<Record<To, number>> | undefined {
   if (!adjustments) return undefined
-  const renamed = pickBy(mapValues(names, (name) => adjustments[name]), (value) => value !== undefined)
+  const renamed = pickBy(
+    mapValues(names, (name) => adjustments[name]),
+    (value) => value !== undefined
+  )
   return isEmptyObject(renamed) ? undefined : renamed
 }
 
@@ -70,19 +73,7 @@ export function fillToKiwiPaint(fill: Fill): Paint {
     paint.imageScaleMode = fill.imageScaleMode === 'CROP' ? 'STRETCH' : fill.imageScaleMode
   if (fill.imageTransform) paint.transform = fill.imageTransform
   if (fill.imageRotation) paint.rotation = fill.imageRotation
-  const paintFilter = renameAdjustments(IMAGE_FILTER_FIELDS, fill.filters)
-  if (paintFilter) paint.paintFilter = paintFilter
-  if (fill.sourceNodeId) paint.sourceNodeId = stringToGuid(fill.sourceNodeId)
-  if (fill.scale) paint.scale = fill.scale
-  if (fill.spacing) paint.spacing = fill.spacing
-  if (fill.patternSpacing) paint.patternSpacing = fill.patternSpacing
-  if (fill.patternTileType) paint.patternTileType = fill.patternTileType
-  if (fill.verticalAlignment) paint.verticalAlignment = fill.verticalAlignment
-  if (fill.horizontalAlignment) paint.horizontalAlignment = fill.horizontalAlignment
-  if (fill.noiseType) paint.noiseType = fill.noiseType
-  if (fill.density !== undefined) paint.density = fill.density
-  if (fill.noiseSize) paint.noiseSize = fill.noiseSize
-  if (fill.customEffectId) paint.customEffectId = { guid: stringToGuid(fill.customEffectId) }
+  applyPaintExtras(fill, paint)
   return paint
 }
 
@@ -237,4 +228,20 @@ export function convertEffects(effects?: KiwiEffect[]): Effect[] {
     blendMode: (e.blendMode ?? 'NORMAL') as BlendMode,
     showShadowBehindNode: e.showShadowBehindNode ?? true
   }))
+}
+
+function applyPaintExtras(fill: Fill, paint: Paint): void {
+  const paintFilter = renameAdjustments(IMAGE_FILTER_FIELDS, fill.filters)
+  if (paintFilter) paint.paintFilter = paintFilter
+  if (fill.sourceNodeId) paint.sourceNodeId = stringToGuid(fill.sourceNodeId)
+  if (fill.scale) paint.scale = fill.scale
+  if (fill.spacing) paint.spacing = fill.spacing
+  if (fill.patternSpacing) paint.patternSpacing = fill.patternSpacing
+  if (fill.patternTileType) paint.patternTileType = fill.patternTileType
+  if (fill.verticalAlignment) paint.verticalAlignment = fill.verticalAlignment
+  if (fill.horizontalAlignment) paint.horizontalAlignment = fill.horizontalAlignment
+  if (fill.noiseType) paint.noiseType = fill.noiseType
+  if (fill.density !== undefined) paint.density = fill.density
+  if (fill.noiseSize) paint.noiseSize = fill.noiseSize
+  if (fill.customEffectId) paint.customEffectId = { guid: stringToGuid(fill.customEffectId) }
 }

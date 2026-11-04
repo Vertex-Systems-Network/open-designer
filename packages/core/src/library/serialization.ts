@@ -109,7 +109,7 @@ export function deserializeLibraryRevision(
 ): ComponentLibraryRevision {
   const graph = new SceneGraph()
   graph.rootId = revision.graph.rootId
-  graph.nodes = new Map(revision.graph.nodes.map(([id, node]) => [id, cloneLibraryNode(node)]))
+  for (const [id, node] of revision.graph.nodes) graph.nodes.set(id, cloneLibraryNode(node))
   graph.images = new Map(
     revision.graph.images.map(([hash, bytes]) => [hash, new Uint8Array(bytes)])
   )

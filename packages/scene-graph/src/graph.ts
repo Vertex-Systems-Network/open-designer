@@ -20,12 +20,8 @@ import { generateId } from './ids'
 import * as Instances from './instances'
 import { LayoutWrites } from './layout/writes'
 import Matrix from './matrix'
+import { CONTAINER_TYPES, createDefaultNode, createDefaultSourceMetadata } from './node-defaults'
 import { fractionalPosition, orderKeyBetween } from './order-keys'
-import {
-  CONTAINER_TYPES,
-  createDefaultNode,
-  createDefaultSourceMetadata
-} from './node-defaults'
 import { updateNodePreview, type NodePreviewObserver } from './preview'
 import type { Color, Rect, Vector } from './primitives'
 import { markSourceFieldsEdited } from './source-metadata'

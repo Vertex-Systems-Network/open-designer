@@ -100,6 +100,15 @@ export interface FigSessionCheckpoint {
  * The layer each archive record became, by record GUID: layers, pages, instances, and the
  * layers inside components down to the instances they nest, whose contents are no records.
  */
+function isNestedInstancePath(
+  path: readonly string[],
+  instances: readonly (readonly string[])[]
+): boolean {
+  return instances.some(
+    (prefix) => prefix.length < path.length && prefix.every((id, index) => path[index] === id)
+  )
+}
+
 export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<string, string> {
   const records = new Map(checkpoint.sources)
   for (const [componentId, component] of checkpoint.components) {
@@ -108,27 +117,18 @@ export function figCheckpointRecords(checkpoint: FigSessionCheckpoint): Map<stri
     for (const entry of component.nodes) {
       const sourceId = entry.path.at(-1)
       if (!sourceId) continue
-      const inInstance = instances.some(
-        (prefix) =>
-          prefix.length < entry.path.length && prefix.every((id, index) => entry.path[index] === id)
-      )
-      if (inInstance) continue
+      if (isNestedInstancePath(entry.path, instances)) continue
       records.set(sourceId, entry.nodeId)
       if (entry.mainComponentId !== null) instances.push(entry.path)
     }
     const removed = component.removedSourcePaths ?? []
     // A deleted instance still owns its nested records as overrides, so only its own archive
     // record is a removal; descendants beneath either live or deleted instances are not records.
-    for (const entry of removed)
-      if (entry.mainComponentId !== null) instances.push(entry.path)
+    for (const entry of removed) if (entry.mainComponentId !== null) instances.push(entry.path)
     for (const entry of removed) {
       const sourceId = entry.path.at(-1)
       if (!sourceId) continue
-      const inInstance = instances.some(
-        (prefix) =>
-          prefix.length < entry.path.length && prefix.every((id, index) => entry.path[index] === id)
-      )
-      if (!inInstance) records.set(sourceId, sourceId)
+      if (!isNestedInstancePath(entry.path, instances)) records.set(sourceId, sourceId)
     }
   }
   return records
@@ -506,57 +506,75 @@ function materializeReaderInto(
    * sizes over the sizes Figma derived for instances earlier pages already placed.
    */
   const resync = new Set<string>()
-  const populateInstances = (occurrence: InstanceOccurrence): void => {
+  function collectObsoleteNodes(rootId: string): string[] {
+    const ids: string[] = []
+    function collect(id: string): void {
+      const node = graph.getNode(id)
+      if (!node) return
+      ids.push(id)
+      for (const childId of node.childIds) collect(childId)
+    }
+    collect(rootId)
+    return ids
+  }
+
+  function discardObsoleteNodes(
+    obsoleteIds: string[],
+    rootId: string | undefined,
+    nodes: ReturnType<typeof materializeInstance>['nodes']
+  ): void {
+    const obsolete = new Set(obsoleteIds)
+    for (const [sourceId, nodeId] of sources) if (obsolete.has(nodeId)) sources.delete(sourceId)
+    for (const id of obsoleteIds.toReversed()) if (id !== rootId) graph.deleteNode(id)
+    for (const [nodeOccurrence, node] of nodes) sources.set(nodeOccurrence.sourceId, node.id)
+  }
+
+  function isStaleInstanceSwap(
+    existing: SceneNode | undefined,
+    expectedId: string | undefined
+  ): boolean {
+    return (
+      existing?.type === 'INSTANCE' &&
+      expectedId !== undefined &&
+      existing.componentId !== expectedId
+    )
+  }
+
+  function populateChild(child: InstanceOccurrence, parentId: string): void {
+    if (edited) reconcileOccurrenceStructure(child, graph, components)
+    const existingId = sources.get(child.sourceId)
+    const existing = existingId ? graph.getNode(existingId) : undefined
+    const expectedComponentId =
+      child.mainComponentId === null ? undefined : componentIds.get(child.mainComponentId)
+    const staleSwap = isStaleInstanceSwap(existing, expectedComponentId)
+    const obsoleteNodeIds = staleSwap && existing ? collectObsoleteNodes(existing.id) : []
+    if (child.mainComponentId !== null && (!existing || staleSwap)) {
+      onProgress?.()
+      const materialized = materializeInstance(graph, parentId, child, componentIds, {
+        blobs,
+        sourceChildren: mapInstanceSourceChildren(child, components),
+        existingNodes: staleSwap && existing ? new Map([[child, existing]]) : undefined,
+        recordId
+      })
+      rememberDerivedSizes(materialized.nodes)
+      if (staleSwap) discardObsoleteNodes(obsoleteNodeIds, existing?.id, materialized.nodes)
+      linkInstanceSourceChildren(child, materialized, components)
+      if (edited) {
+        reconcileLiveComponentEdits(graph, materialized)
+        if (materialized.root.componentId) resync.add(materialized.root.id)
+      }
+      sources.set(child.sourceId, materialized.root.id)
+    } else if (child.mainComponentId === null && child.properties.type !== 'SYMBOL')
+      populateInstances(child)
+  }
+
+  function populateInstances(occurrence: InstanceOccurrence): void {
     if (occurrence.properties.type === 'SYMBOL') return
     const parentId = sources.get(occurrence.sourceId)
     if (!parentId) throw new Error(`Missing source container ${occurrence.sourceId}`)
     const ordered: string[] = []
     for (const child of occurrence.children) {
-      if (edited) reconcileOccurrenceStructure(child, graph, components)
-      const existingId = sources.get(child.sourceId)
-      const existing = existingId ? graph.getNode(existingId) : undefined
-      const expectedComponentId =
-        child.mainComponentId === null ? undefined : componentIds.get(child.mainComponentId)
-      const staleSwap =
-        existing?.type === 'INSTANCE' &&
-        expectedComponentId !== undefined &&
-        existing.componentId !== expectedComponentId
-      const obsoleteNodeIds: string[] = []
-      if (staleSwap && existing) {
-        const collect = (id: string): void => {
-          const node = graph.getNode(id)
-          if (!node) return
-          obsoleteNodeIds.push(id)
-          for (const childId of node.childIds) collect(childId)
-        }
-        collect(existing.id)
-      }
-      if (child.mainComponentId !== null && (!existing || staleSwap)) {
-        onProgress?.()
-        const materialized = materializeInstance(graph, parentId, child, componentIds, {
-          blobs,
-          sourceChildren: mapInstanceSourceChildren(child, components),
-          existingNodes: staleSwap && existing ? new Map([[child, existing]]) : undefined,
-          recordId
-        })
-        rememberDerivedSizes(materialized.nodes)
-        if (staleSwap) {
-          const obsolete = new Set(obsoleteNodeIds)
-          for (const [sourceId, nodeId] of sources)
-            if (obsolete.has(nodeId)) sources.delete(sourceId)
-          for (const id of obsoleteNodeIds.toReversed())
-            if (id !== existing?.id) graph.deleteNode(id)
-          for (const [nodeOccurrence, node] of materialized.nodes)
-            sources.set(nodeOccurrence.sourceId, node.id)
-        }
-        linkInstanceSourceChildren(child, materialized, components)
-        if (edited) {
-          reconcileLiveComponentEdits(graph, materialized)
-          if (materialized.root.componentId) resync.add(materialized.root.id)
-        }
-        sources.set(child.sourceId, materialized.root.id)
-      } else if (child.mainComponentId === null && child.properties.type !== 'SYMBOL')
-        populateInstances(child)
+      populateChild(child, parentId)
       const id = sources.get(child.sourceId)
       if (!id) throw new Error(`Missing assembled child ${child.sourceId}`)
       // A layer moved live to another parent stays there; this only orders what the parent holds.

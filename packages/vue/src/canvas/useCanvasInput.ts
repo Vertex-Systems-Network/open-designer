@@ -1,7 +1,8 @@
 import { useEventListener } from '@vueuse/core'
 import { onScopeDispose, ref, watch, type Ref } from 'vue'
 
-import { resolveEditorProfile, type Editor } from '@open-designer/core'
+import { editedGradientLayout, resolveEditorProfile, type Editor } from '@open-designer/core'
+import { hitTestGradientHandles } from '@open-designer/core/geometry'
 import type { SceneNode } from '@open-designer/scene-graph'
 
 import { createAutoLayoutValueEdit } from '#vue/canvas/auto-layout/value-edit'
@@ -22,7 +23,7 @@ import {
   updateNodeEditHover
 } from '#vue/canvas/vector-input/input'
 import { resolveAutoLayoutHover } from '#vue/shared/input/auto-layout-hover'
-import { createClickCounter } from '#vue/shared/input/click-count'
+import { createClickCounter, MULTI_CLICK_DELAY } from '#vue/shared/input/click-count'
 import {
   attachModifiers,
   handleConnectorDrawMove,
@@ -194,15 +195,73 @@ export function useCanvasInput(
     handleMarqueeMove
   } = createCanvasTransformInput(editor, setDrag)
 
-  function onDblClick(e: MouseEvent) {
-    if (editor.state.activeTool === 'COMMENT' || profile().pointer === 'pan') return
+  /**
+   * The second click of a run and every one after it, on its press: one level deeper, or a value
+   * field, as in Figma. The press decides so that every click of a quick run counts; the browser
+   * fires its double-click event by its own count, which a click shortly before the run shifts.
+   */
+  let multiClickPressAt = 0
+  let multiClickTargetId: string | null = null
+  let multiClickTargetCount = 0
+
+  /** Only an unhandled select-tool press on the same target takes a multi-click. */
+  function takesMultiClick(e: MouseEvent): boolean {
+    if (
+      e.button !== 0 ||
+      editor.state.activeTool !== 'SELECT' ||
+      editor.state.editingTextId ||
+      editor.state.nodeEditState ||
+      profile().pointer === 'pan'
+    )
+      return false
+    const { cx, cy, sx, sy } = getCoords(e)
+    const handleCursor = updateHoverCursor(cx, cy, editor, hitFns)
+    const shapeHandle = shapeHandleHoverAt(sx, sy, e.altKey)
+    const gradientLayout = editedGradientLayout(
+      editor.graph,
+      editor.state.gradientEdit,
+      editor.state
+    )
+    const gradientHandle =
+      gradientLayout && hitTestGradientHandles(gradientLayout, { x: sx, y: sy })
+    return handleCursor === null && shapeHandle?.handle == null && gradientHandle == null
+  }
+
+  function onMultiClickDown(e: MouseEvent, clickCount: number) {
+    multiClickPressAt = performance.now()
     const { cx, cy } = getCoords(e)
-    if (profile().edits && valueEdit.start(cx, cy)) {
+    if (clickCount === 2 && profile().edits && valueEdit.start(cx, cy)) {
       e.preventDefault()
       e.stopPropagation()
       return
     }
-    onTextDblClick(e)
+    onTextDblClick(e, clickCount > 2)
+  }
+
+  function onDblClick(e: MouseEvent) {
+    // Handled on the press, which the event only must not follow with a browser text selection;
+    // a double-click dispatched without presses, as tests do, is handled here instead.
+    e.preventDefault()
+    if (performance.now() - multiClickPressAt < MULTI_CLICK_DELAY) return
+    if (takesMultiClick(e)) onMultiClickDown(e, 2)
+  }
+
+  function trackMultiClickTarget(
+    cx: number,
+    cy: number,
+    clickCount: number,
+    selectedIdsBeforeMouseDown: ReadonlySet<string>
+  ): number {
+    const targetId = hitTestInScope(cx, cy, true)?.id ?? null
+    const targetChanged = clickCount === 1 || targetId !== multiClickTargetId
+    if (targetChanged) {
+      multiClickTargetId = targetId
+      multiClickTargetCount = targetId ? 1 : 0
+      selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
+    } else if (targetId) {
+      multiClickTargetCount++
+    }
+    return multiClickTargetCount
   }
 
   function hoverLayers({ event, cx, cy, sx, sy }: CanvasToolPointer) {
@@ -257,13 +316,16 @@ export function useCanvasInput(
       e.preventDefault()
       return
     }
-    if (e.button === 0 || editor.state.activeTool !== 'COMMENT') {
-      editor.setSelectedGuide(null)
-    }
+    editor.setSelectedGuide(null)
 
     const selectedIdsBeforeMouseDown = new Set(editor.state.selectedIds)
-    const clickCount = recordClick(sx, sy)
-    if (clickCount === 1) selectedIdsBeforeClickSequence.value = selectedIdsBeforeMouseDown
+    const clickCount = recordClick(sx, sy, e.detail)
+    if (e.button === 0) multiClickPressAt = performance.now()
+    const multiClickCount = trackMultiClickTarget(cx, cy, clickCount, selectedIdsBeforeMouseDown)
+    if (multiClickCount >= 2 && takesMultiClick(e)) {
+      onMultiClickDown(e, multiClickCount)
+      return
+    }
     pressCanvasTool({ event: e, cx, cy, sx, sy }, toolContext)
   }
 

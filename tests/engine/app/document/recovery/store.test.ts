@@ -28,6 +28,7 @@ describe('document recovery store', () => {
     const store = createIdbRecoveryStore()
     const metadata = await store.write({
       id: 'recovery-1',
+      sessionId: 'test-session',
       documentName: 'Agent draft',
       figBytes: bytes
     })
@@ -51,6 +52,7 @@ describe('document recovery store', () => {
     const buffer = new Uint8Array([9, 9, 1, 2, 3, 9])
     await store.write({
       id: 'recovery-1',
+      sessionId: 'test-session',
       documentName: 'Agent draft',
       figBytes: buffer.subarray(2, 5)
     })
@@ -62,7 +64,12 @@ describe('document recovery store', () => {
   test('memory store owns input and output bytes', async () => {
     const store = createMemoryRecoveryStore()
     const input = new Uint8Array(bytes)
-    await store.write({ id: 'one', documentName: 'Draft', figBytes: input })
+    await store.write({
+      id: 'one',
+      sessionId: 'test-session',
+      documentName: 'Draft',
+      figBytes: input
+    })
     input[0] = 99
 
     const first = await store.read('one')

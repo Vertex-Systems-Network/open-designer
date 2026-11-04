@@ -61,9 +61,8 @@ export function serializedSceneGraphTransferList(data: SerializedSceneGraph): Tr
 export function cloneSceneGraphForFigExport(graph: SceneGraph): SceneGraph {
   const cloned = new SceneGraph()
   cloned.rootId = graph.rootId
-  cloned.nodes = new Map(
-    [...graph.nodes].map(([id, node]) => [id, { ...node, childIds: [...node.childIds] }])
-  )
+  for (const [id, node] of graph.nodes)
+    cloned.nodes.set(id, { ...node, childIds: [...node.childIds] })
   cloned.images = new Map(graph.images)
   cloned.variables = new Map(graph.variables)
   cloned.variableCollections = new Map(graph.variableCollections)
@@ -96,7 +95,7 @@ function normalizeImportedNode(
 export function deserializeSceneGraph(data: SerializedSceneGraph): SceneGraph {
   const graph = new SceneGraph()
   graph.rootId = data.rootId
-  graph.nodes = new Map(data.nodes.map(([id, node]) => [id, normalizeImportedNode(node)]))
+  for (const [id, node] of data.nodes) graph.nodes.set(id, normalizeImportedNode(node))
   graph.images = new Map(data.images)
   graph.variables = new Map(data.variables)
   graph.variableCollections = new Map(data.variableCollections)

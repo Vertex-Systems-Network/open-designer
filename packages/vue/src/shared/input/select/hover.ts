@@ -1,4 +1,5 @@
 import { resolveEditorProfile, type Editor } from '@open-designer/core'
+import type { SceneNode } from '@open-designer/scene-graph'
 import { layerResizes, layerRotates } from '@open-designer/scene-graph/generated'
 
 import { connectorLineCursor } from '#vue/shared/input/connector/line'
@@ -12,6 +13,7 @@ import {
 import { lineEndAt } from '#vue/shared/input/line/end'
 import type { HitTestFns } from '#vue/shared/input/select'
 import { hitTestLabel } from '#vue/shared/input/select/hit'
+import { insideSelectedFrame, pressesSelection } from '#vue/shared/input/select/move'
 import { scalesByHandles } from '#vue/shared/input/sticky/scale'
 import { getNodeEditState } from '#vue/shared/input/vector'
 
@@ -54,6 +56,16 @@ function getRotationCursorForSelection(cx: number, cy: number, editor: Editor): 
   return cornerRotationCursor(corner, node, editor.graph, editor.state.rotationPreview)
 }
 
+/**
+ * Whether a press on `hit` selects it rather than the selection it lies in: a layer inside a
+ * selected frame drags the frame, unless the document is read-only, where nothing drags and the
+ * press selects the layer.
+ */
+function pressSelects(hit: SceneNode, cx: number, cy: number, editor: Editor): boolean {
+  if (!pressesSelection(hit, cx, cy, editor)) return true
+  return !resolveEditorProfile(editor.state).edits && insideSelectedFrame(hit, editor)
+}
+
 function updateHoveredNode(
   cx: number,
   cy: number,
@@ -68,9 +80,12 @@ function updateHoveredNode(
     ? fns.hitTestInScope(cx, cy, true)
     : (hitTestLabel(cx, cy, fns) ?? fns.hitTestInScope(cx, cy, false))
   const editNodeId = getNodeEditState(editor)?.nodeId
-  editor.setHoveredNode(
-    hit && !editor.state.selectedIds.has(hit.id) && hit.id !== editNodeId ? hit.id : null
-  )
+  const hovered =
+    hit &&
+    !editor.state.selectedIds.has(hit.id) &&
+    hit.id !== editNodeId &&
+    (deep || pressSelects(hit, cx, cy, editor))
+  editor.setHoveredNode(hovered ? hit.id : null)
 }
 
 export function updateHoverCursor(

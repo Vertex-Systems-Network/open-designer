@@ -199,8 +199,8 @@ export class Linter {
     return checks
   }
 
-  private isGeneratedLayer(node: SceneNode): boolean {
-    for (let current: SceneNode | undefined = node; current; ) {
+  private isGeneratedLayer(id: string): boolean {
+    for (let current = this.graph?.getNode(id); current;) {
       if (GENERATED_TYPES.has(current.type)) return true
       current = current.parentId ? this.graph?.getNode(current.parentId) : undefined
     }
@@ -212,7 +212,7 @@ export class Linter {
     if (!node) return
     // A sticky note, shape, or connector is FigJam's own, with its fixed choices: no design
     // system rule applies to it or to the sublayers it generates, even when scoped directly.
-    if (this.isGeneratedLayer(node)) return
+    if (this.isGeneratedLayer(node.id)) return
     for (const { rule, context } of this.checks) {
       if (rule.match && !rule.match.includes(node.type)) continue
       rule.check(node, context)

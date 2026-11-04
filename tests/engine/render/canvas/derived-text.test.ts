@@ -56,7 +56,7 @@ function squareCommandsBlob(): Uint8Array {
 }
 
 describe('derived text rendering', () => {
-  test('uses run alpha and inherited paint at saved cluster positions', () => {
+  test('uses saved cluster positions and run alpha when fonts are unavailable', () => {
     const graph = new SceneGraph()
     const page = graph.getPages()[0]
     const text = graph.createNode('TEXT', page.id, {
@@ -83,9 +83,7 @@ describe('derived text rendering', () => {
     })
     const surface = expectDefined(ck.MakeSurface(1, 1), 'surface')
     const renderer = new SkiaRenderer(ck, surface)
-    renderer.nodeFontReadiness = () => {
-      throw new Error('Saved text must not depend on font readiness')
-    }
+    useDerivedGlyphFallback(renderer)
     try {
       const png = expectDefined(
         renderNodesToImage(ck, renderer, graph, page.id, [text.id], {

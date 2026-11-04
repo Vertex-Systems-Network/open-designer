@@ -61,7 +61,11 @@ const menuUI = useMenuUI({ content: 'min-w-40', item: 'justify-start gap-2 text-
     The entry's own element is its root, so a parent's directives and attributes reach it, as the
     preview directives of Home do; under the context menu they would land on a fragment.
   -->
-  <div data-slot="document-entry" :data-kind="kind" :class="styles.root({ class: normalizeClass(className) })">
+  <div
+    data-slot="document-entry"
+    :data-kind="kind"
+    :class="styles.root({ class: normalizeClass(className) })"
+  >
     <ContextMenuRoot :disabled="!menu">
       <ContextMenuTrigger as-child>
         <div data-slot="surface" :class="styles.surface()">

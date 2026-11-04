@@ -13,7 +13,7 @@ function pageWithGuide(): { graph: SceneGraph; page: SceneNode } {
     guides: [{ id: 'guide', axis: 'x', position: 20 }]
   })
   const graph = new SceneGraph()
-  graph.nodes = new Map([['page', page]])
+  graph.nodes.set('page', page)
   graph.rootId = 'page'
   return { graph, page }
 }

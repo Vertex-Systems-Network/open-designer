@@ -89,7 +89,7 @@ try {
   await writeFile(environment.OPENDESIGNER_CLOUD_CONFIG, config)
   await run([...compose, 'up', '-d', '--wait', 'postgres', 'seaweedfs'])
   await run([...compose, 'run', '--rm', 'seaweedfs-init'])
-  await run(['bun', cloudPackagePath('src/runtime/node/migrate.ts')], cloudPackagePath())
+  await run(['bun', cloudPackagePath('src/runtime/node/migrate/index.ts')], cloudPackagePath())
   worker = Bun.spawn(
     [
       'bunx',

@@ -21,8 +21,7 @@ export function checkpointComponent(
     // Keep deleted record identities separately so a resumed FIG patch can remove their archive records.
     if (!node && path.length > 0) {
       removedSourcePaths.push({ path, mainComponentId: occurrence.mainComponentId })
-      for (const child of occurrence.children)
-        visit(child, [...path, child.sourceId])
+      for (const child of occurrence.children) visit(child, [...path, child.sourceId])
       return
     }
     if (!node) throw new Error('Missing checkpoint occurrence')

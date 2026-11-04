@@ -123,7 +123,8 @@ export function createCloudStorageAdapter(
       const baseRevision = options?.baseRevision ?? null
       const name = cloudDocumentName(metadata.name)
       // The file says whether it is a board, as its header does for Figma.
-      const split = splitCloudDocument(bytes)\n      const kind = split.kind ?? figArchiveKind(bytes) ?? 'design'
+      const split = splitCloudDocument(bytes)
+      const kind = split.kind ?? figArchiveKind(bytes) ?? 'design'
       // Without a revision this is the first save; the document may not exist on the server yet.
       if (!baseRevision && !(await listed(id))) {
         await cloud.createDocument(workspaceId(), { id, name, kind })

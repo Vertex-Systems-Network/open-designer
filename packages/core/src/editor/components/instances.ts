@@ -26,10 +26,7 @@ function nestedInstanceOverrides(
   ctx: EditorContext,
   instanceId: string
 ): Map<string, InstanceOverrideState> {
-  const states = new Map<
-    string,
-    InstanceOverrideState
-  >()
+  const states = new Map<string, InstanceOverrideState>()
   const visit = (parentId: string): void => {
     for (const child of ctx.graph.getChildren(parentId)) {
       if (child.type === 'INSTANCE')

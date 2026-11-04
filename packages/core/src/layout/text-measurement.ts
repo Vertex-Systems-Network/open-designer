@@ -1,5 +1,6 @@
 import type { SceneNode } from '@open-designer/scene-graph'
 import { faceStyleKey } from '@open-designer/scene-graph/font-style'
+import type { Size } from '@open-designer/scene-graph/primitives'
 import { lineHeightPixels } from '@open-designer/scene-graph/text'
 
 import { measureTextWithFont } from '#core/text/font/glyphs'
@@ -21,60 +22,12 @@ export function estimateTextSize(
   const text = node.text || ''
   const runs = node.styleRuns.toSorted((a, b) => a.start - b.start)
   const hasRunMetrics = runs.some((run) =>
-    ['fontSize', 'lineHeight', 'letterSpacing'].some((field) =>
-      Object.hasOwn(run.style, field)
-    )
+    ['fontSize', 'lineHeight', 'letterSpacing'].some((field) => Object.hasOwn(run.style, field))
   )
 
   // With no renderer, estimate each character using its resolved run size. Binding updates can
   // change a run without changing the text node's base font, so a node-wide estimate is wrong.
-  if (hasRunMetrics) {
-    let runIndex = 0
-    let lineWidth = 0
-    let lineHeight = Math.ceil(fontSize * 1.4)
-    const lineWidths: number[] = []
-    const lineHeights: number[] = []
-    for (let index = 0; index < text.length; index++) {
-      while (
-        runIndex < runs.length &&
-        runs[runIndex].start + runs[runIndex].length <= index
-      ) runIndex++
-      const run =
-        runs[runIndex]?.start <= index &&
-        index < runs[runIndex].start + runs[runIndex].length
-          ? runs[runIndex]
-          : undefined
-      const size = run?.style.fontSize ?? fontSize
-      if (text[index] === '\\n') {
-        lineWidths.push(lineWidth)
-        lineHeights.push(lineHeight)
-        lineWidth = 0
-        lineHeight = Math.ceil(fontSize * 1.4)
-        continue
-      }
-      const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing?.value ?? 0
-      const charWidth = Math.max(0, size * GLYPH_WIDTH_FACTOR + spacing)
-      const maxLineWidth = maxWidth && maxWidth > 0 ? maxWidth : undefined
-      if (maxLineWidth && lineWidth > 0 && lineWidth + charWidth > maxLineWidth) {
-        lineWidths.push(lineWidth)
-        lineHeights.push(lineHeight)
-        lineWidth = 0
-        lineHeight = Math.ceil(fontSize * 1.4)
-      }
-      lineWidth += charWidth
-      const lineHeightValue =
-        run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
-      lineHeight = Math.max(
-        lineHeight,
-        lineHeightPixels(lineHeightValue, size) ?? Math.ceil(size * 1.4)
-      )
-    }
-    lineWidths.push(lineWidth)
-    lineHeights.push(lineHeight)
-    const width = Math.ceil(Math.max(0, ...lineWidths))
-    const height = lineHeights.reduce((total, value) => total + value, 0)
-    return { width: maxWidth && width > maxWidth ? maxWidth : width, height }
-  }
+  if (hasRunMetrics) return estimateRunTextSize(node, text, runs, fontSize, maxWidth)
 
   const family = node.fontFamily || 'Inter'
   const style = faceStyleKey({ ...node, fontWeight: node.fontWeight || 400 })
@@ -92,6 +45,70 @@ export function estimateTextSize(
     return { width: maxWidth, height: Math.ceil(lines * lineH) }
   }
   return { width: singleLineWidth, height: lineH }
+}
+
+function estimateRunTextSize(
+  node: SceneNode,
+  text: string,
+  runs: SceneNode['styleRuns'],
+  fontSize: number,
+  maxWidth?: number
+): { width: number; height: number } {
+  let runIndex = 0
+  const line = { width: 0, height: Math.ceil(fontSize * 1.4) }
+  const lineWidths: number[] = []
+  const lineHeights: number[] = []
+  for (let index = 0; index < text.length; index++) {
+    while (runIndex < runs.length && runs[runIndex].start + runs[runIndex].length <= index)
+      runIndex++
+    const run =
+      runs[runIndex]?.start <= index && index < runs[runIndex].start + runs[runIndex].length
+        ? runs[runIndex]
+        : undefined
+    appendRunCharacter(node, text[index], run, fontSize, maxWidth, line, lineWidths, lineHeights)
+  }
+  lineWidths.push(line.width)
+  lineHeights.push(line.height)
+  const width = Math.ceil(Math.max(0, ...lineWidths))
+  const height = lineHeights.reduce((total, value) => total + value, 0)
+  return { width: maxWidth && width > maxWidth ? maxWidth : width, height }
+}
+
+function appendRunCharacter(
+  node: SceneNode,
+  character: string,
+  run: SceneNode['styleRuns'][number] | undefined,
+  fontSize: number,
+  maxWidth: number | undefined,
+  line: Size,
+  lineWidths: number[],
+  lineHeights: number[]
+): void {
+  const baseHeight = Math.ceil(fontSize * 1.4)
+  if (character === '\n') {
+    lineWidths.push(line.width)
+    lineHeights.push(line.height)
+    line.width = 0
+    line.height = baseHeight
+    return
+  }
+  const size = run?.style.fontSize ?? fontSize
+  const spacing = run?.style.letterSpacing?.value ?? node.letterSpacing.value
+  const charWidth = Math.max(0, size * GLYPH_WIDTH_FACTOR + spacing)
+  const maxLineWidth = maxWidth && maxWidth > 0 ? maxWidth : undefined
+  if (maxLineWidth && line.width > 0 && line.width + charWidth > maxLineWidth) {
+    lineWidths.push(line.width)
+    lineHeights.push(line.height)
+    line.width = 0
+    line.height = baseHeight
+  }
+  line.width += charWidth
+  const lineHeightValue =
+    run && Object.hasOwn(run.style, 'lineHeight') ? run.style.lineHeight : node.lineHeight
+  line.height = Math.max(
+    line.height,
+    lineHeightPixels(lineHeightValue ?? null, size) ?? Math.ceil(size * 1.4)
+  )
 }
 
 export function autoWidthWrapWidth(

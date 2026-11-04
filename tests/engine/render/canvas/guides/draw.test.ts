@@ -11,9 +11,10 @@ import { asCanvas } from '../helpers'
 function graphWithGuides(guides: SceneNode['guides']): SceneGraph {
   const graph = new SceneGraph()
   graph.rootId = 'root'
-  graph.nodes = new Map([
-    ['page', createDefaultNode(() => 'page', 'CANVAS', { childIds: [], guides })]
-  ])
+  graph.nodes.set(
+    'page',
+    createDefaultNode(() => 'page', 'CANVAS', { childIds: [], guides })
+  )
   return graph
 }
 
@@ -71,14 +72,14 @@ describe('page guide rendering', () => {
       childIds: ['frame'],
       guides: []
     })
-    const nodes = new Map([
+    const nodes: Array<[string, SceneNode]> = [
       ['page', page],
       ['frame', frame],
       ['nested', nested]
-    ])
+    ]
     const graph = new SceneGraph()
     graph.rootId = 'root'
-    graph.nodes = nodes
+    for (const [id, node] of nodes) graph.nodes.set(id, node)
 
     drawGuides(r, asCanvas(canvas), graph, undefined)
 

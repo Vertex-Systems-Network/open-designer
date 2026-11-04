@@ -1,3 +1,4 @@
+export { unionBounds } from './bounds'
 export {
   figmaRotation,
   panelPosition,

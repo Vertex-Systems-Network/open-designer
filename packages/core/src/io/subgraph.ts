@@ -50,7 +50,6 @@ function cloneIntoGraph(
 ): SceneGraph {
   const graph = new SceneGraph()
   graph.rootId = source.rootId
-  graph.nodes = new Map()
   graph.images = new Map()
   graph.variables = new Map()
   graph.variableCollections = new Map()
