@@ -75,10 +75,34 @@ export function drawLineStroke(
  * The outline of a LINE's first visible stroke, as booleans and flattening take it: its shaft, its
  * caps, and its heads, without dashes.
  */
-export function makeLineStrokeOutline(r: SkiaRenderer, node: SceneNode): Path | null {
+/** The weight and cap a LINE is stroked with: its first visible stroke's. */
+function lineStroke(node: SceneNode): { weight: number; cap: StrokeCap } {
   const stroke = node.strokes.find((item) => item.visible)
-  const weight = stroke?.weight ?? 1
-  const cap = stroke?.cap ?? node.strokeCap
+  return { weight: stroke?.weight ?? 1, cap: stroke?.cap ?? node.strokeCap }
+}
+
+/**
+ * A LINE as Flatten keeps it: the segment its stroke is drawn along, to one side and inside its
+ * caps, so the stroke it keeps lies where it did (live-verified).
+ */
+export function makeLineSegmentPath(r: SkiaRenderer, node: SceneNode): Path {
+  const stroke = node.strokes.find((item) => item.visible)
+  const { weight, cap } = lineStroke(node)
+  const { from, to } = lineStrokePath(node, weight, cap)
+  const length = Math.hypot(to.x - from.x, to.y - from.y)
+  const pattern = normalizeDashPattern(stroke?.dashPattern)
+  const spans = pattern.length > 0 ? sideDashSpans(length, pattern) : [[0, length]]
+  const path = new r.ck.PathBuilder()
+  for (const [start, end] of spans) {
+    const at = (distance: number) => (length > 0 ? distance / length : 0)
+    path.moveTo(from.x + (to.x - from.x) * at(start), from.y + (to.y - from.y) * at(start))
+    path.lineTo(from.x + (to.x - from.x) * at(end), to.y + (to.y - from.y) * at(end))
+  }
+  return path.detachAndDelete()
+}
+
+export function makeLineStrokeOutline(r: SkiaRenderer, node: SceneNode): Path | null {
+  const { weight, cap } = lineStroke(node)
   const { network, from, to } = lineStrokePath(node, weight, cap)
   const shaft = new r.ck.PathBuilder()
   shaft.moveTo(from.x, from.y)
