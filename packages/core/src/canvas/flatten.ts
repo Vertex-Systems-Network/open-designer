@@ -193,6 +193,7 @@ function rebaseFills(
     if (!bytes) return fill
     const image = renderer.ck.MakeImageFromEncoded(bytes)
     if (!image) return fill
+    let rebased = fill
     try {
       // Encode the original FILL/FIT/TILE layout as an equivalent CROP transform. Those layout
       // modes derive their mapping from node bounds and ignore imageTransform, which no longer
@@ -200,23 +201,26 @@ function rebaseFills(
       const oldLocalMatrix = makeImageFillLocalMatrix(fill, node, image.width(), image.height())
       const sourceToFlatPixels = multiplyAffine(translateAffine(-box.x, -box.y), matrix as Affine)
       const flatToSourcePixels = invertAffine(sourceToFlatPixels)
-      if (!flatToSourcePixels) return fill
-      const destinationToImage = multiplyAffine(flatToSourcePixels, oldLocalMatrix as Affine)
-      const inverseImageTransform = multiplyAffine(
-        scaleAffine(1 / (box.width || 1), 1 / (box.height || 1)),
-        multiplyAffine(destinationToImage, scaleAffine(image.width(), image.height()))
-      )
-      const imageTransform = invertAffine(inverseImageTransform)
-      if (!imageTransform) return fill
-      return {
-        ...fill,
-        imageScaleMode: 'CROP',
-        imageRotation: 0,
-        imageTransform: affineTransform(imageTransform)
+      if (flatToSourcePixels) {
+        const destinationToImage = multiplyAffine(flatToSourcePixels, oldLocalMatrix as Affine)
+        const inverseImageTransform = multiplyAffine(
+          scaleAffine(1 / (box.width || 1), 1 / (box.height || 1)),
+          multiplyAffine(destinationToImage, scaleAffine(image.width(), image.height()))
+        )
+        const imageTransform = invertAffine(inverseImageTransform)
+        if (imageTransform) {
+          rebased = {
+            ...fill,
+            imageScaleMode: 'CROP',
+            imageRotation: 0,
+            imageTransform: affineTransform(imageTransform)
+          }
+        }
       }
     } finally {
       image.delete()
     }
+    return rebased
   })
 }
 

@@ -43,13 +43,11 @@ import {
   configureStrokePaint,
   forVisibleStrokes,
   drawArrowHeads,
-  applyStrokeShader,
   drawDashedRRectWithSolidCorners,
   drawStyledRRectStroke,
   getStrokeCapEntity,
   getStrokeJoinEntity,
-  normalizeDashPattern,
-  setStrokeBlendMode
+  normalizeDashPattern
 } from './strokes'
 import { drawLineStroke } from './strokes/line'
 import { drawOutlinedDashes } from './strokes/outlined-dashes'
