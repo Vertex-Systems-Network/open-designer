@@ -72,8 +72,8 @@ export function drawLineStroke(
 }
 
 /**
- * The outline of a LINE's first visible stroke, as booleans and flattening take it: its shaft, its
- * caps, and its heads, without dashes.
+ * The continuous shaft of a LINE for flattening. Its per-stroke dash and arrow cap stay on the
+ * flattened vector's stroke, so splitting the path here would create a cap at every dash endpoint.
  */
 /** The weight and cap a LINE is stroked with: its first visible stroke's. */
 function lineStroke(node: SceneNode): { weight: number; cap: StrokeCap } {
