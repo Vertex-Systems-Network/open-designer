@@ -44,7 +44,8 @@ export function createAutomationEnvironment(
     OPENDESIGNER_MCP_CORS_ORIGIN: corsOrigin,
     OPENDESIGNER_MCP_ROOT: configuration.rootDirectory.trim() || process.cwd(),
     OPENDESIGNER_MCP_DISABLED_TOOLS: serializeDisabledTools(configuration.disabledTools),
-    OPENDESIGNER_MCP_SCOPE: configuration.scope
+    OPENDESIGNER_MCP_SCOPE: configuration.scope,
+    OPENDESIGNER_MCP_SESSION_IDLE_TIMEOUT_MS: String(configuration.sessionIdleTimeoutMs)
   }
   if (socketPath) environment.OPENDESIGNER_MCP_SOCKET = socketPath
   if (discoveryPath) environment.OPENDESIGNER_MCP_DISCOVERY_PATH = discoveryPath
@@ -147,6 +148,7 @@ export function configurationsMatch(
     current.authenticationEnabled === next.authenticationEnabled &&
     current.rootDirectory === next.rootDirectory &&
     current.scope === next.scope &&
+    current.sessionIdleTimeoutMs === next.sessionIdleTimeoutMs &&
     current.disabledTools.length === next.disabledTools.length &&
     current.disabledTools.every((tool, index) => tool === next.disabledTools[index])
   )
@@ -163,7 +165,8 @@ export function automationPlugin(
     authenticationEnabled: true,
     rootDirectory: '',
     disabledTools: [],
-    scope: 'document'
+    scope: 'document',
+    sessionIdleTimeoutMs: 604_800_000
   }
 
   function enqueue(operation: () => Promise<void>): Promise<void> {
