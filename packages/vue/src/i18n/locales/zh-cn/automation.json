@@ -88,7 +88,7 @@
   "mcpFailureDetails": "详细信息",
   "mcpFailureCopy": "复制详细信息",
   "sessionIdleTimeout": "会话超时",
-  "sessionIdleTimeoutDescription": "在此时间后关闭不活动的 MCP 会话。选择“永不”可将会话保留到客户端断开连接。重启服务器以应用更改。",
+  "sessionIdleTimeoutDescription": "在此时间后关闭不活动的会话。选择“永不”可将会话保留到客户端断开连接。重启服务器以应用更改。",
   "sessionTimeout15Minutes": "15 分钟",
   "sessionTimeoutOneDay": "1 天",
   "sessionTimeoutSevenDays": "7 天",
