@@ -26,7 +26,8 @@ describe('MCP Vite development server', () => {
         authenticationEnabled: false,
         rootDirectory: '/designs',
         disabledTools: ['eval', 'delete_node'],
-        scope: 'selection'
+        scope: 'selection',
+        sessionIdleTimeoutMs: 604_800_000
       },
       corsOrigin: 'http://localhost:1420',
       discoveryPath: '/tmp/mcp.json',
@@ -39,6 +40,7 @@ describe('MCP Vite development server', () => {
     expect(env.OPENDESIGNER_MCP_DISABLED_TOOLS).toBe('eval,delete_node')
     expect(env.OPENDESIGNER_MCP_DISCOVERY_PATH).toBe('/tmp/mcp.json')
     expect(env.OPENDESIGNER_MCP_SCOPE).toBe('selection')
+    expect(env.OPENDESIGNER_MCP_SESSION_IDLE_TIMEOUT_MS).toBe('604800000')
   })
 
   test('normalizes and validates typed disabled tool configuration', () => {
@@ -47,20 +49,23 @@ describe('MCP Vite development server', () => {
         authenticationEnabled: true,
         rootDirectory: '/designs',
         disabledTools: [' eval ', 'delete_node', 'eval'],
-        scope: 'document'
+        scope: 'document',
+        sessionIdleTimeoutMs: 604_800_000
       })
     ).toEqual({
       authenticationEnabled: true,
       rootDirectory: '/designs',
       disabledTools: ['eval', 'delete_node'],
-      scope: 'document'
+      scope: 'document',
+      sessionIdleTimeoutMs: 604_800_000
     })
     expect(
       parseDevMCPConfiguration({
         authenticationEnabled: true,
         rootDirectory: '',
         disabledTools: ['invalid tool'],
-        scope: 'document'
+        scope: 'document',
+        sessionIdleTimeoutMs: 604_800_000
       })
     ).toBeNull()
   })
@@ -81,7 +86,8 @@ describe('MCP Vite development server', () => {
       authenticationEnabled: true,
       rootDirectory: '/设计',
       disabledTools: [],
-      scope: 'document'
+      scope: 'document',
+      sessionIdleTimeoutMs: 604_800_000
     })
   })
 
@@ -90,7 +96,8 @@ describe('MCP Vite development server', () => {
       authenticationEnabled: true,
       rootDirectory: '/designs',
       disabledTools: ['eval', 'delete_node'],
-      scope: 'document'
+      scope: 'document',
+      sessionIdleTimeoutMs: 604_800_000
     }
     expect(configurationsMatch(configuration, structuredClone(configuration))).toBe(true)
     expect(
