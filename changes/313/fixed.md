@@ -1,0 +1,1 @@
+- The desktop window keeps handling MCP requests when hidden or minimized on macOS, so background automations no longer stall.
