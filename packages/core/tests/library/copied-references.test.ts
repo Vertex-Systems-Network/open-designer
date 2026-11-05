@@ -34,6 +34,44 @@ function libraryWithIconProperty() {
 const named = (graph: SceneGraph, id: string | undefined) => (id ? graph.getNode(id)?.name : null)
 
 describe('references between copied library layers', () => {
+  test('publishes bound variables and remaps them into the consumer library collection', async () => {
+    const source = new SceneGraph()
+    const collection = source.createCollection('Tokens')
+    const accent = source.createVariable('accent', 'COLOR', collection.id, {
+      r: 0.1,
+      g: 0.5,
+      b: 0.4,
+      a: 1
+    })
+    const button = source.createNode('COMPONENT', source.getPages()[0].id, {
+      name: 'Button',
+      componentKey: 'button',
+      fills: [{ type: 'SOLID', color: { r: 0, g: 0, b: 0, a: 1 }, opacity: 1, visible: true }]
+    })
+    source.bindVariable(button.id, 'fills/0/color', accent.id)
+
+    const revision = await createLibraryRevision({
+      libraryId: 'design-system',
+      name: 'Design system',
+      graph: source
+    })
+    expect(revision.graph.variables.has(accent.id)).toBe(true)
+
+    const consumer = new SceneGraph()
+    const { componentId } = materializeLibraryAsset(consumer, revision, 'button')
+    const imported = consumer.getNode(componentId)
+    const importedVariableId = imported?.boundVariables['fills/0/color']
+    expect(importedVariableId).toBeDefined()
+    expect(importedVariableId).not.toBe(accent.id)
+    expect(consumer.variables.get(importedVariableId ?? '')?.valuesByMode).toEqual(
+      expect.objectContaining({
+        [consumer.variableCollections.get(
+          consumer.variables.get(importedVariableId ?? '')?.collectionId ?? ''
+        )?.defaultModeId ?? 'missing']: accent.valuesByMode[collection.defaultModeId]
+      })
+    )
+  })
+
   test('point instance-swap properties at the copied components', async () => {
     const revision = await createLibraryRevision({
       libraryId: 'design-system',
