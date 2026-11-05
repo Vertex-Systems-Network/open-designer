@@ -117,6 +117,11 @@ function applyAutoLayout(
 ): void {
   node.layoutMode = layoutMode
   node.primaryAxisAlign = mapJustifyContent(pen.justifyContent)
+  node.pluginData = withPluginData(
+    node.pluginData,
+    OPEN_DESIGNER_PLUGIN_DATA.penEqualFillPadding,
+    'true'
+  )
   if (pen.justifyContent === 'space_between') {
     node.pluginData = withPluginData(
       node.pluginData,
