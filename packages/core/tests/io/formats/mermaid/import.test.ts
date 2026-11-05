@@ -77,6 +77,24 @@ flowchart TD
   G ~~~ A`
 
 describe('opening Mermaid files', () => {
+  test('keeps Markdown emphasis as rich text in node labels', async () => {
+    const graph = await read('flowchart TD\n  A["`**Bold** and *italic*`"] -->|Yes| B[Done]')
+    const a = named(graph, 'Bold and italic')
+    const aLabel = shapeWithTextLabel(graph, a)
+    const edge = connectors(graph).find(
+      (connector) => connectorSublayers(graph, connector)?.label.text === 'Yes'
+    )
+    const edgeLabel = edge && connectorSublayers(graph, edge)?.label
+    expect(aLabel).toMatchObject({
+      text: 'Bold and italic',
+      styleRuns: expect.arrayContaining([
+        { start: 0, length: 4, style: { fontWeight: 700 } },
+        { start: 9, length: 6, style: { italic: true } }
+      ])
+    })
+    expect(edgeLabel).toMatchObject({ text: 'Yes' })
+  })
+
   test('takes .mmd and .mermaid files and refuses diagrams other than flowcharts', async () => {
     const format = expectDefined(io.getFormat('mermaid'))
     expect(format.matchesFile?.('flow.mmd')).toBe(true)

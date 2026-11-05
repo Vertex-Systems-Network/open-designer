@@ -22,6 +22,7 @@ import { applyArrangement, type ArrangePlacement } from '#core/layout/arrange/ap
 import { arrangeBoxes, type ArrangeInput } from '#core/layout/arrange/boxes'
 import { connectorLabelSize } from '#core/layout/arrange/routes'
 import { shapeWithTextWidthFor } from '#core/layout/shape-with-text'
+import { markdownText } from '#core/text/markdown'
 import { prepareGraphFonts } from '#core/text/prepare'
 
 import { figJamShape } from './shapes'
@@ -50,10 +51,13 @@ function solid(color: Color): Fill {
   return { type: 'SOLID', color: { ...color }, opacity: 1, visible: true }
 }
 
-/** Markdown's emphasis marks taken out, which a label shows as plain text for now. */
+/** A Mermaid label's rich-text fields, preserving Markdown emphasis and block structure. */
+function labelFields(label: FlowLabel, base: Pick<SceneNode, 'fontSize' | 'fontWeight'>) {
+  return label.format === 'markdown' ? markdownText(label.text, base) : { text: label.text }
+}
+
 function labelText(label: FlowLabel): string {
-  if (label.format === 'text') return label.text
-  return label.text.replace(/(\*\*|__)(.+?)\1/g, '$2').replace(/([*_])(.+?)\1/g, '$2')
+  return labelFields(label, { fontSize: 16, fontWeight: 500 }).text
 }
 
 function styledFills(layer: Partial<SceneNode>, style: FlowStyle): Fill[] | undefined {
@@ -158,7 +162,10 @@ class FlowchartBuilder {
         shapeTruncates: false,
         name: text.split('\n')[0]?.trim() || node.id
       },
-      style.color ? { text, fills: [solid(style.color)] } : { text }
+      {
+        ...labelFields(node.label, { fontSize: 16, fontWeight: 500 }),
+        ...(style.color && { fills: [solid(style.color)] })
+      }
     )
     this.layers.set(node.id, shape.id)
   }
@@ -194,6 +201,9 @@ class FlowchartBuilder {
       text: edge.label ? labelText(edge.label) : ''
     })
     const parts = connectorSublayers(graph, connector)
+    if (parts && edge.label?.format === 'markdown') {
+      graph.updateNode(parts.label.id, labelFields(edge.label, { fontSize: 16, fontWeight: 500 }))
+    }
     const stroke = parts?.line.strokes.at(0)
     if (parts && stroke) {
       const weight = edge.stroke === 'thick' ? stroke.weight * THICK : stroke.weight
