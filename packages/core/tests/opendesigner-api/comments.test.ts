@@ -94,15 +94,20 @@ describe('opendesigner comments', () => {
 
     const reopened = await parseFigFile((await exportFigFile(graph)).buffer as ArrayBuffer)
     const threads = readComments(reopened)
+    const reopenedPage = reopened.getPages()[0]
+    const reopenedCard = [...reopened.getAllNodes()].find((node) => node.name === 'Card')
+    if (!reopenedPage || !reopenedCard) throw new Error('Missing reopened comment target')
     expect(threads.filter((thread) => !thread.deleted)).toHaveLength(3)
-    expect(threads.map((thread) => thread.pageId)).toEqual(threads.map(() => page.id))
-    expect(threads.find((thread) => thread.text === 'Pinned to layer')?.nodeId).toBe(card.id)
+    expect(threads.map((thread) => thread.pageId)).toEqual(threads.map(() => reopenedPage.id))
+    expect(threads.find((thread) => thread.text === 'Pinned to layer')?.nodeId).toBe(
+      reopenedCard.id
+    )
     expect(
       listCommentThreads(threads, {
         query: '',
         showResolved: true,
         onlyPage: true,
-        pageId: page.id,
+        pageId: reopenedPage.id,
         onlyMine: false,
         author: '',
         sort: 'oldest'
