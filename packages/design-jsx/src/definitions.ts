@@ -149,6 +149,7 @@ export const DESIGN_JSX_SUPPORTED_PROPERTY_NAMES = [
   'textAutoResize',
   'lineHeight',
   'letterSpacing',
+  'markdown',
   'textDecoration',
   'textDecorationStyle',
   'textDecorationColor',
