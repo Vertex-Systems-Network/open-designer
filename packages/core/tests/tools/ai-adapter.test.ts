@@ -13,10 +13,16 @@ type ToolFactory = Parameters<typeof toolsToAI>[2]['tool']
 const tool = ((definition: unknown) => definition) as ToolFactory
 
 type ModelOutputTool = {
-  toModelOutput(options: { output: unknown }): unknown
+  toModelOutput(options: { toolCallId: string; output: unknown }): Promise<unknown>
 }
 
-function adapt(output: unknown): ModelOutputTool {
+function adapt(
+  output: unknown,
+  encodeModelImage?: (image: {
+    data: string
+    mediaType: string
+  }) => Promise<{ data: string; mediaType: string }>
+): ModelOutputTool {
   const def = defineTool({
     name: 'image_tool',
     description: 'Returns a fixed result',
@@ -25,7 +31,7 @@ function adapt(output: unknown): ModelOutputTool {
     execute: () => output
   })
   const figma = new FigmaAPI(new SceneGraph())
-  const tools = toolsToAI([def], { getFigma: () => figma }, { tool })
+  const tools = toolsToAI([def], { getFigma: () => figma, encodeModelImage }, { tool })
   const adapted: unknown = tools.image_tool
   if (!hasModelOutput(adapted)) throw new Error('image_tool has no toModelOutput')
   return adapted
@@ -41,9 +47,9 @@ function hasModelOutput(value: unknown): value is ModelOutputTool {
 }
 
 describe('AI adapter model output', () => {
-  test('sends any image result as a file with its metadata as text', () => {
+  test('sends any image result as a file with its metadata as text', async () => {
     const output = { mimeType: 'image/png', base64: 'AAAA', changedPixels: 12 }
-    expect(adapt(output).toModelOutput({ output })).toEqual({
+    expect(await adapt(output).toModelOutput({ output, toolCallId: 'call' })).toEqual({
       type: 'content',
       value: [
         { type: 'text', text: '{"changedPixels":12}' },
@@ -56,7 +62,7 @@ describe('AI adapter model output', () => {
     { mimeType: 'image/png', base64: 'AAAA', changedPixels: 12 },
     { mimeType: 'image/png', base64: 'AAAA' },
     { mimeType: 'application/pdf', base64: 'AAAA' }
-  ])('produces a tool message the AI SDK accepts in the next prompt (%p)', (output) => {
+  ])('produces a tool message the AI SDK accepts in the next prompt (%p)', async (output) => {
     const message = {
       role: 'tool',
       content: [
@@ -64,16 +70,34 @@ describe('AI adapter model output', () => {
           type: 'tool-result',
           toolCallId: 'call',
           toolName: 'image_tool',
-          output: adapt(output).toModelOutput({ output })
+          output: await adapt(output).toModelOutput({ output, toolCallId: 'call' })
         }
       ]
     }
     expect(toolModelMessageSchema.safeParse(message).success).toBe(true)
   })
 
-  test('keeps non-image results as JSON', () => {
+  test('keeps non-image results as JSON', async () => {
     const output = { mimeType: 'application/pdf', base64: 'AAAA' }
-    expect(adapt(output).toModelOutput({ output })).toEqual({ type: 'json', value: output })
+    expect(await adapt(output).toModelOutput({ output, toolCallId: 'call' })).toEqual({
+      type: 'json',
+      value: output
+    })
+  })
+
+  test('encodes each image only once and leaves the tool result metadata intact', async () => {
+    const output = { mimeType: 'image/png', base64: 'AAAA', changedPixels: 12 }
+    let encodes = 0
+    const adapted = adapt(output, async () => {
+      encodes++
+      return { mediaType: 'image/webp', data: 'BBBB' }
+    })
+    const options = { output, toolCallId: 'call' }
+    expect(await adapted.toModelOutput(options)).toMatchObject({
+      value: [{ text: '{"changedPixels":12}' }, { mediaType: 'image/webp', data: { data: 'BBBB' } }]
+    })
+    await adapted.toModelOutput(options)
+    expect(encodes).toBe(1)
   })
 })
 
