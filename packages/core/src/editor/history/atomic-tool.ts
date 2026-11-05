@@ -86,7 +86,9 @@ export function executeAtomicTool(
     const changed = checkpoint.reported.size
     if (changed > MAX_ATOMIC_CHANGED_LAYERS) {
       throw new Error(
-        `This edit changes ${changed} layers; one atomic agent edit may change at most ${MAX_ATOMIC_CHANGED_LAYERS}. Change fewer layers per call.`
+        `Atomic tool "${def.name}" changed ${changed} layers in one call; the limit is ${MAX_ATOMIC_CHANGED_LAYERS}. ` +
+          `The document contains ${graph.nodes.size} layers and ${graph.variables.size} variables. ` +
+          'Split the edit into smaller calls or smaller ID batches.'
       )
     }
     const records = recordChanges(graph, checkpoint)
