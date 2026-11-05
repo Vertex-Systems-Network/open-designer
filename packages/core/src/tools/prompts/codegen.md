@@ -240,6 +240,7 @@ assets/
 - `textAutoResize: WIDTH_AND_HEIGHT` → no explicit dimensions
 - `textAutoResize: HEIGHT` → fixed width, auto height
 - `textAutoResize: NONE` → fixed width and height
+- MCP `create_shape` with `type: TEXT` defaults to `WIDTH_AND_HEIGHT`; use `text_auto_resize: HEIGHT` only when the label should wrap to a fixed width.
 - `textDecoration` → `text-decoration`
 - `textCase` → `text-transform`
 
