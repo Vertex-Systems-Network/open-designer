@@ -24,6 +24,13 @@ describe('lineStrokeEnds', () => {
     }
   })
 
+  test('can keep the full flatten inset when a capped line is shorter than its weight', () => {
+    expect(lineStrokeEnds(6, 0, 8, 'ROUND', true)).toEqual({
+      start: { x: 4, y: -4 },
+      end: { x: 2, y: -4 }
+    })
+  })
+
   test('keeps the point of an equilateral arrow at the end', () => {
     expect(lineStrokeEnds(240, 0, 8, 'ARROW_EQUILATERAL')).toEqual({
       start: { x: 0, y: -4 },

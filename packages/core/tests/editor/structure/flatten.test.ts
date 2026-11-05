@@ -132,6 +132,28 @@ describe('flattenSelected', () => {
     expect(vector?.vectorNetwork?.segments).toHaveLength(1)
   })
 
+  test('keeps the full inset when flattening a capped line shorter than its stroke', async () => {
+    const { editor } = await createEditorWithRenderer()
+    const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
+    const line = editor.graph.createNode('LINE', editor.state.currentPageId, {
+      x: 50,
+      y: 20,
+      width: 6,
+      height: 0,
+      strokes: [{ ...solid, weight: 8, align: 'CENTER', cap: 'ROUND' }],
+      strokeWeight: 8,
+      strokeCap: 'ROUND'
+    })
+
+    editor.select([line.id])
+    editor.flattenSelected()
+
+    const vector = editor.graph.getNode([...editor.state.selectedIds][0])
+    expect([vector?.x, vector?.y, vector?.width, vector?.height]).toEqual([52, 16, 2, 0])
+    expect(vector?.vectorNetwork?.segments).toHaveLength(1)
+    expect(vector?.strokeCap).toBe('ROUND')
+  })
+
   test('keeps an outside stroke separate from its fill geometry', async () => {
     const { editor } = await createEditorWithRenderer()
     const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }

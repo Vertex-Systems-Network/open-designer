@@ -87,16 +87,10 @@ function lineStroke(node: SceneNode): { weight: number; cap: StrokeCap } {
  */
 export function makeLineSegmentPath(r: SkiaRenderer, node: SceneNode): Path {
   const { weight, cap } = lineStroke(node)
-  const { from, to } = lineStrokePath(node, weight, cap)
-  const length = Math.hypot(to.x - from.x, to.y - from.y)
-  const pattern = normalizeDashPattern(stroke?.dashPattern)
-  const spans = pattern.length > 0 ? sideDashSpans(length, pattern) : [[0, length]]
+  const { start, end } = lineStrokeEnds(node.width, node.height, weight, cap, true)
   const path = new r.ck.PathBuilder()
-  for (const [start, end] of spans) {
-    const at = (distance: number) => (length > 0 ? distance / length : 0)
-    path.moveTo(from.x + (to.x - from.x) * at(start), from.y + (to.y - from.y) * at(start))
-    path.lineTo(from.x + (to.x - from.x) * at(end), to.y + (to.y - from.y) * at(end))
-  }
+  path.moveTo(start.x, start.y)
+  path.lineTo(end.x, end.y)
   return path.detachAndDelete()
 }
 
