@@ -29,7 +29,9 @@ describe('tool font loading', () => {
     const figma = new FigmaAPI(new SceneGraph())
     figma.loadFontAsync = (font) => {
       loaded.push(font.family)
-      return new Promise<void>((resolve) => pending.push(resolve))
+      return new Promise<void>((resolve) => {
+        pending.push(resolve)
+      })
     }
 
     const loading = tool.loadFonts(figma, {})
@@ -45,7 +47,10 @@ describe('tool font loading', () => {
     async () => {
       const tool = fontTool()
       const figma = new FigmaAPI(new SceneGraph())
-      figma.loadFontAsync = () => new Promise<void>(() => undefined)
+      figma.loadFontAsync = () =>
+        new Promise<void>(() => {
+          void 0
+        })
 
       await expect(tool.loadFonts(figma, {})).rejects.toThrow(
         `Timed out loading font "Alpha Regular" after ${TOOL_FONT_LOAD_TIMEOUT_MS / 1000}s`
