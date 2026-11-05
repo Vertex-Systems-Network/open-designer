@@ -1,8 +1,11 @@
 import { SceneGraph, type SceneNode } from '@open-designer/scene-graph'
 import { cloneNodeProps } from '@open-designer/scene-graph/copy'
 import { standardStyleName } from '@open-designer/scene-graph/font-style'
+import { overriddenBindingField } from '@open-designer/scene-graph/instances/overrides'
 import { contentPluginData } from '@open-designer/scene-graph/plugin-data'
+import { styleRunReferences } from '@open-designer/scene-graph/text'
 import { remapCopiedReferences } from '@open-designer/scene-graph/transfer'
+import { variableValueReferences } from '@open-designer/scene-graph/variables'
 
 import { existingAssetKey } from './asset-keys'
 import { contentHash } from './hash'
@@ -91,6 +94,8 @@ export function extractLibrarySnapshot(
   for (const [sourceId, targetId] of mappedIds)
     if (sourceId === targetId) throw new Error('Snapshot IDs must be remapped')
   remapCopiedReferences(snapshot, mappedIds)
+
+  copySnapshotVariables(source, snapshot, closure)
 
   for (const imageHash of new Set(
     [...closure].flatMap((id) => {
@@ -207,7 +212,108 @@ export async function describeSnapshotAssets(
       name: node.name,
       description: node.symbolDescription,
       sourceNodeId: node.id,
-      contentHash: await contentHash(canonicalLibraryNode(snapshot.graph, node, new Set([node.id])))
+      contentHash: await contentHash({
+        node: canonicalLibraryNode(snapshot.graph, node, new Set([node.id])),
+        variables: [...variablesForAsset(snapshot.graph, node.id)].sort().flatMap((id) => {
+          const variable = snapshot.graph.variables.get(id)
+          const collection = variable
+            ? snapshot.graph.variableCollections.get(variable.collectionId)
+            : undefined
+          return variable ? [{ variable, collection }] : []
+        })
+      })
     }))
   )
+}
+
+function variablesForAsset(graph: SceneGraph, rootId: string): Set<string> {
+  const nodes = collectNodeClosure(graph, [rootId])
+  const variables = directVariables(graph, nodes)
+  const pending = [...variables]
+  while (pending.length > 0) {
+    const id = pending.pop()
+    const variable = id ? graph.variables.get(id) : undefined
+    if (!variable) continue
+    for (const value of Object.values(variable.valuesByMode)) {
+      for (const reference of variableValueReferences(value)) {
+        if (graph.variables.has(reference) && !variables.has(reference)) {
+          variables.add(reference)
+          pending.push(reference)
+        }
+      }
+    }
+  }
+  return variables
+}
+
+function directVariables(graph: SceneGraph, nodeIds: ReadonlySet<string>): Set<string> {
+  const variables = new Set<string>()
+  for (const id of nodeIds) {
+    const node = graph.getNode(id)
+    if (!node) continue
+    for (const variableId of nodeVariableReferences(node)) variables.add(variableId)
+    for (const collectionId of Object.keys(node.variableModes)) {
+      for (const variable of graph.variables.values()) {
+        if (variable.collectionId === collectionId) variables.add(variable.id)
+      }
+    }
+  }
+  return variables
+}
+
+function copySnapshotVariables(
+  source: SceneGraph,
+  snapshot: SceneGraph,
+  nodeIds: ReadonlySet<string>
+): void {
+  const variables = directVariables(source, nodeIds)
+  const pending = [...variables]
+  while (pending.length > 0) {
+    const id = pending.pop()
+    const variable = id ? source.variables.get(id) : undefined
+    if (!variable) continue
+    for (const value of Object.values(variable.valuesByMode)) {
+      for (const reference of variableValueReferences(value)) {
+        if (source.variables.has(reference) && !variables.has(reference)) {
+          variables.add(reference)
+          pending.push(reference)
+        }
+      }
+    }
+  }
+  const collections = new Set(
+    [...variables].flatMap((id) => {
+      const collectionId = source.variables.get(id)?.collectionId
+      return collectionId ? [collectionId] : []
+    })
+  )
+  for (const id of collections) {
+    const collection = source.variableCollections.get(id)
+    if (!collection) continue
+    snapshot.variableCollections.set(id, {
+      ...structuredClone(collection),
+      variableIds: collection.variableIds.filter((variableId) => variables.has(variableId))
+    })
+    snapshot.activeMode.set(id, source.activeMode.get(id) ?? collection.defaultModeId)
+  }
+  for (const id of variables) {
+    const variable = source.variables.get(id)
+    if (variable) snapshot.variables.set(id, structuredClone(variable))
+  }
+}
+
+function nodeVariableReferences(node: SceneNode): string[] {
+  const variables = new Set([
+    ...Object.values(node.boundVariables),
+    ...styleRunReferences(node.styleRuns).variables
+  ])
+  for (const entries of [
+    node.instanceOverrides.self,
+    ...node.instanceOverrides.descendants.values()
+  ]) {
+    for (const [field, value] of entries) {
+      if (overriddenBindingField(field) !== null && typeof value === 'string') variables.add(value)
+    }
+  }
+  return [...variables]
 }
