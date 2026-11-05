@@ -12,6 +12,7 @@ import {
 } from 'yoga-layout'
 
 import { resolveNodeLayoutDirection } from '@open-designer/scene-graph/text/direction'
+import { OPEN_DESIGNER_PLUGIN_DATA, readPluginData } from '@open-designer/scene-graph/plugin-data'
 
 import { applyYogaLayout } from './layout/apply'
 import {
@@ -209,6 +210,21 @@ function insertFlexChildren(
   graph: SceneGraph,
   direction: 'LTR' | 'RTL'
 ): void {
+  const equalFillPadding =
+    readPluginData(parent.pluginData, OPEN_DESIGNER_PLUGIN_DATA.penEqualFillPadding) === 'true'
+  const isRow = parent.layoutMode === 'HORIZONTAL'
+  const mainPadding = (node: SceneNode) =>
+    node.layoutMode === 'NONE'
+      ? 0
+      : isRow
+        ? node.paddingLeft + node.paddingRight
+        : node.paddingTop + node.paddingBottom
+  const fillChildren = graph
+    .getChildren(parent.id)
+    .filter((node) => node.visible && node.layoutPositioning !== 'ABSOLUTE' && node.layoutGrow > 0)
+  const commonFillPadding = equalFillPadding
+    ? Math.max(0, ...fillChildren.map(mainPadding))
+    : 0
   const overlap = siblingOverlap(parent)
   const capHugOverlap = overlap > 0 && parent.primaryAxisSizing === 'HUG'
   const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
@@ -223,6 +239,11 @@ function insertFlexChildren(
       yogaChild.setDisplay(Display.None)
     } else {
       configureInFlowChild(yogaChild, child, parent, graph, direction)
+      if (equalFillPadding && child.layoutGrow > 0) {
+        // Yoga's zero flex basis still floors a nested frame at its own padding. Offset the
+        // content-box basis so every Fill sibling starts with the same outer size before growth.
+        yogaChild.setFlexBasis(Math.max(0, commonFillPadding - mainPadding(child)))
+      }
     }
     yogaParent.insertChild(yogaChild, yogaParent.getChildCount())
     return { child, yogaChild }
