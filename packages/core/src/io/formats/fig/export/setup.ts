@@ -415,7 +415,6 @@ export async function prepareFigExport(
   const documentNc = makeDocumentNodeChange(docGuid, graph.documentColorSpace)
   const rootNode = graph.getNode(graph.rootId)
   if (rootNode) Object.assign(documentNc, rootNode.source.fig.rawNodeFields)
-  applyDocumentPluginData(documentNc, graph)
 
   const pages = graph.getPages(true)
   const nodeIdToGuid = new Map<string, GUID>()
@@ -481,6 +480,7 @@ export async function prepareFigExport(
   )
   const pluginDataOverrides = renamedBehaviourPluginData(graph, propertyIdToGuid)
   assignOwnLayerGuids(graph, sourceOwners, nodeIdToGuid, assignedGuidValues)
+  applyDocumentPluginData(documentNc, graph, nodeIdToGuid, sourceOwners)
 
   return {
     graph,

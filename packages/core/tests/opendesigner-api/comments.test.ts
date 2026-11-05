@@ -5,7 +5,7 @@ import { exportFigFile, parseFigFile } from '@open-designer/core/io/formats/fig'
 import { compileScript } from '@open-designer/core/tools'
 import { initCodec } from '@open-designer/kiwi/fig/codec'
 import { SceneGraph } from '@open-designer/scene-graph'
-import { readComments } from '@open-designer/scene-graph/comments'
+import { listCommentThreads, readComments } from '@open-designer/scene-graph/comments'
 
 /** A document with a Card frame holding a Title, as a script would build it. */
 async function document() {
@@ -76,16 +76,43 @@ describe('opendesigner comments', () => {
 
   test('comments survive saving the .fig file and opening it again', async () => {
     await initCodec()
-    const { graph, figma } = await document()
+    const { graph, figma, card, title } = await document()
+    const pageId = card.parentId
+    if (!pageId) throw new Error('Missing page ID')
+    const page = graph.getNode(pageId)
+    if (!page) throw new Error('Missing page')
+    // Imported Figma records may use GUIDs that differ from OpenDesigner's live graph IDs.
+    page.source.id = '0:3'
+    card.source.id = '0:4'
     await compileScript(`
       const comment = opendesigner.addComment('Check spacing', { x: 5, y: 6 })
       comment.reply('Done').resolve()
+      opendesigner.addComment('Pinned to layer', { node: ${JSON.stringify(title.id)}, x: 4, y: 7 })
+      opendesigner.addComment('Pinned to page', { page: ${JSON.stringify(page.id)}, x: 8, y: 9 })
       opendesigner.addComment('Gone').remove()
     `)(figma)
 
     const reopened = await parseFigFile((await exportFigFile(graph)).buffer as ArrayBuffer)
-    expect(readComments(reopened)).toEqual(readComments(graph))
-    expect(readComments(reopened).filter((thread) => !thread.deleted)).toHaveLength(1)
+    const threads = readComments(reopened)
+    const reopenedPage = reopened.getPages()[0]
+    const reopenedCard = [...reopened.getAllNodes()].find((node) => node.name === 'Card')
+    if (!reopenedPage || !reopenedCard) throw new Error('Missing reopened comment target')
+    expect(threads.filter((thread) => !thread.deleted)).toHaveLength(3)
+    expect(threads.map((thread) => thread.pageId)).toEqual(threads.map(() => reopenedPage.id))
+    expect(threads.find((thread) => thread.text === 'Pinned to layer')?.nodeId).toBe(
+      reopenedCard.id
+    )
+    expect(
+      listCommentThreads(threads, {
+        query: '',
+        showResolved: true,
+        onlyPage: true,
+        pageId: reopenedPage.id,
+        onlyMine: false,
+        author: '',
+        sort: 'oldest'
+      })
+    ).toHaveLength(3)
   })
 
   test('changing a deleted comment names it instead of writing it back', async () => {

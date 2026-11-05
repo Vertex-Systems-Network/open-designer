@@ -1,6 +1,7 @@
 import type { NodeChange } from '@open-designer/kiwi/fig/codec'
 import { guidToString } from '@open-designer/kiwi/fig/guid'
 import { generateId, SceneGraph, type SceneNode } from '@open-designer/scene-graph'
+import { readComments, writeComments } from '@open-designer/scene-graph/comments'
 import { repairHierarchy } from '@open-designer/scene-graph/hierarchy'
 import { OPEN_DESIGNER_PLUGIN_DATA } from '@open-designer/scene-graph/plugin-data'
 import { remapStyleRunReferences } from '@open-designer/scene-graph/text'
@@ -614,5 +615,22 @@ function materializeReaderInto(
     applyDocumentValueBindings(graph, materialized)
   })
   repairHierarchy(graph)
+  remapImportedCommentReferences(graph, sources)
   return state
+}
+
+/** Document comments name file GUIDs; the live graph may have assigned different layer IDs. */
+function remapImportedCommentReferences(
+  graph: SceneGraph,
+  sources: ReadonlyMap<string, string>
+): void {
+  const existing = readComments(graph)
+  const threads = existing.map((thread) => {
+    const pageId = sources.get(thread.pageId) ?? thread.pageId
+    const nodeId = thread.nodeId ? (sources.get(thread.nodeId) ?? thread.nodeId) : thread.nodeId
+    return pageId === thread.pageId && nodeId === thread.nodeId
+      ? thread
+      : { ...thread, pageId, nodeId }
+  })
+  if (threads.some((thread, index) => thread !== existing[index])) writeComments(graph, threads)
 }
