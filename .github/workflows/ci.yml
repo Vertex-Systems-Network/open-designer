@@ -368,7 +368,7 @@ jobs:
   production-support-gate:
     name: Production support gate
     needs: changes
-    if: needs.changes.outputs.scope == 'code'
+    if: needs.changes.outputs.scope == 'code' || needs.changes.outputs.scope == 'cloud'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
