@@ -8,6 +8,7 @@ import type {
 } from '@open-designer/scene-graph'
 import { CORNER_FIELDS } from '@open-designer/scene-graph/fields'
 import { fillSizingFields } from '@open-designer/scene-graph/layout'
+import { OPEN_DESIGNER_PLUGIN_DATA, withPluginData } from '@open-designer/scene-graph/plugin-data'
 import type { Color } from '@open-designer/scene-graph/primitives'
 
 import { convertEffects } from './effects'
@@ -116,6 +117,13 @@ function applyAutoLayout(
 ): void {
   node.layoutMode = layoutMode
   node.primaryAxisAlign = mapJustifyContent(pen.justifyContent)
+  if (pen.justifyContent === 'space_between') {
+    node.pluginData = withPluginData(
+      node.pluginData,
+      OPEN_DESIGNER_PLUGIN_DATA.penSpaceBetweenGap,
+      'true'
+    )
+  }
   node.counterAxisAlign = mapAlignItems(pen.alignItems)
   node.itemSpacing = resolveNumber(pen.gap, ctx)
   bindIfVar(node, 'itemSpacing', pen.gap, ctx)
