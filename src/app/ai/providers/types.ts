@@ -27,4 +27,6 @@ export type ModelProviderRuntime = {
 
 export interface ModelProviderAdapter {
   create(config: ModelConfig, runtime: ModelProviderRuntime): LanguageModel
+  /** The provider's API documents WebP image input. */
+  webpImages?: boolean
 }
