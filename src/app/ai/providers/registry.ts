@@ -27,20 +27,22 @@ const MODEL_PROVIDER_ADAPTERS = {
       return provider(config.customModelID.trim() || config.modelID)
     }
   },
-  anthropic: createAnthropicCompatibleAdapter(),
-  openai: createOpenAICompatibleAdapter(),
+  anthropic: createAnthropicCompatibleAdapter({ webpImages: true }),
+  openai: createOpenAICompatibleAdapter({ webpImages: true }),
   chatgpt: chatGPTAdapter,
   google: {
     create(config, runtime) {
       return createGoogleGenerativeAI({ apiKey: config.apiKey, fetch: runtime.fetch })(
         config.modelID
       )
-    }
+    },
+    webpImages: true
   },
   deepseek: {
     create(config, runtime) {
       return createDeepSeek({ apiKey: config.apiKey, fetch: runtime.fetch })(config.modelID)
-    }
+    },
+    webpImages: true
   },
   zai: createAnthropicCompatibleAdapter({ baseURL: 'https://api.z.ai/api/anthropic' }),
   minimax: createOpenAICompatibleAdapter({ baseURL: 'https://api.minimax.io/v1', mode: 'chat' }),
@@ -67,4 +69,8 @@ export function modelProviderAdapter(providerID: AIProviderID): ModelProviderAda
     throw new Error('ACP providers and Harness agents do not use direct API models')
   }
   return MODEL_PROVIDER_ADAPTERS[providerID]
+}
+
+export function providerTakesWebPImages(providerID: AIProviderID): boolean {
+  return isDirectProviderID(providerID) && modelProviderAdapter(providerID).webpImages === true
 }

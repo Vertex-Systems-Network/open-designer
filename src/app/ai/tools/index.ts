@@ -3,6 +3,7 @@ import { isPlainObject } from 'es-toolkit'
 
 import { graphFromPageSnapshot } from '@open-designer/core'
 import { registerComponentCatalog, isAtomicTool, toolsToAI } from '@open-designer/core/tools'
+import type { ModelImage } from '@open-designer/core/tools'
 
 import {
   currentRun,
@@ -41,7 +42,11 @@ function withUndoNote(result: unknown, note: string): unknown {
   return isPlainObject(result) ? { ...result, undoNote: note } : { result, undoNote: note }
 }
 
-export function createAITools(store: EditorStore, diagnosticContext?: AIDiagnosticContext) {
+export function createAITools(
+  store: EditorStore,
+  diagnosticContext?: AIDiagnosticContext,
+  encodeModelImage?: (image: ModelImage) => Promise<ModelImage>
+) {
   const libraryService = useLibraryService()
   libraryService.bindEditor(store)
   registerComponentCatalog(store.graph, libraryService)
@@ -91,7 +96,8 @@ export function createAITools(store: EditorStore, diagnosticContext?: AIDiagnost
           entry.cause
         )
       },
-      getStepBudget: () => stepBudget(store)
+      getStepBudget: () => stepBudget(store),
+      encodeModelImage
     },
     { tool }
   )
