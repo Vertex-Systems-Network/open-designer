@@ -154,7 +154,7 @@ export default defineConfig({
             url: origin,
             env: { PORTLESS_URL: '' },
             reuseExistingServer: false,
-            timeout: 120_000
+            timeout: 600_000
           }
         ]
       : [])
