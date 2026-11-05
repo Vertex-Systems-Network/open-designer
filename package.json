@@ -89,6 +89,7 @@
     "check:cloud-off": "bun tools/checks/cloud-off/src/index.ts",
     "check:test-types": "bun tools/checks/test-types/src/index.ts",
     "check:vue": "vue-tsc --noEmit -p tsconfig.json && vue-tsc --noEmit -p packages/vue/tsconfig.json",
+    "test:production": "OPENDESIGNER_TEST_SERVER=production playwright test --project=opendesigner-production",
     "test": "OPENDESIGNER_TEST_SERVER=app playwright test --project=opendesigner --grep-invert @real-llm",
     "test:storybook": "OPENDESIGNER_TEST_SERVER=storybook playwright test --project=storybook-chromium",
     "test:real-llm": "OPENDESIGNER_TEST_SERVER=app playwright test --project=opendesigner --grep @real-llm",
