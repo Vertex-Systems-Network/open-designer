@@ -365,9 +365,27 @@ jobs:
           CLOUD_E2E_SCRIPT: ${{ matrix.script }}
         run: bun --filter @open-designer/cloud "$CLOUD_E2E_SCRIPT"
 
+  production-support-gate:
+    name: Production support gate
+    needs: changes
+    if: needs.changes.outputs.scope == 'code'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-bun
+
+      - uses: ./.github/actions/setup-playwright
+
+      - name: Run support-gate E2E against the production build
+        run: bun run test:production
+
   result:
     name: CI result
-    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, unit-tests, feedback-tests, cloud-tests, cloud-storage]
+    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, unit-tests, feedback-tests, cloud-tests, cloud-storage, production-support-gate]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 3
