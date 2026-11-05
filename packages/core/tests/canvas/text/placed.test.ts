@@ -5,7 +5,7 @@ import type { CanvasKit, TypefaceFontProvider } from 'canvaskit-wasm'
 
 import { SceneGraph } from '@open-designer/scene-graph'
 import type { SceneNode } from '@open-designer/scene-graph'
-import { pixelLength } from '@open-designer/scene-graph/text'
+import { pixelLength, textLengthPixels } from '@open-designer/scene-graph/text'
 
 import { TextLayout } from '#core/canvas/text/layout'
 import { laidOutGlyphs } from '#core/canvas/text/placed'
@@ -60,7 +60,12 @@ function placed(
     fontSize: FONT_SIZE,
     ...props
   })
-  const textStyle = { fontFamilies: [FAMILY], fontSize: FONT_SIZE, fontFeatures: features }
+  const textStyle = {
+    fontFamilies: [FAMILY],
+    fontSize: FONT_SIZE,
+    fontFeatures: features,
+    letterSpacing: textLengthPixels(node.letterSpacing, FONT_SIZE)
+  }
   const builder = ck.ParagraphBuilder.MakeFromFontProvider(
     new ck.ParagraphStyle({ textStyle }),
     provider
@@ -85,6 +90,13 @@ function placed(
 const variableSource = () => expectDefined(glyphOutlineSourceSync(FAMILY, 'Regular'))
 
 describe('the font saved glyphs are outlined from', () => {
+  test('starts letter-spaced text at the Figma run origin', () => {
+    const glyphs = placed('ab', variableProvider, [], { letterSpacing: pixelLength(10) })
+
+    expect(glyphs[0].x).toBeCloseTo(0, 4)
+    expect(glyphs[1].x).toBeCloseTo(glyphs[0].advance + glyphs[0].x, 3)
+  })
+
   /**
    * The files number `B` and `a` alike but not `t` (#1619): one matching glyph must not let the
    * variable file outline the static file's glyphs, which would save another letter for `t`.
@@ -132,9 +144,17 @@ describe('the font saved glyphs are outlined from', () => {
     const source = variableSource()
     const text = 'a->b a->b'
     // The second arrow keeps its characters: the run drawn from one font has both arrows.
-    const glyphs = placed(text, variableProvider, [], {
-      styleRuns: [{ start: 5, length: 4, style: { fontFeatures: [{ tag: 'CALT', enabled: false }] } }]
-    }, { from: 5, features: [{ name: 'calt', value: 0 }] })
+    const glyphs = placed(
+      text,
+      variableProvider,
+      [],
+      {
+        styleRuns: [
+          { start: 5, length: 4, style: { fontFeatures: [{ tag: 'CALT', enabled: false }] } }
+        ]
+      },
+      { from: 5, features: [{ name: 'calt', value: 0 }] }
+    )
 
     expect(glyphs.map((glyph) => glyph.firstCharacter)).toEqual([0, 1, 3, 4, 5, 6, 7, 8])
     expect(glyphs.slice(4).map((glyph) => glyph.id)).toEqual(
