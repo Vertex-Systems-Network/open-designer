@@ -1,5 +1,7 @@
 import * as v from 'valibot'
 
+import { DEFAULT_FONT_FAMILY } from '#core/constants'
+
 import type { FigmaNodeProxy } from '#core/figma-api'
 import { toolNumber, positionInputs, defineTool, nodeSummary } from '#core/tools/schema'
 
@@ -26,6 +28,8 @@ export const createShape = defineTool({
     ),
     parent_id: v.optional(v.pipe(v.string(), v.description('Parent node ID to nest inside')))
   }),
+  fonts: (_figma, args) =>
+    args.type === 'TEXT' ? [{ family: DEFAULT_FONT_FAMILY, style: 'Regular' }] : [],
   execute: (figma, args) => {
     const parentId = args.parent_id
     const parent = parentId ? figma.getNodeById(parentId) : null
