@@ -1,3 +1,5 @@
+import { useRouter } from 'vue-router'
+
 import { useI18n } from '@open-designer/vue/i18n'
 
 import { openTour } from '@/app/demo/document'
@@ -13,6 +15,7 @@ import {
 } from '@/app/settings/preferences/native-menu'
 import { appPreferences } from '@/app/settings/preferences/store'
 import { useNativeMenuEvents } from '@/app/shell/menu/native-events'
+import { openHomeLocation } from '@/app/shell/menu/navigation'
 import { APP_MENU_SCHEMA, type AppMenuEntry } from '@/app/shell/menu/schema'
 import { useAppTheme } from '@/app/shell/theme'
 import { checkForAppUpdate } from '@/app/shell/updater/check'
@@ -35,6 +38,8 @@ export const SHELL_MENU_IDS = new Set([
 
 export function useShellMenu() {
   if (!isTauri()) return
+
+  const router = useRouter()
 
   void syncNativeSnappingMenu(appPreferences.value.editing.snapping).catch((error: unknown) => {
     console.error('[Menu] Failed to synchronize native snapping preferences:', error)
@@ -60,6 +65,7 @@ export function useShellMenu() {
       openTour().catch((error: unknown) => console.error('[Tour] Could not open the tour:', error))
     },
     settings: openSettingsDialog,
+    'open-storage': () => openHomeLocation(router, { kind: 'storage' }),
     diagnostics: () => openSettingsDialog('diagnostics'),
     'snap-geometry': () => {
       const current = appPreferences.value.editing.snapping.geometry
