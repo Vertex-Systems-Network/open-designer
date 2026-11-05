@@ -1,6 +1,7 @@
 import 'fake-indexeddb/auto'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'bun:test'
 
+import * as tauriFs from '@tauri-apps/plugin-fs'
 import { toRaw } from 'vue'
 
 import * as layoutModule from '@open-designer/core/layout'
@@ -439,6 +440,46 @@ describe('file paths in a browser go through the MCP server', () => {
     expect(String(url)).toBe('http://mcp.test/files//root/my%20%231%20slots.fig')
     expect(new Headers(init?.headers).get('authorization')).toBe('Bearer token')
     expect(getActiveStore().state.documentName).toBe('my #1 slots')
+  })
+
+  test('opens a second file through MCP and keeps later requests responsive', async () => {
+    createTab()
+    const bytes = new Uint8Array(await Bun.file(testPath('fixtures', 'slots.fig')).arrayBuffer())
+    const fetch = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(new Response(bytes))
+      .mockResolvedValueOnce(new Response(bytes))
+
+    await settle(requestThroughServer('open_file', { path: '/root/first.fig' }))
+    await settle(requestThroughServer('open_file', { path: '/root/second.fig' }))
+
+    expect(getActiveStore().state.documentName).toBe('second')
+    const response = await requestThroughServer('list_documents', {})
+    expect(response).toMatchObject({ ok: true })
+    expect(fetch).toHaveBeenCalledTimes(2)
+  })
+
+  test('opens multiple desktop paths and keeps later MCP requests responsive', async () => {
+    createTab()
+    Object.assign(window, { __TAURI_INTERNALS__: {} })
+    const bytes = new Uint8Array(await Bun.file(testPath('fixtures', 'slots.fig')).arrayBuffer())
+    const readFile = vi.spyOn(tauriFs, 'readFile').mockResolvedValue(bytes)
+    vi.spyOn(tauriFs, 'stat').mockResolvedValue(
+      asDouble<Awaited<ReturnType<typeof tauriFs.stat>>>({
+        size: bytes.byteLength,
+        mtime: new Date()
+      })
+    )
+
+    await settle(requestThroughServer('open_file', { path: '/root/first.fig' }))
+    await settle(requestThroughServer('open_file', { path: '/root/second.fig' }))
+
+    expect(getActiveStore().state.documentName).toBe('second')
+    const response = await requestThroughServer('list_documents', {})
+    expect(response).toMatchObject({ ok: true })
+    expect(readFile.mock.calls.map(([path]) => path)).toEqual(
+      expect.arrayContaining(['/root/first.fig', '/root/second.fig'])
+    )
   })
 })
 
