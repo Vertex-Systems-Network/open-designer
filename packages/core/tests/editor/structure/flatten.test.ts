@@ -114,6 +114,7 @@ describe('flattenSelected', () => {
         {
           ...solid,
           weight: 2,
+          align: 'CENTER' as const,
           cap: 'ARROW_EQUILATERAL' as const,
           dashPattern: [8, 4]
         }
