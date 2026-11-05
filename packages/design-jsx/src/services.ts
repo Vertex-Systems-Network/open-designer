@@ -33,4 +33,9 @@ export interface DesignJSXServices<Artwork> {
   layout(graph: SceneGraph, rootIds: readonly string[]): void
   /** The tight bounds of a vector network, its curves included, which size a `<Vector>`. */
   vectorBounds(network: VectorNetwork): Rect
+  /** Converts Markdown into native rich text using the host's text model. */
+  markdownText?(
+    markdown: string,
+    base: Pick<SceneNode, 'fontSize' | 'fontWeight'>
+  ): Pick<SceneNode, 'text' | 'styleRuns' | 'textParagraphs'>
 }

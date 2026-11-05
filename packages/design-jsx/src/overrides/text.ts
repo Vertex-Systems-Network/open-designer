@@ -38,6 +38,7 @@ const openTypeTagSchema = v.pipe(
 )
 
 const textPropsSchema = v.object({
+  markdown: v.optional(v.boolean()),
   // Read by TEXT_DECORATION_STYLE, so an unknown style warns rather than failing the render.
   textDecorationStyle: v.optional(v.string()),
   textDecorationColor: v.optional(

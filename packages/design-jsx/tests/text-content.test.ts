@@ -17,7 +17,12 @@ const renderer = createDesignJSXRenderer<never>({
   },
   vectorBounds: () => {
     throw new Error('No vectors in these tests')
-  }
+  },
+  markdownText: (markdown) => ({
+    text: markdown.replaceAll('**', ''),
+    styleRuns: [{ start: 0, length: 5, style: { fontWeight: 700 } }],
+    textParagraphs: []
+  })
 })
 
 async function renderText(source: string): Promise<{ node: SceneNode; warnings: string[] }> {
@@ -29,6 +34,14 @@ async function renderText(source: string): Promise<{ node: SceneNode; warnings: 
 }
 
 describe('Span', () => {
+  test('asks the host text service to turn Markdown into native rich text', async () => {
+    const { node, warnings } = await renderText('<Text markdown size={24}>**Hello**</Text>')
+    expect(node.text).toBe('Hello')
+    expect(node.fontSize).toBe(24)
+    expect(node.styleRuns).toEqual([{ start: 0, length: 5, style: { fontWeight: 700 } }])
+    expect(warnings).toEqual([])
+  })
+
   test('cases and links its characters', async () => {
     const { node, warnings } = await renderText(
       '<Text textCase="upper">Read <Span textCase="original" href="https://openpencil.dev">the docs</Span></Text>'

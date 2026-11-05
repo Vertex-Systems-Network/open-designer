@@ -229,7 +229,7 @@ export type VectorProps = {
   /** Paths with their own winding rules, as export writes them; `NONE` draws an open path. */
   paths?: Array<{ windingRule: 'NONZERO' | 'EVENODD' | 'NONE'; data: string }>
 }
-export type TextProps = BaseProps
+export type TextProps = BaseProps & { markdown?: boolean }
 
 /** A `<Span>`'s props: the character styles of `<Text>`, under the same names. */
 export type SpanProps = Pick<

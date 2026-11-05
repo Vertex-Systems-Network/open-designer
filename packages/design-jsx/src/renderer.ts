@@ -574,7 +574,8 @@ export function elementOverrides(
   graph: SceneGraph,
   nodeType: NodeType,
   tree: TreeNode,
-  parentId: string
+  parentId: string,
+  services?: Pick<DesignJSXServices<never>, 'markdownText'>
 ): ElementOverrides {
   const parentLayout = graph.getNode(parentId)?.layoutMode ?? 'NONE'
   const isText = nodeType === 'TEXT'
@@ -592,7 +593,20 @@ export function elementOverrides(
     // A span's variables give their values; characters keep no bindings of their own.
     const spanOverrides = (spanProps: Record<string, unknown>) =>
       propsToOverrides(preparePropsForRender(graph, spanProps, true, layer).props, true, 'NONE')
-    Object.assign(overrides, textContentFields(tree, props, overrides, spanOverrides))
+    const content = textContentFields(tree, props, overrides, spanOverrides)
+    if (props.markdown === true) {
+      if (!services?.markdownText) throw new Error('<Text markdown> needs a Markdown text service')
+      const markdown = content.text ?? (typeof props.text === 'string' ? props.text : '')
+      Object.assign(
+        overrides,
+        services.markdownText(markdown, {
+          fontSize: overrides.fontSize ?? 16,
+          fontWeight: overrides.fontWeight ?? 400
+        })
+      )
+    } else {
+      Object.assign(overrides, content)
+    }
   }
   return { overrides, bindings }
 }
@@ -647,7 +661,13 @@ async function renderNodeContent<Artwork>(
     render: (child, childParentId, childScope) =>
       renderNode(services, graph, child, childParentId, onNode, childScope),
     create: (nodeType, element, elementParentId) => {
-      const { overrides, bindings } = elementOverrides(graph, nodeType, element, elementParentId)
+      const { overrides, bindings } = elementOverrides(
+        graph,
+        nodeType,
+        element,
+        elementParentId,
+        services
+      )
       const created = graph.createNode(nodeType, elementParentId, overrides)
       applyBindings(graph, created.id, bindings)
       placeVectorPaths(graph, created, element.props, (network) => services.vectorBounds(network))
@@ -663,7 +683,7 @@ async function renderNodeContent<Artwork>(
   const nodeType = elementNodeType(tree.type)
   if (!nodeType) throw new Error(`Unknown element: <${tree.type}>`)
 
-  const { overrides, bindings } = elementOverrides(graph, nodeType, tree, parentId)
+  const { overrides, bindings } = elementOverrides(graph, nodeType, tree, parentId, services)
   const node = graph.createNode(nodeType, parentId, overrides)
   applyBindings(graph, node.id, bindings)
   placeVectorPaths(graph, node, tree.props, (network) => services.vectorBounds(network))
