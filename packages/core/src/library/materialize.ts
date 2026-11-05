@@ -1,12 +1,104 @@
 import type { SceneGraph, SceneNode } from '@open-designer/scene-graph'
 import { cloneNodeProps } from '@open-designer/scene-graph/copy'
+import { remapInstanceOverrideState } from '@open-designer/scene-graph/instances/overrides'
+import { remapStyleRunReferences } from '@open-designer/scene-graph/text'
 import { remapCopiedReferences } from '@open-designer/scene-graph/transfer'
+import { mapVariableValueReferences } from '@open-designer/scene-graph/variables'
 
 import { findLibraryDefinition } from './definitions'
 import { assertLibraryAssetKey, assertLibraryId, libraryAssetIdentityKey } from './identity'
 import type { ComponentLibraryRevision, LibraryAssetDescriptor } from './types'
 
 const INTERNAL_LIBRARY_PAGE_NAME = 'OpenDesigner library definitions'
+
+function libraryResourceId(
+  kind: 'variable' | 'collection' | 'mode',
+  libraryId: string,
+  revisionId: string,
+  sourceId: string
+): string {
+  return `library:${kind}:${JSON.stringify([libraryId, revisionId, sourceId])}`
+}
+
+function copyLibraryVariables(
+  consumer: SceneGraph,
+  revision: ComponentLibraryRevision,
+  mappedIds: ReadonlyMap<string, string>
+): void {
+  const { libraryId, revisionId } = revision.manifest
+  const variableIds = new Map(
+    [...revision.graph.variables.keys()].map((id) => [
+      id,
+      libraryResourceId('variable', libraryId, revisionId, id)
+    ])
+  )
+  const collectionIds = new Map(
+    [...revision.graph.variableCollections.keys()].map((id) => [
+      id,
+      libraryResourceId('collection', libraryId, revisionId, id)
+    ])
+  )
+  const modeIds = new Map<string, string>()
+  for (const collection of revision.graph.variableCollections.values()) {
+    for (const mode of collection.modes) {
+      modeIds.set(mode.modeId, libraryResourceId('mode', libraryId, revisionId, mode.modeId))
+    }
+  }
+  const renameVariable = (id: string) => variableIds.get(id) ?? id
+  const renameCollection = (id: string) => collectionIds.get(id) ?? id
+  const renameMode = (id: string) => modeIds.get(id) ?? id
+
+  for (const [sourceId, targetId] of collectionIds) {
+    const source = revision.graph.variableCollections.get(sourceId)
+    if (!source || consumer.variableCollections.has(targetId)) continue
+    consumer.addCollection({
+      ...structuredClone(source),
+      id: targetId,
+      defaultModeId: renameMode(source.defaultModeId),
+      modes: source.modes.map((mode) => ({ ...mode, modeId: renameMode(mode.modeId) })),
+      variableIds: source.variableIds.map(renameVariable)
+    })
+    consumer.activeMode.set(targetId, renameMode(source.defaultModeId))
+  }
+  for (const [sourceId, targetId] of variableIds) {
+    const source = revision.graph.variables.get(sourceId)
+    if (!source || consumer.variables.has(targetId)) continue
+    consumer.addVariable({
+      ...structuredClone(source),
+      id: targetId,
+      collectionId: renameCollection(source.collectionId),
+      valuesByMode: Object.fromEntries(
+        Object.entries(source.valuesByMode).map(([modeId, value]) => [
+          renameMode(modeId),
+          mapVariableValueReferences(value, renameVariable, renameMode)
+        ])
+      )
+    })
+  }
+
+  for (const targetId of mappedIds.values()) {
+    const node = consumer.getNode(targetId)
+    if (!node) continue
+    const boundVariables = Object.fromEntries(
+      Object.entries(node.boundVariables).map(([field, id]) => [field, renameVariable(id)])
+    )
+    const variableModes = Object.fromEntries(
+      Object.entries(node.variableModes).map(([collection, mode]) => [
+        renameCollection(collection),
+        renameMode(mode)
+      ])
+    )
+    const instanceOverrides = remapInstanceOverrideState(node.instanceOverrides, {
+      node: (id) => id,
+      variable: renameVariable
+    })
+    const styleRuns = remapStyleRunReferences(node.styleRuns, {
+      variable: renameVariable,
+      style: (id) => id
+    })
+    consumer.updateNode(targetId, { boundVariables, variableModes, instanceOverrides, styleRuns })
+  }
+}
 
 export interface MaterializedLibraryAsset {
   componentId: string
@@ -162,6 +254,7 @@ export function materializeLibraryAsset(
   for (const root of libraryDependencyRoots(revision, descriptor)) {
     copyLibraryTree(revision.graph, consumer, root.id, page.id, mappedIds)
   }
+  copyLibraryVariables(consumer, revision, mappedIds)
   markDefinitions(consumer, revision, mappedIds)
   copyImages(revision.graph, consumer, mappedIds)
 
