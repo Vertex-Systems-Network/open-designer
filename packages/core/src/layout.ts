@@ -213,12 +213,10 @@ function insertFlexChildren(
   const equalFillPadding =
     readPluginData(parent.pluginData, OPEN_DESIGNER_PLUGIN_DATA.penEqualFillPadding) === 'true'
   const isRow = parent.layoutMode === 'HORIZONTAL'
-  const mainPadding = (node: SceneNode) =>
-    node.layoutMode === 'NONE'
-      ? 0
-      : isRow
-        ? node.paddingLeft + node.paddingRight
-        : node.paddingTop + node.paddingBottom
+  const mainPadding = (node: SceneNode) => {
+    if (node.layoutMode === 'NONE') return 0
+    return isRow ? node.paddingLeft + node.paddingRight : node.paddingTop + node.paddingBottom
+  }
   const fillChildren = graph
     .getChildren(parent.id)
     .filter((node) => node.visible && node.layoutPositioning !== 'ABSOLUTE' && node.layoutGrow > 0)
