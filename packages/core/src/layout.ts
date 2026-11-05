@@ -11,8 +11,8 @@ import {
   type Node as YogaNode
 } from 'yoga-layout'
 
-import { resolveNodeLayoutDirection } from '@open-designer/scene-graph/text/direction'
 import { OPEN_DESIGNER_PLUGIN_DATA, readPluginData } from '@open-designer/scene-graph/plugin-data'
+import { resolveNodeLayoutDirection } from '@open-designer/scene-graph/text/direction'
 
 import { applyYogaLayout } from './layout/apply'
 import {
@@ -222,9 +222,7 @@ function insertFlexChildren(
   const fillChildren = graph
     .getChildren(parent.id)
     .filter((node) => node.visible && node.layoutPositioning !== 'ABSOLUTE' && node.layoutGrow > 0)
-  const commonFillPadding = equalFillPadding
-    ? Math.max(0, ...fillChildren.map(mainPadding))
-    : 0
+  const commonFillPadding = equalFillPadding ? Math.max(0, ...fillChildren.map(mainPadding)) : 0
   const overlap = siblingOverlap(parent)
   const capHugOverlap = overlap > 0 && parent.primaryAxisSizing === 'HUG'
   const leadingEdge = parent.layoutMode === 'HORIZONTAL' ? Edge.Start : Edge.Top
