@@ -1,5 +1,7 @@
 import type { CanvasKit } from 'canvaskit-wasm'
 
+import type { RasterExportFormat } from './render'
+
 /** Unpremultiplied sRGB RGBA pixels, row-major with no padding. */
 export interface RGBAImage {
   width: number
@@ -47,5 +49,33 @@ export function createCanvasKitRasterCodec(ck: CanvasKit): RasterCodec {
         image.delete()
       }
     }
+  }
+}
+
+/** Encodes an existing image as JPEG or WebP; null when the CanvasKit build cannot encode it. */
+export function reencodeImage(
+  ck: CanvasKit,
+  bytes: Uint8Array,
+  format: RasterExportFormat,
+  quality: number
+): Uint8Array | null {
+  const image = ck.MakeImageFromEncoded(bytes)
+  if (!image) return null
+  try {
+    let imageFormat: CanvasKit['ImageFormat'][keyof CanvasKit['ImageFormat']]
+    switch (format) {
+      case 'JPG':
+        imageFormat = ck.ImageFormat.JPEG
+        break
+      case 'WEBP':
+        imageFormat = ck.ImageFormat.WEBP
+        break
+      default:
+        imageFormat = ck.ImageFormat.PNG
+    }
+    const encoded = image.encodeToBytes(imageFormat, quality)
+    return encoded ? new Uint8Array(encoded) : null
+  } finally {
+    image.delete()
   }
 }
