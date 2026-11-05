@@ -105,7 +105,57 @@ describe('flattenSelected', () => {
     expect([vector?.x, vector?.y, vector?.width, vector?.height]).toEqual([50, 22, 8, 8])
   })
 
-  test('keeps the shape an outside stroke surrounds empty', async () => {
+  test('keeps line dashes and arrow caps on one continuous flattened path', async () => {
+    const { editor } = await createEditorWithRenderer()
+    const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
+    const line = editor.graph.createNode('LINE', editor.state.currentPageId, {
+      width: 80,
+      strokes: [
+        {
+          ...solid,
+          weight: 2,
+          align: 'CENTER' as const,
+          cap: 'ARROW_EQUILATERAL' as const,
+          dashPattern: [8, 4]
+        }
+      ]
+    })
+
+    editor.select([line.id])
+    editor.flattenSelected()
+
+    const vector = editor.graph.getNode([...editor.state.selectedIds][0])
+    expect(vector?.type).toBe('VECTOR')
+    expect(vector?.strokes[0]).toMatchObject({
+      cap: 'ARROW_EQUILATERAL',
+      dashPattern: [8, 4]
+    })
+    expect(vector?.vectorNetwork?.segments).toHaveLength(1)
+  })
+
+  test('keeps the full inset when flattening a capped line shorter than its stroke', async () => {
+    const { editor } = await createEditorWithRenderer()
+    const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
+    const line = editor.graph.createNode('LINE', editor.state.currentPageId, {
+      x: 50,
+      y: 20,
+      width: 6,
+      height: 0,
+      strokes: [{ ...solid, weight: 8, align: 'CENTER', cap: 'ROUND' }],
+      strokeWeight: 8,
+      strokeCap: 'ROUND'
+    })
+
+    editor.select([line.id])
+    editor.flattenSelected()
+
+    const vector = editor.graph.getNode([...editor.state.selectedIds][0])
+    expect([vector?.x, vector?.y, vector?.width, vector?.height]).toEqual([52, 16, 2, 0])
+    expect(vector?.vectorNetwork?.segments).toHaveLength(1)
+    expect(vector?.strokeCap).toBe('ROUND')
+  })
+
+  test('keeps an outside stroke separate from its fill geometry', async () => {
     const { editor } = await createEditorWithRenderer()
     const solid = { type: 'SOLID' as const, color: BLACK, opacity: 1, visible: true }
     const ellipse = editor.graph.createNode('ELLIPSE', editor.state.currentPageId, {
@@ -121,9 +171,11 @@ describe('flattenSelected', () => {
     const vector = editor.graph.getNode([...editor.state.selectedIds][0])
     const network = vector?.vectorNetwork
     if (!vector || !network) throw new Error('Expected a flattened vector')
+    expect(vector.fills.every((fill) => !fill.visible)).toBe(true)
+    expect(vector.strokes).toHaveLength(1)
+    expect(vector.strokes[0]).toMatchObject({ weight: 4, align: 'OUTSIDE' })
     const [path] = vectorNetworkToPath(await initCanvasKit(), network)
-    expect(path?.contains(60 - vector.x, 35 - vector.y)).toBe(false)
-    expect(path?.contains(60 - vector.x, -2 - vector.y)).toBe(true)
+    expect(path?.contains(60 - vector.x, 35 - vector.y)).toBe(true)
     path?.delete()
   })
 
@@ -388,8 +440,9 @@ describe('flattenSelected', () => {
     const [vectorId] = [...editor.state.selectedIds]
     const vector = editor.graph.getNode(vectorId)
     expect(vector?.type).toBe('VECTOR')
-    expect(vector?.width).toBeGreaterThan(50)
-    expect(vector?.height).toBeGreaterThan(40)
+    expect(vector?.width).toBe(50)
+    expect(vector?.height).toBe(40)
+    expect(vector?.strokes).toHaveLength(1)
   })
 
   test('undo and redo restore flattened children and vector', async () => {
