@@ -436,9 +436,12 @@ function reshapedGlyphs(
   run: GlyphRun,
   outline: Extract<RunOutline, { glyphs: ShapedGlyph[] }>,
   lineLeft: number,
-  y: number
+  y: number,
+  lineStartCorrection: number
 ): LaidOutGlyph[] {
-  let x = run.positions[0]
+  // CanvasKit centres tracking at the line origin; Figma starts there and adds full spacing after
+  // each character instead.
+  let x = run.positions[0] - lineStartCorrection
   return outline.glyphs.map((glyph, index) => {
     // Spacing follows a character once, after its last glyph, so marks stay on their base.
     const endsCharacter = outline.glyphs.at(index + 1)?.cluster !== glyph.cluster
@@ -511,6 +514,11 @@ export function laidOutGlyphs(
     if (marker) glyphs.push(...markerGlyphs(marker, offsetY))
     const { left, baseline } = metrics[lineIndex]
     const lastLine = lineIndex === lines.length - 1
+    const firstRun = line.runs.at(0)
+    const firstCharacter = firstRun ? characterAt(firstRun.offsets[0]) : 0
+    const lineStartCorrection = firstRun
+      ? letterSpacingOf(node, styleRunAt(node, sourceAt(firstCharacter))) / 2
+      : 0
     for (const [runIndex, run] of line.runs.entries()) {
       const endsTruncated =
         lastLine && runIndex === line.runs.length - 1 && layout.didExceedMaxLines()
@@ -521,11 +529,12 @@ export function laidOutGlyphs(
       // Run positions round the baseline to whole pixels; line metrics keep it exact.
       const y = baseline + offsetY
       if (outline?.glyphs && !sameClusters(run, outline, characterAt)) {
-        glyphs.push(...reshapedGlyphs(run, outline, left, y))
+        glyphs.push(...reshapedGlyphs(run, outline, left, y, lineStartCorrection))
         continue
       }
       for (let index = 0; index < run.glyphs.length; index++) {
-        const x = run.positions[index * 2]
+        const rawX = run.positions[index * 2]
+        const x = rawX - lineStartCorrection
         glyphs.push({
           id: outline?.glyphs?.[index].id ?? run.glyphs[index],
           x,
@@ -533,7 +542,7 @@ export function laidOutGlyphs(
           fontSize: run.size,
           // The ellipsis truncation adds draws no character, as Figma saves it.
           firstCharacter: ellipsis ? undefined : characterAt(run.offsets[index]),
-          advance: run.positions[(index + 1) * 2] - x,
+          advance: run.positions[(index + 1) * 2] - rawX,
           lineLeft: left,
           source: outline?.source ?? null
         })
