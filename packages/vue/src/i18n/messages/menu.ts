@@ -11,6 +11,7 @@ export const menuMessageDefaults = {
   new: 'New design',
   newTab: 'New tab',
   open: 'Open…',
+  openStorage: 'Open from storage…',
   openTour: 'Open the Tour',
   diagnostics: 'Diagnostics…',
   save: 'Save',

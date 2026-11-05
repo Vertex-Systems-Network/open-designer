@@ -36,7 +36,7 @@ export type AppMenuHandler = 'editor' | 'shell'
 
 /** A feature an item waits for: it shows only while the feature is available (`./features`). */
 /** Items shown only for a document backed by a file on disk. */
-export type AppMenuFeature = 'local-file' | 'cloud-document'
+export type AppMenuFeature = 'local-file' | 'cloud-document' | 'storage-configured'
 
 export interface AppMenuActionItem {
   type?: 'item'
@@ -83,6 +83,12 @@ export const APP_MENU_SCHEMA = [
       { id: 'new', label: 'New Design', shortcut: 'MOD+N' },
       { id: 'new-tab', label: 'New Tab', shortcut: 'MOD+T' },
       { id: 'open', label: 'Open…', shortcut: 'MOD+O' },
+      {
+        id: 'open-storage',
+        label: 'Open from storage…',
+        handler: 'shell',
+        feature: 'storage-configured'
+      },
       { id: 'open-recent', label: 'Open Recent', target: 'native' },
       { id: 'open-tour', label: 'Open the Tour', handler: 'shell' },
       {

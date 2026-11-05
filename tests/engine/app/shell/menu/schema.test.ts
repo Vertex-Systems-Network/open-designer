@@ -49,6 +49,7 @@ describe('APP_MENU_SCHEMA', () => {
     ).filter((entry) => !('type' in entry) && entry.handler === 'shell')
 
     expect(shellEntries.map((entry) => ('type' in entry ? '' : entry.id))).toEqual([
+      'open-storage',
       'open-tour',
       'diagnostics',
       'settings',
