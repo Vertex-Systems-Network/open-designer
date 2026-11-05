@@ -52,6 +52,30 @@ export interface ToolDef extends ToolMetadata {
   execute: (figma: FigmaAPI, args: Record<string, unknown>) => unknown
 }
 
+/** Leave time for the CLI/MCP transport to return a useful error before its RPC deadline. */
+export const TOOL_FONT_LOAD_TIMEOUT_MS = 12_000
+
+function loadToolFontWithTimeout(figma: FigmaAPI, font: FigmaFontNameInput): Promise<void> {
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  const label = `${font.family}${font.style ? ` ${font.style}` : ''}`
+  return Promise.race([
+    figma.loadFontAsync(font),
+    new Promise<never>((_, reject) => {
+      timeout = setTimeout(
+        () =>
+          reject(
+            new Error(
+              `Timed out loading font "${label}" after ${TOOL_FONT_LOAD_TIMEOUT_MS / 1000}s`
+            )
+          ),
+        TOOL_FONT_LOAD_TIMEOUT_MS
+      )
+    })
+  ]).finally(() => {
+    if (timeout !== undefined) clearTimeout(timeout)
+  })
+}
+
 type ToolDefinitionMetadata = Omit<ToolMetadata, 'exposure' | 'capabilities' | 'availability'> &
   Partial<Pick<ToolMetadata, 'exposure' | 'capabilities' | 'availability'>>
 
@@ -83,7 +107,11 @@ export function defineTool<P extends v.ObjectEntries, R>(
       // Wrong arguments are for `execute` to report.
       const parsed = v.safeParse(def.input, args)
       if (!parsed.success) return
-      for (const font of fonts(figma, parsed.output)) await figma.loadFontAsync(font)
+      // Load independent faces together: serial network loads could multiply the CLI/MCP RPC
+      // deadline by the number of text styles in one tool call. A timed-out edit never runs.
+      await Promise.all(
+        fonts(figma, parsed.output).map((font) => loadToolFontWithTimeout(figma, font))
+      )
     },
     execute: (figma, args) => def.execute(figma, parseToolArgs(def.name, def.input, args))
   }
