@@ -61,6 +61,13 @@ export interface AIAdapterOptions {
   onFlashNodes?: (nodeIds: string[]) => void
   onToolLog?: (entry: ToolLogEntry) => void
   getStepBudget?: () => StepBudget
+  /** Encodes an image for a provider while retaining the original tool result for history. */
+  encodeModelImage?: (image: ModelImage) => Promise<ModelImage>
+}
+
+export interface ModelImage {
+  data: string
+  mediaType: string
 }
 
 const STEP_WARNING_THRESHOLD = 5
@@ -174,6 +181,20 @@ export function toolsToAI(
 ): ToolSet {
   const { tool } = deps
   const result: ToolSet = {}
+  // Tool outputs are replayed with every request; encode once per call, not once per step.
+  const encodedImages = new Map<string, Promise<ModelImage>>()
+  const modelImage = (toolCallId: string, image: ModelImage): Promise<ModelImage> => {
+    if (!options.encodeModelImage) return Promise.resolve(image)
+    let encoded = encodedImages.get(toolCallId)
+    if (!encoded) {
+      encoded = options.encodeModelImage(image).catch((error: unknown) => {
+        console.warn('[AI] Sending a tool image as returned:', error)
+        return image
+      })
+      encodedImages.set(toolCallId, encoded)
+    }
+    return encoded
+  }
 
   for (const def of tools) {
     if (!isToolExposed(def, 'ai')) continue
@@ -225,13 +246,23 @@ export function toolsToAI(
 
     // Image results reach the model as files, with their metadata as text. Typed against the
     // SDK, because a shape it does not know fails the next step's prompt validation.
-    toolOpts.toModelOutput = ({ output }: { output: unknown }): ToolResultPart['output'] => {
+    toolOpts.toModelOutput = async ({
+      toolCallId,
+      output
+    }: {
+      toolCallId: string
+      output: unknown
+    }): Promise<ToolResultPart['output']> => {
       if (isImageOutput(output)) {
         const { base64, mimeType, ...metadata } = output
+        const { data, mediaType } = await modelImage(toolCallId, {
+          data: base64,
+          mediaType: mimeType
+        })
         const image = {
           type: 'file' as const,
-          mediaType: mimeType,
-          data: { type: 'data' as const, data: base64 }
+          mediaType,
+          data: { type: 'data' as const, data }
         }
         return !isEmptyObject(metadata)
           ? {
