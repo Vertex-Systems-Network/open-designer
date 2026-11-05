@@ -1,4 +1,4 @@
-import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm'
+import CanvasKitInit, { type CanvasKit } from 'canvaskit-wasm/full'
 
 import { IS_BROWSER } from './constants'
 
@@ -17,7 +17,7 @@ export interface CanvasKitOptions {
 }
 
 let locator: CanvasKitLocator = (file) =>
-  IS_BROWSER ? `/${file}` : new URL(file, import.meta.resolve('canvaskit-wasm')).href
+  IS_BROWSER ? `/${file}` : new URL(file, import.meta.resolve('canvaskit-wasm/full')).href
 
 /** Points CanvasKit at the host's copy of its files. Call before the first {@link getCanvasKit}. */
 export function setCanvasKitLocator(locate: CanvasKitLocator): void {
