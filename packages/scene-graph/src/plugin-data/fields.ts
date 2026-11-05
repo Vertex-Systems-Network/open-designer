@@ -149,6 +149,8 @@ export const OPEN_DESIGNER_PLUGIN_DATA = {
   textDirection: textPluginDataField('textDirection', 'format', DIRECTIONS),
   /** An auto-layout frame's direction. */
   layoutDirection: textPluginDataField('layoutDirection', 'format', DIRECTIONS),
+  /** `.pen` uses CSS gap semantics with `space_between`, unlike Figma auto layout. */
+  penSpaceBetweenGap: textPluginDataField('penSpaceBetweenGap', 'format', ['true']),
   /** Marks a component set Figma would read as a plain frame. */
   nodeType: textPluginDataField('nodeType', 'format', ['COMPONENT_SET']),
   /** Variable bindings by field path, including those Figma cannot store natively. */
