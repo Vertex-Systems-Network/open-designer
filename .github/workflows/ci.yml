@@ -252,6 +252,39 @@ jobs:
       - name: Compile native-test Tauri feature
         run: cargo check --manifest-path desktop/Cargo.toml --features native-test
 
+  native-tests:
+    name: Native app end-to-end
+    needs: changes
+    if: needs.changes.outputs.scope == 'code' || needs.changes.outputs.scope == 'cloud'
+    timeout-minutes: 45
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop -> target
+          key: native-test-macos
+      - uses: ./.github/actions/setup-bun
+        with:
+          lfs: 'true'
+          lfs-include: tests/fixtures/gold-preview.fig
+      - name: Build the matching MCP executable
+        run: bun --filter @open-designer/mcp build
+      - name: Expose the matching MCP executable to the native app
+        run: |
+          mkdir -p "$HOME/.bun/bin"
+          cat > "$HOME/.bun/bin/opendesigner-mcp-http" <<'SH'
+          #!/bin/sh
+          exec node "$GITHUB_WORKSPACE/packages/mcp/dist/index.mjs" "$@"
+          SH
+          chmod +x "$HOME/.bun/bin/opendesigner-mcp-http"
+          echo "$HOME/.bun/bin" >> "$GITHUB_PATH"
+      - name: Run each native spec in a fresh app process
+        run: bun run test:native:isolated
+
   unit-tests:
     needs: changes
     if: needs.changes.outputs.scope == 'code' || needs.changes.outputs.scope == 'cloud'
@@ -385,7 +418,7 @@ jobs:
 
   result:
     name: CI result
-    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, unit-tests, feedback-tests, cloud-tests, cloud-storage, production-support-gate]
+    needs: [changes, commit-messages, documentation, source-quality, package-quality, repository-quality, storybook, native-test-contracts, native-tests, unit-tests, feedback-tests, cloud-tests, cloud-storage, production-support-gate]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 3
