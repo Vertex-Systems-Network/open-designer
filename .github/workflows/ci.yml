@@ -272,7 +272,7 @@ jobs:
           lfs: 'true'
           lfs-include: tests/fixtures/gold-preview.fig
       - name: Build the matching MCP executable
-        run: bun --filter @open-designer/mcp build
+        run: bun run build:packages && bun --filter @open-designer/mcp build
       - name: Expose the matching MCP executable to the native app
         run: |
           mkdir -p "$HOME/.bun/bin"
