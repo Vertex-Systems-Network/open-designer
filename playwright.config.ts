@@ -15,8 +15,8 @@ if (reuse !== undefined && reuse !== '0' && reuse !== '1') {
 }
 
 const server = process.env.OPENDESIGNER_TEST_SERVER ?? 'all'
-if (!['app', 'storybook', 'all'].includes(server)) {
-  throw new Error('OPENDESIGNER_TEST_SERVER must be app, storybook, or all')
+if (!['app', 'storybook', 'production', 'all'].includes(server)) {
+  throw new Error('OPENDESIGNER_TEST_SERVER must be app, storybook, production, or all')
 }
 const storybookPort = 6017
 if (server === 'all' && [appPort, mcpPort].some((port) => Number(port) === storybookPort)) {
@@ -65,52 +65,63 @@ export default defineConfig({
   testDir: './tests',
   timeout: 15_000,
   workers: 1,
-  projects: [
-    {
-      ...appDefaults,
-      name: 'opendesigner',
-      testDir: './tests/e2e',
-      testIgnore: ['**/native/**', '**/storybook/**'],
-      fullyParallel: false
-    },
-    {
-      ...appDefaults,
-      name: 'opendesigner-webkit',
-      testDir: './tests/e2e',
-      testIgnore: ['**/native/**', '**/storybook/**'],
-      testMatch: [
-        '**/*.webkit.spec.ts',
-        '**/design/panel.spec.ts',
-        '**/design/retained-panel.spec.ts',
-        '**/export/basic.spec.ts',
-        '**/fonts/settings.spec.ts'
-      ],
-      use: {
-        ...appDefaults.use,
-        browserName: 'webkit'
-      }
-    },
-    {
-      ...appDefaults,
-      name: 'figma',
-      testDir: './tests/figma'
-    },
-    {
-      name: 'storybook-chromium',
-      testDir: './tests/e2e/storybook',
-      timeout: 30_000,
-      use: {
-        baseURL: `http://localhost:${storybookPort}`,
-        viewport: { width: 800, height: 600 },
-        deviceScaleFactor: 1,
-        contextOptions: { reducedMotion: 'reduce' }
-      }
-    }
-  ],
-  webServer: [
-    ...(server === 'storybook'
-      ? []
+  projects:
+    server === 'production'
+      ? [
+          {
+            ...appDefaults,
+            name: 'opendesigner-production',
+            testDir: './tests/e2e',
+            testIgnore: ['**/native/**', '**/storybook/**'],
+            testMatch: ['**/app/support-gate.spec.ts'],
+            fullyParallel: false
+          }
+        ]
       : [
+          {
+            ...appDefaults,
+            name: 'opendesigner',
+            testDir: './tests/e2e',
+            testIgnore: ['**/native/**', '**/storybook/**'],
+            fullyParallel: false
+          },
+          {
+            ...appDefaults,
+            name: 'opendesigner-webkit',
+            testDir: './tests/e2e',
+            testIgnore: ['**/native/**', '**/storybook/**'],
+            testMatch: [
+              '**/*.webkit.spec.ts',
+              '**/design/panel.spec.ts',
+              '**/design/retained-panel.spec.ts',
+              '**/export/basic.spec.ts',
+              '**/fonts/settings.spec.ts'
+            ],
+            use: {
+              ...appDefaults.use,
+              browserName: 'webkit'
+            }
+          },
+          {
+            ...appDefaults,
+            name: 'figma',
+            testDir: './tests/figma'
+          },
+          {
+            name: 'storybook-chromium',
+            testDir: './tests/e2e/storybook',
+            timeout: 30_000,
+            use: {
+              baseURL: `http://localhost:${storybookPort}`,
+              viewport: { width: 800, height: 600 },
+              deviceScaleFactor: 1,
+              contextOptions: { reducedMotion: 'reduce' }
+            }
+          }
+        ],
+  webServer: [
+    ...(['app', 'all'].includes(server)
+      ? [
           {
             command: `bun run dev --port ${appPort} --strictPort`,
             cwd: import.meta.dirname,
@@ -122,10 +133,10 @@ export default defineConfig({
             },
             reuseExistingServer: !process.env.CI && reuse === '1'
           }
-        ]),
-    ...(server === 'app'
-      ? []
-      : [
+        ]
+      : []),
+    ...(['storybook', 'all'].includes(server)
+      ? [
           {
             command: `bun run storybook -- --port ${storybookPort} --ci --no-open`,
             cwd: import.meta.dirname,
@@ -133,6 +144,19 @@ export default defineConfig({
             reuseExistingServer: false,
             timeout: 120_000
           }
-        ])
+        ]
+      : []),
+    ...(server === 'production'
+      ? [
+          {
+            command: `bun run build && bun run preview --host localhost --port ${appPort} --strictPort`,
+            cwd: import.meta.dirname,
+            url: origin,
+            env: { PORTLESS_URL: '' },
+            reuseExistingServer: false,
+            timeout: 600_000
+          }
+        ]
+      : [])
   ]
 })
