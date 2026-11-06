@@ -103,7 +103,7 @@ Heavier `.fig` suites are sensitive to machine load. A full run alongside other 
 
 ## Server ownership and worktrees
 
-The canonical `playwright.config.ts` owns app, Figma and Storybook projects. The `test`, `test:update`, `test:real-llm` and `test:figma` scripts select only the app server; `test:storybook` selects Storybook on port `6017`. Direct Playwright commands start both servers by default. Set `OPENDESIGNER_TEST_SERVER=app`, `storybook` or `all`; `--project` selects tests, not servers.
+The canonical `playwright.config.ts` owns app, Figma, Storybook and production projects. The `test`, `test:update`, `test:real-llm` and `test:figma` scripts select only the app server; `test:storybook` selects Storybook on port `6017`; `test:production` builds the app and tests the production preview. Direct Playwright commands start both app and Storybook servers by default. Set `OPENDESIGNER_TEST_SERVER=app`, `storybook`, `production` or `all`; `--project` selects tests, not servers. To run the production support gate, use `OPENDESIGNER_TEST_SERVER=production bunx playwright test tests/e2e/app/support-gate.spec.ts --project=opendesigner-production`.
 
 App tests start Vite from the current checkout and wait for its HTTP URL. Vite owns its MCP companion. Reuse is off by default and always off in CI. Default ports are app `1420` and MCP `7600`; concurrent worktrees need distinct free pairs:
 
