@@ -48,6 +48,7 @@ export const CODE_JOBS = [
   'repository-quality',
   'storybook',
   'native-test-contracts',
+  'native-tests',
   'unit-tests',
   'feedback-tests',
   'production-support-gate'
