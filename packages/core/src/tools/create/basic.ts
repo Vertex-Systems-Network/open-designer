@@ -1,6 +1,7 @@
 import * as v from 'valibot'
 
 import type { FigmaNodeProxy } from '#core/figma-api'
+import { textAutoResizeChanges } from '#core/layout/text-auto-resize'
 import { toolNumber, positionInputs, defineTool, nodeSummary } from '#core/tools/schema'
 
 export const createShape = defineTool({
@@ -18,6 +19,14 @@ export const createShape = defineTool({
     width: toolNumber(v.pipe(v.number(), v.minValue(1), v.description('Width in pixels'))),
     height: toolNumber(v.pipe(v.number(), v.minValue(1), v.description('Height in pixels'))),
     name: v.optional(v.pipe(v.string(), v.description('Node name shown in layers panel'))),
+    text_auto_resize: v.optional(
+      v.pipe(
+        v.picklist(['WIDTH_AND_HEIGHT', 'HEIGHT', 'NONE']),
+        v.description(
+          'Text sizing: auto width and height, fixed width with auto height, or fixed size'
+        )
+      )
+    ),
     parent_id: v.optional(v.pipe(v.string(), v.description('Parent node ID to nest inside')))
   }),
   execute: (figma, args) => {
@@ -37,6 +46,13 @@ export const createShape = defineTool({
     node.x = args.x
     node.y = args.y
     node.resize(args.width, args.height)
+    if (args.type === 'TEXT') {
+      const textAutoResize = args.text_auto_resize ?? 'WIDTH_AND_HEIGHT'
+      figma.graph.updateNode(node.id, {
+        textAutoResize,
+        ...textAutoResizeChanges(figma.graph.getNode(node.id), { textAutoResize })
+      })
+    }
     if (args.name) node.name = args.name
     if (parent) parent.appendChild(node)
     return nodeSummary(node)

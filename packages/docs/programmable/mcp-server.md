@@ -235,7 +235,7 @@ Settings tools never expose credentials, AI models, MCP connections, storage, or
 
 | Tool | Description |
 |------|-------------|
-| `create_shape` | Create a shape (`FRAME`, `RECTANGLE`, `ELLIPSE`, `TEXT`, `LINE`, `STAR`, `POLYGON`, `SECTION`) |
+| `create_shape` | Create a shape (`FRAME`, `RECTANGLE`, `ELLIPSE`, `TEXT`, `LINE`, `STAR`, `POLYGON`, `SECTION`). For `TEXT`, `text_auto_resize` accepts `WIDTH_AND_HEIGHT`, `HEIGHT`, or `NONE` and defaults to content-sized width and height. |
 | `create_vector` | Create a vector node from a path string |
 | `create_slice` | Create an export slice |
 | `create_connector` | Join two layers, or a layer and a point, with a connector that follows them |
